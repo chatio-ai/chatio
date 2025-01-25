@@ -11,7 +11,30 @@ dotenv.load_dotenv()
 
 prompt = " ".join(sys.argv[1:])
 
-chat = Chat(prompt)
+
+def run_command(command=None):
+    from subprocess import run, PIPE, STDOUT
+    return run(command, shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
+
+
+tools = [{
+    "name": "run_command",
+    "description": "Run custom user command using system shell",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "command": {
+                "type": "string",
+                "description": "The command to run using system shell",
+            },
+        },
+        "required": ["command"],
+    },
+    "func": run_command,
+}]
+
+
+chat = Chat(prompt, tools=tools)
 
 
 if __name__ == '__main__':

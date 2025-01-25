@@ -5,9 +5,8 @@ import mimetypes
 from anthropic import Anthropic
 
 class Chat:
-    def __init__(self, system=None, messages=None):
+    def __init__(self, system=None, messages=None, tools=None):
         self._client = Anthropic()
-        self._stream = None
 
         self._system = system
 
@@ -21,26 +20,61 @@ class Chat:
                     if not index % 2 else
                     self._ai_message(message))
 
+        self._tools = []
+        self._funcs = {}
+
+        for tool in tools:
+            name = tool.get("name")
+            func = tool.pop("func")
+
+            if not name or not func:
+                raise RuntimeError()
+
+            self._funcs.setdefault(name, func)
+            self._tools.append(tool)
+
     def _user_message(self, content):
         return {"role": "user", "content": content}
 
     def _ai_message(self, content):
         return {"role": "assistant", "content": content}
 
-    def __call__(self, content):
-        if self._stream is not None:
-            with self._stream as stream:
-                self._messages.append(self._ai_message(stream.get_final_text()))
+    def __call__(self, request):
 
-        self._messages.append(self._user_message(content))
+        self._messages.append(self._user_message(request))
 
-        self._stream = self._client.messages.stream(
+        tool_use_block = None
+
+        with self._client.messages.stream(
             model='claude-3-5-sonnet-latest',
             max_tokens=4096,
             system=self._system,
-            messages=self._messages)
+            messages=self._messages,
+            tools=self._tools) as stream:
 
-        return self._stream
+            for chunk in stream:
+                if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
+                    yield chunk.delta.text
+                elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
+                    tool_use_block = chunk.content_block
+
+            response = [_.to_dict() for _ in stream.get_final_message().content]
+
+            self._messages.append(self._ai_message(response))
+
+        if tool_use_block:
+            yield from self._run_tool(tool_use_block)
+
+    def _run_tool(self, content_block):
+        func = self._funcs.get(content_block.name)
+        if func is not None:
+            content = func(**content_block.input)
+
+        return self([{
+            "type": "tool_result",
+            "tool_use_id": content_block.id,
+            "content": content,
+        }])
 
 
 def do_image(filename):
