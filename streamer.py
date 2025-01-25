@@ -12,12 +12,32 @@ dotenv.load_dotenv()
 prompt = " ".join(sys.argv[1:])
 
 
+def run_bc_calc(expr=None):
+    from subprocess import run, PIPE, STDOUT
+    return run(f"echo '{expr}' | bc", shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
+
+run_bc_calc_desc = {
+    "name": "run_bc_calc",
+    "description": "Run bc command to evaluate the expression",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "expr": {
+                "type": "string",
+                "description": "The expression to evaluate",
+            },
+        },
+        "required": ["expr"],
+    },
+    "func": run_bc_calc,
+}
+
+
 def run_command(command=None):
     from subprocess import run, PIPE, STDOUT
     return run(command, shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
 
-
-tools = [{
+run_command_desc = {
     "name": "run_command",
     "description": "Run custom user command using system shell",
     "input_schema": {
@@ -31,10 +51,10 @@ tools = [{
         "required": ["command"],
     },
     "func": run_command,
-}]
+}
 
 
-chat = Chat(prompt, tools=tools)
+chat = Chat(prompt, tools=[run_command_desc])
 
 
 if __name__ == '__main__':
