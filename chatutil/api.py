@@ -5,9 +5,11 @@ import mimetypes
 from anthropic import Anthropic
 
 class Chat:
-    def __init__(self, system=None, messages=None, tools=None):
+    def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None):
         self._client = Anthropic()
 
+        if system is None:
+            system = ""
         self._system = system
 
         if messages is None:
@@ -32,6 +34,13 @@ class Chat:
 
             self._funcs.setdefault(name, func)
             self._tools.append(tool)
+
+        if not tool_choice:
+            self._tool_choice = None
+        elif not tool_choice_name:
+            self._tool_choice = {"type": tool_choice}
+        else:
+            self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
 
     def _user_message(self, content):
         return {"role": "user", "content": content}
@@ -69,6 +78,8 @@ class Chat:
         func = self._funcs.get(content_block.name)
         if func is not None:
             content = func(**content_block.input)
+        if content is None:
+            content = ""
 
         return self([{
             "type": "tool_result",

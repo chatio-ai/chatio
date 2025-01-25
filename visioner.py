@@ -4,52 +4,55 @@ import sys
 
 import dotenv
 
+from textwrap import dedent
+
 from chatutil.api import Chat, do_image
 from chatutil.ui import run_chat
 
 
-def makechat():
-    prompt = "Отвечай на русском"
-    #prompt = "duplicate user message as is"
-    #prompt = """
-#You are 'determenistic parrot' system.
-#Each user's message should be repeated back to them. Reproduce user message as verbatim as possible.
-#Do not remove anything and do not add anything!
-#"""
 
-    messages = []
+def run_imgdump(info=None):
+    from pprint import pprint
+    pprint(info)
 
-    #messages.append("How do you do? duplicate my message as is")
-    #messages.append("How do you do? duplicate my message as is")
-
-    #messages.append("<data>data</data>\n\nWhat is my data? duplicate my message as is")
-    #messages.append("<data>data</data>\n\nWhat is my data? duplicate my message as is")
-
-    #messages.append("[content description]\n\nWhat is my content about? duplicate my message as is")
-    #messages.append("[content description]\n\nWhat is my content about? duplicate my message as is")
-
-    #for _ in range(5):
-    #    messages.append("[abra cadabra] something strange and not sdf;sljkdfs;ldk sdf <content>sdflskdgjlskdjgsldkgj</content> duplicate my message as is")
-    #    messages.append("[abra cadabra] something strange and not sdf;sljkdfs;ldk sdf <content>sdflskdgjlskdjgsldkgj</content> duplicate my message as is")
-
-    #for _ in range(5):
-    #    messages.append("any random text and markup <data>here is the data</data>\n\nduplicate my message as is")
-    #    messages.append("any random text and markup <data>here is the data</data>\n\nduplicate my message as is")
-
-    for _ in range(5):
-        messages.append("any random text and markup <data>here is the data</data>")
-        messages.append("any random text and markup <data>here is the data</data>")
-
-    for _ in range(5):
-        messages.append("content.jpeg [Image depicting holy grail of Roman Empire]")
-        messages.append("content.jpeg [Image depicting holy grail of Roman Empire]")
-
-    return Chat(prompt, messages)
-
+run_imgdump_desc = {
+    "name": "run_imgdump",
+    "description": "Dump summary of image analysis. Summary should include key colors (r,g,b) and image description.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "info": {
+                "type": "object",
+                "description": "image summary wrapping structure",
+                "properties": {
+                    "r": {
+                        "type": "number",
+                        "description": "red value [0.0, 1.0]",
+                    },
+                    "g": {
+                        "type": "number",
+                        "description": "green value [0.0, 1.0]",
+                    },
+                    "b": {
+                        "type": "number",
+                        "description": "blue value [0.0, 1.0]",
+                    },
+                    "desc": {
+                        "type": "string",
+                        "description": "image description",
+                    },
+                },
+                "required": ["r", "g", "b"],
+            },
+        },
+        "required": ["info"],
+    },
+    "func": run_imgdump,
+}
 
 dotenv.load_dotenv()
 
-chat = makechat()
+chat = Chat(tools=[run_imgdump_desc], tool_choice='name', tool_choice_name='run_imgdump')
 
 
 if __name__ == '__main__':
@@ -59,9 +62,9 @@ if __name__ == '__main__':
     for filename in sys.argv[1:]:
         content.extend(do_image(filename))
 
-    #content.append({"type": "text", "text": "duplicate my message as is"})
+    if not content:
+        raise SystemExit()
 
     run_chat(chat, content)
 
-    #run_chat(chat, "what is the exact text on first image? duplicate my message as is")
-    run_chat(chat, "what is the exact text on first image?")
+    print()
