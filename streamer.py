@@ -1,9 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys
 import dotenv
 
-from chatutil import Chat, run_user, run_chat
+from chatutil.api import Chat
+from chatutil.ui import run_user, run_chat
 
 
 dotenv.load_dotenv()

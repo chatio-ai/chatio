@@ -1,10 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys
 
 import dotenv
 
-from chatutil import Chat, do_image, run_chat
+from chatutil.api import Chat, do_image
+from chatutil.ui import run_chat
 
 
 def makechat():
