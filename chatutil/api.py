@@ -77,6 +77,8 @@ class Chat:
                 if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
                     yield chunk.delta.text
                 elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
+                    if tool_use_block is not None:
+                        raise RuntimeError()
                     tool_use_block = chunk.content_block
 
             response = [_.to_dict() for _ in stream.get_final_message().content]
