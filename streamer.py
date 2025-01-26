@@ -2,11 +2,17 @@
 
 import sys
 import dotenv
+import logging
 
 from chatutil.api import Chat
 from chatutil.ui import run_user, run_chat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
+
+
+logging.basicConfig(filename='chatbot.log', filemode='a', level=logging.INFO,
+                    format='%(asctime)s %(name)s %(levelname)s %(message)s')
+logging.getLogger('httpx').setLevel(logging.WARN)
 
 
 dotenv.load_dotenv()

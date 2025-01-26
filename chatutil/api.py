@@ -1,8 +1,13 @@
 
 import base64
+import logging
 import mimetypes
 
 from anthropic import Anthropic
+
+
+log = logging.getLogger(__name__)
+
 
 class Chat:
     def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None):
@@ -54,6 +59,7 @@ class Chat:
         return {"role": "assistant", "content": content}
 
     def __call__(self, request):
+        log.info(">>> %s", request)
 
         self._messages.append(self._user_message(request))
 
@@ -67,6 +73,7 @@ class Chat:
             tools=self._tools) as stream:
 
             for chunk in stream:
+                log.info("::: %s", chunk)
                 if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
                     yield chunk.delta.text
                 elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
