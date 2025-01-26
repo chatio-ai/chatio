@@ -9,6 +9,8 @@ from chatutil.ui import run_user, run_chat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 
+from toolbelt.wiki import WikiContentTool, WikiSummaryTool, WikiSectionTool
+
 
 logging.basicConfig(filename='chatbot.log', filemode='a', level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -23,6 +25,9 @@ prompt = " ".join(sys.argv[1:])
 chat = Chat(prompt, tools={
     "run_command": ShellExecTool(),
     "run_bc_calc": ShellCalcTool(),
+    "wiki_content": WikiContentTool(),
+    "wiki_summary": WikiSummaryTool(),
+    "wiki_section": WikiSectionTool(),
 })
 
 
