@@ -55,8 +55,6 @@ class Chat:
         else:
             self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
 
-        self.events = []
-
     def _user_message(self, content):
         return {"role": "user", "content": content}
 
@@ -64,45 +62,45 @@ class Chat:
         return {"role": "assistant", "content": content}
 
     def __call__(self, request):
-        log.info(">>> %s", request)
+        while request:
+            self._messages.append(self._user_message(request))
 
-        self._messages.append(self._user_message(request))
+            tool_use_blocks = []
 
-        tool_use_blocks = []
+            with self._client.messages.stream(
+                model='claude-3-5-sonnet-latest',
+                max_tokens=4096,
+                system=self._system,
+                messages=self._messages,
+                tools=self._tools) as stream:
 
-        with self._client.messages.stream(
-            model='claude-3-5-sonnet-latest',
-            max_tokens=4096,
-            system=self._system,
-            messages=self._messages,
-            tools=self._tools) as stream:
+                for chunk in stream:
+                    log.info("::: %s", chunk)
+                    if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
+                        yield chunk.delta.text
+                    elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
+                        tool_use_blocks.append(chunk.content_block)
+                        yield {
+                            "type": "tools",
+                            "tool_name": chunk.content_block.name,
+                            "tool_args": chunk.content_block.input,
+                        }
+                    elif chunk.type == 'message_stop':
+                        yield {
+                            "type": "usage",
+                            "input_tokens": chunk.message.usage.input_tokens,
+                            "output_tokens": chunk.message.usage.output_tokens,
+                        }
 
-            for chunk in stream:
-                log.info("::: %s", chunk)
-                if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
-                    yield chunk.delta.text
-                elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
-                    tool_use_blocks.append(chunk.content_block)
-                    self.events.append({
-                        "type": "tools",
-                        "tool_name": chunk.content_block.name,
-                        "tool_args": chunk.content_block.input,
-                    })
-                elif chunk.type == 'message_stop':
-                    self.events.append({
-                        "type": "usage",
-                        "input_tokens": chunk.message.usage.input_tokens,
-                        "output_tokens": chunk.message.usage.output_tokens,
-                    })
+                response = [_.to_dict() for _ in stream.get_final_message().content]
 
-            response = [_.to_dict() for _ in stream.get_final_message().content]
+                if response:
+                    self._messages.append(self._ai_message(response))
 
-            if response:
-                self._messages.append(self._ai_message(response))
-
-        if tool_use_blocks:
-            results = self._run_tool(tool_use_blocks)
-            yield from self(results)
+            if tool_use_blocks:
+                request = self._run_tool(tool_use_blocks)
+            else:
+                request = None
 
     def _run_tool(self, content_blocks):
         results = []

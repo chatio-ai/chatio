@@ -12,16 +12,23 @@ def run_chat(chat, content, prefix=None):
     if prefix is not None:
         print(prefix, end="", flush=True)
 
+    events = []
+
     for chunk in chat(content):
+        if not isinstance(chunk, str):
+            events.append(chunk)
+            continue
+
         print(chunk, end="", flush=True)
 
     print()
 
+    return events
 
-def run_stat(chat, prefix=None):
 
-    while chat.events:
-        event = chat.events.pop(0)
+def run_stat(events, prefix=None):
+
+    for event in events:
         if prefix is not None:
             print(prefix, end="", flush=True)
         etype = event['type']

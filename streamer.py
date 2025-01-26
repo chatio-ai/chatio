@@ -41,8 +41,8 @@ if __name__ == '__main__':
         elif not content:
             continue
 
-        run_chat(chat, content, "<<< ")
+        events = run_chat(chat, content, "<<< ")
 
-        run_stat(chat, "::: ")
+        run_stat(events, "::: ")
 
     print()
