@@ -10,6 +10,7 @@ from chatutil.ui import run_user, run_chat
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 
 from toolbelt.wiki import WikiContentTool, WikiSummaryTool, WikiSectionTool
+from toolbelt.wiki import WikiSearchTool
 
 
 logging.basicConfig(filename='chatbot.log', filemode='a', level=logging.INFO,
@@ -28,6 +29,7 @@ chat = Chat(prompt, tools={
     "wiki_content": WikiContentTool(),
     "wiki_summary": WikiSummaryTool(),
     "wiki_section": WikiSectionTool(),
+    "wiki_search": WikiSearchTool(),
 })
 
 

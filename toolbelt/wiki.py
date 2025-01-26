@@ -5,6 +5,28 @@ from mediawiki import MediaWiki
 from . import ToolBase
 
 
+class WikiSearchTool(ToolBase):
+
+    __desc__ = "Get list of titles based on string search"
+
+    __schema__ = {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "description": "The text to search for across pages titles and content",
+                },
+            },
+            "required": ["text"],
+        }
+
+    def __call__(self, text=None):
+        wiki = MediaWiki()
+        titles = wiki.search(text)
+
+        return "\n".join(titles)
+
+
 class WikiContentTool(ToolBase):
 
     __desc__ = "Get list of sections for wikipedia article"
