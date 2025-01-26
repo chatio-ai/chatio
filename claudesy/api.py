@@ -30,6 +30,9 @@ class Chat:
         self._tools = []
         self._funcs = {}
 
+        if tools is None:
+            tools = {}
+
         for name, tool in tools.items():
             desc = tool.__desc__
             schema = tool.__schema__

@@ -4,8 +4,8 @@ import sys
 import dotenv
 import logging
 
-from chatutil.api import Chat
-from chatutil.ui import run_user, run_chat
+from claudesy.api import Chat
+from claudesy.ui import run_user, run_chat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 
