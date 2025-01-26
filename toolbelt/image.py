@@ -1,6 +1,4 @@
 
-from pprint import pprint
-
 from . import ToolBase
 
 
@@ -39,4 +37,4 @@ class ImageDumpTool(ToolBase):
     }
 
     def __call__(self, info=None):
-        pprint(info)
+        pass

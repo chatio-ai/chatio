@@ -5,7 +5,7 @@ import sys
 import dotenv
 
 from claudesy.api import Chat, do_image
-from claudesy.ui import run_chat
+from claudesy.ui import run_chat, run_stat
 
 
 from toolbelt.image import ImageDumpTool
@@ -32,5 +32,7 @@ if __name__ == '__main__':
         raise SystemExit()
 
     run_chat(chat, content)
+
+    run_stat(chat)
 
     print()

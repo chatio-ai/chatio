@@ -55,6 +55,8 @@ class Chat:
         else:
             self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
 
+        self.events = []
+
     def _user_message(self, content):
         return {"role": "user", "content": content}
 
@@ -81,6 +83,17 @@ class Chat:
                     yield chunk.delta.text
                 elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
                     tool_use_blocks.append(chunk.content_block)
+                    self.events.append({
+                        "type": "tools",
+                        "tool_name": chunk.content_block.name,
+                        "tool_args": chunk.content_block.input,
+                    })
+                elif chunk.type == 'message_stop':
+                    self.events.append({
+                        "type": "usage",
+                        "input_tokens": chunk.message.usage.input_tokens,
+                        "output_tokens": chunk.message.usage.output_tokens,
+                    })
 
             response = [_.to_dict() for _ in stream.get_final_message().content]
 
@@ -88,7 +101,8 @@ class Chat:
                 self._messages.append(self._ai_message(response))
 
         if tool_use_blocks:
-            yield from self._run_tool(tool_use_blocks)
+            results = self._run_tool(tool_use_blocks)
+            yield from self(results)
 
     def _run_tool(self, content_blocks):
         results = []
@@ -109,7 +123,7 @@ class Chat:
                 "content": content,
             })
 
-        return self(results)
+        return results
 
 
 def do_image(filename):

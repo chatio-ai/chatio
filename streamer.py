@@ -5,7 +5,7 @@ import dotenv
 import logging
 
 from claudesy.api import Chat
-from claudesy.ui import run_user, run_chat
+from claudesy.ui import run_user, run_chat, run_stat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 
@@ -42,5 +42,7 @@ if __name__ == '__main__':
             continue
 
         run_chat(chat, content, "<<< ")
+
+        run_stat(chat, "::: ")
 
     print()
