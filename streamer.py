@@ -31,6 +31,8 @@ if __name__ == '__main__':
         content = run_user(">>> ")
         if content is None:
             break
+        elif not content:
+            continue
 
         run_chat(chat, content, "<<< ")
 

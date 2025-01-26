@@ -81,7 +81,8 @@ class Chat:
 
             response = [_.to_dict() for _ in stream.get_final_message().content]
 
-            self._messages.append(self._ai_message(response))
+            if response:
+                self._messages.append(self._ai_message(response))
 
         if tool_use_block:
             yield from self._run_tool(tool_use_block)
