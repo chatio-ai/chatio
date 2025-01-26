@@ -25,15 +25,20 @@ class Chat:
         self._tools = []
         self._funcs = {}
 
-        for tool in tools:
-            name = tool.get("name")
-            func = tool.pop("func")
+        for name, tool in tools.items():
+            desc = tool.__desc__
+            schema = tool.__schema__
 
-            if not name or not func:
+            if not name or not desc or not schema:
                 raise RuntimeError()
 
-            self._funcs.setdefault(name, func)
-            self._tools.append(tool)
+            self._tools.append({
+                "name": name,
+                "description": desc,
+                "input_schema": schema,
+            })
+
+            self._funcs[name] = tool
 
         if not tool_choice:
             self._tool_choice = None
