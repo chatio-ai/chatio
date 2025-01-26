@@ -63,7 +63,7 @@ class Chat:
 
         self._messages.append(self._user_message(request))
 
-        tool_use_block = None
+        tool_use_blocks = []
 
         with self._client.messages.stream(
             model='claude-3-5-sonnet-latest',
@@ -77,30 +77,36 @@ class Chat:
                 if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
                     yield chunk.delta.text
                 elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
-                    if tool_use_block is not None:
-                        raise RuntimeError()
-                    tool_use_block = chunk.content_block
+                    tool_use_blocks.append(chunk.content_block)
 
             response = [_.to_dict() for _ in stream.get_final_message().content]
 
             if response:
                 self._messages.append(self._ai_message(response))
 
-        if tool_use_block:
-            yield from self._run_tool(tool_use_block)
+        if tool_use_blocks:
+            yield from self._run_tool(tool_use_blocks)
 
-    def _run_tool(self, content_block):
-        func = self._funcs.get(content_block.name)
-        if func is not None:
-            content = func(**content_block.input)
-        if content is None:
-            content = ""
+    def _run_tool(self, content_blocks):
+        results = []
 
-        return self([{
-            "type": "tool_result",
-            "tool_use_id": content_block.id,
-            "content": content,
-        }])
+        for content_block in content_blocks:
+            func = self._funcs.get(content_block.name)
+            if func is not None:
+                content = func(**content_block.input)
+            else:
+                content = None
+
+            if content is None:
+                content = ""
+
+            results.append({
+                "type": "tool_result",
+                "tool_use_id": content_block.id,
+                "content": content,
+            })
+
+        return self(results)
 
 
 def do_image(filename):
