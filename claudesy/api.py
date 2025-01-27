@@ -18,7 +18,7 @@ class Chat:
             self._system = ""
         else:
             self._system = self._as_contents(system)
-            self._using_cache(self._system)
+            self._setup_cache(self._system)
 
         if messages is None:
             messages = []
@@ -51,7 +51,7 @@ class Chat:
 
             self._funcs[name] = tool
 
-        self._using_cache(self._tools)
+        self._setup_cache(self._tools)
 
         if not tool_choice:
             self._tool_choice = None
@@ -60,9 +60,17 @@ class Chat:
         else:
             self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
 
-    def _using_cache(self, param):
+    def _setup_cache(self, param):
         if param:
             param[-1].update({"cache_control": {"type": "ephemeral"}})
+
+    def _setup_messages_cache(self):
+        for message in self._messages:
+            for content in message.get("content"):
+                content.pop("cache_control", None)
+
+        if self._messages:
+            self._setup_cache(self._messages[-1].get("content"))
 
     def _as_contents(self, content):
         if isinstance(content, str):
@@ -71,10 +79,10 @@ class Chat:
             return content
 
     def _usr_message(self, content):
-        return {"role": "user", "content": content}
+        return {"role": "user", "content": self._as_contents(content)}
 
     def _bot_message(self, content):
-        return {"role": "assistant", "content": content}
+        return {"role": "assistant", "content": self._as_contents(content)}
 
     def _token_count(self):
         return self._client.messages.count_tokens(
@@ -86,6 +94,8 @@ class Chat:
     def __call__(self, request):
         while request:
             self._messages.append(self._usr_message(request))
+
+            self._setup_messages_cache()
 
             tool_use_blocks = []
 
