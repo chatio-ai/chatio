@@ -23,9 +23,9 @@ class Chat:
         self._messages = []
         for index, message in enumerate(messages):
             self._messages.append(
-                    self._user_message(message)
+                    self._usr_message(message)
                     if not index % 2 else
-                    self._ai_message(message))
+                    self._bot_message(message))
 
         self._tools = []
         self._funcs = {}
@@ -55,15 +55,15 @@ class Chat:
         else:
             self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
 
-    def _user_message(self, content):
+    def _usr_message(self, content):
         return {"role": "user", "content": content}
 
-    def _ai_message(self, content):
+    def _bot_message(self, content):
         return {"role": "assistant", "content": content}
 
     def __call__(self, request):
         while request:
-            self._messages.append(self._user_message(request))
+            self._messages.append(self._usr_message(request))
 
             tool_use_blocks = []
 
@@ -95,7 +95,7 @@ class Chat:
                 response = [_.to_dict() for _ in stream.get_final_message().content]
 
                 if response:
-                    self._messages.append(self._ai_message(response))
+                    self._messages.append(self._bot_message(response))
 
             request = []
             for tool_use_block in tool_use_blocks:
