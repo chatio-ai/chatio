@@ -68,7 +68,7 @@ class Chat:
             tool_use_blocks = []
 
             with self._client.messages.stream(
-                model='claude-3-5-sonnet-latest',
+                model='claude-3-5-haiku-latest',
                 max_tokens=4096,
                 system=self._system,
                 messages=self._messages,

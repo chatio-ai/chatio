@@ -19,7 +19,7 @@ if __name__ == '__main__':
         raise SystemExit()
 
     usage = client.messages.count_tokens(
-            model='claude-3-5-sonnet-latest',
+            model='claude-3-5-haiku-latest',
             messages=[
                 {"role": "user", "content": [
                     {"type": "text", "text": content}
