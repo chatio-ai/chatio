@@ -10,9 +10,10 @@ log = logging.getLogger(__name__)
 
 
 class Chat:
-    def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None):
+    def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None, use_cache=True):
         self._client = Anthropic()
         self._model = 'claude-3-5-sonnet-latest'
+        self._cache = use_cache
 
         if not system:
             self._system = ""
@@ -61,7 +62,7 @@ class Chat:
             self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
 
     def _setup_cache(self, param):
-        if param:
+        if self._cache and param:
             param[-1].update({"cache_control": {"type": "ephemeral"}})
 
     def _setup_messages_cache(self):
