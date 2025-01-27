@@ -37,4 +37,5 @@ class ImageDumpTool(ToolBase):
     }
 
     def __call__(self, info=None):
-        pass
+        return
+        yield

@@ -97,32 +97,25 @@ class Chat:
                 if response:
                     self._messages.append(self._ai_message(response))
 
-            if tool_use_blocks:
-                request = self._run_tool(tool_use_blocks)
-            else:
-                request = None
+            request = []
+            for tool_use_block in tool_use_blocks:
+                content_chunks = []
+                for chunk in self._run_tool(tool_use_block):
+                    if isinstance(chunk, str):
+                        content_chunks.append(chunk)
+                    elif chunk is not None:
+                        yield chunk
 
-    def _run_tool(self, content_blocks):
-        results = []
+                request.append({
+                    "type": "tool_result",
+                    "tool_use_id": tool_use_block.id,
+                    "content": "".join(content_chunks),
+                })
 
-        for content_block in content_blocks:
-            func = self._funcs.get(content_block.name)
-            if func is not None:
-                content = func(**content_block.input)
-            else:
-                content = None
-
-            if content is None:
-                content = ""
-
-            results.append({
-                "type": "tool_result",
-                "tool_use_id": content_block.id,
-                "content": content,
-            })
-
-        return results
-
+    def _run_tool(self, content_block):
+        func = self._funcs.get(content_block.name)
+        if func is not None:
+            yield from func(**content_block.input)
 
 def do_image(filename):
     content = []

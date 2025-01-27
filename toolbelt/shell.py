@@ -23,7 +23,7 @@ class ShellCalcTool(ToolBase):
         pass
 
     def __call__(self, expr):
-        return run(f"echo '{expr}' | bc", shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
+        yield run(f"echo '{expr}' | bc", shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
 
 
 class ShellExecTool(ToolBase):
@@ -42,5 +42,5 @@ class ShellExecTool(ToolBase):
     }
 
     def __call__(self, command=None):
-        return run(command, shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
+        yield run(command, shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
 

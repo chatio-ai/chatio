@@ -54,7 +54,7 @@ class WikiSearchTool(WikiToolBase):
         }
 
     def __call__(self, text=None):
-        return "\n".join(self.wiki.search(text))
+        yield "\n".join(self.wiki.search(text))
 
 
 class WikiContentTool(WikiToolBase):
@@ -73,7 +73,7 @@ class WikiContentTool(WikiToolBase):
         }
 
     def __call__(self, title=None):
-        return "\n".join(self._get_page(title).sections)
+        yield "\n".join(self._get_page(title).sections)
 
 
 class WikiSummaryTool(WikiToolBase):
@@ -92,7 +92,7 @@ class WikiSummaryTool(WikiToolBase):
         }
 
     def __call__(self, title=None):
-        return self._get_page(title).section(None)
+        yield self._get_page(title).section(None)
 
 
 class WikiSectionTool(WikiToolBase):
@@ -115,4 +115,4 @@ class WikiSectionTool(WikiToolBase):
         }
 
     def __call__(self, title=None, section=None):
-        return self._get_page(title).section(section)
+        yield self._get_page(title).section(section)

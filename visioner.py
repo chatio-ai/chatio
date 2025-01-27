@@ -31,8 +31,8 @@ if __name__ == '__main__':
     if not content:
         raise SystemExit()
 
-    run_chat(chat, content)
+    events = run_chat(chat, content)
 
-    run_stat(chat)
+    run_stat(events)
 
     print()
