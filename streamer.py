@@ -9,8 +9,7 @@ from claudesy.ui import run_user, run_chat, run_stat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 
-from toolbelt.wiki import WikiContentTool, WikiSummaryTool, WikiSectionTool
-from toolbelt.wiki import WikiSearchTool
+from toolbelt.wiki import WikiToolFactory
 
 
 logging.basicConfig(filename='chatbot.log', filemode='a', level=logging.INFO,
@@ -22,14 +21,16 @@ dotenv.load_dotenv()
 
 prompt = " ".join(sys.argv[1:])
 
+wiki = WikiToolFactory()
+
 
 chat = Chat(prompt, tools={
     "run_command": ShellExecTool(),
     "run_bc_calc": ShellCalcTool(),
-    "wiki_content": WikiContentTool(),
-    "wiki_summary": WikiSummaryTool(),
-    "wiki_section": WikiSectionTool(),
-    "wiki_search": WikiSearchTool(),
+    "wiki_content": wiki.wiki_content(),
+    "wiki_summary": wiki.wiki_summary(),
+    "wiki_section": wiki.wiki_section(),
+    "wiki_search": wiki.wiki_search(),
 })
 
 

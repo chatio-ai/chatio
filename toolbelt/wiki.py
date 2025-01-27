@@ -5,7 +5,40 @@ from mediawiki import MediaWiki
 from . import ToolBase
 
 
-class WikiSearchTool(ToolBase):
+class WikiToolFactory:
+    def __init__(self):
+        self.wiki = MediaWiki()
+        self.page_cache = {}
+
+    def wiki_search(self, desc=None):
+        return WikiSearchTool(self.wiki, self.page_cache, desc)
+
+    def wiki_content(self, desc=None):
+        return WikiContentTool(self.wiki, self.page_cache, desc)
+
+    def wiki_summary(self, desc=None):
+        return WikiSummaryTool(self.wiki, self.page_cache, desc)
+
+    def wiki_section(self, desc=None):
+        return WikiSectionTool(self.wiki, self.page_cache, desc)
+
+
+class WikiToolBase(ToolBase):
+    def __init__(self, wiki, page_cache, desc=None):
+        super().__init__(desc)
+
+        self.wiki = wiki
+        self.page_cache = page_cache
+
+    def _get_page(self, title=None):
+        if not title in self.page_cache:
+            title = self.wiki.suggest(title)
+        if not title in self.page_cache:
+            self.page_cache[title] = self.wiki.page(title, auto_suggest=False)
+        return self.page_cache[title]
+
+
+class WikiSearchTool(WikiToolBase):
 
     __desc__ = "Get list of titles based on string search"
 
@@ -21,13 +54,10 @@ class WikiSearchTool(ToolBase):
         }
 
     def __call__(self, text=None):
-        wiki = MediaWiki()
-        titles = wiki.search(text)
-
-        return "\n".join(titles)
+        return "\n".join(self.wiki.search(text))
 
 
-class WikiContentTool(ToolBase):
+class WikiContentTool(WikiToolBase):
 
     __desc__ = "Get list of sections for wikipedia article"
 
@@ -43,13 +73,10 @@ class WikiContentTool(ToolBase):
         }
 
     def __call__(self, title=None):
-        wiki = MediaWiki()
-        page = wiki.page(title)
-
-        return "\n".join(page.sections)
+        return "\n".join(self._get_page(title).sections)
 
 
-class WikiSummaryTool(ToolBase):
+class WikiSummaryTool(WikiToolBase):
 
     __desc__ = "Get content of summary for wikipedia article"
 
@@ -65,13 +92,10 @@ class WikiSummaryTool(ToolBase):
         }
 
     def __call__(self, title=None):
-        wiki = MediaWiki()
-        page = wiki.page(title)
-
-        return page.section(None)
+        return self._get_page(title).section(None)
 
 
-class WikiSectionTool(ToolBase):
+class WikiSectionTool(WikiToolBase):
 
     __desc__ = "Get content of specific section for wikipedia article"
 
@@ -91,7 +115,4 @@ class WikiSectionTool(ToolBase):
         }
 
     def __call__(self, title=None, section=None):
-        wiki = MediaWiki()
-        page = wiki.page(title)
-
-        return page.section(section)
+        return self._get_page(title).section(section)
