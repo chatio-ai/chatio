@@ -65,6 +65,13 @@ class Chat:
     def _bot_message(self, content):
         return {"role": "assistant", "content": content}
 
+    def _token_count(self):
+        return self._client.messages.count_tokens(
+                model=self._model,
+                system=self._system,
+                messages=self._messages,
+                tools=self._tools).input_tokens
+
     def __call__(self, request):
         while request:
             self._messages.append(self._usr_message(request))
