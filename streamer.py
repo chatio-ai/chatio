@@ -12,6 +12,7 @@ from toolbelt.image import ImageDumpTool
 from toolbelt.dummy import DummyTool
 
 from toolbelt.wiki import WikiToolFactory
+from toolbelt.web import WebSearchTool, WebBrowseTool
 
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
@@ -34,6 +35,8 @@ chat = Chat(prompt, tools={
     "wiki_summary": wiki.wiki_summary(),
     "wiki_section": wiki.wiki_section(),
     "wiki_search": wiki.wiki_search(),
+    "web_search": WebSearchTool(),
+    "web_browse": WebBrowseTool(),
     "run_nothing": DummyTool(),
 })
 
