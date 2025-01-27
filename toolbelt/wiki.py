@@ -31,11 +31,21 @@ class WikiToolBase(ToolBase):
         self.page_cache = page_cache
 
     def _get_page(self, title=None):
+        cached = True
         if not title in self.page_cache:
             title = self.wiki.suggest(title)
         if not title in self.page_cache:
             self.page_cache[title] = self.wiki.page(title, auto_suggest=False)
-        return self.page_cache[title]
+            cached = False
+        return self.page_cache[title], cached
+
+    def _run_tool(self, page=None, **kwargs):
+        raise NotImplementedError()
+
+    def __call__(self, title=None, **kwargs):
+        page, cached = self._get_page(title)
+        yield {"title": title, "cache": cached}
+        yield from self._run_tool(page, **kwargs)
 
 
 class WikiSearchTool(WikiToolBase):
@@ -72,8 +82,8 @@ class WikiContentTool(WikiToolBase):
             "required": ["title"],
         }
 
-    def __call__(self, title=None):
-        yield "\n".join(self._get_page(title).sections)
+    def _run_tool(self, page=None):
+        yield "\n".join(page.sections)
 
 
 class WikiSummaryTool(WikiToolBase):
@@ -91,8 +101,8 @@ class WikiSummaryTool(WikiToolBase):
             "required": ["title"],
         }
 
-    def __call__(self, title=None):
-        yield self._get_page(title).section(None)
+    def _run_tool(self, page=None):
+        yield page.section(None)
 
 
 class WikiSectionTool(WikiToolBase):
@@ -114,5 +124,5 @@ class WikiSectionTool(WikiToolBase):
             "required": ["title", "section"],
         }
 
-    def __call__(self, title=None, section=None):
-        yield self._get_page(title).section(section)
+    def _run_tool(self, page=None, section=None):
+        yield page.section(section)

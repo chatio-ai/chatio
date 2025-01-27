@@ -81,13 +81,13 @@ class Chat:
                     elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
                         tool_use_blocks.append(chunk.content_block)
                         yield {
-                            "type": "tools",
+                            "type": "tools_usage",
                             "tool_name": chunk.content_block.name,
                             "tool_args": chunk.content_block.input,
                         }
                     elif chunk.type == 'message_stop':
                         yield {
-                            "type": "usage",
+                            "type": "token_stats",
                             "input_tokens": chunk.message.usage.input_tokens,
                             "output_tokens": chunk.message.usage.output_tokens,
                         }
@@ -104,7 +104,11 @@ class Chat:
                     if isinstance(chunk, str):
                         content_chunks.append(chunk)
                     elif chunk is not None:
-                        yield chunk
+                        yield {
+                            "type": "tools_event",
+                            "tool_name": tool_use_block.name,
+                            "tool_data": chunk,
+                        }
 
                 request.append({
                     "type": "tool_result",
