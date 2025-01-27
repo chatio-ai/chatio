@@ -14,9 +14,11 @@ class Chat:
         self._client = Anthropic()
         self._model = 'claude-3-5-sonnet-latest'
 
-        if system is None:
-            system = ""
-        self._system = system
+        if not system:
+            self._system = ""
+        else:
+            self._system = self._as_contents(system)
+            self._using_cache(self._system)
 
         if messages is None:
             messages = []
@@ -49,8 +51,7 @@ class Chat:
 
             self._funcs[name] = tool
 
-        if self._tools:
-            self._tools[-1].update({"cache_control": {"type": "ephemeral"}})
+        self._using_cache(self._tools)
 
         if not tool_choice:
             self._tool_choice = None
@@ -58,6 +59,16 @@ class Chat:
             self._tool_choice = {"type": tool_choice}
         else:
             self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
+
+    def _using_cache(self, param):
+        if param:
+            param[-1].update({"cache_control": {"type": "ephemeral"}})
+
+    def _as_contents(self, content):
+        if isinstance(content, str):
+            return [{"type": "text", "text": content}]
+        else:
+            return content
 
     def _usr_message(self, content):
         return {"role": "user", "content": content}
