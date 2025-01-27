@@ -50,14 +50,14 @@ class WikiToolBase(ToolBase):
 
 class WikiSearchTool(WikiToolBase):
 
-    __desc__ = "Get list of titles based on string search"
+    __desc__ = "Get list of titles based on string search. Returns up to 10 titles each on separate line."
 
     __schema__ = {
             "type": "object",
             "properties": {
                 "text": {
                     "type": "string",
-                    "description": "The text to search for across pages titles and content",
+                    "description": "The text to search for across pages titles and content.",
                 },
             },
             "required": ["text"],
@@ -69,14 +69,14 @@ class WikiSearchTool(WikiToolBase):
 
 class WikiContentTool(WikiToolBase):
 
-    __desc__ = "Get list of sections for wikipedia article"
+    __desc__ = "Get list of sections for wikipedia article. Returns list of sections each on separate line."
 
     __schema__ = {
             "type": "object",
             "properties": {
                 "title": {
                     "type": "string",
-                    "description": "The title of article to fetch list of sections for",
+                    "description": "The title of article to fetch list of sections for.",
                 },
             },
             "required": ["title"],
@@ -88,14 +88,14 @@ class WikiContentTool(WikiToolBase):
 
 class WikiSummaryTool(WikiToolBase):
 
-    __desc__ = "Get content of summary for wikipedia article"
+    __desc__ = "Get content of summary for wikipedia article. Returns text of summary (header) section."
 
     __schema__ = {
             "type": "object",
             "properties": {
                 "title": {
                     "type": "string",
-                    "description": "The title of article to fetch summary content for",
+                    "description": "The title of article to fetch summary content for.",
                 },
             },
             "required": ["title"],
@@ -107,18 +107,18 @@ class WikiSummaryTool(WikiToolBase):
 
 class WikiSectionTool(WikiToolBase):
 
-    __desc__ = "Get content of specific section for wikipedia article"
+    __desc__ = "Get content of specific section for wikipedia article. Returns text of the given section."
 
     __schema__ = {
             "type": "object",
             "properties": {
                 "title": {
                     "type": "string",
-                    "description": "The title of article to fetch section content for",
+                    "description": "The title of article to fetch section content for.",
                 },
                 "section": {
                     "type": "string",
-                    "description": "The section name to fetch content for",
+                    "description": "The section name to fetch content for.",
                 }
             },
             "required": ["title", "section"],

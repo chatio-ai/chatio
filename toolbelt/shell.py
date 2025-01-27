@@ -6,7 +6,7 @@ from . import ToolBase
 
 class ShellCalcTool(ToolBase):
 
-    __desc__ = "Run bc command to evaluate the expression"
+    __desc__ = "Run bc command using system shell to evaluate the expression. Returns output of the command."
 
     __schema__ = {
         "type": "object",
@@ -28,7 +28,7 @@ class ShellCalcTool(ToolBase):
 
 class ShellExecTool(ToolBase):
 
-    __desc__ = "Run custom user command using system shell"
+    __desc__ = "Run custom user command using system shell. Returns output collected from stdout and stderr streams."
 
     __schema__ = {
         "type": "object",

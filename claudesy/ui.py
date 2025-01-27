@@ -35,7 +35,8 @@ def run_stat(events, prefix=None):
         if not etype:
             pass
         elif etype == 'token_stats':
-            print("token_stats: input_tokens: %s / output_tokens: %s" % (event['input_tokens'], event['output_tokens']))
+            print("token_stats: input_tokens: %s / output_tokens: %s / cache_written: %s / cache_read: %s" % (
+                event['input_tokens'], event['output_tokens'], event['cache_written'], event['cache_read']))
         elif etype == 'tools_usage':
             print("tools_usage: %s: %s" % (event['tool_name'], event['tool_args']))
         elif etype == 'tools_event':

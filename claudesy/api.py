@@ -12,6 +12,7 @@ log = logging.getLogger(__name__)
 class Chat:
     def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None):
         self._client = Anthropic()
+        self._model = 'claude-3-5-sonnet-latest'
 
         if system is None:
             system = ""
@@ -48,6 +49,9 @@ class Chat:
 
             self._funcs[name] = tool
 
+        if self._tools:
+            self._tools[-1].update({"cache_control": {"type": "ephemeral"}})
+
         if not tool_choice:
             self._tool_choice = None
         elif not tool_choice_name:
@@ -68,7 +72,7 @@ class Chat:
             tool_use_blocks = []
 
             with self._client.messages.stream(
-                model='claude-3-5-haiku-latest',
+                model=self._model,
                 max_tokens=4096,
                 system=self._system,
                 messages=self._messages,
@@ -90,6 +94,8 @@ class Chat:
                             "type": "token_stats",
                             "input_tokens": chunk.message.usage.input_tokens,
                             "output_tokens": chunk.message.usage.output_tokens,
+                            "cache_written": chunk.message.usage.cache_creation_input_tokens,
+                            "cache_read": chunk.message.usage.cache_read_input_tokens,
                         }
 
                 response = [_.to_dict() for _ in stream.get_final_message().content]

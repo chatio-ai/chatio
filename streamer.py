@@ -8,6 +8,8 @@ from claudesy.api import Chat
 from claudesy.ui import run_user, run_chat, run_stat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
+from toolbelt.image import ImageDumpTool
+from toolbelt.dummy import DummyTool
 
 from toolbelt.wiki import WikiToolFactory
 
@@ -27,10 +29,12 @@ wiki = WikiToolFactory()
 chat = Chat(prompt, tools={
     "run_command": ShellExecTool(),
     "run_bc_calc": ShellCalcTool(),
+    "run_imgdump": ImageDumpTool(),
     "wiki_content": wiki.wiki_content(),
     "wiki_summary": wiki.wiki_summary(),
     "wiki_section": wiki.wiki_section(),
     "wiki_search": wiki.wiki_search(),
+    "run_nothing": DummyTool(),
 })
 
 

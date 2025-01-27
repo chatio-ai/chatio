@@ -11,23 +11,23 @@ class ImageDumpTool(ToolBase):
         "properties": {
             "info": {
                 "type": "object",
-                "description": "image summary wrapping structure",
+                "description": "Structure to wrap all the details of image summary.",
                 "properties": {
                     "r": {
                         "type": "number",
-                        "description": "red value [0.0, 1.0]",
+                        "description": "red value component [0.0, 1.0].",
                     },
                     "g": {
                         "type": "number",
-                        "description": "green value [0.0, 1.0]",
+                        "description": "green value component [0.0, 1.0].",
                     },
                     "b": {
                         "type": "number",
-                        "description": "blue value [0.0, 1.0]",
+                        "description": "blue value component [0.0, 1.0].",
                     },
                     "desc": {
                         "type": "string",
-                        "description": "image description",
+                        "description": "Text description of the image.",
                     },
                 },
                 "required": ["r", "g", "b"],
