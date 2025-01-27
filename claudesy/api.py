@@ -75,7 +75,7 @@ class Chat:
                 tools=self._tools) as stream:
 
                 for chunk in stream:
-                    log.info("::: %s", chunk)
+                    log.info("%s", chunk.to_dict())
                     if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
                         yield chunk.delta.text
                     elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':

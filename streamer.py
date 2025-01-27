@@ -12,7 +12,7 @@ from toolbelt.shell import ShellCalcTool, ShellExecTool
 from toolbelt.wiki import WikiToolFactory
 
 
-logging.basicConfig(filename='chatbot.log', filemode='a', level=logging.INFO,
+logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
 logging.getLogger('httpx').setLevel(logging.WARN)
 
