@@ -132,7 +132,7 @@ class Chat:
                         self._stats.input_tokens = self._stats.input_tokens + chunk.message.usage.input_tokens
                         self._stats.output_tokens = self._stats.output_tokens + chunk.message.usage.output_tokens
                         self._stats.cache_creation_input_tokens = self._stats.cache_creation_input_tokens + chunk.message.usage.cache_creation_input_tokens
-                        self._stats.cache_read_input_tokens = self._stats.cache_creation_input_tokens + chunk.message.usage.cache_creation_input_tokens
+                        self._stats.cache_read_input_tokens = self._stats.cache_read_input_tokens + chunk.message.usage.cache_read_input_tokens
 
                         yield {
                             "type": "token_stats",
