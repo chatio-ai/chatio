@@ -8,7 +8,7 @@ def run_user(prefix=None):
         return None
 
 
-def run_chat(chat, content, prefix=None):
+def run_chat(chat, content, prefix=None, machine=False):
     if prefix is not None:
         print(prefix, end="", flush=True)
 
@@ -19,6 +19,7 @@ def run_chat(chat, content, prefix=None):
             events.append(chunk)
             continue
 
+        chunk_raw = chunk.encode('unicode_escape').decode()
         print(chunk, end="", flush=True)
 
     print()
@@ -26,18 +27,18 @@ def run_chat(chat, content, prefix=None):
     return events
 
 
-def run_stat(events, prefix=None):
+def run_stat(events, prefix=None, file=None):
 
     for event in events:
         if prefix is not None:
-            print(prefix, end="", flush=True)
+            print(prefix, end="", flush=True, file=file)
         etype = event['type']
         if not etype:
             pass
         elif etype == 'token_stats':
             print("token_stats: input_tokens: %s / output_tokens: %s / cache_written: %s / cache_read: %s" % (
-                event['input_tokens'], event['output_tokens'], event['cache_written'], event['cache_read']))
+                event['input_tokens'], event['output_tokens'], event['cache_written'], event['cache_read']), file=file)
         elif etype == 'tools_usage':
-            print("tools_usage: %s: %s" % (event['tool_name'], event['tool_args']))
+            print("tools_usage: %s: %s" % (event['tool_name'], event['tool_args']), file=file)
         elif etype == 'tools_event':
-            print("tools_event: %s: %s" % (event['tool_name'], event['tool_data']))
+            print("tools_event: %s: %s" % (event['tool_name'], event['tool_data']), file=file)
