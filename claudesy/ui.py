@@ -21,9 +21,8 @@ def run_chat(chat, content, prefix=None, file=None):
 
         print(chunk, end="", flush=True, file=file)
 
-        #chunk_raw = chunk.encode('unicode_escape').decode()
         chunk_raw = chunk.replace('\\', '\\\\').replace('\n', '\\n')
-        print(chunk, end="", flush=True)
+        print(chunk_raw, end="", flush=True)
 
     print(file=file)
 

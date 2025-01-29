@@ -27,7 +27,6 @@ if __name__ == '__main__':
         elif not content_raw:
             continue
 
-        #content = content_raw.encode().decode('unicode_escape')
         content = content_raw.replace('\\n', '\n').replace('\\\\', '\\')
 
         print(">>>", content, file=sys.stderr)
