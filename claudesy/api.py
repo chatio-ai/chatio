@@ -9,6 +9,14 @@ from anthropic import Anthropic
 log = logging.getLogger(__name__)
 
 
+class Stats:
+    def __init__(self):
+        self.input_tokens = 0
+        self.output_tokens = 0
+        self.cache_creation_input_tokens = 0
+        self.cache_read_input_tokens = 0
+
+
 class Chat:
     def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None, use_cache=True):
         self._client = Anthropic()
@@ -60,6 +68,8 @@ class Chat:
             self._tool_choice = {"type": tool_choice}
         else:
             self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
+
+        self._stats = Stats()
 
     def _setup_cache(self, param):
         if self._cache and param:
@@ -119,12 +129,21 @@ class Chat:
                             "tool_args": chunk.content_block.input,
                         }
                     elif chunk.type == 'message_stop':
+                        self._stats.input_tokens = self._stats.input_tokens + chunk.message.usage.input_tokens
+                        self._stats.output_tokens = self._stats.output_tokens + chunk.message.usage.output_tokens
+                        self._stats.cache_creation_input_tokens = self._stats.cache_creation_input_tokens + chunk.message.usage.cache_creation_input_tokens
+                        self._stats.cache_read_input_tokens = self._stats.cache_creation_input_tokens + chunk.message.usage.cache_creation_input_tokens
+
                         yield {
                             "type": "token_stats",
                             "input_tokens": chunk.message.usage.input_tokens,
                             "output_tokens": chunk.message.usage.output_tokens,
                             "cache_written": chunk.message.usage.cache_creation_input_tokens,
                             "cache_read": chunk.message.usage.cache_read_input_tokens,
+                            "input_tokens_total": self._stats.input_tokens,
+                            "output_tokens_total": self._stats.output_tokens,
+                            "cache_written_total": self._stats.cache_creation_input_tokens,
+                            "cache_read_total": self._stats.cache_read_input_tokens,
                         }
 
                 response = [_.to_dict() for _ in stream.get_final_message().content]
