@@ -18,9 +18,12 @@ class Stats:
 
 
 class Chat:
-    def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None, use_cache=True):
+    def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None, model=None, use_cache=True):
         self._client = Anthropic()
-        self._model = 'claude-3-5-sonnet-latest'
+        if model is None:
+            model = 'claude-3-5-sonnet-latest'
+
+        self._model = model
         self._cache = use_cache
 
         if not system:

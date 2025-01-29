@@ -16,7 +16,7 @@ dotenv.load_dotenv()
 
 prompt = " ".join(sys.argv[1:])
 
-chat = Chat(prompt)
+chat = Chat(prompt, model='claude-3-5-haiku-latest')
 
 
 if __name__ == '__main__':
