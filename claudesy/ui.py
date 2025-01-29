@@ -8,7 +8,7 @@ def run_user(prefix=None):
         return None
 
 
-def run_chat(chat, content, prefix=None, machine=False):
+def run_chat(chat, content, prefix=None, file=None):
     if prefix is not None:
         print(prefix, end="", flush=True)
 
@@ -19,8 +19,13 @@ def run_chat(chat, content, prefix=None, machine=False):
             events.append(chunk)
             continue
 
-        chunk_raw = chunk.encode('unicode_escape').decode()
+        print(chunk, end="", flush=True, file=file)
+
+        #chunk_raw = chunk.encode('unicode_escape').decode()
+        chunk_raw = chunk.replace('\\', '\\\\').replace('\n', '\\n')
         print(chunk, end="", flush=True)
+
+    print(file=file)
 
     print()
 

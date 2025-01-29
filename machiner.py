@@ -27,13 +27,14 @@ if __name__ == '__main__':
         elif not content_raw:
             continue
 
-        content = content_raw.encode().decode('unicode_escape')
+        #content = content_raw.encode().decode('unicode_escape')
+        content = content_raw.replace('\\n', '\n').replace('\\\\', '\\')
 
         print(">>>", content, file=sys.stderr)
         print("", file=sys.stderr)
-        print("<<< ", end="", flush=True, file=sys.stderr)
+        print("<<<", "", end="", flush=True, file=sys.stderr)
 
-        events = run_chat(chat, content, machine=True)
+        events = run_chat(chat, content, file=sys.stderr)
 
         print("", file=sys.stderr)
         print("", file=sys.stderr)
