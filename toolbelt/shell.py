@@ -4,7 +4,13 @@ from subprocess import run, PIPE, STDOUT
 from . import ToolBase
 
 
-class ShellCalcTool(ToolBase):
+class ShellToolBase(ToolBase):
+
+    def __call__(self, command=None):
+        yield run(command, shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
+
+
+class ShellCalcTool(ShellToolBase):
 
     __desc__ = "Run bc command using system shell to evaluate the expression. Returns output of the command."
 
@@ -23,10 +29,10 @@ class ShellCalcTool(ToolBase):
         pass
 
     def __call__(self, expr):
-        yield run(f"echo '{expr}' | bc", shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
+        return super().__call__(f"echo '{expr}' | bc")
 
 
-class ShellExecTool(ToolBase):
+class ShellExecTool(ShellToolBase):
 
     __desc__ = "Run custom user command using system shell. Returns output collected from stdout and stderr streams."
 
@@ -40,7 +46,3 @@ class ShellExecTool(ToolBase):
         },
         "required": ["command"],
     }
-
-    def __call__(self, command=None):
-        yield run(command, shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
-
