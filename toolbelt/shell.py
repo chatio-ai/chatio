@@ -1,5 +1,5 @@
 
-from subprocess import run, PIPE, STDOUT
+from subprocess import Popen, PIPE, STDOUT
 
 from . import ToolBase
 
@@ -7,7 +7,16 @@ from . import ToolBase
 class ShellToolBase(ToolBase):
 
     def __call__(self, command=None):
-        yield run(command, shell=True, stdout=PIPE, stderr=STDOUT).stdout.decode()
+
+        process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT, text=True)
+
+        for chunk in process.stdout:
+            yield chunk
+
+        process.stdout.close()
+        return_code = process.wait()
+        if return_code:
+            raise RuntimeError(return_code)
 
 
 class ShellCalcTool(ShellToolBase):
