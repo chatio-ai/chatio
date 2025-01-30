@@ -52,3 +52,5 @@ def run_stat(events, prefix=None, file=None):
             print("tools_usage: %s: %s" % (event['tool_name'], event['tool_args']), file=file)
         elif etype == 'tools_event':
             print("tools_event: %s: %s" % (event['tool_name'], event['tool_data']), file=file)
+        else:
+            raise RuntimeError()

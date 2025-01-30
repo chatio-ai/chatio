@@ -6,17 +6,32 @@ from . import ToolBase
 
 class ShellToolBase(ToolBase):
 
+    def _iterate(self, command=None, iterate=None):
+        yield f"""
+
+```
+$ {command}
+"""
+
+        try:
+            for chunk in iterate:
+                yield chunk
+        except KeyboardInterrupt:
+            pass
+
+        yield f"""
+```
+"""
+
     def __call__(self, command=None):
 
         process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT, text=True)
 
-        for chunk in process.stdout:
-            yield chunk
+        yield from self._iterate(command, process.stdout)
 
         process.stdout.close()
-        return_code = process.wait()
-        if return_code:
-            raise RuntimeError(return_code)
+        exit_code = process.wait()
+        yield {'command': command, 'exit_code': exit_code}
 
 
 class ShellCalcTool(ShellToolBase):

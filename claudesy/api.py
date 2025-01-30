@@ -154,12 +154,15 @@ class Chat:
                 if response:
                     self._messages.append(self._bot_message(response))
 
+            yield "\n"
+
             request = []
             for tool_use_block in tool_use_blocks:
                 content_chunks = []
                 for chunk in self._run_tool(tool_use_block):
                     if isinstance(chunk, str):
                         content_chunks.append(chunk)
+                        yield chunk
                     elif chunk is not None:
                         yield {
                             "type": "tools_event",
