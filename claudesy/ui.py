@@ -21,12 +21,14 @@ def run_chat(chat, content, prefix=None, file=None):
 
         print(chunk, end="", flush=True, file=file)
 
-        chunk_raw = chunk.replace('\\', '\\\\').replace('\n', '\\n')
-        print(chunk_raw, end="", flush=True)
+        if file:
+            chunk_raw = chunk.replace('\\', '\\\\').replace('\n', '\\n')
+            print(chunk_raw, end="", flush=True)
 
     print(file=file)
 
-    print()
+    if file:
+        print()
 
     return events
 
