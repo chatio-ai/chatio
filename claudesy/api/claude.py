@@ -90,18 +90,6 @@ class Chat(ChatBase):
         else:
             self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
 
-    def _as_contents(self, content):
-        if isinstance(content, str):
-            return [{"type": "text", "text": content}]
-        else:
-            return content
-
-    def _usr_message(self, content):
-        return {"role": "user", "content": self._as_contents(content)}
-
-    def _bot_message(self, content):
-        return {"role": "assistant", "content": self._as_contents(content)}
-
     def _token_count(self):
         return self._client.messages.count_tokens(
                 model=self._model,
@@ -132,7 +120,6 @@ class Chat(ChatBase):
             "cache_written": self._stats.cache_creation_input_tokens,
             "cache_read": self._stats.cache_read_input_tokens,
         }
-
 
     def __call__(self, request):
         while request:
