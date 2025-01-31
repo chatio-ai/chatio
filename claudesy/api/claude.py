@@ -109,6 +109,31 @@ class Chat(ChatBase):
                 messages=self._messages,
                 tools=self._tools).input_tokens
 
+    def _process_stats(self, usage):
+        yield {
+            "type": "token_stats",
+            "scope": "round",
+            "input_tokens": usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+            "cache_written": usage.cache_creation_input_tokens,
+            "cache_read": usage.cache_read_input_tokens,
+        }
+
+        self._stats.input_tokens += usage.input_tokens
+        self._stats.output_tokens += usage.output_tokens
+        self._stats.cache_creation_input_tokens += usage.cache_creation_input_tokens
+        self._stats.cache_read_input_tokens += usage.cache_read_input_tokens
+
+        yield {
+            "type": "token_stats",
+            "scope": "total",
+            "input_tokens": self._stats.input_tokens,
+            "output_tokens": self._stats.output_tokens,
+            "cache_written": self._stats.cache_creation_input_tokens,
+            "cache_read": self._stats.cache_read_input_tokens,
+        }
+
+
     def __call__(self, request):
         while request:
             self._messages.append(self._usr_message(request))
@@ -136,22 +161,7 @@ class Chat(ChatBase):
                             "tool_args": chunk.content_block.input,
                         }
                     elif chunk.type == 'message_stop':
-                        self._stats.input_tokens = self._stats.input_tokens + chunk.message.usage.input_tokens
-                        self._stats.output_tokens = self._stats.output_tokens + chunk.message.usage.output_tokens
-                        self._stats.cache_creation_input_tokens = self._stats.cache_creation_input_tokens + chunk.message.usage.cache_creation_input_tokens
-                        self._stats.cache_read_input_tokens = self._stats.cache_read_input_tokens + chunk.message.usage.cache_read_input_tokens
-
-                        yield {
-                            "type": "token_stats",
-                            "input_tokens": chunk.message.usage.input_tokens,
-                            "output_tokens": chunk.message.usage.output_tokens,
-                            "cache_written": chunk.message.usage.cache_creation_input_tokens,
-                            "cache_read": chunk.message.usage.cache_read_input_tokens,
-                            "input_tokens_total": self._stats.input_tokens,
-                            "output_tokens_total": self._stats.output_tokens,
-                            "cache_written_total": self._stats.cache_creation_input_tokens,
-                            "cache_read_total": self._stats.cache_read_input_tokens,
-                        }
+                        yield from self._process_stats(chunk.message.usage)
 
                 response = [_.to_dict() for _ in stream.get_final_message().content]
 
