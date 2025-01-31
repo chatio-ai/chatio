@@ -5,6 +5,8 @@ import mimetypes
 
 from anthropic import Anthropic
 
+from . import ChatBase
+
 
 log = logging.getLogger(__name__)
 
@@ -17,8 +19,8 @@ class Stats:
         self.cache_read_input_tokens = 0
 
 
-class Chat:
-    def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None, model=None, use_cache=True):
+class Chat(ChatBase):
+    def _setup_context(self, model, use_cache=True):
         self._client = Anthropic()
         if model is None:
             model = 'claude-3-5-sonnet-latest'
@@ -26,6 +28,21 @@ class Chat:
         self._model = model
         self._cache = use_cache
 
+        self._stats = Stats()
+
+    def _setup_cache(self, param):
+        if self._cache and param:
+            param[-1].update({"cache_control": {"type": "ephemeral"}})
+
+    def _setup_messages_cache(self):
+        for message in self._messages:
+            for content in message.get("content"):
+                content.pop("cache_control", None)
+
+        if self._messages:
+            self._setup_cache(self._messages[-1].get("content"))
+
+    def _setup_messages(self, system, messages):
         if not system:
             self._system = ""
         else:
@@ -42,6 +59,7 @@ class Chat:
                     if not index % 2 else
                     self._bot_message(message))
 
+    def _setup_tools(self, tools, tool_choice, tool_choice_name):
         self._tools = []
         self._funcs = {}
 
@@ -71,20 +89,6 @@ class Chat:
             self._tool_choice = {"type": tool_choice}
         else:
             self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
-
-        self._stats = Stats()
-
-    def _setup_cache(self, param):
-        if self._cache and param:
-            param[-1].update({"cache_control": {"type": "ephemeral"}})
-
-    def _setup_messages_cache(self):
-        for message in self._messages:
-            for content in message.get("content"):
-                content.pop("cache_control", None)
-
-        if self._messages:
-            self._setup_cache(self._messages[-1].get("content"))
 
     def _as_contents(self, content):
         if isinstance(content, str):
