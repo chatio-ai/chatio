@@ -5,6 +5,7 @@ import dotenv
 import logging
 
 #from claudesy.api.default import Chat
+#from claudesy.api.claude import Chat
 from claudesy.api.openai import Chat
 from claudesy.ui import run_user, run_chat, run_stat
 

@@ -42,9 +42,28 @@ class Chat(ChatBase):
                     if not index % 2 else
                     self._bot_message(message))
 
-    def _setup_tools(self, tools, tool_choice, tool_choice_name):
-        # TODO
+    def _tool_schema(self, schema):
+        result = schema.copy()
 
+        if result.get("type") == "object":
+            props = result.setdefault("properties", {})
+        else:
+            props = None
+
+        if props is not None:
+            result.update({
+                "additionalProperties": False,
+                "required": list(props),
+            })
+
+            for key in props:
+                value = props.get(key, {})
+                value = self._tool_schema(value)
+                props[key] = value
+
+        return result
+
+    def _setup_tools(self, tools, tool_choice, tool_choice_name):
         self._tools = []
         self._funcs = {}
 
@@ -53,15 +72,19 @@ class Chat(ChatBase):
 
         for name, tool in tools.items():
             desc = tool.__desc__
-            schema = tool.__schema__
+            schema = self._tool_schema(tool.__schema__)
 
             if not name or not desc or not schema:
                 raise RuntimeError()
 
             self._tools.append({
-                "name": name,
-                "description": desc,
-                "input_schema": schema,
+                "type": "function",
+                "function": {
+                    "name": name,
+                    "description": desc,
+                    "parameters": schema,
+                    "strict": True,
+                },
             })
 
             self._funcs[name] = tool
@@ -71,7 +94,7 @@ class Chat(ChatBase):
         elif not tool_choice_name:
             self._tool_choice = {"type": tool_choice}
         else:
-            self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
+            self._tool_choice = {"type": tool_choice, "function": {"name": tool_choice_name}}
 
     def _process_stats(self, usage):
         yield {
@@ -95,9 +118,17 @@ class Chat(ChatBase):
             "cache_read": 0,
         }
 
+    def _bot_message(self, content, tool_calls=None):
+        message = {"role": "assistant", "content": self._as_contents(content)}
+        if tool_calls:
+            message.update({"tool_calls": tool_calls})
+        return message
+
     def __call__(self, request):
-        while request:
-            self._messages.append(self._usr_message(request))
+        self._messages.append(self._usr_message(request))
+
+        done = False
+        while not done:
 
             tool_use_blocks = []
 
@@ -105,25 +136,39 @@ class Chat(ChatBase):
                 model=self._model,
                 max_tokens=4096,
                 stream_options={'include_usage': True},
-                messages=self._messages) as stream:
-                #tools=self._tools) as stream:
+                messages=self._messages,
+                tools=self._tools) as stream:
 
                 for chunk in stream:
                     log.info("%s", chunk.to_dict())
                     if chunk.type == 'content.delta':
                         yield chunk.delta
 
-                usage = stream.get_final_completion().usage
+                final = stream.get_final_completion()
+
+                calls = final.choices[0].message.tool_calls
+                if calls:
+                    for call in calls:
+                        tool_use_blocks.append(call)
+                        yield {
+                            "type": "tools_usage",
+                            "tool_name": call.function.name,
+                            "tool_args": call.function.parsed_arguments,
+                        }
+
+                usage = final.usage
                 if usage:
                     yield from self._process_stats(usage)
 
-                response = stream.get_final_completion().choices[0].message.content
+                response = final.choices[0].message
                 if response:
-                    self._messages.append(self._bot_message(response))
+                    self._messages.append(self._bot_message(response.content, response.tool_calls))
 
             yield "\n"
 
-            request = []
+            if not tool_use_blocks:
+                done = True
+
             for tool_use_block in tool_use_blocks:
                 content_chunks = []
                 for chunk in self._run_tool(tool_use_block):
@@ -133,20 +178,20 @@ class Chat(ChatBase):
                     elif chunk is not None:
                         yield {
                             "type": "tools_event",
-                            "tool_name": tool_use_block.name,
+                            "tool_name": tool_use_block.function.name,
                             "tool_data": chunk,
                         }
 
-                request.append({
-                    "type": "tool_result",
-                    "tool_use_id": tool_use_block.id,
+                self._messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_use_block.id,
                     "content": "".join(content_chunks),
                 })
 
     def _run_tool(self, content_block):
-        func = self._funcs.get(content_block.name)
+        func = self._funcs.get(content_block.function.name)
         if func is not None:
-            yield from func(**content_block.input)
+            yield from func(**content_block.function.parsed_arguments)
 
 def do_image(filename):
     content = []
