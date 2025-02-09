@@ -8,11 +8,12 @@ def run_user(prefix=None):
         return None
 
 
-def run_chat(chat, content, prefix=None, file=None):
+def _run_chat(chat, content, prefix=None, file=None):
     if prefix is not None:
         print(prefix, end="", flush=True)
 
     events = []
+    result = ""
 
     for chunk in chat(content):
         if not isinstance(chunk, str):
@@ -20,6 +21,7 @@ def run_chat(chat, content, prefix=None, file=None):
             continue
 
         print(chunk, end="", flush=True, file=file)
+        result += chunk
 
         if file:
             chunk_raw = chunk.replace('\\', '\\\\').replace('\n', '\\n')
@@ -30,7 +32,11 @@ def run_chat(chat, content, prefix=None, file=None):
     if file:
         print()
 
-    return events
+    return events, result
+
+
+def run_chat(chat, content, prefix=None, file=None):
+    events, result = _run_chat(chat, content, prefix, file)
 
 
 def run_stat(events, prefix=None, file=None):
