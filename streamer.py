@@ -28,8 +28,7 @@ prompt = " ".join(sys.argv[1:])
 
 wiki = WikiToolFactory()
 
-
-chat = Chat(prompt, tools={
+tools = {
     "run_command": ShellExecTool(),
     "run_bc_calc": ShellCalcTool(),
     "run_imgdump": ImageDumpTool(),
@@ -40,7 +39,10 @@ chat = Chat(prompt, tools={
     "web_search": WebSearchTool(),
     "web_browse": WebBrowseTool(),
     "run_nothing": DummyTool(),
-})
+}
+
+chat = Chat(prompt, tools=tools, model='gemini-exp-1206')
+#chat = Chat(prompt, model='deepseek-r1:14b')
 
 
 if __name__ == '__main__':
