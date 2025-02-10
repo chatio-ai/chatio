@@ -3,6 +3,7 @@
 import sys
 import dotenv
 import logging
+import pathlib
 
 from claudesy.api.default import Chat
 from claudesy.ui import run_user, _run_chat, run_stat
@@ -14,8 +15,6 @@ logging.getLogger('httpx').setLevel(logging.WARN)
 
 dotenv.load_dotenv()
 
-prompt = " ".join(sys.argv[1:])
-
 model = 'claude-3-5-sonnet-latest'
 
 label = [
@@ -25,6 +24,20 @@ label = [
 
 
 if __name__ == '__main__':
+
+    script = pathlib.Path(sys.argv[1]) if sys.argv[1:] else pathlib.Path()
+
+    try:
+        request_prompt = script.joinpath('request.prompt').open().read()
+    except Exception as e:
+        print(e, file=sys.stderr)
+        request_prompt = None
+
+    try:
+        response_prompt = script.joinpath('response.prompt').open().read()
+    except Exception as e:
+        print(e, file=sys.stderr)
+        response_prompt = None
 
     isbot = False
 
@@ -46,8 +59,8 @@ if __name__ == '__main__':
         isbot = not isbot
 
     chats = [
-        Chat(prompt, messages=["."] + messages, model=model),
-        Chat(prompt, messages=messages, model=model),
+        Chat(request_prompt, messages=["."] + messages, model=model),
+        Chat(response_prompt, messages=messages, model=model),
     ]
 
     while True:
@@ -56,5 +69,7 @@ if __name__ == '__main__':
         run_stat(events, "::: ", file=sys.stderr)
 
         isbot = not isbot
+
+        print()
 
     print()
