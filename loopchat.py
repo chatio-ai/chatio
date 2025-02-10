@@ -15,7 +15,7 @@ logging.getLogger('httpx').setLevel(logging.WARN)
 
 dotenv.load_dotenv()
 
-model = 'claude-3-5-sonnet-latest'
+model = 'claude-3-5-haiku-latest'
 
 label = [
     ">>> ",
@@ -67,7 +67,6 @@ if __name__ == '__main__':
 
     try:
         while True:
-            print(label[isbot], end="", flush=True)
 
             this_messages = response_messages if isbot else request_messages
             this_prompt = response_prompt if isbot else request_prompt
@@ -85,6 +84,8 @@ if __name__ == '__main__':
                         request_messages.append(content)
                         response_messages.append(content)
                     content = content_raw.strip()
+
+                    print(label[isbot], end="", flush=True)
                     print(content)
 
                 if not content_raw:
@@ -95,9 +96,9 @@ if __name__ == '__main__':
                     content = "."
 
                 #print(chats[isbot], chats[isbot]._system, chats[isbot]._messages, content)
-                events, content = _run_chat(chats[isbot], content)
+                events, content = _run_chat(chats[isbot], content, prefix=label[isbot])
 
-                run_stat(events, "::: ", file=sys.stderr)
+                run_stat(events, "::: " + label[isbot], file=sys.stderr)
 
                 if not chats[not isbot]:
                     chats[not isbot] = Chat(that_prompt, that_messages, model=model)

@@ -20,16 +20,24 @@ def _run_chat(chat, content, prefix=None, file=None):
             events.append(chunk)
             continue
 
-        print(chunk, end="", flush=True, file=file)
         result += chunk
+        for index, chunk_line in enumerate(chunk.splitlines()):
+            if index:
+                print(flush=True, file=file)
+            if index and prefix is not None:
+                print(prefix, end="", flush=True, file=file)
+
+            print(chunk_line, end="", flush=True, file=file)
 
         if file:
             chunk_raw = chunk.replace('\\', '\\\\').replace('\n', '\\n')
             print(chunk_raw, end="", flush=True)
 
     print(file=file)
+    print(file=file)
 
     if file:
+        print()
         print()
 
     return events, result
