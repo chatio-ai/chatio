@@ -21,7 +21,7 @@ def _run_chat(chat, content, prefix=None, file=None):
             continue
 
         result += chunk
-        for index, chunk_line in enumerate(chunk.splitlines()):
+        for index, chunk_line in enumerate((chunk + "\n").splitlines()):
             if index:
                 print(flush=True, file=file)
             if index and prefix is not None:
