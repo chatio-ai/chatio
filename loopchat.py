@@ -23,9 +23,17 @@ label = [
 ]
 
 
-def prompt_from(filepath):
+def text_from(filepath):
     try:
         return filepath.open().read()
+    except IOError as e:
+        print(e, file=sys.stderr)
+        return None
+
+
+def file_from(filepath):
+    try:
+        return filepath.open()
     except IOError as e:
         print(e, file=sys.stderr)
         return None
@@ -36,14 +44,20 @@ if __name__ == '__main__':
     script = pathlib.Path(sys.argv[1]) if sys.argv[1:] else pathlib.Path()
 
     request_messages = []
-    request_prompt = prompt_from(script.joinpath('request.prompt'))
+    request_prompt = text_from(script.joinpath('request.prompt'))
     if request_prompt:
         print("###", label[False], request_prompt)
 
     response_messages = []
-    response_prompt = prompt_from(script.joinpath('response.prompt'))
+    response_prompt = text_from(script.joinpath('response.prompt'))
     if response_prompt:
         print("###", label[True], response_prompt)
+
+    messages_list = file_from(script.joinpath('messages.list'))
+    if messages_list:
+        fetch_message = lambda: messages_list.readline()
+    else:
+        fetch_message = lambda: ""
 
     chats = [None, None]
 
@@ -62,7 +76,7 @@ if __name__ == '__main__':
             that_prompt = request_prompt if isbot else response_prompt
 
             if not chats[isbot]:
-                content_raw = sys.stdin.readline()
+                content_raw = fetch_message()
 
                 if content_raw:
                     if content:
