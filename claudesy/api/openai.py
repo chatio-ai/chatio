@@ -132,12 +132,21 @@ class Chat(ChatBase):
 
             tool_use_blocks = []
 
-            with self._client.beta.chat.completions.stream(
-                model=self._model,
-                max_tokens=4096,
-                stream_options={'include_usage': True},
-                messages=self._messages,
-                tools=self._tools) as stream:
+            if self._tools:
+                stream = self._client.beta.chat.completions.stream(
+                    model=self._model,
+                    max_tokens=4096,
+                    stream_options={'include_usage': True},
+                    messages=self._messages,
+                    tools=self._tools)
+            else:
+                stream = self._client.beta.chat.completions.stream(
+                    model=self._model,
+                    max_tokens=4096,
+                    stream_options={'include_usage': True},
+                    messages=self._messages)
+
+            with stream as stream:
 
                 for chunk in stream:
                     log.info("%s", chunk.to_dict())

@@ -5,7 +5,7 @@ import dotenv
 import logging
 import pathlib
 
-from claudesy.api.default import Chat
+from claudesy.api.openai import Chat
 from claudesy.ui import run_user, _run_chat, run_stat
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
@@ -15,7 +15,8 @@ logging.getLogger('httpx').setLevel(logging.WARN)
 
 dotenv.load_dotenv()
 
-model = 'claude-3-5-haiku-latest'
+#model = 'claude-3-5-haiku-latest'
+model = 'gpt-4o'
 
 label = [
     ">>> ",
