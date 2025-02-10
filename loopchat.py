@@ -15,7 +15,7 @@ logging.getLogger('httpx').setLevel(logging.WARN)
 
 dotenv.load_dotenv()
 
-model = 'claude-3-5-sonnet-latest'
+model = 'claude-3-5-haiku-latest'
 
 label = [
     ">>> ",
@@ -35,10 +35,12 @@ if __name__ == '__main__':
 
     script = pathlib.Path(sys.argv[1]) if sys.argv[1:] else pathlib.Path()
 
+    request_messages = []
     request_prompt = prompt_from(script.joinpath('request.prompt'))
     if request_prompt:
         print("###", label[False], request_prompt)
 
+    response_messages = []
     response_prompt = prompt_from(script.joinpath('response.prompt'))
     if response_prompt:
         print("###", label[True], response_prompt)
@@ -47,40 +49,42 @@ if __name__ == '__main__':
 
     isbot = False
 
-    messages = []
+    content = None
 
     try:
         while True:
             print(label[isbot], end="", flush=True)
 
-            content = None
             if not chats[isbot]:
+                this_messages = response_messages if isbot else request_messages
+                this_prompt = response_prompt if isbot else request_prompt
+
                 content_raw = sys.stdin.readline()
                 content = content_raw.strip()
 
                 if content_raw:
                     if content:
-                        messages.append(content)
+                        this_messages.append(content)
                     content = content_raw.strip()
                     print(content)
 
                 if not content_raw:
-                    #messages = messages if isbot else ["."] + messages
-                    prompt = response_prompt if isbot else request_prompt
-                    chats[isbot] = Chat(prompt, messages=messages, model=model)
+                    chats[isbot] = Chat(this_prompt, messages=this_messages[:], model=model)
 
             if chats[isbot]:
+                that_messages = request_messages if isbot else response_messages
+                that_prompt = request_prompt if isbot else response_prompt
+
                 if not content:
                     content = "."
-                events, content = _run_chat(chats[isbot], content, None)
+
+                #print(chats[isbot], chats[isbot]._system, chats[isbot]._messages, content)
+                events, content = _run_chat(chats[isbot], content)
 
                 run_stat(events, "::: ", file=sys.stderr)
 
                 if not chats[not isbot]:
-                    messages = messages if isbot else messages + [content]
-                    prompt = request_prompt if isbot else response_prompt
-                    chats[not isbot] = Chat(prompt, messages, model=model)
-                    print(chats[not isbot], chats[not isbot]._system, chats[not isbot]._messages)
+                    chats[not isbot] = Chat(that_prompt, that_messages, model=model)
 
             isbot = not isbot
 
