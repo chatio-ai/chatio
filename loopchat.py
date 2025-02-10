@@ -23,21 +23,25 @@ label = [
 ]
 
 
+def prompt_from(filepath):
+    try:
+        return filepath.open().read()
+    except IOError as e:
+        print(e, file=sys.stderr)
+        return None
+
+
 if __name__ == '__main__':
 
     script = pathlib.Path(sys.argv[1]) if sys.argv[1:] else pathlib.Path()
 
-    try:
-        request_prompt = script.joinpath('request.prompt').open().read()
-    except Exception as e:
-        print(e, file=sys.stderr)
-        request_prompt = None
+    request_prompt = prompt_from(script.joinpath('request.prompt'))
+    if request_prompt:
+        print("###", label[False], request_prompt)
 
-    try:
-        response_prompt = script.joinpath('response.prompt').open().read()
-    except Exception as e:
-        print(e, file=sys.stderr)
-        response_prompt = None
+    response_prompt = prompt_from(script.joinpath('response.prompt'))
+    if response_prompt:
+        print("###", label[True], response_prompt)
 
     isbot = False
 
@@ -63,13 +67,14 @@ if __name__ == '__main__':
         Chat(response_prompt, messages=messages, model=model),
     ]
 
-    while True:
-        events, content = _run_chat(chats[isbot], content, prefix=label[isbot])
+    try:
+        while True:
+            events, content = _run_chat(chats[isbot], content, prefix=label[isbot])
 
-        run_stat(events, "::: ", file=sys.stderr)
+            run_stat(events, "::: ", file=sys.stderr)
 
-        isbot = not isbot
+            isbot = not isbot
 
+            print()
+    except KeyboardInterrupt:
         print()
-
-    print()
