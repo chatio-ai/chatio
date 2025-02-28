@@ -45,6 +45,7 @@ def _run_chat(chat, content, prefix=None, file=None):
 
 def run_chat(chat, content, prefix=None, file=None):
     events, result = _run_chat(chat, content, prefix, file)
+    return events
 
 
 def run_stat(events, prefix=None, file=None):
