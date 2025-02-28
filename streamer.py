@@ -43,6 +43,8 @@ tools = {
 
 chat = Chat(prompt, tools=tools, model='gemini-exp-1206')
 #chat = Chat(prompt, model='deepseek-r1:14b')
+#chat = Chat(prompt, model='chatgpt-4o-latest')
+#chat = Chat(prompt, model='gpt-4o')
 
 
 if __name__ == '__main__':
