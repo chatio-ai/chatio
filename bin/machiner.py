@@ -4,7 +4,8 @@ import sys
 import dotenv
 import logging
 
-from chatio.api.default import Chat
+from chatio.api import build_chat
+from chatio.misc import init_config
 from chatio.ui import run_user, run_chat, run_stat
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
@@ -16,7 +17,7 @@ dotenv.load_dotenv()
 
 prompt = " ".join(sys.argv[1:])
 
-chat = Chat(prompt, model='claude-3-5-haiku-latest')
+chat = build_chat(prompt, config=init_config())
 
 
 if __name__ == '__main__':

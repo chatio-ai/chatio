@@ -5,8 +5,8 @@ import dotenv
 import logging
 import pathlib
 
-from chatio.api.claude import ClaudeChat
-from chatio.api.openai import OpenaiChat
+from chatio.api import build_chat
+from chatio.misc import init_config
 from chatio.ui import run_user, _run_chat, run_stat
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
@@ -16,11 +16,7 @@ logging.getLogger('httpx').setLevel(logging.WARN)
 
 dotenv.load_dotenv()
 
-#Chat = ClaudeChat
-#model = 'claude-3-5-haiku-latest'
-
-Chat = OpenaiChat
-model = 'gpt-4o-mini'
+config = init_config()
 
 label = [
     ">>> ",
@@ -94,7 +90,7 @@ if __name__ == '__main__':
                     print(content)
 
                 if not content_raw:
-                    chats[isbot] = Chat(this_prompt, messages=this_messages[:], model=model)
+                    chats[isbot] = build_chat(this_prompt, messages=this_messages[:], config=config)
 
             if chats[isbot]:
                 if not content:
@@ -106,7 +102,7 @@ if __name__ == '__main__':
                 run_stat(events, "::: " + label[isbot], file=sys.stderr)
 
                 if not chats[not isbot]:
-                    chats[not isbot] = Chat(that_prompt, that_messages, model=model)
+                    chats[not isbot] = build_chat(that_prompt, that_messages, config=config)
 
             isbot = not isbot
 

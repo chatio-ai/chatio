@@ -182,27 +182,28 @@ class ClaudeChat(ChatBase):
         if func is not None:
             yield from func(**content_block.input)
 
-def do_image(filename):
-    content = []
+    @staticmethod
+    def do_image(filename):
+        content = []
 
-    with open(filename, "rb") as file:
-        data = file.read()
-        data_as_base64 = base64.b64encode(data)
-        data_as_string = data_as_base64.decode()
-        mimetype, _ = mimetypes.guess_type(filename)
+        with open(filename, "rb") as file:
+            data = file.read()
+            data_as_base64 = base64.b64encode(data)
+            data_as_string = data_as_base64.decode()
+            mimetype, _ = mimetypes.guess_type(filename)
 
-        content.append({
-            "type": "text",
-            "text": filename,
-        })
+            content.append({
+                "type": "text",
+                "text": filename,
+            })
 
-        content.append({
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": mimetype,
-                "data": data_as_string,
-            }
-        })
+            content.append({
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": mimetype,
+                    "data": data_as_string,
+                }
+            })
 
-    return content
+        return content

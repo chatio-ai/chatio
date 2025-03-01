@@ -5,9 +5,9 @@ import sys
 import dotenv
 import logging
 
-from chatio.api import build as chat_build
-from chatio.api import ChatConfig
+from chatio.api import build_chat
 from chatio.ui import run_user, run_chat, run_stat
+from chatio.misc import init_config
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 from toolbelt.image import ImageDumpTool
@@ -23,8 +23,6 @@ logging.getLogger('httpx').setLevel(logging.WARN)
 
 
 dotenv.load_dotenv()
-
-provider_file = os.environ.get("CLAUDESY_PROVIDER_JSON", "./provider.json")
 
 prompt = " ".join(sys.argv[1:])
 
@@ -43,7 +41,7 @@ tools = {
     "run_nothing": DummyTool(),
 }
 
-chat = chat_build(prompt, config=ChatConfig(provider_file))
+chat = build_chat(prompt, config=init_config())
 
 
 if __name__ == '__main__':

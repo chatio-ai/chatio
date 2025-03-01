@@ -28,14 +28,10 @@ class ChatConfig:
 
 class ChatBase:
 
-    def __init__(self, system=None, messages=None, tools=None, tool_choice=None, tool_choice_name=None, model=None, config: ChatConfig = None, **kwargs):
-
-        if config is None:
-            config = ChatConfig()
-        if model is not None:
-            config.model = model
-        if config.model is None:
-            raise RuntimeError()
+    def __init__(self,
+                 system=None, messages=None,
+                 tools=None, tool_choice=None, tool_choice_name=None,
+                 config: ChatConfig = None, **kwargs):
 
         self._setup_context(config, **kwargs)
 

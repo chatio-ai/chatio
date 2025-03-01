@@ -4,8 +4,9 @@ import sys
 
 import dotenv
 
-from chatio.api import Chat, do_image
+from chatio.api import build_chat
 from chatio.ui import run_chat
+from chatio.misc import init_config
 
 
 def makechat():
@@ -44,7 +45,7 @@ def makechat():
         messages.append("content.jpeg [Image depicting holy grail of Roman Empire]")
         messages.append("content.jpeg [Image depicting holy grail of Roman Empire]")
 
-    return Chat(prompt, messages)
+    return build_chat(prompt, messages, config=init_config())
 
 
 dotenv.load_dotenv()
@@ -57,7 +58,7 @@ if __name__ == '__main__':
     content = []
 
     for filename in sys.argv[1:]:
-        content.extend(do_image(filename))
+        content.extend(chat.do_image(filename))
 
     #content.append({"type": "text", "text": "duplicate my message as is"})
 
