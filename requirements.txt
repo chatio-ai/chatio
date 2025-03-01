@@ -1,0 +1,6 @@
+dotenv
+openai
+anthropic
+pymediawiki
+googlesearch-python
+html2text
