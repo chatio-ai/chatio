@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import dotenv
 import logging
@@ -23,6 +24,8 @@ logging.getLogger('httpx').setLevel(logging.WARN)
 
 dotenv.load_dotenv()
 
+provider_file = os.environ.get("CLAUDESY_PROVIDER_JSON", "./provider.json")
+
 prompt = " ".join(sys.argv[1:])
 
 wiki = WikiToolFactory()
@@ -40,7 +43,7 @@ tools = {
     "run_nothing": DummyTool(),
 }
 
-chat = chat_build(prompt, config=ChatConfig('./provider.json'))
+chat = chat_build(prompt, config=ChatConfig(provider_file))
 
 
 if __name__ == '__main__':
