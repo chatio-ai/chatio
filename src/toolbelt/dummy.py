@@ -12,4 +12,14 @@ class DummyTool(ToolBase):
 
     __schema__ = {
             "type": "object",
+            "properties": {
+                "dummy": {
+                    "type": "string",
+                    "description": "dummy value",
+                },
+            },
         }
+
+    def __call__(self, dummy=None):
+        return
+        yield

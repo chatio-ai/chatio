@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import sys
 import dotenv
 import logging
@@ -41,7 +40,7 @@ tools = {
     "run_nothing": DummyTool(),
 }
 
-tools = {}
+#tools = {}
 
 chat = build_chat(prompt, tools=tools,  config=init_config())
 

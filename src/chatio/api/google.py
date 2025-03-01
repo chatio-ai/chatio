@@ -45,27 +45,6 @@ class GoogleChat(ChatBase):
                     if not index % 2 else
                     self._bot_message(message))
 
-    def _tool_schema(self, schema):
-        result = schema.copy()
-
-        if result.get("type") == "object":
-            props = result.setdefault("properties", {})
-        else:
-            props = None
-
-        if props is not None:
-            result.update({
-                "additionalProperties": False,
-                "required": list(props),
-            })
-
-            for key in props:
-                value = props.get(key, {})
-                value = self._tool_schema(value)
-                props[key] = value
-
-        return result
-
     def _setup_tools(self, tools, tool_choice, tool_choice_name):
         self._tools = []
         self._funcs = {}
@@ -75,19 +54,15 @@ class GoogleChat(ChatBase):
 
         for name, tool in tools.items():
             desc = tool.__desc__
-            schema = self._tool_schema(tool.__schema__)
+            schema = tool.__schema__
 
             if not name or not desc or not schema:
                 raise RuntimeError()
 
             self._tools.append({
-                "type": "function",
-                "function": {
-                    "name": name,
-                    "description": desc,
-                    "parameters": schema,
-                    "strict": True,
-                },
+                "name": name,
+                "description": desc,
+                "parameters": schema,
             })
 
             self._funcs[name] = tool
@@ -131,11 +106,8 @@ class GoogleChat(ChatBase):
     def _usr_message(self, content):
         return {"role": "user", "parts": self._as_contents(content)}
 
-    def _bot_message(self, content, tool_calls=None):
-        message = {"role": "model", "parts": self._as_contents(content)}
-        if tool_calls:
-            message.update({"tool_calls": tool_calls})
-        return message
+    def _bot_message(self, content):
+        return {"role": "model", "parts": self._as_contents(content)}
 
     def __call__(self, request):
         self._messages.append(self._usr_message(request))
@@ -151,38 +123,44 @@ class GoogleChat(ChatBase):
                 config={
                     'system_instruction': self._system,
                     'max_output_tokens': 4096,
+                    'tools': [{
+                        "function_declarations": self._tools,
+                    }] if self._tools else None,
                 })
 
             if stream:
 
                 usage = None
-                final_content = ""
+                parts = []
+
                 for chunk in stream:
                     log.info("%s", chunk.to_json_dict())
                     if chunk.candidates \
                             and chunk.candidates[0].content \
                             and chunk.candidates[0].content.parts:
-                        chunk_content = "".join(part.text for part in chunk.candidates[0].content.parts)
-                        final_content += chunk_content
-                        yield chunk_content
+
+                        for part in chunk.candidates[0].content.parts:
+                            if part.text:
+                                yield part.text
+                            elif part.function_call:
+                                tool_use_blocks.append(part.function_call)
+                                yield {
+                                    "type": "tools_usage",
+                                    "tool_name": part.function_call.name,
+                                    "tool_args": part.function_call.args,
+                                }
+                            else:
+                                continue
+
+                            parts.append(part.to_json_dict())
 
                     usage = chunk.usage_metadata
-
-                #calls = final.choices[0].message.tool_calls
-                #if calls:
-                #    for call in calls:
-                #        tool_use_blocks.append(call)
-                #        yield {
-                #            "type": "tools_usage",
-                #            "tool_name": call.function.name,
-                #            "tool_args": call.function.parsed_arguments,
-                #        }
 
                 if usage:
                     yield from self._process_stats(usage)
 
-                if final_content:
-                    self._messages.append(self._bot_message(final_content))
+                if parts:
+                    self._messages.append(self._bot_message(parts))
 
             yield "\n"
 
@@ -198,20 +176,27 @@ class GoogleChat(ChatBase):
                     elif chunk is not None:
                         yield {
                             "type": "tools_event",
-                            "tool_name": tool_use_block.function.name,
+                            "tool_name": tool_use_block.name,
                             "tool_data": chunk,
                         }
 
                 self._messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_use_block.id,
-                    "content": "".join(content_chunks),
+                    "role": "user",
+                    "parts": [{
+                        "function_response": {
+                            "id": tool_use_block.id,
+                            "name": tool_use_block.name,
+                            "response": {
+                                "output": "".join(content_chunks),
+                            },
+                        },
+                    }],
                 })
 
-    def _run_tool(self, content_block):
-        func = self._funcs.get(content_block.function.name)
+    def _run_tool(self, function_call):
+        func = self._funcs.get(function_call.name)
         if func is not None:
-            yield from func(**content_block.function.parsed_arguments)
+            yield from func(**function_call.args)
 
     @staticmethod
     def do_image(filename):
