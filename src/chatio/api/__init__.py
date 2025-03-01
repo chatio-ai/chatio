@@ -3,6 +3,7 @@ from ._common import ChatBase
 from ._common import ChatConfig
 
 from .claude import ClaudeChat
+from .google import GoogleChat
 from .openai import OpenAIChat
 
 
@@ -18,9 +19,11 @@ def build_chat(*args, **kwargs):
     api_type = config.api_type
     if not api_type:
         return OpenAIChat(*args, **kwargs)
-    if api_type == 'openai':
-        return OpenAIChat(*args, **kwargs)
     if api_type == 'claude':
         return ClaudeChat(*args, **kwargs)
+    if api_type == 'google':
+        return GoogleChat(*args, **kwargs)
+    if api_type == 'openai':
+        return OpenAIChat(*args, **kwargs)
 
     raise RuntimeError("api_type not supported: %s" % api_type)

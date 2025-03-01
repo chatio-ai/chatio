@@ -41,7 +41,9 @@ tools = {
     "run_nothing": DummyTool(),
 }
 
-chat = build_chat(prompt, config=init_config())
+tools = {}
+
+chat = build_chat(prompt, tools=tools,  config=init_config())
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 dotenv
-openai
 anthropic
+google-genai
+openai
 pymediawiki
 googlesearch-python
 html2text

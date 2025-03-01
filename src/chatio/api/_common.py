@@ -39,7 +39,7 @@ class ChatBase:
 
         self._setup_tools(tools, tool_choice, tool_choice_name)
 
-    def _setup_context(self, config, **kwargs):
+    def _setup_context(self, config: ChatConfig, **kwargs):
         raise NotImplementedError()
 
     def _setup_messages(self, system, messages):
