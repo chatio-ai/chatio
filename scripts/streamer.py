@@ -5,9 +5,9 @@ import sys
 import dotenv
 import logging
 
-from claudesy.api import build as chat_build
-from claudesy.api import ChatConfig
-from claudesy.ui import run_user, run_chat, run_stat
+from chatio.api import build as chat_build
+from chatio.api import ChatConfig
+from chatio.ui import run_user, run_chat, run_stat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 from toolbelt.image import ImageDumpTool

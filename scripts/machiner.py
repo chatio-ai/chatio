@@ -4,8 +4,8 @@ import sys
 import dotenv
 import logging
 
-from claudesy.api.default import Chat
-from claudesy.ui import run_user, run_chat, run_stat
+from chatio.api.default import Chat
+from chatio.ui import run_user, run_chat, run_stat
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')

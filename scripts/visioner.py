@@ -4,8 +4,8 @@ import sys
 
 import dotenv
 
-from claudesy.api import Chat, do_image
-from claudesy.ui import run_chat, run_stat
+from chatio.api import Chat, do_image
+from chatio.ui import run_chat, run_stat
 
 
 from toolbelt.image import ImageDumpTool

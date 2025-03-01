@@ -4,7 +4,7 @@ import sys
 
 import dotenv
 
-from claudesy.api import Chat
+from chatio.api import Chat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 from toolbelt.image import ImageDumpTool

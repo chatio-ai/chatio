@@ -5,9 +5,9 @@ import dotenv
 import logging
 import pathlib
 
-from claudesy.api.claude import Chat as ClaudeChat
-from claudesy.api.openai import Chat as OpenaiChat
-from claudesy.ui import run_user, _run_chat, run_stat
+from chatio.api.claude import ClaudeChat
+from chatio.api.openai import OpenaiChat
+from chatio.ui import run_user, _run_chat, run_stat
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
