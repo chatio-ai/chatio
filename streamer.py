@@ -7,6 +7,7 @@ import logging
 #from claudesy.api.default import Chat
 #from claudesy.api.claude import Chat
 from claudesy.api.openai import Chat
+from claudesy.api import ChatConfig
 from claudesy.ui import run_user, run_chat, run_stat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
@@ -41,10 +42,7 @@ tools = {
     "run_nothing": DummyTool(),
 }
 
-chat = Chat(prompt, tools=tools, model='gemini-exp-1206')
-#chat = Chat(prompt, model='deepseek-r1:14b')
-#chat = Chat(prompt, model='chatgpt-4o-latest')
-#chat = Chat(prompt, model='gpt-4o')
+chat = Chat(prompt, config=ChatConfig('./provider.json'))
 
 
 if __name__ == '__main__':

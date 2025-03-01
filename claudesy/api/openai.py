@@ -18,12 +18,12 @@ class Stats:
 
 
 class Chat(ChatBase):
-    def _setup_context(self, model):
-        self._client = OpenAI()
-        if model is None:
-            model = 'gpt-4o'
+    def _setup_context(self, config):
+        self._client = OpenAI(
+                base_url=config.api_url,
+                api_key=config.api_key)
 
-        self._model = model
+        self._model = config.model
 
         self._stats = Stats()
 

@@ -20,12 +20,12 @@ class Stats:
 
 
 class Chat(ChatBase):
-    def _setup_context(self, model, use_cache=True):
-        self._client = Anthropic()
-        if model is None:
-            model = 'claude-3-5-sonnet-latest'
+    def _setup_context(self, config, use_cache=True):
+        self._client = Anthropic(
+                base_url=config.api_url,
+                api_key=config.api_key)
 
-        self._model = model
+        self._model = config.model
         self._cache = use_cache
 
         self._stats = Stats()
