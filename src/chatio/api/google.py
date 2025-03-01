@@ -12,10 +12,11 @@ from ._common import ChatConfig
 log = logging.getLogger(__name__)
 
 
-class Stats:
+class GoogleStat:
     def __init__(self):
-        self.prompt_tokens = 0
-        self.completion_tokens = 0
+        self.cached_content_token_count = 0
+        self.candidates_token_count = 0
+        self.prompt_token_count = 0
 
 
 class GoogleChat(ChatBase):
@@ -24,11 +25,9 @@ class GoogleChat(ChatBase):
                 #base_url=config.api_url,
                 api_key=config.api_key)
 
-        self._config = {}
-
         self._model = config.model
 
-        self._stats = Stats()
+        self._stats = GoogleStat()
 
     def _setup_messages(self, system, messages):
         if not system:
@@ -104,22 +103,23 @@ class GoogleChat(ChatBase):
         yield {
             "type": "token_stats",
             "scope": "round",
-            "input_tokens": usage.prompt_tokens,
-            "output_tokens": usage.completion_tokens,
+            "input_tokens": usage.prompt_token_count,
+            "output_tokens": usage.candidates_token_count,
             "cache_written": 0,
-            "cache_read": 0,
+            "cache_read": usage.cached_content_token_count or 0,
         }
 
-        self._stats.prompt_tokens += usage.prompt_tokens
-        self._stats.completion_tokens += usage.completion_tokens
+        self._stats.prompt_token_count += usage.prompt_token_count
+        self._stats.candidates_token_count += usage.candidates_token_count
+        self._stats.cached_content_token_count += usage.cached_content_token_count or 0
 
         yield {
             "type": "token_stats",
             "scope": "total",
-            "input_tokens": self._stats.prompt_tokens,
-            "output_tokens": self._stats.completion_tokens,
+            "input_tokens": self._stats.prompt_token_count,
+            "output_tokens": self._stats.candidates_token_count,
             "cache_written": 0,
-            "cache_read": 0,
+            "cache_read": self._stats.cached_content_token_count,
         }
 
     def _as_contents(self, content):
@@ -150,19 +150,23 @@ class GoogleChat(ChatBase):
                 contents=self._messages,
                 config={
                     'system_instruction': self._system,
+                    'max_output_tokens': 4096,
                 })
 
             if stream:
 
+                usage = None
                 final_content = ""
                 for chunk in stream:
-                    #log.info("%s", chunk.to_dict())
+                    log.info("%s", chunk.to_json_dict())
                     if chunk.candidates \
                             and chunk.candidates[0].content \
                             and chunk.candidates[0].content.parts:
                         chunk_content = "".join(part.text for part in chunk.candidates[0].content.parts)
                         final_content += chunk_content
                         yield chunk_content
+
+                    usage = chunk.usage_metadata
 
                 #calls = final.choices[0].message.tool_calls
                 #if calls:
@@ -174,9 +178,8 @@ class GoogleChat(ChatBase):
                 #            "tool_args": call.function.parsed_arguments,
                 #        }
 
-                #usage = final.usage
-                #if usage:
-                #    yield from self._process_stats(usage)
+                if usage:
+                    yield from self._process_stats(usage)
 
                 if final_content:
                     self._messages.append(self._bot_message(final_content))

@@ -11,10 +11,11 @@ from ._common import ChatBase
 log = logging.getLogger(__name__)
 
 
-class Stats:
+class OpenAIStat:
     def __init__(self):
         self.prompt_tokens = 0
         self.completion_tokens = 0
+        self.cached_tokens = 0
 
 
 class OpenAIChat(ChatBase):
@@ -25,7 +26,7 @@ class OpenAIChat(ChatBase):
 
         self._model = config.model
 
-        self._stats = Stats()
+        self._stats = OpenAIStat()
 
     def _setup_messages(self, system, messages):
         self._messages = []
@@ -103,11 +104,12 @@ class OpenAIChat(ChatBase):
             "input_tokens": usage.prompt_tokens,
             "output_tokens": usage.completion_tokens,
             "cache_written": 0,
-            "cache_read": 0,
+            "cache_read": usage.prompt_tokens_details.cached_tokens,
         }
 
         self._stats.prompt_tokens += usage.prompt_tokens
         self._stats.completion_tokens += usage.completion_tokens
+        self._stats.cached_tokens += usage.prompt_tokens_details.cached_tokens
 
         yield {
             "type": "token_stats",
@@ -115,7 +117,7 @@ class OpenAIChat(ChatBase):
             "input_tokens": self._stats.prompt_tokens,
             "output_tokens": self._stats.completion_tokens,
             "cache_written": 0,
-            "cache_read": 0,
+            "cache_read": self._stats.cached_tokens,
         }
 
     def _bot_message(self, content, tool_calls=None):

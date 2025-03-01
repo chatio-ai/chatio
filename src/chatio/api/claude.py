@@ -11,7 +11,7 @@ from ._common import ChatBase
 log = logging.getLogger(__name__)
 
 
-class Stats:
+class ClaudeStat:
     def __init__(self):
         self.input_tokens = 0
         self.output_tokens = 0
@@ -28,7 +28,7 @@ class ClaudeChat(ChatBase):
         self._model = config.model
         self._cache = use_cache
 
-        self._stats = Stats()
+        self._stats = ClaudeStat()
 
     def _setup_cache(self, param):
         if self._cache and param:
