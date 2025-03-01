@@ -5,7 +5,7 @@ import mimetypes
 
 from anthropic import Anthropic
 
-from . import ChatBase
+from ._common import ChatBase
 
 
 log = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ class Stats:
         self.cache_read_input_tokens = 0
 
 
-class Chat(ChatBase):
+class ClaudeChat(ChatBase):
     def _setup_context(self, config, use_cache=True):
         self._client = Anthropic(
                 base_url=config.api_url,

@@ -5,7 +5,7 @@ import mimetypes
 
 from openai import OpenAI
 
-from . import ChatBase
+from ._common import ChatBase
 
 
 log = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class Stats:
         self.completion_tokens = 0
 
 
-class Chat(ChatBase):
+class OpenAIChat(ChatBase):
     def _setup_context(self, config):
         self._client = OpenAI(
                 base_url=config.api_url,
