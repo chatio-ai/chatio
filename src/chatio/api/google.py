@@ -12,13 +12,6 @@ from ._common import ChatConfig
 log = logging.getLogger(__name__)
 
 
-class GoogleStat:
-    def __init__(self):
-        self.cached_content_token_count = 0
-        self.candidates_token_count = 0
-        self.prompt_token_count = 0
-
-
 class GoogleChat(ChatBase):
     def _setup_context(self, config: ChatConfig):
         self._client = Client(
@@ -26,8 +19,6 @@ class GoogleChat(ChatBase):
                 api_key=config.api_key)
 
         self._model = config.model
-
-        self._stats = GoogleStat()
 
     # tools
 
@@ -45,31 +36,6 @@ class GoogleChat(ChatBase):
             return {"type": tool_choice}
         else:
             return {"type": tool_choice, "function": {"name": tool_choice_name}}
-
-    # stats
-
-    def _process_stats(self, usage):
-        yield {
-            "type": "token_stats",
-            "scope": "round",
-            "input_tokens": usage.prompt_token_count,
-            "output_tokens": usage.candidates_token_count,
-            "cache_written": 0,
-            "cache_read": usage.cached_content_token_count or 0,
-        }
-
-        self._stats.prompt_token_count += usage.prompt_token_count
-        self._stats.candidates_token_count += usage.candidates_token_count
-        self._stats.cached_content_token_count += usage.cached_content_token_count or 0
-
-        yield {
-            "type": "token_stats",
-            "scope": "total",
-            "input_tokens": self._stats.prompt_token_count,
-            "output_tokens": self._stats.candidates_token_count,
-            "cache_written": 0,
-            "cache_read": self._stats.cached_content_token_count,
-        }
 
     # messages
 
@@ -182,7 +148,12 @@ class GoogleChat(ChatBase):
 
             yield {
                 "type": "stat",
-                "stat": usage,
+                "stat": {
+                    "input_tokens": usage.prompt_token_count,
+                    "output_tokens": usage.candidates_token_count,
+                    "cache_written": 0,
+                    "cache_read": usage.cached_content_token_count or 0,
+                }
             }
 
     @staticmethod

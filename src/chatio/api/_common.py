@@ -39,6 +39,13 @@ class ChatBase:
 
         self._setup_tools(tools, tool_choice, tool_choice_name)
 
+        self._stats = {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_written": 0,
+            "cache_read": 0,
+        }
+
     def _setup_context(self, config: ChatConfig, **kwargs):
         raise NotImplementedError()
 
@@ -141,6 +148,32 @@ class ChatBase:
                     }
 
             self._commit_tool_response(tool_call["id"], tool_call["name"], "".join(content_chunks))
+
+    # stats
+
+    def _process_stats(self, usage):
+        yield {
+            "type": "token_stats",
+            "scope": "round",
+            "input_tokens": usage["input_tokens"],
+            "output_tokens": usage["output_tokens"],
+            "cache_written": usage["cache_written"],
+            "cache_read": usage["cache_read"],
+        }
+
+        self._stats["input_tokens"] += usage["input_tokens"]
+        self._stats["output_tokens"] += usage["output_tokens"]
+        self._stats["cache_written"] += usage["cache_written"]
+        self._stats["cache_read"] += usage["cache_read"]
+
+        yield {
+            "type": "token_stats",
+            "scope": "total",
+            "input_tokens": self._stats["input_tokens"],
+            "output_tokens": self._stats["output_tokens"],
+            "cache_written": self._stats["cache_written"],
+            "cache_read": self._stats["cache_read"],
+        }
 
     # stream
 

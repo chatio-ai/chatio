@@ -11,13 +11,6 @@ from ._common import ChatBase
 log = logging.getLogger(__name__)
 
 
-class OpenAIStat:
-    def __init__(self):
-        self.prompt_tokens = 0
-        self.completion_tokens = 0
-        self.cached_tokens = 0
-
-
 class OpenAIChat(ChatBase):
     def _setup_context(self, config):
         self._client = OpenAI(
@@ -25,8 +18,6 @@ class OpenAIChat(ChatBase):
                 api_key=config.api_key)
 
         self._model = config.model
-
-        self._stats = OpenAIStat()
 
     # tools
 
@@ -70,31 +61,6 @@ class OpenAIChat(ChatBase):
             return {"type": tool_choice}
         else:
             return {"type": tool_choice, "function": {"name": tool_choice_name}}
-
-    # stats
-
-    def _process_stats(self, usage):
-        yield {
-            "type": "token_stats",
-            "scope": "round",
-            "input_tokens": usage.prompt_tokens,
-            "output_tokens": usage.completion_tokens,
-            "cache_written": 0,
-            "cache_read": usage.prompt_tokens_details.cached_tokens,
-        }
-
-        self._stats.prompt_tokens += usage.prompt_tokens
-        self._stats.completion_tokens += usage.completion_tokens
-        self._stats.cached_tokens += usage.prompt_tokens_details.cached_tokens
-
-        yield {
-            "type": "token_stats",
-            "scope": "total",
-            "input_tokens": self._stats.prompt_tokens,
-            "output_tokens": self._stats.completion_tokens,
-            "cache_written": 0,
-            "cache_read": self._stats.cached_tokens,
-        }
 
     # messages
 
@@ -166,7 +132,6 @@ class OpenAIChat(ChatBase):
                     }
 
             final = stream.get_final_completion().choices[0].message
-
             yield {
                 "type": "done",
                 "text": final.content,
@@ -183,9 +148,15 @@ class OpenAIChat(ChatBase):
                     }
                 }
 
+            usage = stream.get_final_completion().usage
             yield {
                 "type": "stat",
-                "stat": stream.get_final_completion().usage
+                "stat": {
+                    "input_tokens": usage.prompt_tokens,
+                    "output_tokens": usage.completion_tokens,
+                    "cache_written": 0,
+                    "cache_read": usage.prompt_tokens_details.cached_tokens,
+                },
             }
 
     @staticmethod

@@ -11,14 +11,6 @@ from ._common import ChatBase
 log = logging.getLogger(__name__)
 
 
-class ClaudeStat:
-    def __init__(self):
-        self.input_tokens = 0
-        self.output_tokens = 0
-        self.cache_creation_input_tokens = 0
-        self.cache_read_input_tokens = 0
-
-
 class ClaudeChat(ChatBase):
     def _setup_context(self, config, use_cache=True):
         self._client = Anthropic(
@@ -27,8 +19,6 @@ class ClaudeChat(ChatBase):
 
         self._model = config.model
         self._cache = use_cache
-
-        self._stats = ClaudeStat()
 
     def _setup_cache(self, param):
         if self._cache and param:
@@ -88,32 +78,6 @@ class ClaudeChat(ChatBase):
                 system=self._system,
                 messages=self._messages,
                 tools=self._tools).input_tokens
-
-    # stats
-
-    def _process_stats(self, usage):
-        yield {
-            "type": "token_stats",
-            "scope": "round",
-            "input_tokens": usage.input_tokens,
-            "output_tokens": usage.output_tokens,
-            "cache_written": usage.cache_creation_input_tokens,
-            "cache_read": usage.cache_read_input_tokens,
-        }
-
-        self._stats.input_tokens += usage.input_tokens
-        self._stats.output_tokens += usage.output_tokens
-        self._stats.cache_creation_input_tokens += usage.cache_creation_input_tokens
-        self._stats.cache_read_input_tokens += usage.cache_read_input_tokens
-
-        yield {
-            "type": "token_stats",
-            "scope": "total",
-            "input_tokens": self._stats.input_tokens,
-            "output_tokens": self._stats.output_tokens,
-            "cache_written": self._stats.cache_creation_input_tokens,
-            "cache_read": self._stats.cache_read_input_tokens,
-        }
 
     # messages
 
@@ -197,9 +161,15 @@ class ClaudeChat(ChatBase):
                         }
                     }
 
+            usage = stream.get_final_message().usage
             yield {
                 "type": "stat",
-                "stat": stream.get_final_message().usage,
+                "stat": {
+                    "input_tokens": usage.input_tokens,
+                    "output_tokens": usage.output_tokens,
+                    "cache_written": usage.cache_creation_input_tokens,
+                    "cache_read": usage.cache_read_input_tokens,
+                }
             }
 
     @staticmethod
