@@ -120,18 +120,65 @@ class OpenAIChat(ChatBase):
             "cache_read": self._stats.cached_tokens,
         }
 
-    def _bot_message(self, content, tool_calls=None):
-        message = {"role": "assistant", "content": self._as_contents(content)}
-        if tool_calls:
-            message.update({"tool_calls": tool_calls})
-        return message
+    def _as_contents(self, content):
+        if isinstance(content, str):
+            return [{"type": "text", "text": content}]
+        elif isinstance(content, dict):
+            return [content]
+        elif isinstance(content, list):
+            return content
+
+        raise RuntimeError()
+
+    def _format_user_message(self, content):
+        return {
+            "role": "user",
+            "content": self._as_contents(content)
+        }
+
+    def _commit_user_message(self, content):
+        self._messages.append(self._format_user_message(content))
+
+    def _format_model_message(self, content):
+        return {
+            "role": "assistant",
+            "content": self._as_contents(content)
+        }
+
+    def _commit_model_message(self, content):
+        self._messages.append(self._format_model_message(content))
+
+    def _format_tool_request(self, tool_call_id, tool_name, tool_input):
+        return {
+            "role": "assistant",
+            "tool_calls": [{
+                "id": tool_call_id,
+                "type": "function",
+                "function": {
+                    "name": tool_name,
+                    "arguments": tool_input,
+                },
+            }],
+        }
+
+    def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
+        self._messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
+
+    def _format_tool_response(self, tool_call_id, tool_name, tool_output):
+        return {
+            "role": "tool",
+            "tool_call_id": tool_call_id,
+            "content": tool_output,
+        }
+
+    def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
+        self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
 
     def __call__(self, request):
-        self._messages.append(self._usr_message(request))
+        self._commit_user_message(request)
 
-        done = False
-        while not done:
-
+        tool_use_blocks = [request]
+        while tool_use_blocks:
             tool_use_blocks = []
 
             if self._tools:
@@ -155,30 +202,29 @@ class OpenAIChat(ChatBase):
                     if chunk.type == 'content.delta':
                         yield chunk.delta
 
-                final = stream.get_final_completion()
+                final = stream.get_final_completion().choices[0].message
 
-                calls = final.choices[0].message.tool_calls
-                if calls:
-                    for call in calls:
-                        tool_use_blocks.append(call)
-                        yield {
-                            "type": "tools_usage",
-                            "tool_name": call.function.name,
-                            "tool_args": call.function.parsed_arguments,
-                        }
+                response = final.content
+                if response:
+                    if not response.endswith("\n"):
+                        yield "\n"
+                    self._commit_model_message(response)
 
-                usage = final.usage
+                calls = final.tool_calls or ()
+                for call in calls:
+                    tool_use_blocks.append(call)
+                    self._commit_tool_request(call.id,
+                                              call.function.name,
+                                              call.function.arguments)
+                    yield {
+                        "type": "tools_usage",
+                        "tool_name": call.function.name,
+                        "tool_args": call.function.parsed_arguments,
+                    }
+
+                usage = stream.get_final_completion().usage
                 if usage:
                     yield from self._process_stats(usage)
-
-                response = final.choices[0].message
-                if response:
-                    self._messages.append(self._bot_message(response.content, response.tool_calls))
-
-            yield "\n"
-
-            if not tool_use_blocks:
-                done = True
 
             for tool_use_block in tool_use_blocks:
                 content_chunks = []
@@ -193,11 +239,9 @@ class OpenAIChat(ChatBase):
                             "tool_data": chunk,
                         }
 
-                self._messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_use_block.id,
-                    "content": "".join(content_chunks),
-                })
+                self._commit_tool_response(tool_use_block.id,
+                                           tool_use_block.function.name,
+                                           "".join(content_chunks))
 
     def _run_tool(self, content_block):
         func = self._funcs.get(content_block.function.name)
