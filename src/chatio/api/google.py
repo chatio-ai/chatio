@@ -29,34 +29,24 @@ class GoogleChat(ChatBase):
 
         self._stats = GoogleStat()
 
-    def _setup_tools(self, tools, tool_choice, tool_choice_name):
-        self._tools = []
-        self._funcs = {}
+    # tools
 
-        if tools is None:
-            tools = {}
+    def _format_tool_definition(self, name, desc, schema):
+        return {
+            "name": name,
+            "description": desc,
+            "parameters": schema,
+        }
 
-        for name, tool in tools.items():
-            desc = tool.__desc__
-            schema = tool.__schema__
-
-            if not name or not desc or not schema:
-                raise RuntimeError()
-
-            self._tools.append({
-                "name": name,
-                "description": desc,
-                "parameters": schema,
-            })
-
-            self._funcs[name] = tool
-
+    def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
-            self._tool_choice = None
+            return None
         elif not tool_choice_name:
-            self._tool_choice = {"type": tool_choice}
+            return {"type": tool_choice}
         else:
-            self._tool_choice = {"type": tool_choice, "function": {"name": tool_choice_name}}
+            return {"type": tool_choice, "function": {"name": tool_choice_name}}
+
+    # stats
 
     def _process_stats(self, usage):
         yield {

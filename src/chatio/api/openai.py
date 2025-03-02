@@ -28,6 +28,8 @@ class OpenAIChat(ChatBase):
 
         self._stats = OpenAIStat()
 
+    # tools
+
     def _tool_schema(self, schema):
         result = schema.copy()
 
@@ -49,38 +51,27 @@ class OpenAIChat(ChatBase):
 
         return result
 
-    def _setup_tools(self, tools, tool_choice, tool_choice_name):
-        self._tools = []
-        self._funcs = {}
+    def _format_tool_definition(self, name, desc, schema):
+        schema = self._tool_schema(schema)
+        return {
+            "type": "function",
+            "function": {
+                "name": name,
+                "description": desc,
+                "parameters": schema,
+                "strict": True,
+            },
+        }
 
-        if tools is None:
-            tools = {}
-
-        for name, tool in tools.items():
-            desc = tool.__desc__
-            schema = self._tool_schema(tool.__schema__)
-
-            if not name or not desc or not schema:
-                raise RuntimeError()
-
-            self._tools.append({
-                "type": "function",
-                "function": {
-                    "name": name,
-                    "description": desc,
-                    "parameters": schema,
-                    "strict": True,
-                },
-            })
-
-            self._funcs[name] = tool
-
+    def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
-            self._tool_choice = None
+            return None
         elif not tool_choice_name:
-            self._tool_choice = {"type": tool_choice}
+            return {"type": tool_choice}
         else:
-            self._tool_choice = {"type": tool_choice, "function": {"name": tool_choice_name}}
+            return {"type": tool_choice, "function": {"name": tool_choice_name}}
+
+    # stats
 
     def _process_stats(self, usage):
         yield {

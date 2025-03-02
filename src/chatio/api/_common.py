@@ -42,9 +42,6 @@ class ChatBase:
     def _setup_context(self, config: ChatConfig, **kwargs):
         raise NotImplementedError()
 
-    def _setup_tools(self, tools, tool_choice, tool_choice_name):
-        raise NotImplementedError()
-
     # messages
 
     def _setup_messages(self, system, messages):
@@ -92,6 +89,37 @@ class ChatBase:
         self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
 
     # tools
+
+    def _format_tool_definition(self, name, desc, schema):
+        raise NotImplementedError()
+
+    def _format_tool_selection(self, tool_choice, tool_choice_name):
+        raise NotImplementedError()
+
+    def _commit_tool_definitions(self, tool_defs):
+        pass
+
+    def _setup_tools(self, tools, tool_choice, tool_choice_name):
+        self._tools = []
+        self._funcs = {}
+
+        if tools is None:
+            tools = {}
+
+        for name, tool in tools.items():
+            desc = tool.__desc__
+            schema = tool.__schema__
+
+            if not name or not desc or not schema:
+                raise RuntimeError()
+
+            self._tools.append(self._format_tool_definition(name, desc, schema))
+
+            self._funcs[name] = tool
+
+        self._commit_tool_definitions(self._tools)
+
+        self._tool_choice = self._format_tool_selection(tool_choice, tool_choice_name)
 
     def _process_tool(self, tool_name, tool_args):
         func = self._funcs.get(tool_name)

@@ -42,6 +42,26 @@ class ClaudeChat(ChatBase):
         if self._messages:
             self._setup_cache(self._messages[-1].get("content"))
 
+    # tools
+
+    def _format_tool_definition(self, name, desc, schema):
+        return {
+            "name": name,
+            "description": desc,
+            "input_schema": schema,
+        }
+
+    def _format_tool_selection(self, tool_choice, tool_choice_name):
+        if not tool_choice:
+            return None
+        elif not tool_choice_name:
+            return {"type": tool_choice}
+        else:
+            return {"type": tool_choice, "name": tool_choice_name}
+
+    def _commit_tool_definitions(self, tool_defs):
+        self._setup_cache(tool_defs)
+
     def _setup_tools(self, tools, tool_choice, tool_choice_name):
         self._tools = []
         self._funcs = {}
@@ -56,22 +76,11 @@ class ClaudeChat(ChatBase):
             if not name or not desc or not schema:
                 raise RuntimeError()
 
-            self._tools.append({
-                "name": name,
-                "description": desc,
-                "input_schema": schema,
-            })
+            self._tools.append(self._format_tool_definition(name, desc, schema))
 
             self._funcs[name] = tool
 
-        self._setup_cache(self._tools)
-
-        if not tool_choice:
-            self._tool_choice = None
-        elif not tool_choice_name:
-            self._tool_choice = {"type": tool_choice}
-        else:
-            self._tool_choice = {"type": tool_choice, "name": tool_choice_name}
+        self._tool_choice = self._format_tool_selection(tool_choice, tool_choice_name)
 
     def _token_count(self):
         return self._client.messages.count_tokens(
@@ -79,6 +88,8 @@ class ClaudeChat(ChatBase):
                 system=self._system,
                 messages=self._messages,
                 tools=self._tools).input_tokens
+
+    # stats
 
     def _process_stats(self, usage):
         yield {
