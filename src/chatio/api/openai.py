@@ -13,13 +13,48 @@ from ._events import *
 log = logging.getLogger(__name__)
 
 
+class OpenAIPump:
+    def __init__(self, model, system, messages, tools, client=None):
+        self._model = model
+        self._tools = tools
+        self._system = system
+        self._messages = messages
+
+        self._client = client
+
+    def __iter__(self):
+        stream = self._client.beta.chat.completions.stream(
+            model=self._model,
+            max_tokens=4096,
+            stream_options={'include_usage': True},
+            messages=self._messages,
+            tools=self._tools)
+
+        with stream as stream:
+            for chunk in stream:
+                log.info("%s", chunk.to_dict())
+
+                if chunk.type == 'content.delta':
+                    yield TextEvent(chunk.delta)
+
+            final = stream.get_final_completion().choices[0].message
+            yield DoneEvent(final.content)
+
+            for call in final.tool_calls or ():
+                yield CallEvent(call.id, call.function.name,
+                                call.function.parsed_arguments, call.function.arguments)
+
+            usage = stream.get_final_completion().usage
+            yield StatEvent(
+                    usage.prompt_tokens, usage.completion_tokens,
+                    0, usage.prompt_tokens_details.cached_tokens)
+
+
 class OpenAIChat(ChatBase):
     def _setup_context(self, config):
         self._client = OpenAI(
                 base_url=config.api_url,
                 api_key=config.api_key)
-
-        self._model = config.model
 
     # tools
 
@@ -77,10 +112,10 @@ class OpenAIChat(ChatBase):
         raise RuntimeError()
 
     def _format_dev_message(self, content):
-        return {
+        return [], [{
             "role": "developer",
             "content": self._as_contents(content)
-        }
+        }]
 
     def _format_user_message(self, content):
         return {
@@ -114,33 +149,12 @@ class OpenAIChat(ChatBase):
             "content": tool_output,
         }
 
-    def _chat__iter__(self, tools, messages):
+    # events
 
-        stream = self._client.beta.chat.completions.stream(
-            model=self._model,
-            max_tokens=4096,
-            stream_options={'include_usage': True},
-            messages=messages,
-            tools=tools)
+    def _iterate_model_events(self, model, system, messages, tools):
+        return OpenAIPump(model, system, messages, tools, self._client)
 
-        with stream as stream:
-            for chunk in stream:
-                log.info("%s", chunk.to_dict())
-
-                if chunk.type == 'content.delta':
-                    yield TextEvent(chunk.delta)
-
-            final = stream.get_final_completion().choices[0].message
-            yield DoneEvent(final.content)
-
-            for call in final.tool_calls or ():
-                yield CallEvent(call.id, call.function.name,
-                                call.function.parsed_arguments, call.function.arguments)
-
-            usage = stream.get_final_completion().usage
-            yield StatEvent(
-                    usage.prompt_tokens, usage.completion_tokens,
-                    0, usage.prompt_tokens_details.cached_tokens)
+    # helpers
 
     @staticmethod
     def do_image(filename):

@@ -46,6 +46,8 @@ class ChatBase:
                  tools=None, tool_choice=None, tool_choice_name=None,
                  config: ChatConfig = None, **kwargs):
 
+        self._model = config.model
+
         self._setup_context(config, **kwargs)
 
         self._setup_messages(system, messages)
@@ -60,9 +62,7 @@ class ChatBase:
     # messages
 
     def _setup_messages(self, system, messages):
-        self._messages = []
-
-        self._commit_dev_message(system)
+        self._system, self._messages = self._format_dev_message(system)
 
         if messages is None:
             messages = []
@@ -185,8 +185,20 @@ class ChatBase:
 
     # stream
 
-    def _chat__iter__(self, tools, messages):
+    def _iterate_model_events(self, model, system, messages, tools):
         raise NotImplementedError()
+
+    def _debug_base_chat_state(self):
+        self._debug = False
+        #self._debug = True
+
+        if self._debug:
+            from pprint import pprint
+            print()
+            pprint(self.system)
+            print()
+            pprint(self.messages)
+            print()
 
     def __call__(self, request):
         self._commit_user_message(request)
@@ -195,10 +207,16 @@ class ChatBase:
         while tool_calls:
             tool_calls = []
 
-            #from pprint import pprint
-            #pprint(self._messages)
+            self._debug_base_chat_state()
 
-            for event in self._chat__iter__(self._tools, self._messages):
+            events = self._iterate_model_events(
+                model=self._model,
+                system=self._system,
+                messages=self._messages,
+                tools=self._tools,
+            )
+
+            for event in events:
                 match event:
                     case TextEvent(text):
                         yield text

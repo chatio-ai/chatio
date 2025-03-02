@@ -46,13 +46,21 @@ chat = build_chat(prompt, tools=tools,  config=init_config())
 
 
 if __name__ == '__main__':
+    print("::: chatio: model: %s system: %s messages: %s tools: %s" % (
+        chat._model,
+        len(chat._system or ()),
+        len(chat._messages),
+        len(chat._tools)))
+
     while True:
+        print()
         content = run_user(">>> ")
         if content is None:
             break
         elif not content:
             continue
 
+        print()
         events = run_chat(chat, content, "<<< ")
 
         run_stat(events, "::: ")
