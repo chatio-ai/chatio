@@ -153,9 +153,9 @@ class ClaudeChat(ChatBase):
     def __call__(self, request):
         self._commit_user_message(request)
 
-        tool_use_blocks = [request]
-        while tool_use_blocks:
-            tool_use_blocks = []
+        tool_calls = [request]
+        while tool_calls:
+            tool_calls = []
 
             self._setup_messages_cache()
 
@@ -171,7 +171,11 @@ class ClaudeChat(ChatBase):
                     if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
                         yield chunk.delta.text
                     elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
-                        tool_use_blocks.append(chunk.content_block)
+                        tool_calls.append((
+                            chunk.content_block.id,
+                            chunk.content_block.name,
+                            chunk.content_block.input,
+                        ))
                         yield {
                             "type": "tools_usage",
                             "tool_name": chunk.content_block.name,
@@ -191,22 +195,7 @@ class ClaudeChat(ChatBase):
                     elif message.type == 'tool_use':
                         self._commit_tool_request(message.id, message.name, message.input)
 
-            for tool_use_block in tool_use_blocks:
-                content_chunks = []
-                for chunk in self._run_tool(tool_use_block.name, tool_use_block.input):
-                    if isinstance(chunk, str):
-                        content_chunks.append(chunk)
-                        yield chunk
-                    elif chunk is not None:
-                        yield {
-                            "type": "tools_event",
-                            "tool_name": tool_use_block.name,
-                            "tool_data": chunk,
-                        }
-
-                self._commit_tool_response(tool_use_block.id,
-                                           tool_use_block.name,
-                                           "".join(content_chunks))
+            yield from self._process_tools(tool_calls)
 
     @staticmethod
     def do_image(filename):

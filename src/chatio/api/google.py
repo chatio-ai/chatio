@@ -139,9 +139,9 @@ class GoogleChat(ChatBase):
     def __call__(self, request):
         self._commit_user_message(request)
 
-        tool_use_blocks = [request]
-        while tool_use_blocks:
-            tool_use_blocks = []
+        tool_calls = [request]
+        while tool_calls:
+            tool_calls = []
 
             stream = self._client.models.generate_content_stream(
                 model=self._model,
@@ -170,7 +170,11 @@ class GoogleChat(ChatBase):
                                 final_text += part.text
                                 yield part.text
                             if part.function_call:
-                                tool_use_blocks.append(part.function_call)
+                                tool_calls.append((
+                                    part.function_call.id,
+                                    part.function_call.name,
+                                    part.function_call.args,
+                                ))
                                 self._commit_tool_request(part.function_call.id,
                                                           part.function_call.name,
                                                           part.function_call.args)
@@ -188,22 +192,7 @@ class GoogleChat(ChatBase):
                 if final_text:
                     self._commit_model_message(final_text)
 
-            for tool_use_block in tool_use_blocks:
-                content_chunks = []
-                for chunk in self._run_tool(tool_use_block.name, tool_use_block.args):
-                    if isinstance(chunk, str):
-                        content_chunks.append(chunk)
-                        yield chunk
-                    elif chunk is not None:
-                        yield {
-                            "type": "tools_event",
-                            "tool_name": tool_use_block.name,
-                            "tool_data": chunk,
-                        }
-
-                self._commit_tool_response(tool_use_block.id,
-                                           tool_use_block.name,
-                                           "".join(content_chunks))
+            yield from self._process_tools(tool_calls)
 
     @staticmethod
     def do_image(filename):

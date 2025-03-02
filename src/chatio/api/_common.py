@@ -93,7 +93,25 @@ class ChatBase:
 
     # tools
 
-    def _run_tool(self, tool_name, tool_args):
+    def _process_tool(self, tool_name, tool_args):
         func = self._funcs.get(tool_name)
         if func is not None:
             yield from func(**tool_args)
+
+    def _process_tools(self, tool_calls):
+        for tool_call in tool_calls:
+            tool_call_id, tool_name, tool_input = tool_call
+
+            content_chunks = []
+            for chunk in self._process_tool(tool_name, tool_input):
+                if isinstance(chunk, str):
+                    content_chunks.append(chunk)
+                    yield chunk
+                elif chunk is not None:
+                    yield {
+                        "type": "tools_event",
+                        "tool_name": tool_name,
+                        "tool_data": chunk,
+                    }
+
+            self._commit_tool_response(tool_call_id, tool_name, "".join(content_chunks))

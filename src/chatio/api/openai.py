@@ -158,9 +158,9 @@ class OpenAIChat(ChatBase):
     def __call__(self, request):
         self._commit_user_message(request)
 
-        tool_use_blocks = [request]
-        while tool_use_blocks:
-            tool_use_blocks = []
+        tool_calls = [request]
+        while tool_calls:
+            tool_calls = []
 
             if self._tools:
                 stream = self._client.beta.chat.completions.stream(
@@ -193,7 +193,11 @@ class OpenAIChat(ChatBase):
 
                 calls = final.tool_calls or ()
                 for call in calls:
-                    tool_use_blocks.append(call)
+                    tool_calls.append((
+                        call.id,
+                        call.function.name,
+                        call.function.parsed_arguments,
+                    ))
                     self._commit_tool_request(call.id,
                                               call.function.name,
                                               call.function.arguments)
@@ -207,23 +211,7 @@ class OpenAIChat(ChatBase):
                 if usage:
                     yield from self._process_stats(usage)
 
-            for tool_use_block in tool_use_blocks:
-                content_chunks = []
-                for chunk in self._run_tool(tool_use_block.function.name,
-                                            tool_use_block.function.parsed_arguments):
-                    if isinstance(chunk, str):
-                        content_chunks.append(chunk)
-                        yield chunk
-                    elif chunk is not None:
-                        yield {
-                            "type": "tools_event",
-                            "tool_name": tool_use_block.function.name,
-                            "tool_data": chunk,
-                        }
-
-                self._commit_tool_response(tool_use_block.id,
-                                           tool_use_block.function.name,
-                                           "".join(content_chunks))
+            yield from self._process_tools(tool_calls)
 
     @staticmethod
     def do_image(filename):
