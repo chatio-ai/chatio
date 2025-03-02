@@ -209,7 +209,8 @@ class OpenAIChat(ChatBase):
 
             for tool_use_block in tool_use_blocks:
                 content_chunks = []
-                for chunk in self._run_tool(tool_use_block):
+                for chunk in self._run_tool(tool_use_block.function.name,
+                                            tool_use_block.function.parsed_arguments):
                     if isinstance(chunk, str):
                         content_chunks.append(chunk)
                         yield chunk
@@ -223,11 +224,6 @@ class OpenAIChat(ChatBase):
                 self._commit_tool_response(tool_use_block.id,
                                            tool_use_block.function.name,
                                            "".join(content_chunks))
-
-    def _run_tool(self, content_block):
-        func = self._funcs.get(content_block.function.name)
-        if func is not None:
-            yield from func(**content_block.function.parsed_arguments)
 
     @staticmethod
     def do_image(filename):

@@ -90,3 +90,10 @@ class ChatBase:
 
     def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
         self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
+
+    # tools
+
+    def _run_tool(self, tool_name, tool_args):
+        func = self._funcs.get(tool_name)
+        if func is not None:
+            yield from func(**tool_args)

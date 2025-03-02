@@ -193,7 +193,7 @@ class ClaudeChat(ChatBase):
 
             for tool_use_block in tool_use_blocks:
                 content_chunks = []
-                for chunk in self._run_tool(tool_use_block):
+                for chunk in self._run_tool(tool_use_block.name, tool_use_block.input):
                     if isinstance(chunk, str):
                         content_chunks.append(chunk)
                         yield chunk
@@ -207,11 +207,6 @@ class ClaudeChat(ChatBase):
                 self._commit_tool_response(tool_use_block.id,
                                            tool_use_block.name,
                                            "".join(content_chunks))
-
-    def _run_tool(self, content_block):
-        func = self._funcs.get(content_block.name)
-        if func is not None:
-            yield from func(**content_block.input)
 
     @staticmethod
     def do_image(filename):

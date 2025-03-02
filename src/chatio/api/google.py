@@ -190,7 +190,7 @@ class GoogleChat(ChatBase):
 
             for tool_use_block in tool_use_blocks:
                 content_chunks = []
-                for chunk in self._run_tool(tool_use_block):
+                for chunk in self._run_tool(tool_use_block.name, tool_use_block.args):
                     if isinstance(chunk, str):
                         content_chunks.append(chunk)
                         yield chunk
@@ -204,11 +204,6 @@ class GoogleChat(ChatBase):
                 self._commit_tool_response(tool_use_block.id,
                                            tool_use_block.name,
                                            "".join(content_chunks))
-
-    def _run_tool(self, function_call):
-        func = self._funcs.get(function_call.name)
-        if func is not None:
-            yield from func(**function_call.args)
 
     @staticmethod
     def do_image(filename):
