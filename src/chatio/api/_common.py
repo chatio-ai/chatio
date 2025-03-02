@@ -128,18 +128,62 @@ class ChatBase:
 
     def _process_tools(self, tool_calls):
         for tool_call in tool_calls:
-            tool_call_id, tool_name, tool_input = tool_call
-
             content_chunks = []
-            for chunk in self._process_tool(tool_name, tool_input):
+            for chunk in self._process_tool(tool_call["name"], tool_call["args"]):
                 if isinstance(chunk, str):
                     content_chunks.append(chunk)
                     yield chunk
                 elif chunk is not None:
                     yield {
                         "type": "tools_event",
-                        "tool_name": tool_name,
+                        "tool_name": tool_call["name"],
                         "tool_data": chunk,
                     }
 
-            self._commit_tool_response(tool_call_id, tool_name, "".join(content_chunks))
+            self._commit_tool_response(tool_call["id"], tool_call["name"], "".join(content_chunks))
+
+    # stream
+
+    def _chat__iter__(self, tools, messages):
+        raise NotImplementedError()
+
+    def __call__(self, request):
+        self._commit_user_message(request)
+
+        tool_calls = [request]
+        while tool_calls:
+            tool_calls = []
+
+            #from pprint import pprint
+            #pprint(self._messages)
+
+            for event in self._chat__iter__(self._tools, self._messages):
+                etype = event.get("type")
+
+                if etype == 'text':
+                    yield event["text"]
+
+                elif etype == 'done':
+                    text = event["text"] or ""
+                    if not text.endswith("\n"):
+                        yield "\n"
+
+                    if text:
+                        self._commit_model_message(text)
+
+                elif etype == 'call':
+                    tool_call = event["call"]
+                    tool_calls.append(tool_call)
+
+                    self._commit_tool_request(tool_call["id"], tool_call["name"], tool_call["input"])
+                    yield {
+                        "type": "tools_usage",
+                        "tool_name": tool_call["name"],
+                        "tool_args": tool_call["args"],
+                    }
+
+                elif etype == 'stat':
+                    yield from self._process_stats(event["stat"])
+
+            yield from self._process_tools(tool_calls)
+

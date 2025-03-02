@@ -34,13 +34,13 @@ class ClaudeChat(ChatBase):
         if self._cache and param:
             param[-1].update({"cache_control": {"type": "ephemeral"}})
 
-    def _setup_messages_cache(self):
-        for message in self._messages:
+    def _setup_messages_cache(self, messages):
+        for message in messages:
             for content in message.get("content"):
                 content.pop("cache_control", None)
 
-        if self._messages:
-            self._setup_cache(self._messages[-1].get("content"))
+        if messages:
+            self._setup_cache(messages[-1].get("content"))
 
     # tools
 
@@ -161,52 +161,46 @@ class ClaudeChat(ChatBase):
             "content": tool_output,
         })
 
-    def __call__(self, request):
-        self._commit_user_message(request)
+    def _chat__iter__(self, tools, messages):
+        self._setup_messages_cache(messages)
 
-        tool_calls = [request]
-        while tool_calls:
-            tool_calls = []
+        stream = self._client.messages.stream(
+            model=self._model,
+            max_tokens=4096,
+            system=self._system,
+            messages=messages,
+            tools=tools)
 
-            self._setup_messages_cache()
+        with stream as stream:
+            for chunk in stream:
+                log.info("%s", chunk.to_dict())
+                if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
+                    yield {
+                        "type": "text",
+                        "text": chunk.delta.text,
+                    }
 
-            with self._client.messages.stream(
-                model=self._model,
-                max_tokens=4096,
-                system=self._system,
-                messages=self._messages,
-                tools=self._tools) as stream:
+            yield {
+                "type": "done",
+                "text": stream.get_final_text(),
+            }
 
-                for chunk in stream:
-                    log.info("%s", chunk.to_dict())
-                    if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
-                        yield chunk.delta.text
-                    elif chunk.type == 'content_block_stop' and chunk.content_block.type == 'tool_use':
-                        tool_calls.append((
-                            chunk.content_block.id,
-                            chunk.content_block.name,
-                            chunk.content_block.input,
-                        ))
-                        yield {
-                            "type": "tools_usage",
-                            "tool_name": chunk.content_block.name,
-                            "tool_args": chunk.content_block.input,
+            for message in stream.get_final_message().content:
+                if message.type == 'tool_use':
+                    yield {
+                        "type": "call",
+                        "call": {
+                            "id": message.id,
+                            "name": message.name,
+                            "args": message.input,
+                            "input": message.input,
                         }
-                    elif chunk.type == 'message_stop':
-                        yield from self._process_stats(chunk.message.usage)
+                    }
 
-                response = stream.get_final_text()
-                if response:
-                    if not response.endswith("\n"):
-                        yield "\n"
-
-                for message in stream.get_final_message().content:
-                    if message.type == 'text':
-                        self._commit_model_message(message.text)
-                    elif message.type == 'tool_use':
-                        self._commit_tool_request(message.id, message.name, message.input)
-
-            yield from self._process_tools(tool_calls)
+            yield {
+                "type": "stat",
+                "stat": stream.get_final_message().usage,
+            }
 
     @staticmethod
     def do_image(filename):

@@ -146,63 +146,47 @@ class OpenAIChat(ChatBase):
             "content": tool_output,
         }
 
-    def __call__(self, request):
-        self._commit_user_message(request)
+    def _chat__iter__(self, tools, messages):
 
-        tool_calls = [request]
-        while tool_calls:
-            tool_calls = []
+        stream = self._client.beta.chat.completions.stream(
+            model=self._model,
+            max_tokens=4096,
+            stream_options={'include_usage': True},
+            messages=messages,
+            tools=tools)
 
-            if self._tools:
-                stream = self._client.beta.chat.completions.stream(
-                    model=self._model,
-                    max_tokens=4096,
-                    stream_options={'include_usage': True},
-                    messages=self._messages,
-                    tools=self._tools)
-            else:
-                stream = self._client.beta.chat.completions.stream(
-                    model=self._model,
-                    max_tokens=4096,
-                    stream_options={'include_usage': True},
-                    messages=self._messages)
+        with stream as stream:
 
-            with stream as stream:
-
-                for chunk in stream:
-                    log.info("%s", chunk.to_dict())
-                    if chunk.type == 'content.delta':
-                        yield chunk.delta
-
-                final = stream.get_final_completion().choices[0].message
-
-                response = final.content
-                if response:
-                    if not response.endswith("\n"):
-                        yield "\n"
-                    self._commit_model_message(response)
-
-                calls = final.tool_calls or ()
-                for call in calls:
-                    tool_calls.append((
-                        call.id,
-                        call.function.name,
-                        call.function.parsed_arguments,
-                    ))
-                    self._commit_tool_request(call.id,
-                                              call.function.name,
-                                              call.function.arguments)
+            for chunk in stream:
+                log.info("%s", chunk.to_dict())
+                if chunk.type == 'content.delta':
                     yield {
-                        "type": "tools_usage",
-                        "tool_name": call.function.name,
-                        "tool_args": call.function.parsed_arguments,
+                        "type": "text",
+                        "text": chunk.delta,
                     }
 
-                usage = stream.get_final_completion().usage
-                if usage:
-                    yield from self._process_stats(usage)
+            final = stream.get_final_completion().choices[0].message
 
-            yield from self._process_tools(tool_calls)
+            yield {
+                "type": "done",
+                "text": final.content,
+            }
+
+            for call in final.tool_calls or ():
+                yield {
+                    "type": "call",
+                    "call": {
+                        "id": call.id,
+                        "name": call.function.name,
+                        "args": call.function.parsed_arguments,
+                        "input": call.function.arguments,
+                    }
+                }
+
+            yield {
+                "type": "stat",
+                "stat": stream.get_final_completion().usage
+            }
 
     @staticmethod
     def do_image(filename):

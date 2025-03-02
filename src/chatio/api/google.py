@@ -126,63 +126,64 @@ class GoogleChat(ChatBase):
             }],
         }
 
-    def __call__(self, request):
-        self._commit_user_message(request)
+    def _chat__iter__(self, tools, messages):
+        stream = self._client.models.generate_content_stream(
+            model=self._model,
+            contents=messages,
+            config={
+                'system_instruction': self._system,
+                'max_output_tokens': 4096,
+                'tools': [{
+                    "function_declarations": tools,
+                }] if tools else None,
+            })
 
-        tool_calls = [request]
-        while tool_calls:
-            tool_calls = []
+        if stream:
 
-            stream = self._client.models.generate_content_stream(
-                model=self._model,
-                contents=self._messages,
-                config={
-                    'system_instruction': self._system,
-                    'max_output_tokens': 4096,
-                    'tools': [{
-                        "function_declarations": self._tools,
-                    }] if self._tools else None,
-                })
+            usage = None
+            calls = []
+            final_text = ""
 
-            if stream:
+            for chunk in stream:
+                log.info("%s", chunk.to_json_dict())
 
-                usage = None
+                if chunk.candidates \
+                        and chunk.candidates[0].content \
+                        and chunk.candidates[0].content.parts:
 
-                final_text = ""
-                for chunk in stream:
-                    log.info("%s", chunk.to_json_dict())
-                    if chunk.candidates \
-                            and chunk.candidates[0].content \
-                            and chunk.candidates[0].content.parts:
+                    for part in chunk.candidates[0].content.parts:
+                        if part.text:
+                            final_text += part.text
+                            yield {
+                                "type": "text",
+                                "text": part.text,
+                            }
 
-                        for part in chunk.candidates[0].content.parts:
-                            if part.text:
-                                final_text += part.text
-                                yield part.text
-                            if part.function_call:
-                                tool_calls.append((
-                                    part.function_call.id,
-                                    part.function_call.name,
-                                    part.function_call.args,
-                                ))
-                                self._commit_tool_request(part.function_call.id,
-                                                          part.function_call.name,
-                                                          part.function_call.args)
-                                yield {
-                                    "type": "tools_usage",
-                                    "tool_name": part.function_call.name,
-                                    "tool_args": part.function_call.args,
-                                }
+                        if part.function_call:
+                            calls.append(part.function_call)
 
                     usage = chunk.usage_metadata
 
-                if usage:
-                    yield from self._process_stats(usage)
+            yield {
+                "type": "done",
+                "text": final_text,
+            }
 
-                if final_text:
-                    self._commit_model_message(final_text)
+            for call in calls:
+                yield {
+                    "type": "call",
+                    "call": {
+                        "id": call.id,
+                        "name": call.name,
+                        "args": call.args,
+                        "input": call.args,
+                    }
+                }
 
-            yield from self._process_tools(tool_calls)
+            yield {
+                "type": "stat",
+                "stat": usage,
+            }
 
     @staticmethod
     def do_image(filename):
