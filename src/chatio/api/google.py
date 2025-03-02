@@ -97,24 +97,70 @@ class GoogleChat(ChatBase):
             "cache_read": self._stats.cached_content_token_count,
         }
 
+    def _format_user_message(self, content):
+        return {
+            "role": "user",
+            "parts": self._as_contents(content)
+        }
+
+    def _commit_user_message(self, content):
+        self._messages.append(self._format_user_message(content))
+
+    def _format_model_message(self, content):
+        return {
+            "role": "model",
+            "parts": self._as_contents(content)
+        }
+    def _commit_model_message(self, content):
+        self._messages.append(self._format_model_message(content))
+
+    def _format_tool_request(self, tool_call_id, tool_name, tool_input):
+        return {
+            "role": "model",
+            "parts": [{
+                "function_call": {
+                    "id": tool_call_id,
+                    "name": tool_name,
+                    "args": tool_input,
+                },
+            }],
+        }
+
+    def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
+        self._messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
+
+    def _format_tool_response(self, tool_call_id, tool_name, tool_output):
+        return {
+            "role": "user",
+            "parts": [{
+                "function_response": {
+                    "id": tool_call_id,
+                    "name": tool_name,
+                    "response": {
+                        "output": tool_output,
+                    },
+                },
+            }],
+        }
+
+    def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
+        self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
+
     def _as_contents(self, content):
         if isinstance(content, str):
             return [{"text": content}]
-        else:
+        elif isinstance(content, dict):
+            return [content]
+        elif isinstance(content, list):
             return content
 
-    def _usr_message(self, content):
-        return {"role": "user", "parts": self._as_contents(content)}
-
-    def _bot_message(self, content):
-        return {"role": "model", "parts": self._as_contents(content)}
+        raise RuntimeError()
 
     def __call__(self, request):
-        self._messages.append(self._usr_message(request))
+        self._commit_user_message(request)
 
-        done = False
-        while not done:
-
+        tool_use_blocks = [request]
+        while tool_use_blocks:
             tool_use_blocks = []
 
             stream = self._client.models.generate_content_stream(
@@ -131,8 +177,8 @@ class GoogleChat(ChatBase):
             if stream:
 
                 usage = None
-                parts = []
 
+                final_text = ""
                 for chunk in stream:
                     log.info("%s", chunk.to_json_dict())
                     if chunk.candidates \
@@ -141,31 +187,26 @@ class GoogleChat(ChatBase):
 
                         for part in chunk.candidates[0].content.parts:
                             if part.text:
+                                final_text += part.text
                                 yield part.text
-                            elif part.function_call:
+                            if part.function_call:
                                 tool_use_blocks.append(part.function_call)
+                                self._commit_tool_request(part.function_call.id,
+                                                          part.function_call.name,
+                                                          part.function_call.args)
                                 yield {
                                     "type": "tools_usage",
                                     "tool_name": part.function_call.name,
                                     "tool_args": part.function_call.args,
                                 }
-                            else:
-                                continue
-
-                            parts.append(part.to_json_dict())
 
                     usage = chunk.usage_metadata
 
                 if usage:
                     yield from self._process_stats(usage)
 
-                if parts:
-                    self._messages.append(self._bot_message(parts))
-
-            yield "\n"
-
-            if not tool_use_blocks:
-                done = True
+                if final_text:
+                    self._commit_model_message(final_text)
 
             for tool_use_block in tool_use_blocks:
                 content_chunks = []
@@ -180,18 +221,9 @@ class GoogleChat(ChatBase):
                             "tool_data": chunk,
                         }
 
-                self._messages.append({
-                    "role": "user",
-                    "parts": [{
-                        "function_response": {
-                            "id": tool_use_block.id,
-                            "name": tool_use_block.name,
-                            "response": {
-                                "output": "".join(content_chunks),
-                            },
-                        },
-                    }],
-                })
+                self._commit_tool_response(tool_use_block.id,
+                                           tool_use_block.name,
+                                           "".join(content_chunks))
 
     def _run_tool(self, function_call):
         func = self._funcs.get(function_call.name)
