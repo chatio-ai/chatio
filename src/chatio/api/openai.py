@@ -7,6 +7,8 @@ from openai import OpenAI
 
 from ._common import ChatBase
 
+from ._events import *
+
 
 log = logging.getLogger(__name__)
 
@@ -122,42 +124,23 @@ class OpenAIChat(ChatBase):
             tools=tools)
 
         with stream as stream:
-
             for chunk in stream:
                 log.info("%s", chunk.to_dict())
+
                 if chunk.type == 'content.delta':
-                    yield {
-                        "type": "text",
-                        "text": chunk.delta,
-                    }
+                    yield TextEvent(chunk.delta)
 
             final = stream.get_final_completion().choices[0].message
-            yield {
-                "type": "done",
-                "text": final.content,
-            }
+            yield DoneEvent(final.content)
 
             for call in final.tool_calls or ():
-                yield {
-                    "type": "call",
-                    "call": {
-                        "id": call.id,
-                        "name": call.function.name,
-                        "args": call.function.parsed_arguments,
-                        "input": call.function.arguments,
-                    }
-                }
+                yield CallEvent(call.id, call.function.name,
+                                call.function.parsed_arguments, call.function.arguments)
 
             usage = stream.get_final_completion().usage
-            yield {
-                "type": "stat",
-                "stat": {
-                    "input_tokens": usage.prompt_tokens,
-                    "output_tokens": usage.completion_tokens,
-                    "cache_written": 0,
-                    "cache_read": usage.prompt_tokens_details.cached_tokens,
-                },
-            }
+            yield StatEvent(
+                    usage.prompt_tokens, usage.completion_tokens,
+                    0, usage.prompt_tokens_details.cached_tokens)
 
     @staticmethod
     def do_image(filename):

@@ -8,6 +8,8 @@ from google.genai import Client
 from ._common import ChatBase
 from ._common import ChatConfig
 
+from ._events import *
+
 
 log = logging.getLogger(__name__)
 
@@ -120,41 +122,21 @@ class GoogleChat(ChatBase):
                     for part in chunk.candidates[0].content.parts:
                         if part.text:
                             final_text += part.text
-                            yield {
-                                "type": "text",
-                                "text": part.text,
-                            }
+                            yield TextEvent(part.text)
 
                         if part.function_call:
                             calls.append(part.function_call)
 
                     usage = chunk.usage_metadata
 
-            yield {
-                "type": "done",
-                "text": final_text,
-            }
+            yield DoneEvent(final_text)
 
             for call in calls:
-                yield {
-                    "type": "call",
-                    "call": {
-                        "id": call.id,
-                        "name": call.name,
-                        "args": call.args,
-                        "input": call.args,
-                    }
-                }
+                yield CallEvent(call.id, call.name, call.args, call.args)
 
-            yield {
-                "type": "stat",
-                "stat": {
-                    "input_tokens": usage.prompt_token_count,
-                    "output_tokens": usage.candidates_token_count,
-                    "cache_written": 0,
-                    "cache_read": usage.cached_content_token_count or 0,
-                }
-            }
+            yield StatEvent(
+                    usage.prompt_token_count, usage.candidates_token_count,
+                    0, usage.cached_content_token_count or 0)
 
     @staticmethod
     def do_image(filename):

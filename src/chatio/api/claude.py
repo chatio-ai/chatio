@@ -7,6 +7,8 @@ from anthropic import Anthropic
 
 from ._common import ChatBase
 
+from ._events import *
+
 
 log = logging.getLogger(__name__)
 
@@ -138,39 +140,20 @@ class ClaudeChat(ChatBase):
         with stream as stream:
             for chunk in stream:
                 log.info("%s", chunk.to_dict())
-                if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
-                    yield {
-                        "type": "text",
-                        "text": chunk.delta.text,
-                    }
 
-            yield {
-                "type": "done",
-                "text": stream.get_final_text(),
-            }
+                if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
+                    yield TextEvent(chunk.delta.text)
+
+            yield DoneEvent(stream.get_final_text())
 
             for message in stream.get_final_message().content:
                 if message.type == 'tool_use':
-                    yield {
-                        "type": "call",
-                        "call": {
-                            "id": message.id,
-                            "name": message.name,
-                            "args": message.input,
-                            "input": message.input,
-                        }
-                    }
+                    yield CallEvent(message.id, message.name, message.input, message.input)
 
             usage = stream.get_final_message().usage
-            yield {
-                "type": "stat",
-                "stat": {
-                    "input_tokens": usage.input_tokens,
-                    "output_tokens": usage.output_tokens,
-                    "cache_written": usage.cache_creation_input_tokens,
-                    "cache_read": usage.cache_read_input_tokens,
-                }
-            }
+            yield StatEvent(
+                    usage.input_tokens, usage.output_tokens,
+                    usage.cache_creation_input_tokens, usage.cache_read_input_tokens)
 
     @staticmethod
     def do_image(filename):

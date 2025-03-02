@@ -1,6 +1,11 @@
 
 import json
 
+from dataclasses import dataclass
+
+
+from ._events import *
+
 
 class ChatConfig:
 
@@ -26,6 +31,14 @@ class ChatConfig:
             return {}
 
 
+@dataclass
+class ChatStat:
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cache_written: int = 0
+    cache_read: int = 0
+
+
 class ChatBase:
 
     def __init__(self,
@@ -39,12 +52,7 @@ class ChatBase:
 
         self._setup_tools(tools, tool_choice, tool_choice_name)
 
-        self._stats = {
-            "input_tokens": 0,
-            "output_tokens": 0,
-            "cache_written": 0,
-            "cache_read": 0,
-        }
+        self._stats = ChatStat()
 
     def _setup_context(self, config: ChatConfig, **kwargs):
         raise NotImplementedError()
@@ -136,18 +144,18 @@ class ChatBase:
     def _process_tools(self, tool_calls):
         for tool_call in tool_calls:
             content_chunks = []
-            for chunk in self._process_tool(tool_call["name"], tool_call["args"]):
+            for chunk in self._process_tool(tool_call.name, tool_call.args):
                 if isinstance(chunk, str):
                     content_chunks.append(chunk)
                     yield chunk
                 elif chunk is not None:
                     yield {
                         "type": "tools_event",
-                        "tool_name": tool_call["name"],
+                        "tool_name": tool_call.name,
                         "tool_data": chunk,
                     }
 
-            self._commit_tool_response(tool_call["id"], tool_call["name"], "".join(content_chunks))
+            self._commit_tool_response(tool_call.call_id, tool_call.name, "".join(content_chunks))
 
     # stats
 
@@ -155,24 +163,24 @@ class ChatBase:
         yield {
             "type": "token_stats",
             "scope": "round",
-            "input_tokens": usage["input_tokens"],
-            "output_tokens": usage["output_tokens"],
-            "cache_written": usage["cache_written"],
-            "cache_read": usage["cache_read"],
+            "input_tokens": usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+            "cache_written": usage.cache_written,
+            "cache_read": usage.cache_read,
         }
 
-        self._stats["input_tokens"] += usage["input_tokens"]
-        self._stats["output_tokens"] += usage["output_tokens"]
-        self._stats["cache_written"] += usage["cache_written"]
-        self._stats["cache_read"] += usage["cache_read"]
+        self._stats.input_tokens += usage.input_tokens
+        self._stats.output_tokens += usage.output_tokens
+        self._stats.cache_written += usage.cache_written
+        self._stats.cache_read += usage.cache_read
 
         yield {
             "type": "token_stats",
             "scope": "total",
-            "input_tokens": self._stats["input_tokens"],
-            "output_tokens": self._stats["output_tokens"],
-            "cache_written": self._stats["cache_written"],
-            "cache_read": self._stats["cache_read"],
+            "input_tokens": self._stats.input_tokens,
+            "output_tokens": self._stats.output_tokens,
+            "cache_written": self._stats.cache_written,
+            "cache_read": self._stats.cache_read,
         }
 
     # stream
@@ -191,32 +199,25 @@ class ChatBase:
             #pprint(self._messages)
 
             for event in self._chat__iter__(self._tools, self._messages):
-                etype = event.get("type")
+                match event:
+                    case TextEvent(text):
+                        yield text
+                    case DoneEvent(text):
+                        text = text or ""
+                        if not text.endswith("\n"):
+                            yield "\n"
 
-                if etype == 'text':
-                    yield event["text"]
-
-                elif etype == 'done':
-                    text = event["text"] or ""
-                    if not text.endswith("\n"):
-                        yield "\n"
-
-                    if text:
-                        self._commit_model_message(text)
-
-                elif etype == 'call':
-                    tool_call = event["call"]
-                    tool_calls.append(tool_call)
-
-                    self._commit_tool_request(tool_call["id"], tool_call["name"], tool_call["input"])
-                    yield {
-                        "type": "tools_usage",
-                        "tool_name": tool_call["name"],
-                        "tool_args": tool_call["args"],
-                    }
-
-                elif etype == 'stat':
-                    yield from self._process_stats(event["stat"])
+                        if text:
+                            self._commit_model_message(text)
+                    case CallEvent(call_id, name, args, input):
+                        tool_calls.append(event)
+                        self._commit_tool_request(call_id, name, input)
+                        yield {
+                            "type": "tools_usage",
+                            "tool_name": name,
+                            "tool_args": args,
+                        }
+                    case StatEvent():
+                        yield from self._process_stats(event)
 
             yield from self._process_tools(tool_calls)
-
