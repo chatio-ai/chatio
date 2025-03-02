@@ -42,13 +42,30 @@ class ChatBase:
     def _setup_context(self, config: ChatConfig, **kwargs):
         raise NotImplementedError()
 
-    def _setup_messages(self, system, messages):
-        raise NotImplementedError()
-
     def _setup_tools(self, tools, tool_choice, tool_choice_name):
         raise NotImplementedError()
 
     # messages
+
+    def _setup_messages(self, system, messages):
+        self._messages = []
+
+        self._commit_dev_message(system)
+
+        if messages is None:
+            messages = []
+
+        for index, message in enumerate(messages):
+            if not index % 2:
+                self._commit_user_message(message)
+            else:
+                self._commit_model_message(message)
+
+    def _format_dev_message(self, content):
+        raise NotImplementedError()
+
+    def _commit_dev_message(self, content):
+        self._messages.append(self._format_dev_message(content))
 
     def _format_user_message(self, content):
         raise NotImplementedError()

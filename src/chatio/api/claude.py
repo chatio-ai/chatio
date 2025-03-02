@@ -42,23 +42,6 @@ class ClaudeChat(ChatBase):
         if self._messages:
             self._setup_cache(self._messages[-1].get("content"))
 
-    def _setup_messages(self, system, messages):
-        if not system:
-            self._system = ""
-        else:
-            self._system = self._as_contents(system)
-            self._setup_cache(self._system)
-
-        if messages is None:
-            messages = []
-
-        self._messages = []
-        for index, message in enumerate(messages):
-            self._messages.append(
-                    self._usr_message(message)
-                    if not index % 2 else
-                    self._bot_message(message))
-
     def _setup_tools(self, tools, tool_choice, tool_choice_name):
         self._tools = []
         self._funcs = {}
@@ -132,6 +115,13 @@ class ClaudeChat(ChatBase):
             return content
 
         raise RuntimeError()
+
+    def _commit_dev_message(self, content):
+        if not content:
+            self._system = ""
+        else:
+            self._system = self._as_contents(content)
+            self._setup_cache(self._system)
 
     def _format_user_message(self, content):
         return {

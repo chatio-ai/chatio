@@ -28,21 +28,6 @@ class OpenAIChat(ChatBase):
 
         self._stats = OpenAIStat()
 
-    def _setup_messages(self, system, messages):
-        self._messages = []
-
-        if system:
-            self._messages.append({"role": "developer", "content": self._as_contents(system)})
-
-        if messages is None:
-            messages = []
-
-        for index, message in enumerate(messages):
-            self._messages.append(
-                    self._usr_message(message)
-                    if not index % 2 else
-                    self._bot_message(message))
-
     def _tool_schema(self, schema):
         result = schema.copy()
 
@@ -131,6 +116,12 @@ class OpenAIChat(ChatBase):
             return content
 
         raise RuntimeError()
+
+    def _format_dev_message(self, content):
+        return {
+            "role": "developer",
+            "content": self._as_contents(content)
+        }
 
     def _format_user_message(self, content):
         return {

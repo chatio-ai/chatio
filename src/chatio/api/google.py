@@ -29,22 +29,6 @@ class GoogleChat(ChatBase):
 
         self._stats = GoogleStat()
 
-    def _setup_messages(self, system, messages):
-        if not system:
-            self._system = None
-        else:
-            self._system = {"parts": self._as_contents(system)}
-
-        if messages is None:
-            messages = []
-
-        self._messages = []
-        for index, message in enumerate(messages):
-            self._messages.append(
-                    self._usr_message(message)
-                    if not index % 2 else
-                    self._bot_message(message))
-
     def _setup_tools(self, tools, tool_choice, tool_choice_name):
         self._tools = []
         self._funcs = {}
@@ -108,6 +92,12 @@ class GoogleChat(ChatBase):
             return content
 
         raise RuntimeError()
+
+    def _commit_dev_message(self, content):
+        if not content:
+            self._system = None
+        else:
+            self._system = {"parts": self._as_contents(content)}
 
     def _format_user_message(self, content):
         return {
