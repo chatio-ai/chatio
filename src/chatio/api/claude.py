@@ -121,13 +121,63 @@ class ClaudeChat(ChatBase):
             "cache_read": self._stats.cache_read_input_tokens,
         }
 
+    def _as_contents(self, content):
+        if isinstance(content, str):
+            return [{"type": "text", "text": content}]
+        elif isinstance(content, dict):
+            return [content]
+        elif isinstance(content, list):
+            return content
+
+        raise RuntimeError()
+
+    def _format_user_message(self, content):
+        return {
+            "role": "user",
+            "content": self._as_contents(content)
+        }
+
+    def _commit_user_message(self, content):
+        self._messages.append(self._format_user_message(content))
+
+    def _format_model_message(self, content):
+        return {
+            "role": "assistant",
+            "content": self._as_contents(content)
+        }
+
+    def _commit_model_message(self, content):
+        self._messages.append(self._format_model_message(content))
+
+    def _format_tool_request(self, tool_call_id, tool_name, tool_input):
+        return self._format_model_message({
+            "type": "tool_use",
+            "id": tool_call_id,
+            "name": tool_name,
+            "input": tool_input,
+        })
+
+    def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
+        self._messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
+
+    def _format_tool_response(self, tool_call_id, tool_name, tool_output):
+        return self._format_user_message({
+            "type": "tool_result",
+            "tool_use_id": tool_call_id,
+            "content": tool_output,
+        })
+
+    def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
+        self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
+
     def __call__(self, request):
-        while request:
-            self._messages.append(self._usr_message(request))
+        self._commit_user_message(request)
+
+        tool_use_blocks = [request]
+        while tool_use_blocks:
+            tool_use_blocks = []
 
             self._setup_messages_cache()
-
-            tool_use_blocks = []
 
             with self._client.messages.stream(
                 model=self._model,
@@ -150,14 +200,17 @@ class ClaudeChat(ChatBase):
                     elif chunk.type == 'message_stop':
                         yield from self._process_stats(chunk.message.usage)
 
-                response = [_.to_dict() for _ in stream.get_final_message().content]
-
+                response = stream.get_final_text()
                 if response:
-                    self._messages.append(self._bot_message(response))
+                    if not response.endswith("\n"):
+                        yield "\n"
 
-            yield "\n"
+                for message in stream.get_final_message().content:
+                    if message.type == 'text':
+                        self._commit_model_message(message.text)
+                    elif message.type == 'tool_use':
+                        self._commit_tool_request(message.id, message.name, message.input)
 
-            request = []
             for tool_use_block in tool_use_blocks:
                 content_chunks = []
                 for chunk in self._run_tool(tool_use_block):
@@ -171,11 +224,9 @@ class ClaudeChat(ChatBase):
                             "tool_data": chunk,
                         }
 
-                request.append({
-                    "type": "tool_result",
-                    "tool_use_id": tool_use_block.id,
-                    "content": "".join(content_chunks),
-                })
+                self._commit_tool_response(tool_use_block.id,
+                                           tool_use_block.name,
+                                           "".join(content_chunks))
 
     def _run_tool(self, content_block):
         func = self._funcs.get(content_block.name)
