@@ -48,17 +48,28 @@ class ChatBase:
     def _setup_tools(self, tools, tool_choice, tool_choice_name):
         raise NotImplementedError()
 
-    def _as_contents(self, content):
-        if isinstance(content, str):
-            return [{"type": "text", "text": content}]
-        else:
-            return content
+    # messages
 
-    def _usr_message(self, content):
-        return {"role": "user", "content": self._as_contents(content)}
+    def _format_user_message(self, content):
+        raise NotImplementedError()
 
-    def _bot_message(self, content):
-        return {"role": "assistant", "content": self._as_contents(content)}
+    def _commit_user_message(self, content):
+        self._messages.append(self._format_user_message(content))
 
+    def _format_model_message(self, content):
+        raise NotImplementedError()
 
+    def _commit_model_message(self, content):
+        self._messages.append(self._format_model_message(content))
 
+    def _format_tool_request(self, tool_call_id, tool_name, tool_input):
+        raise NotImplementedError()
+
+    def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
+        self._messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
+
+    def _format_tool_response(self, tool_call_id, tool_name, tool_output):
+        raise NotImplementedError()
+
+    def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
+        self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))

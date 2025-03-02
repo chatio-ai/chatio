@@ -97,23 +97,29 @@ class GoogleChat(ChatBase):
             "cache_read": self._stats.cached_content_token_count,
         }
 
+    # messages
+
+    def _as_contents(self, content):
+        if isinstance(content, str):
+            return [{"text": content}]
+        elif isinstance(content, dict):
+            return [content]
+        elif isinstance(content, list):
+            return content
+
+        raise RuntimeError()
+
     def _format_user_message(self, content):
         return {
             "role": "user",
             "parts": self._as_contents(content)
         }
 
-    def _commit_user_message(self, content):
-        self._messages.append(self._format_user_message(content))
-
     def _format_model_message(self, content):
         return {
             "role": "model",
             "parts": self._as_contents(content)
         }
-    def _commit_model_message(self, content):
-        self._messages.append(self._format_model_message(content))
-
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
         return {
             "role": "model",
@@ -125,9 +131,6 @@ class GoogleChat(ChatBase):
                 },
             }],
         }
-
-    def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
-        self._messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
 
     def _format_tool_response(self, tool_call_id, tool_name, tool_output):
         return {
@@ -142,19 +145,6 @@ class GoogleChat(ChatBase):
                 },
             }],
         }
-
-    def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
-        self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
-
-    def _as_contents(self, content):
-        if isinstance(content, str):
-            return [{"text": content}]
-        elif isinstance(content, dict):
-            return [content]
-        elif isinstance(content, list):
-            return content
-
-        raise RuntimeError()
 
     def __call__(self, request):
         self._commit_user_message(request)

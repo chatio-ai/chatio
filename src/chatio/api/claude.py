@@ -121,6 +121,8 @@ class ClaudeChat(ChatBase):
             "cache_read": self._stats.cache_read_input_tokens,
         }
 
+    # messages
+
     def _as_contents(self, content):
         if isinstance(content, str):
             return [{"type": "text", "text": content}]
@@ -137,17 +139,11 @@ class ClaudeChat(ChatBase):
             "content": self._as_contents(content)
         }
 
-    def _commit_user_message(self, content):
-        self._messages.append(self._format_user_message(content))
-
     def _format_model_message(self, content):
         return {
             "role": "assistant",
             "content": self._as_contents(content)
         }
-
-    def _commit_model_message(self, content):
-        self._messages.append(self._format_model_message(content))
 
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
         return self._format_model_message({
@@ -157,18 +153,12 @@ class ClaudeChat(ChatBase):
             "input": tool_input,
         })
 
-    def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
-        self._messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
-
     def _format_tool_response(self, tool_call_id, tool_name, tool_output):
         return self._format_user_message({
             "type": "tool_result",
             "tool_use_id": tool_call_id,
             "content": tool_output,
         })
-
-    def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
-        self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
 
     def __call__(self, request):
         self._commit_user_message(request)
