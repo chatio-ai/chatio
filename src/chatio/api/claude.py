@@ -14,23 +14,11 @@ log = logging.getLogger(__name__)
 
 
 class ClaudePump:
-    def __init__(self, model, system, messages, tools, client=None):
-        self._model = model
-        self._tools = tools
-        self._system = system
-        self._messages = messages
-
-        self._client = client
+    def __init__(self, stream):
+        self._stream = stream
 
     def __iter__(self):
-        stream = self._client.messages.stream(
-            model=self._model,
-            max_tokens=4096,
-            system=self._system,
-            messages=self._messages,
-            tools=self._tools)
-
-        with stream as stream:
+        with self._stream as stream:
             for chunk in stream:
                 log.info("%s", chunk.to_dict())
 
@@ -71,6 +59,8 @@ class ClaudeChat(ChatBase):
         if messages:
             self._setup_cache(messages[-1].get("content"))
 
+        return messages
+
     # tools
 
     def _format_tool_definition(self, name, desc, schema):
@@ -79,6 +69,9 @@ class ClaudeChat(ChatBase):
             "description": desc,
             "input_schema": schema,
         }
+
+    def _format_tool_definitions(self, tools):
+        return self._setup_cache(tools)
 
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
@@ -90,15 +83,11 @@ class ClaudeChat(ChatBase):
 
     # messages
 
-    def _as_contents(self, content):
-        if isinstance(content, str):
-            return [{"type": "text", "text": content}]
-        elif isinstance(content, dict):
-            return [content]
-        elif isinstance(content, list):
-            return content
+    def _format_chat_messages(self, messages):
+        return self._setup_messages_cache(messages)
 
-        raise RuntimeError()
+    def _format_text_chunk(self, text):
+        return {"type": "text", "text": text}
 
     def _format_dev_message(self, content):
         if not content:
@@ -136,10 +125,12 @@ class ClaudeChat(ChatBase):
     # events
 
     def _iterate_model_events(self, model, system, messages, tools):
-        self._setup_cache(tools)
-        self._setup_messages_cache(messages)
-
-        return ClaudePump(model, system, messages, tools, self._client)
+        return ClaudePump(self._client.messages.stream(
+            model=model,
+            max_tokens=4096,
+            tools=tools,
+            system=system,
+            messages=messages))
 
     # helpers
 

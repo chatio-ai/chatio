@@ -14,23 +14,11 @@ log = logging.getLogger(__name__)
 
 
 class OpenAIPump:
-    def __init__(self, model, system, messages, tools, client=None):
-        self._model = model
-        self._tools = tools
-        self._system = system
-        self._messages = messages
-
-        self._client = client
+    def __init__(self, stream):
+        self._stream = stream
 
     def __iter__(self):
-        stream = self._client.beta.chat.completions.stream(
-            model=self._model,
-            max_tokens=4096,
-            stream_options={'include_usage': True},
-            messages=self._messages,
-            tools=self._tools)
-
-        with stream as stream:
+        with self._stream as stream:
             for chunk in stream:
                 log.info("%s", chunk.to_dict())
 
@@ -101,15 +89,8 @@ class OpenAIChat(ChatBase):
 
     # messages
 
-    def _as_contents(self, content):
-        if isinstance(content, str):
-            return [{"type": "text", "text": content}]
-        elif isinstance(content, dict):
-            return [content]
-        elif isinstance(content, list):
-            return content
-
-        raise RuntimeError()
+    def _format_text_chunk(self, text):
+        return {"type": "text", "text": text}
 
     def _format_dev_message(self, content):
         return [], [{
@@ -152,7 +133,12 @@ class OpenAIChat(ChatBase):
     # events
 
     def _iterate_model_events(self, model, system, messages, tools):
-        return OpenAIPump(model, system, messages, tools, self._client)
+        return OpenAIPump(self._client.beta.chat.completions.stream(
+            model=model,
+            max_tokens=4096,
+            stream_options={'include_usage': True},
+            tools=tools,
+            messages=messages))
 
     # helpers
 

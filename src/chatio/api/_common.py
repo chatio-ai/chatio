@@ -73,6 +73,22 @@ class ChatBase:
             else:
                 self._commit_model_message(message)
 
+    def _format_chat_messages(self, messages):
+        return messages
+
+    def _as_contents(self, content):
+        if isinstance(content, str):
+            return [self._format_text_chunk(content)]
+        elif isinstance(content, dict):
+            return [content]
+        elif isinstance(content, list):
+            return content
+
+        raise RuntimeError()
+
+    def _format_text_chunk(self, text):
+        raise NotImplementedError()
+
     def _format_dev_message(self, content):
         raise NotImplementedError()
 
@@ -108,11 +124,11 @@ class ChatBase:
     def _format_tool_definition(self, name, desc, schema):
         raise NotImplementedError()
 
+    def _format_tool_definitions(self, tools):
+        return tools
+
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         raise NotImplementedError()
-
-    def _commit_tool_definitions(self, tool_defs):
-        pass
 
     def _setup_tools(self, tools, tool_choice, tool_choice_name):
         self._tools = []
@@ -132,7 +148,7 @@ class ChatBase:
 
             self._funcs[name] = tool
 
-        self._commit_tool_definitions(self._tools)
+        self._tools = self._format_tool_definitions(self._tools)
 
         self._tool_choice = self._format_tool_selection(tool_choice, tool_choice_name)
 
@@ -206,6 +222,8 @@ class ChatBase:
         tool_calls = [request]
         while tool_calls:
             tool_calls = []
+
+            self._messages = self._format_chat_messages(self._messages)
 
             self._debug_base_chat_state()
 

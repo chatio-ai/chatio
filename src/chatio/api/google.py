@@ -15,26 +15,11 @@ log = logging.getLogger(__name__)
 
 
 class GooglePump:
-    def __init__(self, model, system, messages, tools, client=None):
-        self._model = model
-        self._tools = tools
-        self._system = system
-        self._messages = messages
-
-        self._client = client
+    def __init__(self, stream):
+        self._stream = stream
 
     def __iter__(self):
-        stream = self._client.models.generate_content_stream(
-            model=self._model,
-            contents=self._messages,
-            config={
-                'system_instruction': self._system,
-                'max_output_tokens': 4096,
-                'tools': [{
-                    "function_declarations": self._tools,
-                }] if self._tools else None,
-            })
-
+        stream = self._stream
         if stream:
 
             usage = None
@@ -82,6 +67,11 @@ class GoogleChat(ChatBase):
             "parameters": schema,
         }
 
+    def _format_tool_definitions(self, tools):
+        return [{
+            "function_declarations": tools,
+        }] if tools else None
+
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
             return None
@@ -92,15 +82,8 @@ class GoogleChat(ChatBase):
 
     # messages
 
-    def _as_contents(self, content):
-        if isinstance(content, str):
-            return [{"text": content}]
-        elif isinstance(content, dict):
-            return [content]
-        elif isinstance(content, list):
-            return content
-
-        raise RuntimeError()
+    def _format_text_chunk(self, text):
+        return {"text": text}
 
     def _format_dev_message(self, content):
         if not content:
@@ -148,7 +131,14 @@ class GoogleChat(ChatBase):
     # events
 
     def _iterate_model_events(self, model, system, messages, tools):
-        return GooglePump(model, system, messages, tools, self._client)
+        return GooglePump(self._client.models.generate_content_stream(
+            model=model,
+            config={
+                'max_output_tokens': 4096,
+                'tools': tools,
+                'system_instruction': system,
+            },
+            contents=messages))
 
     # helpers
 

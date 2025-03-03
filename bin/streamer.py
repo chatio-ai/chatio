@@ -50,7 +50,7 @@ if __name__ == '__main__':
         chat._model,
         len(chat._system or ()),
         len(chat._messages),
-        len(chat._tools)))
+        len(chat._tools or ())))
 
     while True:
         print()
