@@ -162,26 +162,24 @@ class ChatBase:
 
         self._tool_choice = self._format_tool_selection(tool_choice, tool_choice_name)
 
-    def _process_tool(self, tool_name, tool_args):
-        func = self._funcs.get(tool_name)
-        if func is not None:
-            yield from func(**tool_args)
+    def _process_tool(self, tool_call_id, tool_name, tool_args):
+        tool_func = self._funcs.get(tool_name)
+        if not tool_func:
+            return
 
-    def _process_tools(self, tool_calls):
-        for tool_call in tool_calls:
-            content_chunks = []
-            for chunk in self._process_tool(tool_call.name, tool_call.args):
-                if isinstance(chunk, str):
-                    content_chunks.append(chunk)
-                    yield chunk
-                elif chunk is not None:
-                    yield {
-                        "type": "tools_event",
-                        "tool_name": tool_call.name,
-                        "tool_data": chunk,
-                    }
+        content = ""
+        for chunk in tool_func(**tool_args):
+            if isinstance(chunk, str):
+                content += chunk
+                yield chunk
+            elif chunk is not None:
+                yield {
+                    "type": "tools_event",
+                    "tool_name": tool_name,
+                    "tool_data": chunk,
+                }
 
-            self._commit_tool_response(tool_call.call_id, tool_call.name, "".join(content_chunks))
+        self._commit_tool_response(tool_call_id, tool_name, content)
 
     # stats
 
@@ -267,17 +265,15 @@ class ChatBase:
                         if text:
                             self._commit_model_message(text)
                     case CallEvent(call_id, name, args, input):
-                        tool_calls.append(event)
                         self._commit_tool_request(call_id, name, input)
                         yield {
                             "type": "tools_usage",
                             "tool_name": name,
                             "tool_args": args,
                         }
+                        yield from self._process_tool(call_id, name, args)
                     case StatEvent():
                         yield from self._process_stats(event)
-
-            yield from self._process_tools(tool_calls)
 
     def commit_image(self, filepath):
         with open(filepath, "rb") as file:

@@ -43,12 +43,13 @@ class GooglePump:
 
             yield DoneEvent(final_text)
 
-            for call in calls:
-                yield CallEvent(call.id, call.name, call.args, call.args)
-
             yield StatEvent(
                     usage.prompt_token_count, usage.candidates_token_count,
                     0, usage.cached_content_token_count or 0)
+
+            for call in calls:
+                yield CallEvent(call.id, call.name, call.args, call.args)
+
 
 class GoogleChat(ChatBase):
     def _setup_context(self, config: ChatConfig):

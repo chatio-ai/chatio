@@ -25,14 +25,14 @@ class ClaudePump:
 
             yield DoneEvent(stream.get_final_text())
 
-            for message in stream.get_final_message().content:
-                if message.type == 'tool_use':
-                    yield CallEvent(message.id, message.name, message.input, message.input)
-
             usage = stream.get_final_message().usage
             yield StatEvent(
                     usage.input_tokens, usage.output_tokens,
                     usage.cache_creation_input_tokens, usage.cache_read_input_tokens)
+
+            for message in stream.get_final_message().content:
+                if message.type == 'tool_use':
+                    yield CallEvent(message.id, message.name, message.input, message.input)
 
 
 class ClaudeChat(ChatBase):

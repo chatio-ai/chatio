@@ -26,14 +26,14 @@ class OpenAIPump:
             final = stream.get_final_completion().choices[0].message
             yield DoneEvent(final.content)
 
-            for call in final.tool_calls or ():
-                yield CallEvent(call.id, call.function.name,
-                                call.function.parsed_arguments, call.function.arguments)
-
             usage = stream.get_final_completion().usage
             yield StatEvent(
                     usage.prompt_tokens, usage.completion_tokens,
                     0, usage.prompt_tokens_details.cached_tokens)
+
+            for call in final.tool_calls or ():
+                yield CallEvent(call.id, call.function.name,
+                                call.function.parsed_arguments, call.function.arguments)
 
 
 class OpenAIChat(ChatBase):
