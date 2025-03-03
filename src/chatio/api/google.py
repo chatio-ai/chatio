@@ -44,7 +44,7 @@ class GooglePump:
             yield DoneEvent(final_text)
 
             yield StatEvent(
-                    usage.prompt_token_count, usage.candidates_token_count,
+                    usage.prompt_token_count or 0, usage.candidates_token_count or 0,
                     0, usage.cached_content_token_count or 0)
 
             for call in calls:
