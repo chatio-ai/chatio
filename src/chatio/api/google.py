@@ -3,6 +3,8 @@ import logging
 
 from google.genai import Client
 
+from html2text import HTML2Text
+
 from ._common import ChatBase
 from ._common import ChatConfig
 
@@ -23,6 +25,7 @@ class GooglePump:
             usage = None
             calls = []
             final_text = ""
+            search = None
 
             for chunk in stream:
                 log.info("%s", chunk.model_dump_json(indent=2))
@@ -40,6 +43,20 @@ class GooglePump:
                             calls.append(part.function_call)
 
                     usage = chunk.usage_metadata
+                    search = chunk.candidates[0].grounding_metadata
+
+            grounding_chunks = search and search.grounding_chunks or ()
+            for index, chunk in enumerate(grounding_chunks, 1):
+                entry = f"   [{index}]: <{chunk.web.uri}> {chunk.web.title}\n"
+                yield TextEvent(entry, label="search.sources")
+
+            search_entry_point = search and search.search_entry_point or None
+            if search_entry_point:
+                parser = HTML2Text(bodywidth=0)
+                parser.inline_links = False
+                parser.protect_links = True
+                entry = parser.handle(search.search_entry_point.rendered_content)
+                yield TextEvent(entry, label="search.suggest")
 
             yield DoneEvent(final_text)
 
@@ -54,10 +71,12 @@ class GooglePump:
 
 
 class GoogleChat(ChatBase):
-    def _setup_context(self, config: ChatConfig):
+    def _setup_context(self, config: ChatConfig, **kwargs):
         self._client = Client(
                 #base_url=config.api_url,
                 api_key=config.api_key)
+
+        self._grounding = config.features.get('grounding')
 
     # tools
 
@@ -69,9 +88,22 @@ class GoogleChat(ChatBase):
         }
 
     def _format_tool_definitions(self, tools):
-        return [{
-            "function_declarations": tools,
-        }] if tools else None
+        tools_config = []
+
+        if tools:
+            tools_config.append({
+                "function_declarations": tools,
+            })
+
+        if self._grounding:
+            tools_config.append({
+                "google_search": {},
+            })
+
+        if not tools_config:
+            return None
+
+        return tools_config
 
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:

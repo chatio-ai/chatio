@@ -41,15 +41,15 @@ class ClaudePump:
 
 
 class ClaudeChat(ChatBase):
-    def _setup_context(self, config, use_cache=True):
+    def _setup_context(self, config, use_cache=True, **kwargs):
         self._client = Anthropic(
                 base_url=config.api_url,
                 api_key=config.api_key)
 
-        self._cache = use_cache
+        self._use_cache = use_cache
 
     def _setup_cache(self, param):
-        if self._cache and param:
+        if self._use_cache and param:
             param[-1].update({"cache_control": {"type": "ephemeral"}})
 
         return param

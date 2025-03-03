@@ -89,33 +89,40 @@ def _run_chat_chunk(chunk, style, hascr, file=None):
 
 
 def _run_chat(events, model_style=None, event_style=None, tools_style=None, file=None):
-    theme = {
-        'model_chunk': _mk_style(model_style),
-        'tools_chunk': _mk_style(tools_style),
-    }
-
+    model_style = _mk_style(model_style)
+    tools_style = _mk_style(tools_style)
     event_style = _mk_style(event_style)
 
     defer = None
     for event in events:
         etype = event.get("type")
-        chunk = event.get("text")
+        label = event.get("label")
 
-        if not defer == etype:
+        style = None
+        match etype, label:
+            case "model_chunk", None:
+                style = model_style
+            case "model_chunk", _:
+                style = tools_style
+            case "tools_chunk", _:
+                style = tools_style
+            case _, _:
+                style = event_style
+
+        if not defer == style:
             if defer:
-                style = theme.get(defer, None)
                 _run_chat_chunk('\n', style, not defer, file)
                 defer = None
 
-        style = theme.get(etype, event_style)
+        chunk = event.get("text")
         match etype:
             case "model_chunk":
                 hascr = _run_chat_chunk(chunk, style, not defer, file)
-                defer = None if hascr else etype
+                defer = None if hascr else style
                 yield chunk
             case "tools_chunk":
                 hascr = _run_chat_chunk(chunk, style, not defer, file)
-                defer = None if hascr else etype
+                defer = None if hascr else style
             case _:
                 _run_chat_event(event, style, file)
                 defer = None

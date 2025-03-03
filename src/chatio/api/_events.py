@@ -23,6 +23,7 @@ class CallEvent:
 @dataclass
 class TextEvent:
     text: str
+    label: str | None = None
 
 
 @dataclass

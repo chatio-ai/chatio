@@ -207,9 +207,10 @@ class ChatBase:
 
             for event in events:
                 match event:
-                    case TextEvent(text):
+                    case TextEvent(text, label):
                         yield {
                             "type": "model_chunk",
+                            "label": label,
                             "text": text,
                         }
                     case DoneEvent(text):
