@@ -61,7 +61,9 @@ if __name__ == '__main__':
         elif not content:
             continue
 
+        chat.commit_chunk(content)
+
         print()
-        run_chat(chat, content, MODEL_PREFIX, EVENT_PREFIX, TOOLS_PREFIX)
+        run_chat(chat, MODEL_PREFIX, EVENT_PREFIX, TOOLS_PREFIX)
 
     print()

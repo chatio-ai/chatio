@@ -35,6 +35,7 @@ if __name__ == '__main__':
 
     print()
 
-    run_chat(chat, sys.stdin.read(), "<<< ")
+    chat.commit_chunk(sys.stdin.read())
+    run_chat(chat, "<<< ")
 
     print()

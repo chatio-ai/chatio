@@ -1,9 +1,12 @@
 
 
-def run_info(chat, file=None):
+def run_info(chat, prefix=None, file=None):
     info = chat.info()
 
-    print("::: chatio: model: %s tools: %s system: %s messages: %s" % (
+    if prefix is not None:
+        print(prefix, end="", flush=True)
+
+    print("chatio: model: %s tools: %s system: %s messages: %s" % (
         info.model,
         info.tools,
         info.system,
@@ -82,5 +85,5 @@ def _run_chat(chat, content, chunk_prefix=None, event_prefix=None, tools_prefix=
                 raise RuntimeError()
 
 
-def run_chat(chat, content, chunk_prefix=None, event_prefix=None, file=None):
-    return "".join(_run_chat(chat, content, chunk_prefix, event_prefix, file))
+def run_chat(chat, chunk_prefix=None, event_prefix=None, file=None):
+    return "".join(_run_chat(chat, None, chunk_prefix, event_prefix, file))

@@ -288,6 +288,12 @@ class ChatBase:
 
             self._commit_user_message(self._format_image_blob(blob, mimetype))
 
+    def commit_chunk(self, chunk, model=False):
+        if model:
+            self._commit_model_message(chunk)
+        else:
+            self._commit_user_message(chunk)
+
     def _count_message_tokens(self, model, system, messages, tools):
         raise NotImplementedError()
 

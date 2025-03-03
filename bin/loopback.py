@@ -49,69 +49,52 @@ if __name__ == '__main__':
 
     script = pathlib.Path(sys.argv[1]) if sys.argv[1:] else pathlib.Path()
 
-    request_messages = []
     request_prompt = text_from(script.joinpath('request.prompt'))
     if request_prompt:
-        print("###", prefix_chunks[False], request_prompt)
+        print(prefix_chunks[False] + "###", request_prompt)
 
-    response_messages = []
     response_prompt = text_from(script.joinpath('response.prompt'))
     if response_prompt:
-        print("###", prefix_chunks[True], response_prompt)
+        print(prefix_chunks[True] + "###", response_prompt)
+
+    chats = [
+        build_chat(request_prompt, messages=["."], config=config),
+        build_chat(response_prompt, messages=None, config=config),
+    ]
+
+    index = False
 
     messages_list = file_from(script.joinpath('messages.list'))
     if messages_list:
-        fetch_message = lambda: messages_list.readline()
-    else:
-        fetch_message = lambda: ""
+        for content_raw in messages_list:
+            content = content_raw.strip()
+            if not content:
+                continue
 
-    chats = [None, None]
+            chats[index].commit_chunk(content, model=True)
+            chats[not index].commit_chunk(content)
 
-    isbot = False
+            print(prefix_chunks[index], end="", flush=True)
+            print(content)
+            print()
 
-    content = None
+            index = not index
+
+    run_info(chats[index], prefix=prefix_chunks[index] + "::: ")
+    print()
+
+    run_info(chats[not index], prefix=prefix_chunks[not index] + "::: ")
+    print()
 
     try:
         while True:
+            content = run_chat(chats[index],
+                               chunk_prefix=prefix_chunks[index],
+                               event_prefix=prefix_events[index])
 
-            this_messages = response_messages if isbot else request_messages
-            this_prompt = response_prompt if isbot else request_prompt
-
-            that_messages = request_messages if isbot else response_messages
-            that_prompt = request_prompt if isbot else response_prompt
-
-            if not chats[isbot]:
-                content_raw = fetch_message()
-
-                if content_raw:
-                    if content:
-                        if not request_messages:
-                            request_messages.append(".")
-                        request_messages.append(content)
-                        response_messages.append(content)
-                    content = content_raw.strip()
-
-                    print(prefix_chunks[isbot], end="", flush=True)
-                    print(content)
-
-                if not content_raw:
-                    chats[isbot] = build_chat(this_prompt, messages=this_messages[:], config=config)
-                    run_info(chats[isbot])
-
-            if chats[isbot]:
-                if not content:
-                    content = "."
-
-                content = run_chat(chats[isbot], content,
-                                   chunk_prefix=prefix_chunks[isbot],
-                                   event_prefix=prefix_events[isbot])
-
-                if not chats[not isbot]:
-                    chats[not isbot] = build_chat(that_prompt, that_messages, config=config)
-                    run_info(chats[not isbot])
-
-            isbot = not isbot
-
+            chats[not index].commit_chunk(content)
             print()
+
+            index = not index
     except KeyboardInterrupt:
         print()
