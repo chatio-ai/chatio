@@ -1,7 +1,5 @@
 
-import base64
 import logging
-import mimetypes
 
 from google.genai import Client
 
@@ -85,11 +83,17 @@ class GoogleChat(ChatBase):
     def _format_text_chunk(self, text):
         return {"text": text}
 
+    def _format_image_blob(self, blob, mimetype):
+        return {"inline_data": {
+            "mime_type": mimetype,
+            "data": blob,
+        }}
+
     def _format_dev_message(self, content):
         if not content:
             return None, []
-        else:
-            return {"parts": self._as_contents(content)}, []
+
+        return {"parts": self._as_contents(content)}, []
 
     def _format_user_message(self, content):
         return {
@@ -139,31 +143,3 @@ class GoogleChat(ChatBase):
                 'system_instruction': system,
             },
             contents=messages))
-
-    # helpers
-
-    @staticmethod
-    def do_image(filename):
-        content = []
-
-        with open(filename, "rb") as file:
-            data = file.read()
-            data_as_base64 = base64.b64encode(data)
-            data_as_string = data_as_base64.decode()
-            mimetype, _ = mimetypes.guess_type(filename)
-
-            content.append({
-                "type": "text",
-                "text": filename,
-            })
-
-            content.append({
-                "type": "image",
-                "source": {
-                    "type": "base64",
-                    "media_type": mimetype,
-                    "data": data_as_string,
-                }
-            })
-
-        return content

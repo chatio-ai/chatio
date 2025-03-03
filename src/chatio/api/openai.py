@@ -1,7 +1,5 @@
 
-import base64
 import logging
-import mimetypes
 
 from openai import OpenAI
 
@@ -92,7 +90,16 @@ class OpenAIChat(ChatBase):
     def _format_text_chunk(self, text):
         return {"type": "text", "text": text}
 
+    def _format_image_blob(self, blob, mimetype):
+        return {
+            "type": "image_url",
+            "image_url": {"url": f"data:{mimetype};base64,{blob}"},
+        }
+
     def _format_dev_message(self, content):
+        if not content:
+            return [], []
+
         return [], [{
             "role": "developer",
             "content": self._as_contents(content)

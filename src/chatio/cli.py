@@ -1,4 +1,13 @@
 
+def run_info(chat, file=None):
+    info = chat.info()
+
+    print("::: chatio: model: %s tools: %s system: %s messages: %s" % (
+        info.model,
+        info.tools,
+        info.system,
+        info.messages), file=file)
+
 def run_user(prefix=None):
     if prefix is not None:
         print(prefix, end="", flush=True)

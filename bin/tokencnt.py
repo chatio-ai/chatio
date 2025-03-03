@@ -5,6 +5,7 @@ import sys
 import dotenv
 
 from chatio.api import build_chat
+from chatio.cli import run_info
 from chatio.misc import init_config
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
@@ -23,7 +24,7 @@ if __name__ == '__main__':
         raise SystemExit()
 
     wiki = WikiToolFactory()
-    chat = build_chat(prompt, messages=[content], tools={
+    tools = {
         "run_command": ShellExecTool(),
         "run_bc_calc": ShellCalcTool(),
         "run_imgdump": ImageDumpTool(),
@@ -32,6 +33,12 @@ if __name__ == '__main__':
         "wiki_section": wiki.wiki_section(),
         "wiki_search": wiki.wiki_search(),
         "run_nothing": DummyTool(),
-    }, config=init_config())
+    }
 
-    print(chat._token_count())
+    tools = {}
+
+    chat = build_chat(prompt, messages=[content], tools=tools, config=init_config())
+
+    run_info(chat, file=sys.stderr)
+
+    print(chat.count_tokens())

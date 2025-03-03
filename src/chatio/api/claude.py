@@ -1,7 +1,5 @@
 
-import base64
 import logging
-import mimetypes
 
 from anthropic import Anthropic
 
@@ -89,6 +87,16 @@ class ClaudeChat(ChatBase):
     def _format_text_chunk(self, text):
         return {"type": "text", "text": text}
 
+    def _format_image_blob(self, blob, mimetype):
+        return {
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": mimetype,
+                "data": blob,
+            },
+        }
+
     def _format_dev_message(self, content):
         if not content:
             return [], []
@@ -134,35 +142,10 @@ class ClaudeChat(ChatBase):
 
     # helpers
 
-    def _token_count(self):
+    def _count_message_tokens(self, model, system, messages, tools):
         return self._client.messages.count_tokens(
-                model=self._model,
-                system=self._system,
-                messages=self._messages,
-                tools=self._tools).input_tokens
+            model=model,
+            tools=tools,
+            system=system,
+            messages=messages).input_tokens
 
-    @staticmethod
-    def do_image(filename):
-        content = []
-
-        with open(filename, "rb") as file:
-            data = file.read()
-            data_as_base64 = base64.b64encode(data)
-            data_as_string = data_as_base64.decode()
-            mimetype, _ = mimetypes.guess_type(filename)
-
-            content.append({
-                "type": "text",
-                "text": filename,
-            })
-
-            content.append({
-                "type": "image",
-                "source": {
-                    "type": "base64",
-                    "media_type": mimetype,
-                    "data": data_as_string,
-                }
-            })
-
-        return content

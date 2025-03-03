@@ -5,7 +5,7 @@ import dotenv
 import logging
 
 from chatio.api import build_chat
-from chatio.ui import run_user, run_chat, run_stat
+from chatio.cli import run_info, run_user, run_chat, run_stat
 from chatio.misc import init_config
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
@@ -42,15 +42,11 @@ tools = {
 
 #tools = {}
 
-chat = build_chat(prompt, tools=tools,  config=init_config())
+chat = build_chat(prompt, tools=tools, config=init_config())
 
 
 if __name__ == '__main__':
-    print("::: chatio: model: %s system: %s messages: %s tools: %s" % (
-        chat._model,
-        len(chat._system or ()),
-        len(chat._messages),
-        len(chat._tools or ())))
+    run_info(chat)
 
     while True:
         print()

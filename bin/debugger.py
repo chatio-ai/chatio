@@ -5,7 +5,7 @@ import sys
 import dotenv
 
 from chatio.api import build_chat
-from chatio.ui import run_chat
+from chatio.cli import run_info, run_chat
 from chatio.misc import init_config
 
 
@@ -55,14 +55,19 @@ chat = makechat()
 
 if __name__ == '__main__':
 
-    content = []
+    run_info(chat)
 
-    for filename in sys.argv[1:]:
-        content.extend(chat.do_image(filename))
+    filenames = sys.argv[1:]
+    for filename in filenames:
+        chat.commit_image(filename)
 
-    #content.append({"type": "text", "text": "duplicate my message as is"})
+    run_info(chat)
+    print()
 
-    run_chat(chat, content)
+    #chat.commit_text("duplicate my message as is")
+
+    if filenames:
+        run_chat(chat, None, ">>> ")
 
     #run_chat(chat, "what is the exact text on first image? duplicate my message as is")
-    run_chat(chat, "what is the exact text on first image?")
+    run_chat(chat, "what is the exact text on first image?", ">>> ")

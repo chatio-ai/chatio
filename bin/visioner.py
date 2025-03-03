@@ -5,7 +5,7 @@ import sys
 import dotenv
 
 from chatio.api import build_chat
-from chatio.ui import run_chat, run_stat
+from chatio.cli import run_info, run_chat, run_stat
 from chatio.misc import init_config
 
 
@@ -24,16 +24,18 @@ chat = build_chat(
 
 
 if __name__ == '__main__':
-
-    content = []
-
-    for filename in sys.argv[1:]:
-        content.extend(chat.do_image(filename))
-
-    if not content:
+    filenames = sys.argv[1:]
+    if not filenames:
         raise SystemExit()
 
-    events = run_chat(chat, content)
+    for filename in filenames:
+        chat.commit_image(filename)
+
+    run_info(chat)
+
+    print()
+
+    events = run_chat(chat, sys.stdin.read(), "<<< ")
 
     run_stat(events)
 

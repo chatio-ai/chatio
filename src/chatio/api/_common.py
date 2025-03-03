@@ -1,8 +1,10 @@
 
 import json
 
-from dataclasses import dataclass
+import base64
+import mimetypes
 
+from dataclasses import dataclass
 
 from ._events import *
 
@@ -29,6 +31,14 @@ class ChatConfig:
                 return json.load(configfp)
         except FileNotFoundError:
             return {}
+
+
+@dataclass
+class ChatInfo:
+    model: str
+    tools: int
+    system: int
+    messages: int
 
 
 @dataclass
@@ -199,10 +209,15 @@ class ChatBase:
             "cache_read": self._stats.cache_read,
         }
 
-    # stream
+    # debug
 
-    def _iterate_model_events(self, model, system, messages, tools):
-        raise NotImplementedError()
+    def info(self):
+        return ChatInfo(
+            self._model,
+            len(self._funcs or ()),
+            len(self._system or ()),
+            len(self._messages),
+        )
 
     def _debug_base_chat_state(self):
         self._debug = False
@@ -216,10 +231,16 @@ class ChatBase:
             pprint(self.messages)
             print()
 
-    def __call__(self, request):
-        self._commit_user_message(request)
+    # stream
 
-        tool_calls = [request]
+    def _iterate_model_events(self, model, system, messages, tools):
+        raise NotImplementedError()
+
+    def __call__(self, content=None):
+        if content:
+            self._commit_user_message(content)
+
+        tool_calls = [content]
         while tool_calls:
             tool_calls = []
 
@@ -257,3 +278,27 @@ class ChatBase:
                         yield from self._process_stats(event)
 
             yield from self._process_tools(tool_calls)
+
+    def commit_image(self, filepath):
+        with open(filepath, "rb") as file:
+            data = file.read()
+            blob = base64.b64encode(data).decode()
+            mimetype, _ = mimetypes.guess_type(filepath)
+
+            self._commit_user_message(filepath)
+
+            self._commit_user_message(self._format_image_blob(blob, mimetype))
+
+    def _count_message_tokens(self, model, system, messages, tools):
+        raise NotImplementedError()
+
+    def count_tokens(self, content=None):
+        if content:
+            self._commit_user_message(content)
+
+        return self._count_message_tokens(
+            model=self._model,
+            system=self._system,
+            messages=self._messages,
+            tools=self._tools,
+        )
