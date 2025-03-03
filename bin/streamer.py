@@ -48,9 +48,10 @@ chat = build_chat(prompt, tools=tools, config=init_config())
 if __name__ == '__main__':
     run_info(chat)
 
-    USER_PREFIX = "\033[0;92m>>> \033[0;0m"
-    MODEL_PREFIX = "\033[0;96m<<< \033[0;0m"
-    EVENT_PREFIX = "\033[0;97m::: \033[0;0m"
+    USER_PREFIX = "\033[0;92m>>> "
+    MODEL_PREFIX = "\033[0;96m<<< "
+    TOOLS_PREFIX = "\033[0;95m<<< "
+    EVENT_PREFIX = "\033[0;97m::: "
 
     while True:
         print()
@@ -61,6 +62,6 @@ if __name__ == '__main__':
             continue
 
         print()
-        run_chat(chat, content, MODEL_PREFIX, EVENT_PREFIX)
+        run_chat(chat, content, MODEL_PREFIX, EVENT_PREFIX, TOOLS_PREFIX)
 
     print()

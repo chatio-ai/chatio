@@ -171,7 +171,10 @@ class ChatBase:
         for chunk in tool_func(**tool_args):
             if isinstance(chunk, str):
                 content += chunk
-                yield chunk
+                yield {
+                    "type": "tools_chunk",
+                    "text": chunk,
+                }
             elif chunk is not None:
                 yield {
                     "type": "tools_event",

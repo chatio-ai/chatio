@@ -61,7 +61,7 @@ def _run_chat_event(chat, event, prefix=None, file=None, newline=False):
             raise RuntimeError()
 
 
-def _run_chat(chat, content, chunk_prefix=None, event_prefix=None, file=None):
+def _run_chat(chat, content, chunk_prefix=None, event_prefix=None, tools_prefix=None, file=None):
     isline = True
 
     for chunk in chat(content):
@@ -72,7 +72,12 @@ def _run_chat(chat, content, chunk_prefix=None, event_prefix=None, file=None):
                     isline = chunk.endswith("\n")
                 yield chunk
             case dict():
-                _run_chat_event(chat, chunk, event_prefix, file, isline)
+                etype = chunk['type']
+                match etype:
+                    case 'tools_chunk':
+                        _run_chat_chunk(chat, chunk["text"], tools_prefix, file, isline)
+                    case _:
+                        _run_chat_event(chat, chunk, event_prefix, file, isline)
             case _:
                 raise RuntimeError()
 
