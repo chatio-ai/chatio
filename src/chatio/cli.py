@@ -1,4 +1,8 @@
 
+
+_COLOR_DEBUG = "\033[0;90m"
+_COLOR_INFO = "\033[0;97m"
+
 def run_info(chat, file=None):
     info = chat.info()
 
@@ -10,7 +14,7 @@ def run_info(chat, file=None):
 
 def run_user(prefix=None):
     if prefix is not None:
-        print(prefix, end="", flush=True)
+        print(_COLOR_INFO + prefix, end="", flush=True)
     try:
         return input()
     except (EOFError, KeyboardInterrupt):
@@ -22,7 +26,7 @@ def _run_chat_chunk(chat, chunk, prefix=None, file=None, newline=False):
         if index:
             print(flush=True, file=file)
         if (index or newline) and prefix is not None:
-            print(prefix, end="", flush=True, file=file)
+            print(_COLOR_INFO + prefix, end="", flush=True, file=file)
 
         print(chunk_line, end="", flush=True, file=file)
 
@@ -35,7 +39,7 @@ def _run_chat_event(chat, event, prefix=None, file=None, newline=False):
         print(flush=True, file=file)
 
     if prefix is not None:
-        print(prefix, end="", flush=True, file=file)
+        print(_COLOR_DEBUG + prefix, end="", flush=True, file=file)
 
     etype = event['type']
     match etype:
