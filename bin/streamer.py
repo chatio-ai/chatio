@@ -5,7 +5,7 @@ import dotenv
 import logging
 
 from chatio.api import build_chat
-from chatio.cli import run_info, run_user, run_chat, run_stat
+from chatio.cli import run_info, run_user, run_chat
 from chatio.misc import init_config
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
@@ -57,8 +57,6 @@ if __name__ == '__main__':
             continue
 
         print()
-        events = run_chat(chat, content, "<<< ")
-
-        run_stat(events, "::: ")
+        run_chat(chat, content, "<<< ")
 
     print()

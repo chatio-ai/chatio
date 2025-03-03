@@ -224,9 +224,9 @@ class ChatBase:
         if self._debug:
             from pprint import pprint
             print()
-            pprint(self.system)
+            pprint(self._system)
             print()
-            pprint(self.messages)
+            pprint(self._messages)
             print()
 
     # stream
@@ -259,7 +259,7 @@ class ChatBase:
                         yield text
                     case DoneEvent(text):
                         text = text or ""
-                        if not text.endswith("\n"):
+                        if text and not text.endswith("\n"):
                             yield "\n"
 
                         if text:

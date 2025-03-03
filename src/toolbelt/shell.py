@@ -7,9 +7,7 @@ from . import ToolBase
 class ShellToolBase(ToolBase):
 
     def _iterate(self, command=None, iterate=None):
-        yield f"""
-
-```
+        yield f"""```
 $ {command}
 """
 
@@ -19,8 +17,7 @@ $ {command}
         except KeyboardInterrupt:
             pass
 
-        yield f"""
-```
+        yield f"""```
 """
 
     def __call__(self, command=None):

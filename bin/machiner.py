@@ -6,7 +6,7 @@ import logging
 
 from chatio.api import build_chat
 from chatio.misc import init_config
-from chatio.cli import run_info, run_user, run_chat, run_stat
+from chatio.cli import run_info, run_user, run_chat
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -31,16 +31,14 @@ if __name__ == '__main__':
         content = content_raw.replace('\\n', '\n').replace('\\\\', '\\')
 
         print(">>>", content, file=sys.stderr)
-        print("", file=sys.stderr)
-        print("<<<", "", end="", flush=True, file=sys.stderr)
+        print(file=sys.stderr)
 
-        events = run_chat(chat, content, file=sys.stderr)
+        content = run_chat(chat, content, "<<< ", file=sys.stderr)
 
-        print("", file=sys.stderr)
-        print("", file=sys.stderr)
+        content_raw = chunk.replace('\\', '\\\\').replace('\n', '\\n')
 
-        run_stat(events, "::: ", file=sys.stderr)
+        print(chunk_raw, end="", flush=True)
 
-        print("", file=sys.stderr)
+        print(file=sys.stderr)
 
     print()

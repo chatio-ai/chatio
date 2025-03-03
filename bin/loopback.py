@@ -7,7 +7,7 @@ import pathlib
 
 from chatio.api import build_chat
 from chatio.misc import init_config
-from chatio.cli import run_info, run_user, _run_chat, run_stat
+from chatio.cli import run_info, run_user, run_chat
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -97,10 +97,7 @@ if __name__ == '__main__':
                 if not content:
                     content = "."
 
-                #print(chats[isbot], chats[isbot]._system, chats[isbot]._messages, content)
-                events, content = _run_chat(chats[isbot], content, prefix=label[isbot])
-
-                run_stat(events, "::: " + label[isbot], file=sys.stderr)
+                content = run_chat(chats[isbot], content, prefix=label[isbot])
 
                 if not chats[not isbot]:
                     chats[not isbot] = build_chat(that_prompt, that_messages, config=config)

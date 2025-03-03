@@ -61,13 +61,16 @@ if __name__ == '__main__':
     for filename in filenames:
         chat.commit_image(filename)
 
-    run_info(chat)
-    print()
-
     #chat.commit_text("duplicate my message as is")
 
+    run_info(chat)
+
+    print()
+
     if filenames:
-        run_chat(chat, None, ">>> ")
+        run_chat(chat, None, "<<< ")
 
     #run_chat(chat, "what is the exact text on first image? duplicate my message as is")
-    run_chat(chat, "what is the exact text on first image?", ">>> ")
+    run_chat(chat, "what is the exact text on first image?", "<<< ")
+
+    print()

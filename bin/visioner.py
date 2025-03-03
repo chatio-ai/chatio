@@ -5,7 +5,7 @@ import sys
 import dotenv
 
 from chatio.api import build_chat
-from chatio.cli import run_info, run_chat, run_stat
+from chatio.cli import run_info, run_chat
 from chatio.misc import init_config
 
 
@@ -35,8 +35,6 @@ if __name__ == '__main__':
 
     print()
 
-    events = run_chat(chat, sys.stdin.read(), "<<< ")
-
-    run_stat(events)
+    run_chat(chat, sys.stdin.read(), "<<< ")
 
     print()
