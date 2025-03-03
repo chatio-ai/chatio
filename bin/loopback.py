@@ -18,9 +18,14 @@ dotenv.load_dotenv()
 
 config = init_config()
 
-label = [
-    ">>> ",
-    "<<< ",
+prefix_chunks = [
+    "\033[0;92m>>> ",
+    "\033[0;96m<<< ",
+]
+
+prefix_events = [
+    "\033[0;97m::: ",
+    "\033[0;97m::: ",
 ]
 
 
@@ -47,12 +52,12 @@ if __name__ == '__main__':
     request_messages = []
     request_prompt = text_from(script.joinpath('request.prompt'))
     if request_prompt:
-        print("###", label[False], request_prompt)
+        print("###", prefix_chunks[False], request_prompt)
 
     response_messages = []
     response_prompt = text_from(script.joinpath('response.prompt'))
     if response_prompt:
-        print("###", label[True], response_prompt)
+        print("###", prefix_chunks[True], response_prompt)
 
     messages_list = file_from(script.joinpath('messages.list'))
     if messages_list:
@@ -86,7 +91,7 @@ if __name__ == '__main__':
                         response_messages.append(content)
                     content = content_raw.strip()
 
-                    print(label[isbot], end="", flush=True)
+                    print(prefix_chunks[isbot], end="", flush=True)
                     print(content)
 
                 if not content_raw:
@@ -97,7 +102,9 @@ if __name__ == '__main__':
                 if not content:
                     content = "."
 
-                content = run_chat(chats[isbot], content, prefix=label[isbot])
+                content = run_chat(chats[isbot], content,
+                                   chunk_prefix=prefix_chunks[isbot],
+                                   event_prefix=prefix_events[isbot])
 
                 if not chats[not isbot]:
                     chats[not isbot] = build_chat(that_prompt, that_messages, config=config)

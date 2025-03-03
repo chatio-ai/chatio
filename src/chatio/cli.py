@@ -1,8 +1,5 @@
 
 
-_COLOR_DEBUG = "\033[0;90m"
-_COLOR_INFO = "\033[0;97m"
-
 def run_info(chat, file=None):
     info = chat.info()
 
@@ -12,9 +9,11 @@ def run_info(chat, file=None):
         info.system,
         info.messages), file=file)
 
+
 def run_user(prefix=None):
     if prefix is not None:
-        print(_COLOR_INFO + prefix, end="", flush=True)
+        print(prefix, end="", flush=True)
+
     try:
         return input()
     except (EOFError, KeyboardInterrupt):
@@ -26,7 +25,7 @@ def _run_chat_chunk(chat, chunk, prefix=None, file=None, newline=False):
         if index:
             print(flush=True, file=file)
         if (index or newline) and prefix is not None:
-            print(_COLOR_INFO + prefix, end="", flush=True, file=file)
+            print(prefix, end="", flush=True, file=file)
 
         print(chunk_line, end="", flush=True, file=file)
 
@@ -39,7 +38,7 @@ def _run_chat_event(chat, event, prefix=None, file=None, newline=False):
         print(flush=True, file=file)
 
     if prefix is not None:
-        print(_COLOR_DEBUG + prefix, end="", flush=True, file=file)
+        print(prefix, end="", flush=True, file=file)
 
     etype = event['type']
     match etype:
@@ -62,21 +61,21 @@ def _run_chat_event(chat, event, prefix=None, file=None, newline=False):
             raise RuntimeError()
 
 
-def _run_chat(chat, content, prefix=None, file=None):
+def _run_chat(chat, content, chunk_prefix=None, event_prefix=None, file=None):
     isline = True
 
     for chunk in chat(content):
         match chunk:
             case str():
-                _run_chat_chunk(chat, chunk, prefix, file, isline)
+                _run_chat_chunk(chat, chunk, chunk_prefix, file, isline)
                 if chunk:
                     isline = chunk.endswith("\n")
                 yield chunk
             case dict():
-                _run_chat_event(chat, chunk, "::: ", file, isline)
+                _run_chat_event(chat, chunk, event_prefix, file, isline)
             case _:
                 raise RuntimeError()
 
 
-def run_chat(chat, content, prefix=None, file=None):
-    return "".join(_run_chat(chat, content, prefix, file))
+def run_chat(chat, content, chunk_prefix=None, event_prefix=None, file=None):
+    return "".join(_run_chat(chat, content, chunk_prefix, event_prefix, file))

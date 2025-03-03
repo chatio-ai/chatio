@@ -48,15 +48,19 @@ chat = build_chat(prompt, tools=tools, config=init_config())
 if __name__ == '__main__':
     run_info(chat)
 
+    USER_PREFIX = "\033[0;92m>>> \033[0;0m"
+    MODEL_PREFIX = "\033[0;96m<<< \033[0;0m"
+    EVENT_PREFIX = "\033[0;97m::: \033[0;0m"
+
     while True:
         print()
-        content = run_user(">>> ")
+        content = run_user(USER_PREFIX)
         if content is None:
             break
         elif not content:
             continue
 
         print()
-        run_chat(chat, content, "<<< ")
+        run_chat(chat, content, MODEL_PREFIX, EVENT_PREFIX)
 
     print()
