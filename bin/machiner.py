@@ -8,9 +8,9 @@ from chatio.api import build_chat
 from chatio.misc import init_config
 from chatio.cli import run_info, run_user, run_chat
 
-logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
+logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
-logging.getLogger('httpx').setLevel(logging.WARN)
+logging.getLogger('chatio.api').setLevel(logging.INFO)
 
 
 dotenv.load_dotenv()

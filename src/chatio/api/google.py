@@ -25,7 +25,7 @@ class GooglePump:
             final_text = ""
 
             for chunk in stream:
-                log.info("%s", chunk.to_json_dict())
+                log.info("%s", chunk.model_dump_json())
 
                 if chunk.candidates \
                         and chunk.candidates[0].content \

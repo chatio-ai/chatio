@@ -4,6 +4,7 @@ import logging
 from openai import OpenAI
 
 from ._common import ChatBase
+from ._common import ChatConfig
 
 from ._events import *
 
@@ -18,7 +19,7 @@ class OpenAIPump:
     def __iter__(self):
         with self._stream as stream:
             for chunk in stream:
-                log.info("%s", chunk.to_dict())
+                log.info("%s", chunk.model_dump_json())
 
                 if chunk.type == 'content.delta':
                     yield TextEvent(chunk.delta)
@@ -37,7 +38,7 @@ class OpenAIPump:
 
 
 class OpenAIChat(ChatBase):
-    def _setup_context(self, config):
+    def _setup_context(self, config: ChatConfig, **kwargs):
         self._client = OpenAI(
                 base_url=config.api_url,
                 api_key=config.api_key)

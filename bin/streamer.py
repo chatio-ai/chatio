@@ -16,9 +16,9 @@ from toolbelt.wiki import WikiToolFactory
 from toolbelt.web import WebSearchTool, WebBrowseTool
 
 
-logging.basicConfig(filename='chunkapi.log', filemode='a', level=logging.INFO,
+logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
-logging.getLogger('httpx').setLevel(logging.WARN)
+logging.getLogger('chatio.api').setLevel(logging.INFO)
 
 
 dotenv.load_dotenv()
