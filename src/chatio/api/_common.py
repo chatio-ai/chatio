@@ -187,54 +187,6 @@ class ChatBase:
 
         self._commit_tool_response(tool_call_id, tool_name, content)
 
-    # stats
-
-    def _process_stats(self, usage):
-        yield {
-            "type": "token_stats",
-            "scope": "round",
-            "input_tokens": usage.input_tokens,
-            "output_tokens": usage.output_tokens,
-            "cache_written": usage.cache_written,
-            "cache_read": usage.cache_read,
-        }
-
-        self._stats.input_tokens += usage.input_tokens
-        self._stats.output_tokens += usage.output_tokens
-        self._stats.cache_written += usage.cache_written
-        self._stats.cache_read += usage.cache_read
-
-        yield {
-            "type": "token_stats",
-            "scope": "total",
-            "input_tokens": self._stats.input_tokens,
-            "output_tokens": self._stats.output_tokens,
-            "cache_written": self._stats.cache_written,
-            "cache_read": self._stats.cache_read,
-        }
-
-    # debug
-
-    def info(self):
-        return ChatInfo(
-            self._model,
-            len(self._funcs or ()),
-            len(self._system or ()),
-            len(self._messages),
-        )
-
-    def _debug_base_chat_state(self):
-        self._debug = False
-        #self._debug = True
-
-        if self._debug:
-            from pprint import pprint
-            print()
-            pprint(self._system)
-            print()
-            pprint(self._messages)
-            print()
-
     # stream
 
     def _iterate_model_events(self, model, system, messages, tools):
@@ -283,6 +235,70 @@ class ChatBase:
                     case StatEvent():
                         yield from self._process_stats(event)
 
+    def _count_message_tokens(self, model, system, messages, tools):
+        raise NotImplementedError()
+
+    def count_tokens(self, content=None):
+        if content:
+            self._commit_user_message(content)
+
+        return self._count_message_tokens(
+            model=self._model,
+            system=self._system,
+            messages=self._messages,
+            tools=self._tools,
+        )
+
+    # debug
+
+    def info(self):
+        return ChatInfo(
+            self._model,
+            len(self._funcs or ()),
+            len(self._system or ()),
+            len(self._messages),
+        )
+
+    def _debug_base_chat_state(self):
+        self._debug = False
+        #self._debug = True
+
+        if self._debug:
+            from pprint import pprint
+            print()
+            pprint(self._system)
+            print()
+            pprint(self._messages)
+            print()
+
+    # stats
+
+    def _process_stats(self, usage):
+        yield {
+            "type": "token_stats",
+            "scope": "round",
+            "input_tokens": usage.input_tokens,
+            "output_tokens": usage.output_tokens,
+            "cache_written": usage.cache_written,
+            "cache_read": usage.cache_read,
+        }
+
+        self._stats.input_tokens += usage.input_tokens
+        self._stats.output_tokens += usage.output_tokens
+        self._stats.cache_written += usage.cache_written
+        self._stats.cache_read += usage.cache_read
+
+        yield {
+            "type": "token_stats",
+            "scope": "total",
+            "input_tokens": self._stats.input_tokens,
+            "output_tokens": self._stats.output_tokens,
+            "cache_written": self._stats.cache_written,
+            "cache_read": self._stats.cache_read,
+        }
+
+    # history
+
     def commit_image(self, filepath):
         with open(filepath, "rb") as file:
             data = file.read()
@@ -298,17 +314,3 @@ class ChatBase:
             self._commit_model_message(chunk)
         else:
             self._commit_user_message(chunk)
-
-    def _count_message_tokens(self, model, system, messages, tools):
-        raise NotImplementedError()
-
-    def count_tokens(self, content=None):
-        if content:
-            self._commit_user_message(content)
-
-        return self._count_message_tokens(
-            model=self._model,
-            system=self._system,
-            messages=self._messages,
-            tools=self._tools,
-        )
