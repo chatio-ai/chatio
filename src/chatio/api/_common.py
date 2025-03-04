@@ -259,11 +259,16 @@ class ChatBase:
             for event in events:
                 match event:
                     case TextEvent(text):
-                        yield text
+                        yield {
+                            "type": "model_chunk",
+                            "text": text,
+                        }
                     case DoneEvent(text):
-                        text = text or ""
                         if text and not text.endswith("\n"):
-                            yield "\n"
+                            yield {
+                                "type": "model_chunk",
+                                "text": "\n",
+                            }
 
                         if text:
                             self._commit_model_message(text)

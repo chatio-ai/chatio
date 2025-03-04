@@ -82,23 +82,19 @@ def _run_chat(chat, content, model_style=None, event_style=None, tools_style=Non
     tools_style = _mk_style(tools_style)
 
     isline = True
-
-    for chunk in chat(content):
-        match chunk:
-            case str():
+    for event in chat(content):
+        etype = event.get("type")
+        chunk = event.get("text")
+        match etype:
+            case "model_chunk":
                 _run_chat_chunk(chunk, model_style, file, isline)
                 if chunk:
                     isline = chunk.endswith("\n")
                 yield chunk
-            case dict():
-                etype = chunk['type']
-                match etype:
-                    case 'tools_chunk':
-                        _run_chat_chunk(chunk["text"], tools_style, file, isline)
-                    case _:
-                        _run_chat_event(chunk, event_style, file, isline)
+            case "tools_chunk":
+                _run_chat_chunk(chunk, tools_style, file, isline)
             case _:
-                raise RuntimeError()
+                _run_chat_event(event, event_style, file, isline)
 
 
 def run_chat(chat, model_style=None, event_style=None, tools_style=None, file=None):
