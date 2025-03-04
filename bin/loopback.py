@@ -7,7 +7,8 @@ import pathlib
 
 from chatio.api import build_chat
 from chatio.misc import init_config
-from chatio.cli import run_info, run_user, run_chat
+from chatio.cli import run_info, run_user, run_chat, run_text
+from chatio.cli import Style
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -18,14 +19,24 @@ dotenv.load_dotenv()
 
 config = init_config()
 
-prefix_chunks = [
-    "\033[0;92m>>> ",
-    "\033[0;96m<<< ",
+model_styles = [
+    Style(">>> ", color=Style.BRIGHT_GREEN),
+    Style("<<< ", color=Style.BRIGHT_CYAN),
 ]
 
-prefix_events = [
-    "\033[0;97m::: ",
-    "\033[0;97m::: ",
+banner_styles = [
+    Style("::: ", color=Style.BRIGHT_GREEN),
+    Style("::: ", color=Style.BRIGHT_CYAN),
+]
+
+prompt_styles = [
+    Style("### >>> ", color=Style.BRIGHT_GREEN),
+    Style("### <<< ", color=Style.BRIGHT_CYAN),
+]
+
+event_styles = [
+    Style("::: "),
+    Style("::: "),
 ]
 
 
@@ -51,11 +62,11 @@ if __name__ == '__main__':
 
     request_prompt = text_from(script.joinpath('request.prompt'))
     if request_prompt:
-        print(prefix_chunks[False] + "###", request_prompt)
+        run_text(request_prompt, prompt_styles[False])
 
     response_prompt = text_from(script.joinpath('response.prompt'))
     if response_prompt:
-        print(prefix_chunks[True] + "###", response_prompt)
+        run_text(response_prompt, prompt_styles[True])
 
     chats = [
         build_chat(request_prompt, messages=["."], config=config),
@@ -74,23 +85,22 @@ if __name__ == '__main__':
             chats[index].commit_chunk(content, model=True)
             chats[not index].commit_chunk(content)
 
-            print(prefix_chunks[index], end="", flush=True)
-            print(content)
+            run_text(content, model_styles[index])
             print()
 
             index = not index
 
-    run_info(chats[index], prefix=prefix_chunks[index] + "::: ")
+    run_info(chats[index], banner_styles[index])
     print()
 
-    run_info(chats[not index], prefix=prefix_chunks[not index] + "::: ")
+    run_info(chats[not index], banner_styles[not index])
     print()
 
     try:
         while True:
             content = run_chat(chats[index],
-                               chunk_prefix=prefix_chunks[index],
-                               event_prefix=prefix_events[index])
+                               model_style=model_styles[index],
+                               event_style=event_styles[index])
 
             chats[not index].commit_chunk(content)
             print()

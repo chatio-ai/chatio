@@ -31,11 +31,11 @@ if __name__ == '__main__':
     for filename in filenames:
         chat.commit_image(filename)
 
-    run_info(chat)
+    run_info(chat, "::: ")
 
     print()
 
     chat.commit_chunk(sys.stdin.read())
-    run_chat(chat, "<<< ")
+    run_chat(chat, "<<< ", "::: ")
 
     print()

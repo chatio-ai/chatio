@@ -55,7 +55,7 @@ chat = makechat()
 
 if __name__ == '__main__':
 
-    run_info(chat)
+    run_info(chat, "::: ")
 
     filenames = sys.argv[1:]
     for filename in filenames:
@@ -63,16 +63,16 @@ if __name__ == '__main__':
 
     #chat.commit_chunk("duplicate my message as is")
 
-    run_info(chat)
+    run_info(chat, "::: ")
 
     print()
 
     if filenames:
-        run_chat(chat, "<<< ")
+        run_chat(chat, "<<< ", "::: ")
 
     #chat.commit_chunk("what is the exact text on first image? duplicate my message as is")
     chat.commit_chunk("what is the exact text on first image?")
 
-    run_chat(chat, "<<< ")
+    run_chat(chat, "<<< ", "::: ")
 
     print()

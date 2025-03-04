@@ -6,6 +6,7 @@ import logging
 
 from chatio.api import build_chat
 from chatio.cli import run_info, run_user, run_chat
+from chatio.cli.style import Style
 from chatio.misc import init_config
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
@@ -46,16 +47,11 @@ chat = build_chat(prompt, tools=tools, config=init_config())
 
 
 if __name__ == '__main__':
-    run_info(chat)
-
-    USER_PREFIX = "\033[0;92m>>> "
-    MODEL_PREFIX = "\033[0;96m<<< "
-    TOOLS_PREFIX = "\033[0;95m<<< "
-    EVENT_PREFIX = "\033[0;97m::: "
+    run_info(chat, Style("::: ", color=Style.BRIGHT_GREEN))
 
     while True:
         print()
-        content = run_user(USER_PREFIX)
+        content = run_user(Style(">>> ", color=Style.BRIGHT_GREEN))
         if content is None:
             break
         elif not content:
@@ -63,7 +59,9 @@ if __name__ == '__main__':
 
         chat.commit_chunk(content)
 
-        print()
-        run_chat(chat, MODEL_PREFIX, EVENT_PREFIX, TOOLS_PREFIX)
+        run_chat(chat,
+                 model_style=Style("<<< ", color=Style.BRIGHT_CYAN),
+                 event_style=Style("::: ", color=Style.RESET),
+                 tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))
 
     print()
