@@ -147,31 +147,3 @@ class OpenAIChat(ChatBase):
             stream_options={'include_usage': True},
             tools=tools,
             messages=messages))
-
-    # helpers
-
-    @staticmethod
-    def do_image(filename):
-        content = []
-
-        with open(filename, "rb") as file:
-            data = file.read()
-            data_as_base64 = base64.b64encode(data)
-            data_as_string = data_as_base64.decode()
-            mimetype, _ = mimetypes.guess_type(filename)
-
-            content.append({
-                "type": "text",
-                "text": filename,
-            })
-
-            content.append({
-                "type": "image",
-                "source": {
-                    "type": "base64",
-                    "media_type": mimetype,
-                    "data": data_as_string,
-                }
-            })
-
-        return content
