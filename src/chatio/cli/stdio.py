@@ -34,9 +34,7 @@ def run_user(style=None, file=None):
             return None
 
 
-def _run_chat_event(event, style, file=None, newline=False):
-    if not newline:
-        print(flush=True, file=file)
+def _run_chat_event(event, style, file=None):
 
     etype = event['type']
     etext = ""
@@ -63,38 +61,57 @@ def _run_chat_event(event, style, file=None, newline=False):
         print(etext, end="", flush=True, file=file)
 
 
-def _run_chat_chunk(chunk, style, file=None, newline=False):
-    for index, chunk_line in enumerate(chunk.splitlines()):
-        if index:
-            print(style.suffix, flush=True, file=file)
-        if index or newline:
-            print(style.prefix, end="", flush=True, file=file)
+def _run_chat_chunk(chunk, style, hascr, file=None):
 
-        print(chunk_line, end="", flush=True, file=file)
+    for chunk_line in chunk.splitlines(keepends=True):
+        result = ""
+        if hascr:
+            result += style.prefix
 
-    if chunk.endswith("\n"):
-        print(style.suffix, flush=True, file=file)
+        hascr = chunk_line.endswith("\n")
+        if hascr:
+            result += chunk_line[:-1]
+            result += style.suffix
+            result += "\n"
+        else:
+            result += chunk_line
+
+        print(result, end="", flush=True, file=file)
+
+    return hascr
 
 
 def _run_chat(chat, content, model_style=None, event_style=None, tools_style=None, file=None):
-    model_style = _mk_style(model_style)
-    event_style = _mk_style(event_style)
-    tools_style = _mk_style(tools_style)
+    theme = {
+        'model_chunk': _mk_style(model_style),
+        'tools_chunk': _mk_style(tools_style),
+    }
 
-    isline = True
+    event_style = _mk_style(event_style)
+
+    defer = None
     for event in chat(content):
         etype = event.get("type")
         chunk = event.get("text")
+
+        if not defer == etype:
+            if defer:
+                style = theme.get(defer, None)
+                _run_chat_chunk('\n', style, not defer, file)
+                defer = None
+
+        style = theme.get(etype, event_style)
         match etype:
             case "model_chunk":
-                _run_chat_chunk(chunk, model_style, file, isline)
-                if chunk:
-                    isline = chunk.endswith("\n")
+                hascr = _run_chat_chunk(chunk, style, not defer, file)
+                defer = None if hascr else etype
                 yield chunk
             case "tools_chunk":
-                _run_chat_chunk(chunk, tools_style, file, isline)
+                hascr = _run_chat_chunk(chunk, style, not defer, file)
+                defer = None if hascr else etype
             case _:
-                _run_chat_event(event, event_style, file, isline)
+                _run_chat_event(event, style, file)
+                defer = None
 
 
 def run_chat(chat, model_style=None, event_style=None, tools_style=None, file=None):

@@ -216,12 +216,6 @@ class ChatBase:
                             "text": text,
                         }
                     case DoneEvent(text):
-                        if text and not text.endswith("\n"):
-                            yield {
-                                "type": "model_chunk",
-                                "text": "\n",
-                            }
-
                         if text:
                             self._commit_model_message(text)
                     case CallEvent(call_id, name, args, input):
