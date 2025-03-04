@@ -58,6 +58,8 @@ class ChatBase:
 
         self._model = config.model
 
+        self._ready = False
+
         self._setup_context(config, **kwargs)
 
         self._setup_messages(system, messages)
@@ -102,32 +104,33 @@ class ChatBase:
     def _format_dev_message(self, content):
         raise NotImplementedError()
 
-    def _commit_dev_message(self, content):
-        self._messages.append(self._format_dev_message(content))
-
     def _format_user_message(self, content):
         raise NotImplementedError()
 
     def _commit_user_message(self, content):
         self._messages.append(self._format_user_message(content))
+        self._ready = True
 
     def _format_model_message(self, content):
         raise NotImplementedError()
 
     def _commit_model_message(self, content):
         self._messages.append(self._format_model_message(content))
+        self._ready = False
 
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
         raise NotImplementedError()
 
     def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
         self._messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
+        self._ready = False
 
     def _format_tool_response(self, tool_call_id, tool_name, tool_output):
         raise NotImplementedError()
 
     def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
         self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
+        self._ready = True
 
     # tools
 
@@ -241,10 +244,7 @@ class ChatBase:
         if content:
             self._commit_user_message(content)
 
-        tool_calls = [content]
-        while tool_calls:
-            tool_calls = []
-
+        while self._ready:
             self._messages = self._format_chat_messages(self._messages)
 
             self._debug_base_chat_state()
