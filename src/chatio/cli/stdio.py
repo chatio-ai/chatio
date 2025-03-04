@@ -34,19 +34,6 @@ def run_user(style=None, file=None):
             return None
 
 
-def _run_chat_chunk(chunk, style, file=None, newline=False):
-    for index, chunk_line in enumerate(chunk.splitlines()):
-        if index:
-            print(style.suffix, flush=True, file=file)
-        if index or newline:
-            print(style.prefix, end="", flush=True, file=file)
-
-        print(chunk_line, end="", flush=True, file=file)
-
-    if chunk.endswith("\n"):
-        print(style.suffix, flush=True, file=file)
-
-
 def _run_chat_event(event, style, file=None, newline=False):
     if not newline:
         print(flush=True, file=file)
@@ -74,6 +61,19 @@ def _run_chat_event(event, style, file=None, newline=False):
 
     with style.wrap(file):
         print(etext, end="", flush=True, file=file)
+
+
+def _run_chat_chunk(chunk, style, file=None, newline=False):
+    for index, chunk_line in enumerate(chunk.splitlines()):
+        if index:
+            print(style.suffix, flush=True, file=file)
+        if index or newline:
+            print(style.prefix, end="", flush=True, file=file)
+
+        print(chunk_line, end="", flush=True, file=file)
+
+    if chunk.endswith("\n"):
+        print(style.suffix, flush=True, file=file)
 
 
 def _run_chat(chat, content, model_style=None, event_style=None, tools_style=None, file=None):
