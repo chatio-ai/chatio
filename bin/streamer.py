@@ -16,6 +16,8 @@ from toolbelt.dummy import DummyTool
 from toolbelt.wiki import WikiToolFactory
 from toolbelt.web import WebSearchTool, WebBrowseTool
 
+from toolbelt.llm import LlmDialogTool
+
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -39,6 +41,10 @@ tools = {
     "web_search": WebSearchTool(),
     "web_browse": WebBrowseTool(),
     "run_nothing": DummyTool(),
+}
+
+tools = {
+    "llm_message": LlmDialogTool(),
 }
 
 #tools = {}
