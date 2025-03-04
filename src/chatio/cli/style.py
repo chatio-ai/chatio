@@ -1,17 +1,17 @@
 
 
 class StyleWrap:
-    def __init__(self, prefix, suffix, file=None):
+    def __init__(self, prefix, suffix, end=None, file=None):
         self.prefix = prefix
         self.suffix = suffix
         self.file = file
+        self.end = end
 
     def __enter__(self):
         print(self.prefix, end="", flush=True, file=self.file)
 
     def __exit__(self, *exc_info):
-        print(self.suffix, end="", flush=True, file=self.file)
-        print()
+        print(self.suffix, end=self.end, flush=True, file=self.file)
 
 
 class Style:
@@ -50,8 +50,8 @@ class Style:
         self.prefix = color + prefix
         self.suffix = suffix + reset
 
-    def wrap(self, file):
-        return StyleWrap(self.prefix, self.suffix, file)
+    def wrap(self, end=None, file=None):
+        return StyleWrap(self.prefix, self.suffix, end=end, file=file)
 
 
 

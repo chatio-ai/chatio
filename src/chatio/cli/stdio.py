@@ -12,7 +12,7 @@ def _mk_style(style=None):
 
 
 def run_text(text, style=None, file=None):
-    with _mk_style(style).wrap(file):
+    with _mk_style(style).wrap(file=file):
         print(text, end="", flush=True, file=file)
 
 
@@ -27,7 +27,7 @@ def run_info(chat, style=None, file=None):
 
 
 def run_user(style=None, file=None):
-    with _mk_style(style).wrap(file):
+    with _mk_style(style).wrap(end="", file=file):
         try:
             return input()
         except (EOFError, KeyboardInterrupt):
@@ -59,7 +59,7 @@ def _run_chat_event(event, style, file=None, newline=False):
         case _:
             raise RuntimeError()
 
-    with style.wrap(file):
+    with style.wrap(file=file):
         print(etext, end="", flush=True, file=file)
 
 
