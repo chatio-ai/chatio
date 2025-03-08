@@ -73,6 +73,6 @@ if __name__ == '__main__':
     #chat.commit_chunk("what is the exact text on first image? duplicate my message as is")
     chat.commit_chunk("what is the exact text on first image?")
 
-    run_chat(chat, "<<< ", "::: ")
+    run_chat(chat(), "<<< ", "::: ")
 
     print()

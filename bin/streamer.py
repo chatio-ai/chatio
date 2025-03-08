@@ -66,7 +66,7 @@ if __name__ == '__main__':
         chat.commit_chunk(content)
 
         print()
-        run_chat(chat,
+        run_chat(chat(),
                  model_style=Style("<<< ", color=Style.BRIGHT_CYAN),
                  event_style=Style("::: ", color=Style.RESET),
                  tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))

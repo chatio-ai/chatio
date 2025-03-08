@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     try:
         while True:
-            content = run_chat(chats[index],
+            content = run_chat(chats[index](),
                                model_style=model_styles[index],
                                event_style=event_styles[index])
 

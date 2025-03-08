@@ -85,7 +85,7 @@ def _run_chat_chunk(chunk, style, hascr, file=None):
     return hascr
 
 
-def _run_chat(chat, content, model_style=None, event_style=None, tools_style=None, file=None):
+def _run_chat(events, model_style=None, event_style=None, tools_style=None, file=None):
     theme = {
         'model_chunk': _mk_style(model_style),
         'tools_chunk': _mk_style(tools_style),
@@ -94,7 +94,7 @@ def _run_chat(chat, content, model_style=None, event_style=None, tools_style=Non
     event_style = _mk_style(event_style)
 
     defer = None
-    for event in chat(content):
+    for event in events:
         etype = event.get("type")
         chunk = event.get("text")
 
@@ -118,5 +118,5 @@ def _run_chat(chat, content, model_style=None, event_style=None, tools_style=Non
                 defer = None
 
 
-def run_chat(chat, model_style=None, event_style=None, tools_style=None, file=None):
-    return "".join(_run_chat(chat, None, model_style, event_style, tools_style, file))
+def run_chat(events, model_style=None, event_style=None, tools_style=None, file=None):
+    return "".join(_run_chat(events, model_style, event_style, tools_style, file))

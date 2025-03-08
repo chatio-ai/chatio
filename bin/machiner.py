@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
         run_text(content, ">>> ", file=sys.stderr)
 
-        content = run_chat(chat, content, "<<< ", file=sys.stderr)
+        content = run_chat(chat(), content, "<<< ", file=sys.stderr)
 
         content_raw = chunk.replace('\\', '\\\\').replace('\n', '\\n')
 
