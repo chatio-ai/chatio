@@ -26,6 +26,8 @@ class ClaudePump:
             yield DoneEvent(stream.get_final_text())
 
             usage = stream.get_final_message().usage
+            usage.input_tokens += usage.cache_creation_input_tokens
+            usage.input_tokens += usage.cache_read_input_tokens
             yield StatEvent(
                     usage.input_tokens, usage.output_tokens,
                     usage.cache_creation_input_tokens, usage.cache_read_input_tokens)

@@ -43,10 +43,14 @@ def _run_chat_event(event, style, file=None):
 
         case 'token_stats':
             etext = "token_stats: %s:" % event['scope']
-            etext += " input_tokens: %s" % event['input_tokens']
-            etext += " output_tokens: %s" % event['output_tokens']
-            etext += " cache_written: %s" % event['cache_written']
-            etext += " cache_read: %s" % event['cache_read']
+            etext += " in: %s" % event['input_tokens']
+            etext += " (hist: %s" % event['input_history_tokens']
+            etext += " curr: %s)" % event['input_current_tokens']
+            etext += " out: %s" % event['output_tokens']
+            etext += "  "
+            etext += " nc: %s" % event['cache_missed']
+            etext += " cw: %s" % event['cache_written']
+            etext += " cr: %s" % event['cache_read']
 
         case 'tools_usage':
             etext = "tools_usage: %s: %s" % (event['tool_name'], event['tool_args'])
