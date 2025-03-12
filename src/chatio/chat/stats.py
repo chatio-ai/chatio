@@ -9,34 +9,39 @@ class ChatStatData:
     cache_written: int = 0
     cache_read: int = 0
 
+    def __init__(self, label):
+        self.label = label
+
 
 class ChatStat:
     def __init__(self):
-        self._stats = ChatStatData()
+        self._round = ChatStatData("round")
+        self._total = ChatStatData("total")
 
     def __call__(self, usage):
         return self._process(usage)
 
+    def _mkevent(self, stats):
+        return {
+            "type": "token_stats",
+            "scope": stats.label,
+            "input_tokens": stats.input_tokens,
+            "output_tokens": stats.output_tokens,
+            "cache_written": stats.cache_written,
+            "cache_read": stats.cache_read,
+        }
+
     def _process(self, usage):
-        yield {
-            "type": "token_stats",
-            "scope": "round",
-            "input_tokens": usage.input_tokens,
-            "output_tokens": usage.output_tokens,
-            "cache_written": usage.cache_written,
-            "cache_read": usage.cache_read,
-        }
+        self._round.input_tokens = usage.input_tokens
+        self._round.output_tokens = usage.output_tokens
+        self._round.cache_written = usage.cache_written
+        self._round.cache_read = usage.cache_read
 
-        self._stats.input_tokens += usage.input_tokens
-        self._stats.output_tokens += usage.output_tokens
-        self._stats.cache_written += usage.cache_written
-        self._stats.cache_read += usage.cache_read
+        yield self._mkevent(self._round)
 
-        yield {
-            "type": "token_stats",
-            "scope": "total",
-            "input_tokens": self._stats.input_tokens,
-            "output_tokens": self._stats.output_tokens,
-            "cache_written": self._stats.cache_written,
-            "cache_read": self._stats.cache_read,
-        }
+        self._total.input_tokens += usage.input_tokens
+        self._total.output_tokens += usage.output_tokens
+        self._total.cache_written += usage.cache_written
+        self._total.cache_read += usage.cache_read
+
+        yield self._mkevent(self._total)
