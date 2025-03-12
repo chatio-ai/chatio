@@ -11,6 +11,8 @@ class ChatStatData:
     cache_missed: int = 0
     cache_written: int = 0
     cache_read: int = 0
+    predict_accepted: int = 0
+    predict_rejected: int = 0
 
     def __init__(self, label):
         self.label = label
@@ -35,6 +37,8 @@ class ChatStat:
             "cache_missed": stats.cache_missed,
             "cache_written": stats.cache_written,
             "cache_read": stats.cache_read,
+            "predict_accepted": stats.predict_accepted,
+            "predict_rejected": stats.predict_rejected,
         }
 
     def _process(self, usage):
@@ -47,6 +51,9 @@ class ChatStat:
         self._round.cache_written = usage.cache_written
         self._round.cache_read = usage.cache_read
 
+        self._round.predict_accepted = usage.predict_accepted
+        self._round.predict_rejected = usage.predict_rejected
+
         yield self._mkevent(self._round)
 
         self._total.input_history_tokens += self._round.input_history_tokens
@@ -57,5 +64,8 @@ class ChatStat:
         self._total.cache_missed += self._round.cache_missed
         self._total.cache_written += self._round.cache_written
         self._total.cache_read += self._round.cache_read
+
+        self._total.predict_accepted += self._round.predict_accepted
+        self._total.predict_rejected += self._round.predict_rejected
 
         yield self._mkevent(self._total)

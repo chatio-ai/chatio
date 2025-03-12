@@ -44,8 +44,10 @@ class GooglePump:
             yield DoneEvent(final_text)
 
             yield StatEvent(
-                    usage.prompt_token_count or 0, usage.candidates_token_count or 0,
-                    0, usage.cached_content_token_count or 0)
+                    usage.prompt_token_count or 0,
+                    usage.candidates_token_count or 0,
+                    0, usage.cached_content_token_count or 0,
+                    0, 0)
 
             for call in calls:
                 yield CallEvent(call.id, call.name, call.args, call.args)
@@ -135,7 +137,7 @@ class GoogleChat(ChatBase):
 
     # events
 
-    def _iterate_model_events(self, model, system, messages, tools):
+    def _iterate_model_events(self, model, system, messages, tools, **kwargs):
         return GooglePump(self._client.models.generate_content_stream(
             model=model,
             config={

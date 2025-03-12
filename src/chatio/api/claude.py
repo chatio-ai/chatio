@@ -29,8 +29,11 @@ class ClaudePump:
             usage.input_tokens += usage.cache_creation_input_tokens
             usage.input_tokens += usage.cache_read_input_tokens
             yield StatEvent(
-                    usage.input_tokens, usage.output_tokens,
-                    usage.cache_creation_input_tokens, usage.cache_read_input_tokens)
+                    usage.input_tokens,
+                    usage.output_tokens,
+                    usage.cache_creation_input_tokens,
+                    usage.cache_read_input_tokens,
+                    0, 0)
 
             for message in stream.get_final_message().content:
                 if message.type == 'tool_use':
@@ -134,7 +137,7 @@ class ClaudeChat(ChatBase):
 
     # events
 
-    def _iterate_model_events(self, model, system, messages, tools):
+    def _iterate_model_events(self, model, system, messages, tools, **kwargs):
         return ClaudePump(self._client.messages.stream(
             model=model,
             max_tokens=4096,

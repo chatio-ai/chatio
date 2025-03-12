@@ -21,6 +21,8 @@ class ChatConfig:
         self.api_url = self._config.get('api_url')
         self.api_type = self._config.get('api_type')
 
+        self.features = self._config.get('features', {})
+
     def _validate(self):
         pass
 
@@ -186,7 +188,7 @@ class ChatBase:
     def _iterate_model_events(self, model, system, messages, tools):
         raise NotImplementedError()
 
-    def __call__(self, content=None):
+    def __call__(self, content=None, **kwargs):
         if content:
             self._commit_user_message(content)
 
@@ -200,6 +202,7 @@ class ChatBase:
                 system=self._system,
                 messages=self._messages,
                 tools=self._tools,
+                **kwargs,
             )
 
             for event in events:

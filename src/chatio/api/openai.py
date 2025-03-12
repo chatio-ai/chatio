@@ -28,9 +28,18 @@ class OpenAIPump:
             yield DoneEvent(final.content)
 
             usage = stream.get_final_completion().usage
+
+            input_details = usage.prompt_tokens_details
+            output_details = usage.completion_tokens_details
+
             yield StatEvent(
-                    usage.prompt_tokens, usage.completion_tokens,
-                    0, usage.prompt_tokens_details.cached_tokens)
+                    usage.prompt_tokens,
+                    usage.completion_tokens,
+                    0,
+                    input_details and input_details.cached_tokens or 0,
+                    output_details and output_details.accepted_prediction_tokens or 0,
+                    output_details and output_details.rejected_prediction_tokens or 0,
+            )
 
             for call in final.tool_calls or ():
                 yield CallEvent(call.id, call.function.name,
@@ -42,6 +51,8 @@ class OpenAIChat(ChatBase):
         self._client = OpenAI(
                 base_url=config.api_url,
                 api_key=config.api_key)
+
+        self._prediction = config.features.get('prediction')
 
     # tools
 
@@ -138,9 +149,26 @@ class OpenAIChat(ChatBase):
             "content": tool_output,
         }
 
+    def _format_predict_content(self, prediction):
+        return {
+            "type": "content",
+            "content": prediction,
+        }
+
     # events
 
-    def _iterate_model_events(self, model, system, messages, tools):
+    def _iterate_model_events_prediction(self, model, system, messages, prediction):
+        return OpenAIPump(self._client.beta.chat.completions.stream(
+            model=model,
+            stream_options={'include_usage': True},
+            messages=messages,
+            prediction=prediction))
+
+    def _iterate_model_events(self, model, system, messages, tools, prediction=None, **kwargs):
+        if self._prediction and prediction:
+            prediction = self._format_predict_content(prediction)
+            return self._iterate_model_events_prediction(model, system, messages, prediction)
+
         return OpenAIPump(self._client.beta.chat.completions.stream(
             model=model,
             max_tokens=4096,

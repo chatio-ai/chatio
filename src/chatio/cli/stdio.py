@@ -51,6 +51,9 @@ def _run_chat_event(event, style, file=None):
             etext += " nc: %s" % event['cache_missed']
             etext += " cw: %s" % event['cache_written']
             etext += " cr: %s" % event['cache_read']
+            etext += "  "
+            etext += " pa: %s" % event['predict_accepted']
+            etext += " pr: %s" % event['predict_rejected']
 
         case 'tools_usage':
             etext = "tools_usage: %s: %s" % (event['tool_name'], event['tool_args'])

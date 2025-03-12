@@ -8,6 +8,8 @@ class StatEvent:
     output_tokens: int
     cache_written: int
     cache_read: int
+    predict_accepted: int
+    predict_rejected: int
 
 
 @dataclass
