@@ -19,7 +19,7 @@ class OpenAIPump:
     def __iter__(self):
         with self._stream as stream:
             for chunk in stream:
-                log.info("%s", chunk.model_dump_json())
+                log.info("%s", chunk.model_dump_json(indent=2))
 
                 if chunk.type == 'content.delta':
                     yield TextEvent(chunk.delta)

@@ -18,7 +18,7 @@ class ClaudePump:
     def __iter__(self):
         with self._stream as stream:
             for chunk in stream:
-                log.info("%s", chunk.model_dump_json())
+                log.info("%s", chunk.model_dump_json(indent=2))
 
                 if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
                     yield TextEvent(chunk.delta.text)
