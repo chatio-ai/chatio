@@ -6,6 +6,8 @@ import mimetypes
 
 from dataclasses import dataclass
 
+from ..chat.stats import ChatStat
+
 from ._events import *
 
 
@@ -39,14 +41,6 @@ class ChatInfo:
     tools: int
     system: int
     messages: int
-
-
-@dataclass
-class ChatStat:
-    input_tokens: int = 0
-    output_tokens: int = 0
-    cache_written: int = 0
-    cache_read: int = 0
 
 
 class ChatBase:
@@ -227,7 +221,7 @@ class ChatBase:
                         }
                         yield from self._process_tool(call_id, name, args)
                     case StatEvent():
-                        yield from self._process_stats(event)
+                        yield from self._stats(event)
 
     def _count_message_tokens(self, model, system, messages, tools):
         raise NotImplementedError()
@@ -264,32 +258,6 @@ class ChatBase:
             print()
             pprint(self._messages)
             print()
-
-    # stats
-
-    def _process_stats(self, usage):
-        yield {
-            "type": "token_stats",
-            "scope": "round",
-            "input_tokens": usage.input_tokens,
-            "output_tokens": usage.output_tokens,
-            "cache_written": usage.cache_written,
-            "cache_read": usage.cache_read,
-        }
-
-        self._stats.input_tokens += usage.input_tokens
-        self._stats.output_tokens += usage.output_tokens
-        self._stats.cache_written += usage.cache_written
-        self._stats.cache_read += usage.cache_read
-
-        yield {
-            "type": "token_stats",
-            "scope": "total",
-            "input_tokens": self._stats.input_tokens,
-            "output_tokens": self._stats.output_tokens,
-            "cache_written": self._stats.cache_written,
-            "cache_read": self._stats.cache_read,
-        }
 
     # history
 
