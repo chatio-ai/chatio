@@ -1,0 +1,12 @@
+*
+!bin/*.py
+!src/toolbelt/*.py
+!src/chatio/misc/*.py
+!src/chatio/chat/*.py
+!src/chatio/cli/*.py
+!src/chatio/api/*.py
+!src/chatio/*.py
+!lints/run.sh
+!requirements.dev.txt
+!requirements.txt
+!pyproject.toml
