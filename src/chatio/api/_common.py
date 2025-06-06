@@ -1,6 +1,4 @@
 
-import json
-
 import base64
 import mimetypes
 
@@ -16,40 +14,20 @@ from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 @dataclass
+class ApiConfig:
+    api_cls: str | None
+    api_url: str | None = None
+    api_key: str | None = None
+
+    features: dict | None = None
+
+
+@dataclass
 class ChatConfig:
+    vendor: str
     model: str
-    api_key: str | None
-    api_url: str | None
-    api_type: str | None
 
-    features: dict
-
-    def __init__(self, configpath=None):
-        self._config = self._fromfile(configpath)
-
-        model = self._config.get('model')
-        if model is None:
-            raise RuntimeError
-        self.model = model
-
-        self.api_key = self._config.get('api_key')
-        self.api_url = self._config.get('api_url')
-        self.api_type = self._config.get('api_type')
-
-        self.features = self._config.get('features', {})
-
-    def _validate(self):
-        pass
-
-    def _fromfile(self, configpath):
-        if configpath is None:
-            return {}
-
-        try:
-            with Path(configpath).open() as configfp:
-                return json.load(configfp)
-        except FileNotFoundError:
-            return {}
+    config: ApiConfig
 
 
 @dataclass
@@ -61,6 +39,7 @@ class ToolConfig:
 
 @dataclass
 class ChatInfo:
+    vendor: str
     model: str
     tools: int
     system: int
@@ -79,9 +58,9 @@ class ChatBase:
         if config is None:
             raise RuntimeError
 
-        self._model = config.model
+        self._config = config
 
-        self._setup_context(config, **kwargs)
+        self._setup_context(config.config, **kwargs)
 
         self._system = None
 
@@ -96,7 +75,7 @@ class ChatBase:
 
         self._stats = ChatStat()
 
-    def _setup_context(self, config: ChatConfig, **kwargs):
+    def _setup_context(self, config: ApiConfig, **kwargs):
         raise NotImplementedError
 
     # messages
@@ -231,7 +210,7 @@ class ChatBase:
             self._debug_base_chat_state()
 
             events = self._iterate_model_events(
-                model=self._model,
+                model=self._config.model,
                 system=self._system,
                 messages=self._messages,
                 tools=self._tools,
@@ -268,7 +247,7 @@ class ChatBase:
             self._commit_user_message(content)
 
         return self._count_message_tokens(
-            model=self._model,
+            model=self._config.model,
             system=self._system,
             messages=self._messages,
             tools=self._tools,
@@ -278,7 +257,8 @@ class ChatBase:
 
     def info(self):
         return ChatInfo(
-            self._model,
+            self._config.vendor,
+            self._config.model,
             len(self._funcs or ()),
             len(self._system or ()),
             len(self._messages),

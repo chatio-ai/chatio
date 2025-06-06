@@ -1,6 +1,10 @@
 
 import os
+import json
 
+from pathlib import Path
+
+from chatio.api._common import ApiConfig
 from chatio.api._common import ChatConfig
 from chatio.api._common import ToolConfig
 
@@ -14,11 +18,25 @@ from toolbelt.web import WebSearchTool, WebBrowseTool
 # from toolbelt.llm import LlmDialogTool
 
 
-def init_config():
-    return ChatConfig(os.environ.get("CHATIO_PROVIDER_JSON", "./provider.json"))
+def init_config(env_name: str | None = None) -> ChatConfig:
+    if env_name is None:
+        env_name = 'CHATIO_MODEL_NAME'
+
+    model_name = os.environ.get(env_name)
+    if not model_name or '/' not in model_name:
+        err_msg = f"Configure {env_name}!"
+        raise RuntimeError(err_msg)
+
+    vendor_name, _, model_name = model_name.partition('/')
+    vendor_conf = Path("./vendors").joinpath(vendor_name + ".json")
+
+    with vendor_conf.open() as vendorfp:
+        vendor_json = json.load(vendorfp)
+
+    return ChatConfig(vendor_name, model_name, ApiConfig(**vendor_json))
 
 
-def default_tools():
+def default_tools() -> ToolConfig:
     wiki = WikiToolFactory()
 
     return ToolConfig({

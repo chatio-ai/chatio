@@ -20,8 +20,10 @@ def run_text(text, style=None, file=None):
 def run_info(chat, style=None, file=None):
     info = chat.info()
 
-    run_text(f"chatio: model: {info.model} tools: {info.tools} system: {info.system} messages: {info.messages}",
-             style=style, file=file)
+    run_text(
+        f"chatio: model: {info.vendor}/{info.model} "
+        f"tools: {info.tools} system: {info.system} messages: {info.messages}",
+        style=style, file=file)
 
 
 def run_user(style=None, file=None):

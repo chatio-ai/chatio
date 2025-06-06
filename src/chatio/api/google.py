@@ -7,8 +7,8 @@ from google.genai import Client
 
 from html2text import HTML2Text
 
+from ._common import ApiConfig
 from ._common import ChatBase
-from ._common import ChatConfig
 
 from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
@@ -70,12 +70,12 @@ def _pump(stream):
 class GoogleChat(ChatBase):
 
     @override
-    def _setup_context(self, config: ChatConfig, **_kwargs):
+    def _setup_context(self, config: ApiConfig, **_kwargs):
         self._client = Client(
             # base_url=config.api_url,
             api_key=config.api_key)
 
-        self._grounding = config.features.get('grounding')
+        self._grounding = config.features and config.features.get('grounding')
 
     # tools
 

@@ -5,8 +5,8 @@ from typing import override
 
 from openai import OpenAI
 
+from ._common import ApiConfig
 from ._common import ChatBase
-from ._common import ChatConfig
 
 from ._events import TextEvent, DoneEvent, StatEvent, CallEvent
 
@@ -47,12 +47,12 @@ def _pump(streamctx):
 class OpenAIChat(ChatBase):
 
     @override
-    def _setup_context(self, config: ChatConfig, **_kwargs):
+    def _setup_context(self, config: ApiConfig, **_kwargs):
         self._client = OpenAI(
             base_url=config.api_url,
             api_key=config.api_key)
 
-        self._prediction = config.features.get('prediction')
+        self._prediction = config.features and config.features.get('prediction')
 
     # tools
 

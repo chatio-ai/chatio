@@ -5,6 +5,7 @@ from typing import override
 
 from anthropic import Anthropic
 
+from ._common import ApiConfig
 from ._common import ChatBase
 
 from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
@@ -41,7 +42,7 @@ def _pump(streamctx):
 class ClaudeChat(ChatBase):
 
     @override
-    def _setup_context(self, config, *, use_cache=True, **_kwargs):
+    def _setup_context(self, config: ApiConfig, *, use_cache=True, **_kwargs):
         self._client = Anthropic(
             base_url=config.api_url,
             api_key=config.api_key)

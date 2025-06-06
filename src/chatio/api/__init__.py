@@ -8,27 +8,22 @@ from .openai import OpenAIChat
 
 
 def build_chat(*args, **kwargs) -> ChatBase:
-    config: ChatConfig | None = kwargs.setdefault('config')
-    model = kwargs.get('model')
+    config: ChatConfig | None = kwargs.get('config')
 
     if config is None:
         err_msg = "no config specified!"
         raise RuntimeError
-    if model is not None:
-        config.model = model
     if config.model is None:
         err_msg = "no model specified!"
         raise RuntimeError(err_msg)
 
-    api_type = config.api_type
-    if not api_type:
-        return OpenAIChat(*args, **kwargs)
-    if api_type == 'claude':
-        return ClaudeChat(*args, **kwargs)
-    if api_type == 'google':
-        return GoogleChat(*args, **kwargs)
-    if api_type == 'openai':
-        return OpenAIChat(*args, **kwargs)
-
-    err_msg = f"api_type not supported: {api_type}"
-    raise RuntimeError(err_msg)
+    match config.config.api_cls:
+        case 'claude':
+            return ClaudeChat(*args, **kwargs)
+        case 'google':
+            return GoogleChat(*args, **kwargs)
+        case 'openai':
+            return OpenAIChat(*args, **kwargs)
+        case _:
+            err_msg = f"api_cls not supported: {config.config.api_cls}"
+            raise RuntimeError(err_msg)

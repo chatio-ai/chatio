@@ -40,9 +40,9 @@ COPY --from=devel /app/bin /app/bin
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app/src/
 
-RUN useradd -d /app/run -m chatio
+RUN useradd -d /app/var -m chatio
 
-WORKDIR /app/run/
+WORKDIR /app/var
 
 USER chatio
 
