@@ -1,12 +1,14 @@
 
+from collections.abc import Mapping
+
 from . import ToolBase
 
 
 class ImageDumpTool(ToolBase):
 
-    __desc__ = "Dump summary of image analysis. Summary should include key colors (r,g,b) and image description."
+    __desc__: str = "Dump summary of image analysis. Summary should include key colors (r,g,b) and image description."
 
-    __schema__ = {
+    __schema__: Mapping = {
         "type": "object",
         "properties": {
             "info": {
@@ -38,4 +40,4 @@ class ImageDumpTool(ToolBase):
 
     def __call__(self, info=None):
         return
-        yield
+        yield info

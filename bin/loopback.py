@@ -7,8 +7,8 @@ import pathlib
 
 from chatio.api import build_chat
 from chatio.misc import init_config
-from chatio.cli import run_info, run_chat, run_text
-from chatio.cli import Style
+from chatio.cli.stdio import run_info, run_chat, run_text
+from chatio.cli.style import Style
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -43,7 +43,7 @@ event_styles = [
 def text_from(filepath):
     try:
         return filepath.open().read()
-    except IOError as e:
+    except OSError as e:
         print(e, file=sys.stderr)
         return None
 
@@ -51,7 +51,7 @@ def text_from(filepath):
 def file_from(filepath):
     try:
         return filepath.open()
-    except IOError as e:
+    except OSError as e:
         print(e, file=sys.stderr)
         return None
 

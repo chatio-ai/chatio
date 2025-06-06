@@ -4,9 +4,13 @@ import json
 import base64
 import mimetypes
 
+from pathlib import Path
+
+from pprint import pprint
+
 from dataclasses import dataclass
 
-from ..chat.stats import ChatStat
+from chatio.chat.stats import ChatStat
 
 from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
@@ -31,10 +35,17 @@ class ChatConfig:
             return {}
 
         try:
-            with open(configpath, 'r') as configfp:
+            with Path(configpath).open() as configfp:
                 return json.load(configfp)
         except FileNotFoundError:
             return {}
+
+
+@dataclass
+class ToolConfig:
+    tools: dict | None = None
+    tool_choice: str | None = None
+    tool_choice_name: str | None = None
 
 
 @dataclass
@@ -49,8 +60,8 @@ class ChatBase:
 
     def __init__(self,
                  system=None, messages=None,
-                 tools=None, tool_choice=None, tool_choice_name=None,
-                 config: ChatConfig = None, **kwargs):
+                 tools: ToolConfig | None = None,
+                 config: ChatConfig | None = None, **kwargs):
 
         self._model = config.model
 
@@ -60,12 +71,12 @@ class ChatBase:
 
         self._setup_messages(system, messages)
 
-        self._setup_tools(tools, tool_choice, tool_choice_name)
+        self._setup_tools(tools)
 
         self._stats = ChatStat()
 
     def _setup_context(self, config: ChatConfig, **kwargs):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     # messages
 
@@ -87,42 +98,42 @@ class ChatBase:
     def _as_contents(self, content):
         if isinstance(content, str):
             return [self._format_text_chunk(content)]
-        elif isinstance(content, dict):
+        if isinstance(content, dict):
             return [content]
-        elif isinstance(content, list):
+        if isinstance(content, list):
             return content
 
-        raise RuntimeError()
+        raise RuntimeError
 
     def _format_text_chunk(self, text):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _format_dev_message(self, content):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _format_user_message(self, content):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _commit_user_message(self, content):
         self._messages.append(self._format_user_message(content))
         self._ready = True
 
     def _format_model_message(self, content):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _commit_model_message(self, content):
         self._messages.append(self._format_model_message(content))
         self._ready = False
 
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
         self._messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
         self._ready = False
 
     def _format_tool_response(self, tool_call_id, tool_name, tool_output):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
         self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
@@ -131,27 +142,27 @@ class ChatBase:
     # tools
 
     def _format_tool_definition(self, name, desc, schema):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _format_tool_definitions(self, tools):
         return tools
 
     def _format_tool_selection(self, tool_choice, tool_choice_name):
-        raise NotImplementedError()
+        raise NotImplementedError
 
-    def _setup_tools(self, tools, tool_choice, tool_choice_name):
+    def _setup_tools(self, tools: ToolConfig):
         self._tools = []
         self._funcs = {}
 
-        if tools is None:
-            tools = {}
+        if tools.tools is None:
+            tools.tools = {}
 
-        for name, tool in tools.items():
-            desc = tool.__desc__
-            schema = tool.__schema__
+        for name, tool in tools.tools.items():
+            desc = tool.desc
+            schema = tool.schema
 
             if not name or not desc or not schema:
-                raise RuntimeError()
+                raise RuntimeError
 
             self._tools.append(self._format_tool_definition(name, desc, schema))
 
@@ -159,7 +170,7 @@ class ChatBase:
 
         self._tools = self._format_tool_definitions(self._tools)
 
-        self._tool_choice = self._format_tool_selection(tool_choice, tool_choice_name)
+        self._tool_choice = self._format_tool_selection(tools.tool_choice, tools.tool_choice_name)
 
     def _process_tool(self, tool_call_id, tool_name, tool_args):
         tool_func = self._funcs.get(tool_name)
@@ -186,7 +197,7 @@ class ChatBase:
     # stream
 
     def _iterate_model_events(self, model, system, messages, tools):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def __call__(self, content=None, **kwargs):
         if content:
@@ -228,7 +239,7 @@ class ChatBase:
                         yield from self._stats(event)
 
     def _count_message_tokens(self, model, system, messages, tools):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def count_tokens(self, content=None):
         if content:
@@ -256,7 +267,6 @@ class ChatBase:
         # self._debug = True
 
         if self._debug:
-            from pprint import pprint
             print()
             pprint(self._system)
             print()
@@ -266,7 +276,7 @@ class ChatBase:
     # history
 
     def commit_image(self, filepath):
-        with open(filepath, "rb") as file:
+        with Path(filepath).open("rb") as file:
             data = file.read()
             blob = base64.b64encode(data).decode()
             mimetype, _ = mimetypes.guess_type(filepath)
@@ -275,7 +285,7 @@ class ChatBase:
 
             self._commit_user_message(self._format_image_blob(blob, mimetype))
 
-    def commit_chunk(self, chunk, model=False):
+    def commit_chunk(self, chunk, *, model=False):
         if model:
             self._commit_model_message(chunk)
         else:

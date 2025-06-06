@@ -1,11 +1,15 @@
 
+from collections.abc import ABC, Mapping
 
-class ToolBase:
 
-    __desc__ = None
+class ToolBase(ABC):
 
-    __schema__ = None
+    __desc__: str | None = None
+
+    __schema__: Mapping | None = None
 
     def __init__(self, desc=None):
-        if desc:
-            self.__desc__ = desc
+        if desc is None:
+            desc = self.__desc__
+        self.desc = desc
+        self.schema = self.__schema__

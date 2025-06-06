@@ -4,8 +4,10 @@ import sys
 
 import dotenv
 
+from chatio.api._common import ToolConfig
+
 from chatio.api import build_chat
-from chatio.cli import run_info, run_chat
+from chatio.cli.stdio import run_info, run_chat
 from chatio.misc import init_config
 
 from toolbelt.image import ImageDumpTool
@@ -14,9 +16,11 @@ from toolbelt.image import ImageDumpTool
 dotenv.load_dotenv()
 
 chat = build_chat(
-    tool_choice='name',
-    tool_choice_name='run_imgdump',
-    tools={"run_imgdump": ImageDumpTool()},
+    tools=ToolConfig(
+        tools={"run_imgdump": ImageDumpTool()},
+        tool_choice='name',
+        tool_choice_name='run_imgdump',
+    ),
     config=init_config(),
 )
 
@@ -24,7 +28,7 @@ chat = build_chat(
 if __name__ == '__main__':
     filenames = sys.argv[1:]
     if not filenames:
-        raise SystemExit()
+        raise SystemExit
 
     for filename in filenames:
         chat.commit_image(filename)

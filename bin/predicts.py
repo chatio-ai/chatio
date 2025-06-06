@@ -5,7 +5,7 @@ import dotenv
 import logging
 
 from chatio.api import build_chat
-from chatio.cli import run_info, run_user, run_chat
+from chatio.cli.stdio import run_info, run_user, run_chat
 from chatio.cli.style import Style
 from chatio.misc import init_config
 

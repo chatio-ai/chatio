@@ -41,7 +41,7 @@ class ClaudePump:
 
 
 class ClaudeChat(ChatBase):
-    def _setup_context(self, config, use_cache=True, **kwargs):
+    def _setup_context(self, config, *, use_cache=True, **_kwargs):
         self._client = Anthropic(
             base_url=config.api_url,
             api_key=config.api_key)
@@ -79,10 +79,11 @@ class ClaudeChat(ChatBase):
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
             return None
-        elif not tool_choice_name:
+
+        if not tool_choice_name:
             return {"type": tool_choice}
-        else:
-            return {"type": tool_choice, "name": tool_choice_name}
+
+        return {"type": tool_choice, "name": tool_choice_name}
 
     # messages
 
@@ -111,13 +112,13 @@ class ClaudeChat(ChatBase):
     def _format_user_message(self, content):
         return {
             "role": "user",
-            "content": self._as_contents(content)
+            "content": self._as_contents(content),
         }
 
     def _format_model_message(self, content):
         return {
             "role": "assistant",
-            "content": self._as_contents(content)
+            "content": self._as_contents(content),
         }
 
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
@@ -128,7 +129,7 @@ class ClaudeChat(ChatBase):
             "input": tool_input,
         })
 
-    def _format_tool_response(self, tool_call_id, tool_name, tool_output):
+    def _format_tool_response(self, tool_call_id, _tool_name, tool_output):
         return self._format_user_message({
             "type": "tool_result",
             "tool_use_id": tool_call_id,
@@ -137,7 +138,7 @@ class ClaudeChat(ChatBase):
 
     # events
 
-    def _iterate_model_events(self, model, system, messages, tools, **kwargs):
+    def _iterate_model_events(self, model, system, messages, tools, **_kwargs):
         return ClaudePump(self._client.messages.stream(
             model=model,
             max_tokens=4096,

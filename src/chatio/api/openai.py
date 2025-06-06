@@ -36,9 +36,9 @@ class OpenAIPump:
                 usage.prompt_tokens,
                 usage.completion_tokens,
                 0,
-                input_details and input_details.cached_tokens or 0,
-                output_details and output_details.accepted_prediction_tokens or 0,
-                output_details and output_details.rejected_prediction_tokens or 0,
+                (input_details and input_details.cached_tokens) or 0,
+                (output_details and output_details.accepted_prediction_tokens) or 0,
+                (output_details and output_details.rejected_prediction_tokens) or 0,
             )
 
             for call in final.tool_calls or ():
@@ -47,7 +47,7 @@ class OpenAIPump:
 
 
 class OpenAIChat(ChatBase):
-    def _setup_context(self, config: ChatConfig, **kwargs):
+    def _setup_context(self, config: ChatConfig, **_kwargs):
         self._client = OpenAI(
             base_url=config.api_url,
             api_key=config.api_key)
@@ -59,10 +59,9 @@ class OpenAIChat(ChatBase):
     def _tool_schema(self, schema):
         result = schema.copy()
 
+        props = None
         if result.get("type") == "object":
             props = result.setdefault("properties", {})
-        else:
-            props = None
 
         if props is not None:
             result.update({
@@ -92,10 +91,11 @@ class OpenAIChat(ChatBase):
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
             return None
-        elif not tool_choice_name:
+
+        if not tool_choice_name:
             return {"type": tool_choice}
-        else:
-            return {"type": tool_choice, "function": {"name": tool_choice_name}}
+
+        return {"type": tool_choice, "function": {"name": tool_choice_name}}
 
     # messages
 
@@ -114,19 +114,19 @@ class OpenAIChat(ChatBase):
 
         return [], [{
             "role": "developer",
-            "content": self._as_contents(content)
+            "content": self._as_contents(content),
         }]
 
     def _format_user_message(self, content):
         return {
             "role": "user",
-            "content": self._as_contents(content)
+            "content": self._as_contents(content),
         }
 
     def _format_model_message(self, content):
         return {
             "role": "assistant",
-            "content": self._as_contents(content)
+            "content": self._as_contents(content),
         }
 
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
@@ -142,7 +142,7 @@ class OpenAIChat(ChatBase):
             }],
         }
 
-    def _format_tool_response(self, tool_call_id, tool_name, tool_output):
+    def _format_tool_response(self, tool_call_id, _tool_name, tool_output):
         return {
             "role": "tool",
             "tool_call_id": tool_call_id,
@@ -157,14 +157,14 @@ class OpenAIChat(ChatBase):
 
     # events
 
-    def _iterate_model_events_prediction(self, model, system, messages, prediction):
+    def _iterate_model_events_prediction(self, model, _system, messages, prediction):
         return OpenAIPump(self._client.beta.chat.completions.stream(
             model=model,
             stream_options={'include_usage': True},
             messages=messages,
             prediction=prediction))
 
-    def _iterate_model_events(self, model, system, messages, tools, prediction=None, **kwargs):
+    def _iterate_model_events(self, model, system, messages, tools, prediction=None, **_kwargs):
         if self._prediction and prediction:
             prediction = self._format_predict_content(prediction)
             return self._iterate_model_events_prediction(model, system, messages, prediction)

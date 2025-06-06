@@ -4,8 +4,10 @@ import sys
 import dotenv
 import logging
 
+from chatio.api._common import ToolConfig
+
 from chatio.api import build_chat
-from chatio.cli import run_info, run_user, run_chat
+from chatio.cli.stdio import run_info, run_user, run_chat
 from chatio.cli.style import Style
 from chatio.misc import init_config
 
@@ -49,7 +51,7 @@ tools = {
 
 # tools = {}
 
-chat = build_chat(prompt, tools=tools, config=init_config())
+chat = build_chat(prompt, tools=ToolConfig(tools), config=init_config())
 
 
 if __name__ == '__main__':

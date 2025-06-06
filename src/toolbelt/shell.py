@@ -1,4 +1,8 @@
 
+from collections.abc import Mapping
+
+from contextlib import suppress
+
 from subprocess import Popen, PIPE, STDOUT
 
 from . import ToolBase
@@ -11,11 +15,8 @@ class ShellToolBase(ToolBase):
 $ {command}
 """
 
-        try:
-            for chunk in iterate:
-                yield chunk
-        except KeyboardInterrupt:
-            pass
+        with suppress(KeyboardInterrupt):
+            yield from iterate
 
         yield f"""```
 """
@@ -33,9 +34,9 @@ $ {command}
 
 class ShellCalcTool(ShellToolBase):
 
-    __desc__ = "Run bc command using system shell to evaluate the expression. Returns output of the command."
+    __desc__: str = "Run bc command using system shell to evaluate the expression. Returns output of the command."
 
-    __schema__ = {
+    __schema__: Mapping = {
         "type": "object",
         "properties": {
             "expr": {
@@ -55,9 +56,9 @@ class ShellCalcTool(ShellToolBase):
 
 class ShellExecTool(ShellToolBase):
 
-    __desc__ = "Run custom user command using system shell. Returns output collected from stdout and stderr streams."
+    __desc__: str = "Run custom user command using system shell. Returns output collected from stdout and stderr."
 
-    __schema__ = {
+    __schema__: Mapping = {
         "type": "object",
         "properties": {
             "command": {

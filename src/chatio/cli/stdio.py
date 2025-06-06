@@ -5,10 +5,11 @@ from .style import Style, Empty
 def _mk_style(style=None):
     if style is None:
         return Empty
-    elif isinstance(style, str):
+
+    if isinstance(style, str):
         return Style(prefix=style)
-    else:
-        return style
+
+    return style
 
 
 def run_text(text, style=None, file=None):
@@ -19,11 +20,8 @@ def run_text(text, style=None, file=None):
 def run_info(chat, style=None, file=None):
     info = chat.info()
 
-    run_text("chatio: model: %s tools: %s system: %s messages: %s" % (
-        info.model,
-        info.tools,
-        info.system,
-        info.messages), style=style, file=file)
+    run_text(f"chatio: model: {info.model} tools: {info.tools} system: {info.system} messages: {info.messages}",
+             style=style, file=file)
 
 
 def run_user(style=None, file=None):
@@ -42,27 +40,27 @@ def _run_chat_event(event, style, file=None):
     match etype:
 
         case 'token_stats':
-            etext = "token_stats: %s:" % event['scope']
-            etext += " in: %s" % event['input_tokens']
-            etext += " (hist: %s" % event['input_history_tokens']
-            etext += " curr: %s)" % event['input_current_tokens']
-            etext += " out: %s" % event['output_tokens']
+            etext = f"token_stats: {event['scope']}:"
+            etext += f" in: {event['input_tokens']}"
+            etext += f" (hist: {event['input_history_tokens']}"
+            etext += f" curr: {event['input_current_tokens']})"
+            etext += f" out: {event['output_tokens']}"
             etext += "  "
-            etext += " nc: %s" % event['cache_missed']
-            etext += " cw: %s" % event['cache_written']
-            etext += " cr: %s" % event['cache_read']
+            etext += f" nc: {event['cache_missed']}"
+            etext += f" cw: {event['cache_written']}"
+            etext += f" cr: {event['cache_read']}"
             etext += "  "
-            etext += " pa: %s" % event['predict_accepted']
-            etext += " pr: %s" % event['predict_rejected']
+            etext += f" pa: {event['predict_accepted']}"
+            etext += f" pr: {event['predict_rejected']}"
 
         case 'tools_usage':
-            etext = "tools_usage: %s: %s" % (event['tool_name'], event['tool_args'])
+            etext = f"tools_usage: {event['tool_name']}: {event['tool_args']}"
 
         case 'tools_event':
-            etext = "tools_event: %s: %s" % (event['tool_name'], event['tool_data'])
+            etext = f"tools_event: {event['tool_name']}: {event['tool_data']}"
 
         case _:
-            raise RuntimeError()
+            raise RuntimeError
 
     with style.wrap(file=file):
         print(etext, end="", flush=True, file=file)
@@ -109,10 +107,9 @@ def _run_chat(events, model_style=None, event_style=None, tools_style=None, file
             case _, _:
                 style = event_style
 
-        if not defer == style:
-            if defer:
-                _run_chat_chunk('\n', style, not defer, file)
-                defer = None
+        if defer != style and defer:
+            _run_chat_chunk('\n', style, not defer, file)
+            defer = None
 
         chunk = event.get("text")
         match etype:

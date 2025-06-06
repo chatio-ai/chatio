@@ -1,4 +1,5 @@
 
+from collections.abc import Mapping
 
 from mediawiki import MediaWiki
 
@@ -40,7 +41,7 @@ class WikiToolBase(ToolBase):
         return self.page_cache[title], cached
 
     def _run_tool(self, page=None, **kwargs):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def __call__(self, title=None, **kwargs):
         page, cached = self._get_page(title)
@@ -50,9 +51,9 @@ class WikiToolBase(ToolBase):
 
 class WikiSearchTool(WikiToolBase):
 
-    __desc__ = "Get list of titles based on string search. Returns up to 10 titles each on separate line."
+    __desc__: str = "Get list of titles based on string search. Returns up to 10 titles each on separate line."
 
-    __schema__ = {
+    __schema__: Mapping = {
         "type": "object",
         "properties": {
             "text": {
@@ -69,9 +70,9 @@ class WikiSearchTool(WikiToolBase):
 
 class WikiContentTool(WikiToolBase):
 
-    __desc__ = "Get list of sections for wikipedia article. Returns list of sections each on separate line."
+    __desc__: str = "Get list of sections for wikipedia article. Returns list of sections each on separate line."
 
-    __schema__ = {
+    __schema__: Mapping = {
         "type": "object",
         "properties": {
             "title": {
@@ -88,9 +89,9 @@ class WikiContentTool(WikiToolBase):
 
 class WikiSummaryTool(WikiToolBase):
 
-    __desc__ = "Get content of summary for wikipedia article. Returns text of summary (header) section."
+    __desc__: str = "Get content of summary for wikipedia article. Returns text of summary (header) section."
 
-    __schema__ = {
+    __schema__: Mapping = {
         "type": "object",
         "properties": {
             "title": {
@@ -107,9 +108,9 @@ class WikiSummaryTool(WikiToolBase):
 
 class WikiSectionTool(WikiToolBase):
 
-    __desc__ = "Get content of specific section for wikipedia article. Returns text of the given section."
+    __desc__: str = "Get content of specific section for wikipedia article. Returns text of the given section."
 
-    __schema__ = {
+    __schema__: Mapping = {
         "type": "object",
         "properties": {
             "title": {
@@ -119,7 +120,7 @@ class WikiSectionTool(WikiToolBase):
             "section": {
                 "type": "string",
                 "description": "The section name to fetch content for.",
-            }
+            },
         },
         "required": ["title", "section"],
     }

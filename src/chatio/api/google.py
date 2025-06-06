@@ -45,12 +45,12 @@ class GooglePump:
                     usage = chunk.usage_metadata
                     search = chunk.candidates[0].grounding_metadata
 
-            grounding_chunks = search and search.grounding_chunks or ()
+            grounding_chunks = (search and search.grounding_chunks) or ()
             for index, chunk in enumerate(grounding_chunks, 1):
                 entry = f"   [{index}]: <{chunk.web.uri}> {chunk.web.title}\n"
                 yield TextEvent(entry, label="search.sources")
 
-            search_entry_point = search and search.search_entry_point or None
+            search_entry_point = (search and search.search_entry_point) or None
             if search_entry_point:
                 parser = HTML2Text(bodywidth=0)
                 parser.inline_links = False
@@ -71,7 +71,7 @@ class GooglePump:
 
 
 class GoogleChat(ChatBase):
-    def _setup_context(self, config: ChatConfig, **kwargs):
+    def _setup_context(self, config: ChatConfig, **_kwargs):
         self._client = Client(
             # base_url=config.api_url,
             api_key=config.api_key)
@@ -108,10 +108,11 @@ class GoogleChat(ChatBase):
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
             return None
-        elif not tool_choice_name:
+
+        if not tool_choice_name:
             return {"type": tool_choice}
-        else:
-            return {"type": tool_choice, "function": {"name": tool_choice_name}}
+
+        return {"type": tool_choice, "function": {"name": tool_choice_name}}
 
     # messages
 
@@ -133,13 +134,13 @@ class GoogleChat(ChatBase):
     def _format_user_message(self, content):
         return {
             "role": "user",
-            "parts": self._as_contents(content)
+            "parts": self._as_contents(content),
         }
 
     def _format_model_message(self, content):
         return {
             "role": "model",
-            "parts": self._as_contents(content)
+            "parts": self._as_contents(content),
         }
 
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
@@ -170,7 +171,7 @@ class GoogleChat(ChatBase):
 
     # events
 
-    def _iterate_model_events(self, model, system, messages, tools, **kwargs):
+    def _iterate_model_events(self, model, system, messages, tools, **_kwargs):
         return GooglePump(self._client.models.generate_content_stream(
             model=model,
             config={

@@ -14,7 +14,8 @@ def build_chat(*args, **kwargs) -> ChatBase:
     if model is not None:
         config.model = model
     if config.model is None:
-        raise RuntimeError("no model specified!")
+        err_msg = "no model specified!"
+        raise RuntimeError(err_msg)
 
     api_type = config.api_type
     if not api_type:
@@ -26,4 +27,5 @@ def build_chat(*args, **kwargs) -> ChatBase:
     if api_type == 'openai':
         return OpenAIChat(*args, **kwargs)
 
-    raise RuntimeError("api_type not supported: %s" % api_type)
+    err_msg = f"api_type not supported: {api_type}"
+    raise RuntimeError(err_msg)

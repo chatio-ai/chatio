@@ -1,7 +1,7 @@
 
 import os
 
-from ..api._common import ChatConfig
+from chatio.api._common import ChatConfig
 
 
 def init_config():

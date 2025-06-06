@@ -19,6 +19,11 @@ ignore = [
 	"ERA001",	# commented code
 
 	"I001",		# unsorted imports
+
+	"T201",		# print found
+	"T203",		# pprint found
+
+	"S602",		# shell equals true
 ]
 
 [tool.pylint.format]

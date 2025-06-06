@@ -4,8 +4,10 @@ import sys
 
 import dotenv
 
+from chatio.api._common import ToolConfig
+
 from chatio.api import build_chat
-from chatio.cli import run_info
+from chatio.cli.stdio import run_info
 from chatio.misc import init_config
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
@@ -21,7 +23,7 @@ if __name__ == '__main__':
     prompt = " ".join(sys.argv[1:])
     content = sys.stdin.read()
     if not content.strip():
-        raise SystemExit()
+        raise SystemExit
 
     wiki = WikiToolFactory()
     tools = {
@@ -37,7 +39,7 @@ if __name__ == '__main__':
 
     tools = {}
 
-    chat = build_chat(prompt, messages=[content], tools=tools, config=init_config())
+    chat = build_chat(prompt, messages=[content], tools=ToolConfig(tools), config=init_config())
 
     run_info(chat, file=sys.stderr)
 
