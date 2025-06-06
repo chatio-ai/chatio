@@ -12,7 +12,7 @@ class WikiToolFactory:
         self.page_cache = {}
 
     def wiki_search(self, desc=None):
-        return WikiSearchTool(self.wiki, self.page_cache, desc)
+        return WikiSearchTool(self.wiki, desc)
 
     def wiki_content(self, desc=None):
         return WikiContentTool(self.wiki, self.page_cache, desc)
@@ -25,10 +25,14 @@ class WikiToolFactory:
 
 
 class WikiToolBase(ToolBase):
-    def __init__(self, wiki, page_cache, desc=None):
+    def __init__(self, wiki, desc=None):
         super().__init__(desc)
-
         self.wiki = wiki
+
+
+class WikiPageToolBase(WikiToolBase):
+    def __init__(self, wiki, page_cache, desc=None):
+        super().__init__(wiki, desc)
         self.page_cache = page_cache
 
     def _get_page(self, title=None):
@@ -68,7 +72,7 @@ class WikiSearchTool(WikiToolBase):
         yield "\n".join(self.wiki.search(text))
 
 
-class WikiContentTool(WikiToolBase):
+class WikiContentTool(WikiPageToolBase):
 
     __desc__: str = "Get list of sections for wikipedia article. Returns list of sections each on separate line."
 
@@ -83,11 +87,11 @@ class WikiContentTool(WikiToolBase):
         "required": ["title"],
     }
 
-    def _run_tool(self, page=None):
+    def _run_tool(self, page=None, **_kwargs):
         yield "\n".join(page.sections)
 
 
-class WikiSummaryTool(WikiToolBase):
+class WikiSummaryTool(WikiPageToolBase):
 
     __desc__: str = "Get content of summary for wikipedia article. Returns text of summary (header) section."
 
@@ -102,11 +106,11 @@ class WikiSummaryTool(WikiToolBase):
         "required": ["title"],
     }
 
-    def _run_tool(self, page=None):
+    def _run_tool(self, page=None, **_kwargs):
         yield page.section(None)
 
 
-class WikiSectionTool(WikiToolBase):
+class WikiSectionTool(WikiPageToolBase):
 
     __desc__: str = "Get content of specific section for wikipedia article. Returns text of the given section."
 
@@ -125,5 +129,5 @@ class WikiSectionTool(WikiToolBase):
         "required": ["title", "section"],
     }
 
-    def _run_tool(self, page=None, section=None):
+    def _run_tool(self, page=None, section=None, **_kwargs):
         yield page.section(section)

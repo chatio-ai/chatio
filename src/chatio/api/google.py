@@ -180,3 +180,6 @@ class GoogleChat(ChatBase):
                 'system_instruction': system,
             },
             contents=messages))
+
+    def _count_message_tokens(self, model, system, messages, tools):
+        raise NotImplementedError

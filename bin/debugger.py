@@ -2,8 +2,6 @@
 
 import sys
 
-import dotenv
-
 from chatio.api import build_chat
 from chatio.cli.stdio import run_info, run_chat
 from chatio.misc import init_config
@@ -50,12 +48,8 @@ def makechat():
     return build_chat(prompt, messages, config=init_config())
 
 
-dotenv.load_dotenv()
-
-chat = makechat()
-
-
-if __name__ == '__main__':
+def main():
+    chat = makechat()
 
     run_info(chat, "::: ")
 
@@ -78,3 +72,7 @@ if __name__ == '__main__':
     run_chat(chat(), "<<< ", "::: ")
 
     print()
+
+
+if __name__ == '__main__':
+    main()

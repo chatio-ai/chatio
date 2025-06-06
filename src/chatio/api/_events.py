@@ -17,7 +17,7 @@ class CallEvent:
     call_id: str
     name: str
     args: dict
-    input: str
+    args_raw: str
 
 
 @dataclass

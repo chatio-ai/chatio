@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-import dotenv
 import logging
 
 from chatio.api import build_chat
@@ -14,14 +13,11 @@ logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
 logging.getLogger('chatio.api').setLevel(logging.INFO)
 
 
-dotenv.load_dotenv()
+def main():
+    prompt = " ".join(sys.argv[1:])
 
-prompt = " ".join(sys.argv[1:])
+    chat = build_chat(prompt, config=init_config())
 
-chat = build_chat(prompt, config=init_config())
-
-
-if __name__ == '__main__':
     run_info(chat, Style("::: ", color=Style.BRIGHT_GREEN))
 
     results = None
@@ -30,7 +26,7 @@ if __name__ == '__main__':
         content = run_user(Style(">>> ", color=Style.BRIGHT_GREEN))
         if content is None:
             break
-        elif not content:
+        if not content:
             continue
 
         chat.commit_chunk(content)
@@ -42,3 +38,7 @@ if __name__ == '__main__':
                            tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))
 
     print()
+
+
+if __name__ == '__main__':
+    main()

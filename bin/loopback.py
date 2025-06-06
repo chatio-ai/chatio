@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-import dotenv
 import logging
 import pathlib
 
@@ -13,31 +12,6 @@ from chatio.cli.style import Style
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
 logging.getLogger('chatio.api').setLevel(logging.INFO)
-
-
-dotenv.load_dotenv()
-
-config = init_config()
-
-model_styles = [
-    Style(">>> ", color=Style.BRIGHT_GREEN),
-    Style("<<< ", color=Style.BRIGHT_CYAN),
-]
-
-banner_styles = [
-    Style("::: ", color=Style.BRIGHT_GREEN),
-    Style("::: ", color=Style.BRIGHT_CYAN),
-]
-
-prompt_styles = [
-    Style("### >>> ", color=Style.BRIGHT_GREEN),
-    Style("### <<< ", color=Style.BRIGHT_CYAN),
-]
-
-event_styles = [
-    Style("::: "),
-    Style("::: "),
-]
 
 
 def text_from(filepath):
@@ -56,7 +30,28 @@ def file_from(filepath):
         return None
 
 
-if __name__ == '__main__':
+def main():
+    config = init_config()
+
+    model_styles = [
+        Style(">>> ", color=Style.BRIGHT_GREEN),
+        Style("<<< ", color=Style.BRIGHT_CYAN),
+    ]
+
+    banner_styles = [
+        Style("::: ", color=Style.BRIGHT_GREEN),
+        Style("::: ", color=Style.BRIGHT_CYAN),
+    ]
+
+    prompt_styles = [
+        Style("### >>> ", color=Style.BRIGHT_GREEN),
+        Style("### <<< ", color=Style.BRIGHT_CYAN),
+    ]
+
+    event_styles = [
+        Style("::: "),
+        Style("::: "),
+    ]
 
     script = pathlib.Path(sys.argv[1]) if sys.argv[1:] else pathlib.Path()
 
@@ -108,3 +103,7 @@ if __name__ == '__main__':
             index = not index
     except KeyboardInterrupt:
         print()
+
+
+if __name__ == '__main__':
+    main()

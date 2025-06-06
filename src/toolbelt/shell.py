@@ -21,15 +21,15 @@ $ {command}
         yield f"""```
 """
 
-    def __call__(self, command=None):
+    def _command(self, command=None):
 
-        process = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT, text=True)
+        with Popen(command, shell=True, stdout=PIPE, stderr=STDOUT, text=True) as process:
 
-        yield from self._iterate(command, process.stdout)
+            yield from self._iterate(command, process.stdout)
 
-        process.stdout.close()
-        exit_code = process.wait()
-        yield {'command': command, 'exit_code': exit_code}
+            process.stdout.close()
+            exit_code = process.wait()
+            yield {'command': command, 'exit_code': exit_code}
 
 
 class ShellCalcTool(ShellToolBase):
@@ -47,11 +47,8 @@ class ShellCalcTool(ShellToolBase):
         "required": ["expr"],
     }
 
-    def __init__(self):
-        pass
-
     def __call__(self, expr):
-        return super().__call__(f"echo '{expr}' | bc")
+        return self._command(f"echo '{expr}' | bc")
 
 
 class ShellExecTool(ShellToolBase):
@@ -68,3 +65,6 @@ class ShellExecTool(ShellToolBase):
         },
         "required": ["command"],
     }
+
+    def __call__(self, command=None):
+        return self._command(command)

@@ -31,9 +31,13 @@ max-line-length = 120
 
 [tool.pylint."message control"]
 disable = [
+	"unspecified-encoding",
 	"f-string-without-interpolation",
 	"missing-docstring",
 ]
+
+[tool.pylint.similarities]
+min-similarity-lines = 9
 
 [tool.pyright]
 analyzeUnannotatedFunctions = true

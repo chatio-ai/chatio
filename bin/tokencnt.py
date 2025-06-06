@@ -2,45 +2,23 @@
 
 import sys
 
-import dotenv
-
-from chatio.api._common import ToolConfig
-
 from chatio.api import build_chat
 from chatio.cli.stdio import run_info
-from chatio.misc import init_config
-
-from toolbelt.shell import ShellCalcTool, ShellExecTool
-from toolbelt.image import ImageDumpTool
-from toolbelt.dummy import DummyTool
-
-from toolbelt.wiki import WikiToolFactory
+from chatio.misc import init_config, default_tools
 
 
-dotenv.load_dotenv()
-
-if __name__ == '__main__':
+def main():
     prompt = " ".join(sys.argv[1:])
     content = sys.stdin.read()
     if not content.strip():
         raise SystemExit
 
-    wiki = WikiToolFactory()
-    tools = {
-        "run_command": ShellExecTool(),
-        "run_bc_calc": ShellCalcTool(),
-        "run_imgdump": ImageDumpTool(),
-        "wiki_content": wiki.wiki_content(),
-        "wiki_summary": wiki.wiki_summary(),
-        "wiki_section": wiki.wiki_section(),
-        "wiki_search": wiki.wiki_search(),
-        "run_nothing": DummyTool(),
-    }
-
-    tools = {}
-
-    chat = build_chat(prompt, messages=[content], tools=ToolConfig(tools), config=init_config())
+    chat = build_chat(prompt, messages=[content], tools=default_tools(), config=init_config())
 
     run_info(chat, file=sys.stderr)
 
     print(chat.count_tokens())
+
+
+if __name__ == '__main__':
+    main()

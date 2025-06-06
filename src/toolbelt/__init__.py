@@ -1,8 +1,8 @@
 
-from collections.abc import ABC, Mapping
+from collections.abc import Mapping
 
 
-class ToolBase(ABC):
+class ToolBase:
 
     __desc__: str | None = None
 

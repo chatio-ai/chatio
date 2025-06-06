@@ -69,6 +69,10 @@ class ChatBase:
 
         self._setup_context(config, **kwargs)
 
+        self._system = None
+
+        self._messages = None
+
         self._setup_messages(system, messages)
 
         self._setup_tools(tools)
@@ -170,7 +174,8 @@ class ChatBase:
 
         self._tools = self._format_tool_definitions(self._tools)
 
-        self._tool_choice = self._format_tool_selection(tools.tool_choice, tools.tool_choice_name)
+        # self._tool_choice = self._format_tool_selection(tools.tool_choice, tools.tool_choice_name)
+        return self._format_tool_selection(tools.tool_choice, tools.tool_choice_name)
 
     def _process_tool(self, tool_call_id, tool_name, tool_args):
         tool_func = self._funcs.get(tool_name)
@@ -227,8 +232,8 @@ class ChatBase:
                     case DoneEvent(text):
                         if text:
                             self._commit_model_message(text)
-                    case CallEvent(call_id, name, args, input):
-                        self._commit_tool_request(call_id, name, input)
+                    case CallEvent(call_id, name, args, args_raw):
+                        self._commit_tool_request(call_id, name, args_raw)
                         yield {
                             "type": "tools_usage",
                             "tool_name": name,
@@ -263,10 +268,10 @@ class ChatBase:
         )
 
     def _debug_base_chat_state(self):
-        self._debug = False
-        # self._debug = True
+        _debug = False
+        # _debug = True
 
-        if self._debug:
+        if _debug:
             print()
             pprint(self._system)
             print()
@@ -274,6 +279,9 @@ class ChatBase:
             print()
 
     # history
+
+    def _format_image_blob(self, blob, mimetype):
+        raise NotImplementedError
 
     def commit_image(self, filepath):
         with Path(filepath).open("rb") as file:

@@ -175,3 +175,6 @@ class OpenAIChat(ChatBase):
             stream_options={'include_usage': True},
             tools=tools,
             messages=messages))
+
+    def _count_message_tokens(self, model, system, messages, tools):
+        raise NotImplementedError

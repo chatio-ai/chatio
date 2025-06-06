@@ -43,4 +43,4 @@ class WebBrowseTool(ToolBase):
     }
 
     def __call__(self, url=None):
-        yield html2text(get(url).text)
+        yield html2text(get(url, timeout=10).text)
