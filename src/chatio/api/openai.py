@@ -182,7 +182,7 @@ class OpenAIChat(ChatBase):
 
         return _pump(self._client.beta.chat.completions.stream(
             model=model,
-            max_tokens=4096,
+            max_completion_tokens=4096,
             stream_options={'include_usage': True},
             tools=tools,
             messages=messages))
