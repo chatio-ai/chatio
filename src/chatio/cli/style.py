@@ -37,6 +37,9 @@ class Style:
     BRIGHT_WHITE = "\033[97m"
 
     def __init__(self, prefix=None, suffix=None, color=None):
+        self.conf(prefix, suffix, color)
+
+    def conf(self, prefix=None, suffix=None, color=None):
         reset = Style.RESET
         if color is None:
             color = reset

@@ -1,15 +1,15 @@
 
-from collections.abc import Mapping
+from abc import ABC, abstractmethod
 
 
-class ToolBase:
+class ToolBase(ABC):
 
-    __desc__: str | None = None
+    @staticmethod
+    @abstractmethod
+    def desc() -> str:
+        ...
 
-    __schema__: Mapping | None = None
-
-    def __init__(self, desc=None):
-        if desc is None:
-            desc = self.__desc__
-        self.desc = desc
-        self.schema = self.__schema__
+    @staticmethod
+    @abstractmethod
+    def schema() -> dict[str, object]:
+        ...

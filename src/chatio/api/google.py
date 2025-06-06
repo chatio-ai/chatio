@@ -14,60 +14,55 @@ from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 log = logging.getLogger(__name__)
 
 
-class GooglePump:
-    def __init__(self, stream):
-        self._stream = stream
+def _pump(stream):
+    if stream:
 
-    def __iter__(self):
-        stream = self._stream
-        if stream:
+        usage = None
+        calls = []
+        final_text = ""
+        search = None
 
-            usage = None
-            calls = []
-            final_text = ""
-            search = None
+        for chunk in stream:
+            log.info("%s", chunk.model_dump_json(indent=2))
 
-            for chunk in stream:
-                log.info("%s", chunk.model_dump_json(indent=2))
+            if chunk.candidates \
+                    and chunk.candidates[0].content \
+                    and chunk.candidates[0].content.parts:
 
-                if chunk.candidates \
-                        and chunk.candidates[0].content \
-                        and chunk.candidates[0].content.parts:
+                for part in chunk.candidates[0].content.parts:
+                    if part.text:
+                        final_text += part.text
+                        yield TextEvent(part.text)
 
-                    for part in chunk.candidates[0].content.parts:
-                        if part.text:
-                            final_text += part.text
-                            yield TextEvent(part.text)
+                    if part.function_call:
+                        calls.append(part.function_call)
 
-                        if part.function_call:
-                            calls.append(part.function_call)
+                usage = chunk.usage_metadata
+                search = chunk.candidates[0].grounding_metadata
 
-                    usage = chunk.usage_metadata
-                    search = chunk.candidates[0].grounding_metadata
+        grounding_chunks = (search and search.grounding_chunks) or ()
+        for index, chunk in enumerate(grounding_chunks, 1):
+            entry = f"   [{index}]: <{chunk.web.uri}> {chunk.web.title}\n"
+            yield TextEvent(entry, label="search.sources")
 
-            grounding_chunks = (search and search.grounding_chunks) or ()
-            for index, chunk in enumerate(grounding_chunks, 1):
-                entry = f"   [{index}]: <{chunk.web.uri}> {chunk.web.title}\n"
-                yield TextEvent(entry, label="search.sources")
+        search_entry_point = (search and search.search_entry_point) or None
+        if search_entry_point:
+            parser = HTML2Text(bodywidth=0)
+            parser.inline_links = False
+            parser.protect_links = True
+            entry = parser.handle(search.search_entry_point.rendered_content)
+            yield TextEvent(entry, label="search.suggest")
 
-            search_entry_point = (search and search.search_entry_point) or None
-            if search_entry_point:
-                parser = HTML2Text(bodywidth=0)
-                parser.inline_links = False
-                parser.protect_links = True
-                entry = parser.handle(search.search_entry_point.rendered_content)
-                yield TextEvent(entry, label="search.suggest")
+        yield DoneEvent(final_text)
 
-            yield DoneEvent(final_text)
+        yield StatEvent(
+            usage.prompt_token_count or 0,
+            usage.candidates_token_count or 0,
+            0, usage.cached_content_token_count or 0,
+            0, 0)
 
-            yield StatEvent(
-                usage.prompt_token_count or 0,
-                usage.candidates_token_count or 0,
-                0, usage.cached_content_token_count or 0,
-                0, 0)
-
-            for call in calls:
-                yield CallEvent(call.id, call.name, call.args, call.args)
+        for call in calls:
+            yield CallEvent(call.id, call.name, call.args, call.args)
 
 
 class GoogleChat(ChatBase):
@@ -172,7 +167,7 @@ class GoogleChat(ChatBase):
     # events
 
     def _iterate_model_events(self, model, system, messages, tools, **_kwargs):
-        return GooglePump(self._client.models.generate_content_stream(
+        return _pump(self._client.models.generate_content_stream(
             model=model,
             config={
                 'max_output_tokens': 4096,

@@ -1,5 +1,5 @@
 
-from collections.abc import Mapping
+from typing import override
 
 from mediawiki import MediaWiki
 
@@ -11,28 +11,22 @@ class WikiToolFactory:
         self.wiki = MediaWiki()
         self.page_cache = {}
 
-    def wiki_search(self, desc=None):
-        return WikiSearchTool(self.wiki, desc)
+    def wiki_search(self):
+        return WikiSearchTool(self.wiki)
 
-    def wiki_content(self, desc=None):
-        return WikiContentTool(self.wiki, self.page_cache, desc)
+    def wiki_content(self):
+        return WikiContentTool(self.wiki, self.page_cache)
 
-    def wiki_summary(self, desc=None):
-        return WikiSummaryTool(self.wiki, self.page_cache, desc)
+    def wiki_summary(self):
+        return WikiSummaryTool(self.wiki, self.page_cache)
 
-    def wiki_section(self, desc=None):
-        return WikiSectionTool(self.wiki, self.page_cache, desc)
+    def wiki_section(self):
+        return WikiSectionTool(self.wiki, self.page_cache)
 
 
-class WikiToolBase(ToolBase):
-    def __init__(self, wiki, desc=None):
-        super().__init__(desc)
+class WikiPageToolBase(ToolBase):
+    def __init__(self, wiki, page_cache):
         self.wiki = wiki
-
-
-class WikiPageToolBase(WikiToolBase):
-    def __init__(self, wiki, page_cache, desc=None):
-        super().__init__(wiki, desc)
         self.page_cache = page_cache
 
     def _get_page(self, title=None):
@@ -53,20 +47,29 @@ class WikiPageToolBase(WikiToolBase):
         yield from self._run_tool(page, **kwargs)
 
 
-class WikiSearchTool(WikiToolBase):
+class WikiSearchTool(ToolBase):
 
-    __desc__: str = "Get list of titles based on string search. Returns up to 10 titles each on separate line."
+    @staticmethod
+    @override
+    def desc() -> str:
+        return "Get list of titles based on string search. Returns up to 10 titles each on separate line."
 
-    __schema__: Mapping = {
-        "type": "object",
-        "properties": {
-            "text": {
-                "type": "string",
-                "description": "The text to search for across pages titles and content.",
+    @staticmethod
+    @override
+    def schema() -> dict[str, object]:
+        return {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "description": "The text to search for across pages titles and content.",
+                },
             },
-        },
-        "required": ["text"],
-    }
+            "required": ["text"],
+        }
+
+    def __init__(self, wiki):
+        self.wiki = wiki
 
     def __call__(self, text=None):
         yield "\n".join(self.wiki.search(text))
@@ -74,18 +77,24 @@ class WikiSearchTool(WikiToolBase):
 
 class WikiContentTool(WikiPageToolBase):
 
-    __desc__: str = "Get list of sections for wikipedia article. Returns list of sections each on separate line."
+    @staticmethod
+    @override
+    def desc() -> str:
+        return "Get list of sections for wikipedia article. Returns list of sections each on separate line."
 
-    __schema__: Mapping = {
-        "type": "object",
-        "properties": {
-            "title": {
-                "type": "string",
-                "description": "The title of article to fetch list of sections for.",
+    @staticmethod
+    @override
+    def schema() -> dict[str, object]:
+        return {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "The title of article to fetch list of sections for.",
+                },
             },
-        },
-        "required": ["title"],
-    }
+            "required": ["title"],
+        }
 
     def _run_tool(self, page=None, **_kwargs):
         yield "\n".join(page.sections)
@@ -93,18 +102,24 @@ class WikiContentTool(WikiPageToolBase):
 
 class WikiSummaryTool(WikiPageToolBase):
 
-    __desc__: str = "Get content of summary for wikipedia article. Returns text of summary (header) section."
+    @staticmethod
+    @override
+    def desc() -> str:
+        return "Get content of summary for wikipedia article. Returns text of summary (header) section."
 
-    __schema__: Mapping = {
-        "type": "object",
-        "properties": {
-            "title": {
-                "type": "string",
-                "description": "The title of article to fetch summary content for.",
+    @staticmethod
+    @override
+    def schema() -> dict[str, object]:
+        return {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "The title of article to fetch summary content for.",
+                },
             },
-        },
-        "required": ["title"],
-    }
+            "required": ["title"],
+        }
 
     def _run_tool(self, page=None, **_kwargs):
         yield page.section(None)
@@ -112,22 +127,28 @@ class WikiSummaryTool(WikiPageToolBase):
 
 class WikiSectionTool(WikiPageToolBase):
 
-    __desc__: str = "Get content of specific section for wikipedia article. Returns text of the given section."
+    @staticmethod
+    @override
+    def desc() -> str:
+        return "Get content of specific section for wikipedia article. Returns text of the given section."
 
-    __schema__: Mapping = {
-        "type": "object",
-        "properties": {
-            "title": {
-                "type": "string",
-                "description": "The title of article to fetch section content for.",
+    @staticmethod
+    @override
+    def schema() -> dict[str, object]:
+        return {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "The title of article to fetch section content for.",
+                },
+                "section": {
+                    "type": "string",
+                    "description": "The section name to fetch content for.",
+                },
             },
-            "section": {
-                "type": "string",
-                "description": "The section name to fetch content for.",
-            },
-        },
-        "required": ["title", "section"],
-    }
+            "required": ["title", "section"],
+        }
 
     def _run_tool(self, page=None, section=None, **_kwargs):
         yield page.section(section)

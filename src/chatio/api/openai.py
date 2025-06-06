@@ -12,38 +12,34 @@ from ._events import TextEvent, DoneEvent, StatEvent, CallEvent
 log = logging.getLogger(__name__)
 
 
-class OpenAIPump:
-    def __init__(self, stream):
-        self._stream = stream
+def _pump(streamctx):
+    with streamctx as stream:
+        for chunk in stream:
+            log.info("%s", chunk.model_dump_json(indent=2))
 
-    def __iter__(self):
-        with self._stream as stream:
-            for chunk in stream:
-                log.info("%s", chunk.model_dump_json(indent=2))
+            if chunk.type == 'content.delta':
+                yield TextEvent(chunk.delta)
 
-                if chunk.type == 'content.delta':
-                    yield TextEvent(chunk.delta)
+        final = stream.get_final_completion().choices[0].message
+        yield DoneEvent(final.content)
 
-            final = stream.get_final_completion().choices[0].message
-            yield DoneEvent(final.content)
+        usage = stream.get_final_completion().usage
 
-            usage = stream.get_final_completion().usage
+        input_details = usage.prompt_tokens_details
+        output_details = usage.completion_tokens_details
 
-            input_details = usage.prompt_tokens_details
-            output_details = usage.completion_tokens_details
+        yield StatEvent(
+            usage.prompt_tokens,
+            usage.completion_tokens,
+            0,
+            (input_details and input_details.cached_tokens) or 0,
+            (output_details and output_details.accepted_prediction_tokens) or 0,
+            (output_details and output_details.rejected_prediction_tokens) or 0,
+        )
 
-            yield StatEvent(
-                usage.prompt_tokens,
-                usage.completion_tokens,
-                0,
-                (input_details and input_details.cached_tokens) or 0,
-                (output_details and output_details.accepted_prediction_tokens) or 0,
-                (output_details and output_details.rejected_prediction_tokens) or 0,
-            )
-
-            for call in final.tool_calls or ():
-                yield CallEvent(call.id, call.function.name,
-                                call.function.parsed_arguments, call.function.arguments)
+        for call in final.tool_calls or ():
+            yield CallEvent(call.id, call.function.name,
+                            call.function.parsed_arguments, call.function.arguments)
 
 
 class OpenAIChat(ChatBase):
@@ -158,18 +154,19 @@ class OpenAIChat(ChatBase):
     # events
 
     def _iterate_model_events_prediction(self, model, _system, messages, prediction):
-        return OpenAIPump(self._client.beta.chat.completions.stream(
+        return _pump(self._client.beta.chat.completions.stream(
             model=model,
             stream_options={'include_usage': True},
             messages=messages,
             prediction=prediction))
 
-    def _iterate_model_events(self, model, system, messages, tools, prediction=None, **_kwargs):
+    def _iterate_model_events(self, model, system, messages, tools, **kwargs):
+        prediction = kwargs.pop('prediction', None)
         if self._prediction and prediction:
             prediction = self._format_predict_content(prediction)
             return self._iterate_model_events_prediction(model, system, messages, prediction)
 
-        return OpenAIPump(self._client.beta.chat.completions.stream(
+        return _pump(self._client.beta.chat.completions.stream(
             model=model,
             max_tokens=4096,
             stream_options={'include_usage': True},

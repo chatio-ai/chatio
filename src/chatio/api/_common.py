@@ -15,7 +15,14 @@ from chatio.chat.stats import ChatStat
 from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
+@dataclass
 class ChatConfig:
+    model: str
+    api_key: str
+    api_url: str
+    api_type: str
+
+    features: dict
 
     def __init__(self, configpath=None):
         self._config = self._fromfile(configpath)
@@ -162,8 +169,8 @@ class ChatBase:
             tools.tools = {}
 
         for name, tool in tools.tools.items():
-            desc = tool.desc
-            schema = tool.schema
+            desc = tool.desc()
+            schema = tool.schema()
 
             if not name or not desc or not schema:
                 raise RuntimeError

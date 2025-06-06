@@ -11,33 +11,29 @@ from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 log = logging.getLogger(__name__)
 
 
-class ClaudePump:
-    def __init__(self, stream):
-        self._stream = stream
+def _pump(streamctx):
+    with streamctx as stream:
+        for chunk in stream:
+            log.info("%s", chunk.model_dump_json(indent=2))
 
-    def __iter__(self):
-        with self._stream as stream:
-            for chunk in stream:
-                log.info("%s", chunk.model_dump_json(indent=2))
+            if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
+                yield TextEvent(chunk.delta.text)
 
-                if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
-                    yield TextEvent(chunk.delta.text)
+        yield DoneEvent(stream.get_final_text())
 
-            yield DoneEvent(stream.get_final_text())
+        usage = stream.get_final_message().usage
+        usage.input_tokens += usage.cache_creation_input_tokens
+        usage.input_tokens += usage.cache_read_input_tokens
+        yield StatEvent(
+            usage.input_tokens,
+            usage.output_tokens,
+            usage.cache_creation_input_tokens,
+            usage.cache_read_input_tokens,
+            0, 0)
 
-            usage = stream.get_final_message().usage
-            usage.input_tokens += usage.cache_creation_input_tokens
-            usage.input_tokens += usage.cache_read_input_tokens
-            yield StatEvent(
-                usage.input_tokens,
-                usage.output_tokens,
-                usage.cache_creation_input_tokens,
-                usage.cache_read_input_tokens,
-                0, 0)
-
-            for message in stream.get_final_message().content:
-                if message.type == 'tool_use':
-                    yield CallEvent(message.id, message.name, message.input, message.input)
+        for message in stream.get_final_message().content:
+            if message.type == 'tool_use':
+                yield CallEvent(message.id, message.name, message.input, message.input)
 
 
 class ClaudeChat(ChatBase):
@@ -139,7 +135,7 @@ class ClaudeChat(ChatBase):
     # events
 
     def _iterate_model_events(self, model, system, messages, tools, **_kwargs):
-        return ClaudePump(self._client.messages.stream(
+        return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
             tools=tools,

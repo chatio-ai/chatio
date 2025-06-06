@@ -1,5 +1,5 @@
 
-from collections.abc import Mapping
+from typing import override
 
 from contextlib import suppress
 
@@ -34,18 +34,24 @@ $ {command}
 
 class ShellCalcTool(ShellToolBase):
 
-    __desc__: str = "Run bc command using system shell to evaluate the expression. Returns output of the command."
+    @staticmethod
+    @override
+    def desc() -> str:
+        return "Run bc command using system shell to evaluate the expression. Returns output of the command."
 
-    __schema__: Mapping = {
-        "type": "object",
-        "properties": {
-            "expr": {
-                "type": "string",
-                "description": "The expression to evaluate",
+    @staticmethod
+    @override
+    def schema() -> dict[str, object]:
+        return {
+            "type": "object",
+            "properties": {
+                "expr": {
+                    "type": "string",
+                    "description": "The expression to evaluate",
+                },
             },
-        },
-        "required": ["expr"],
-    }
+            "required": ["expr"],
+        }
 
     def __call__(self, expr):
         return self._command(f"echo '{expr}' | bc")
@@ -53,18 +59,24 @@ class ShellCalcTool(ShellToolBase):
 
 class ShellExecTool(ShellToolBase):
 
-    __desc__: str = "Run custom user command using system shell. Returns output collected from stdout and stderr."
+    @staticmethod
+    @override
+    def desc() -> str:
+        return "Run custom user command using system shell. Returns output collected from stdout and stderr."
 
-    __schema__: Mapping = {
-        "type": "object",
-        "properties": {
-            "command": {
-                "type": "string",
-                "description": "The command to run using system shell",
+    @staticmethod
+    @override
+    def schema() -> dict[str, object]:
+        return {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "The command to run using system shell",
+                },
             },
-        },
-        "required": ["command"],
-    }
+            "required": ["command"],
+        }
 
     def __call__(self, command=None):
         return self._command(command)
