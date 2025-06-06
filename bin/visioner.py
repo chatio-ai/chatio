@@ -8,9 +8,7 @@ from chatio.api import build_chat
 from chatio.cli import run_info, run_chat
 from chatio.misc import init_config
 
-
 from toolbelt.image import ImageDumpTool
-
 
 
 dotenv.load_dotenv()

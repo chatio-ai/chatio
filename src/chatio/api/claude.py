@@ -5,7 +5,7 @@ from anthropic import Anthropic
 
 from ._common import ChatBase
 
-from ._events import *
+from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 log = logging.getLogger(__name__)
@@ -29,11 +29,11 @@ class ClaudePump:
             usage.input_tokens += usage.cache_creation_input_tokens
             usage.input_tokens += usage.cache_read_input_tokens
             yield StatEvent(
-                    usage.input_tokens,
-                    usage.output_tokens,
-                    usage.cache_creation_input_tokens,
-                    usage.cache_read_input_tokens,
-                    0, 0)
+                usage.input_tokens,
+                usage.output_tokens,
+                usage.cache_creation_input_tokens,
+                usage.cache_read_input_tokens,
+                0, 0)
 
             for message in stream.get_final_message().content:
                 if message.type == 'tool_use':
@@ -43,8 +43,8 @@ class ClaudePump:
 class ClaudeChat(ChatBase):
     def _setup_context(self, config, use_cache=True, **kwargs):
         self._client = Anthropic(
-                base_url=config.api_url,
-                api_key=config.api_key)
+            base_url=config.api_url,
+            api_key=config.api_key)
 
         self._use_cache = use_cache
 
@@ -153,4 +153,3 @@ class ClaudeChat(ChatBase):
             tools=tools,
             system=system,
             messages=messages).input_tokens
-

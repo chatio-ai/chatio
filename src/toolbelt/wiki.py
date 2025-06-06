@@ -32,9 +32,9 @@ class WikiToolBase(ToolBase):
 
     def _get_page(self, title=None):
         cached = True
-        if not title in self.page_cache:
+        if title not in self.page_cache:
             title = self.wiki.suggest(title)
-        if not title in self.page_cache:
+        if title not in self.page_cache:
             self.page_cache[title] = self.wiki.page(title, auto_suggest=False)
             cached = False
         return self.page_cache[title], cached
@@ -53,15 +53,15 @@ class WikiSearchTool(WikiToolBase):
     __desc__ = "Get list of titles based on string search. Returns up to 10 titles each on separate line."
 
     __schema__ = {
-            "type": "object",
-            "properties": {
-                "text": {
-                    "type": "string",
-                    "description": "The text to search for across pages titles and content.",
-                },
+        "type": "object",
+        "properties": {
+            "text": {
+                "type": "string",
+                "description": "The text to search for across pages titles and content.",
             },
-            "required": ["text"],
-        }
+        },
+        "required": ["text"],
+    }
 
     def __call__(self, text=None):
         yield "\n".join(self.wiki.search(text))
@@ -72,15 +72,15 @@ class WikiContentTool(WikiToolBase):
     __desc__ = "Get list of sections for wikipedia article. Returns list of sections each on separate line."
 
     __schema__ = {
-            "type": "object",
-            "properties": {
-                "title": {
-                    "type": "string",
-                    "description": "The title of article to fetch list of sections for.",
-                },
+        "type": "object",
+        "properties": {
+            "title": {
+                "type": "string",
+                "description": "The title of article to fetch list of sections for.",
             },
-            "required": ["title"],
-        }
+        },
+        "required": ["title"],
+    }
 
     def _run_tool(self, page=None):
         yield "\n".join(page.sections)
@@ -91,15 +91,15 @@ class WikiSummaryTool(WikiToolBase):
     __desc__ = "Get content of summary for wikipedia article. Returns text of summary (header) section."
 
     __schema__ = {
-            "type": "object",
-            "properties": {
-                "title": {
-                    "type": "string",
-                    "description": "The title of article to fetch summary content for.",
-                },
+        "type": "object",
+        "properties": {
+            "title": {
+                "type": "string",
+                "description": "The title of article to fetch summary content for.",
             },
-            "required": ["title"],
-        }
+        },
+        "required": ["title"],
+    }
 
     def _run_tool(self, page=None):
         yield page.section(None)
@@ -110,19 +110,19 @@ class WikiSectionTool(WikiToolBase):
     __desc__ = "Get content of specific section for wikipedia article. Returns text of the given section."
 
     __schema__ = {
-            "type": "object",
-            "properties": {
-                "title": {
-                    "type": "string",
-                    "description": "The title of article to fetch section content for.",
-                },
-                "section": {
-                    "type": "string",
-                    "description": "The section name to fetch content for.",
-                }
+        "type": "object",
+        "properties": {
+            "title": {
+                "type": "string",
+                "description": "The title of article to fetch section content for.",
             },
-            "required": ["title", "section"],
-        }
+            "section": {
+                "type": "string",
+                "description": "The section name to fetch content for.",
+            }
+        },
+        "required": ["title", "section"],
+    }
 
     def _run_tool(self, page=None, section=None):
         yield page.section(section)

@@ -7,7 +7,7 @@ from .google import GoogleChat
 from .openai import OpenAIChat
 
 
-def build_chat(*args, **kwargs):
+def build_chat(*args, **kwargs) -> ChatBase:
     config = kwargs.setdefault('config', ChatConfig())
     model = kwargs.get('model')
 

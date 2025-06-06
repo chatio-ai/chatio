@@ -7,7 +7,7 @@ import pathlib
 
 from chatio.api import build_chat
 from chatio.misc import init_config
-from chatio.cli import run_info, run_user, run_chat, run_text
+from chatio.cli import run_info, run_chat, run_text
 from chatio.cli import Style
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,

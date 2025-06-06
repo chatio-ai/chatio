@@ -3,7 +3,7 @@ from . import ToolBase
 
 
 class ImageDumpTool(ToolBase):
-    
+
     __desc__ = "Dump summary of image analysis. Summary should include key colors (r,g,b) and image description."
 
     __schema__ = {

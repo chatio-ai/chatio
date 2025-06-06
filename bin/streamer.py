@@ -16,7 +16,7 @@ from toolbelt.dummy import DummyTool
 from toolbelt.wiki import WikiToolFactory
 from toolbelt.web import WebSearchTool, WebBrowseTool
 
-from toolbelt.llm import LlmDialogTool
+# from toolbelt.llm import LlmDialogTool
 
 
 logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
@@ -43,11 +43,11 @@ tools = {
     "run_nothing": DummyTool(),
 }
 
-#tools = {
-#    "llm_message": LlmDialogTool(),
-#}
+# tools = {
+#     "llm_message": LlmDialogTool(),
+# }
 
-#tools = {}
+# tools = {}
 
 chat = build_chat(prompt, tools=tools, config=init_config())
 

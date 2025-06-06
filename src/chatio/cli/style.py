@@ -54,5 +54,4 @@ class Style:
         return StyleWrap(self.prefix, self.suffix, end=end, file=file)
 
 
-
 Empty = Style("", "", Style.RESET)

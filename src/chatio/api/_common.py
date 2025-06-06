@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from ..chat.stats import ChatStat
 
-from ._events import *
+from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 class ChatConfig:
@@ -253,7 +253,7 @@ class ChatBase:
 
     def _debug_base_chat_state(self):
         self._debug = False
-        #self._debug = True
+        # self._debug = True
 
         if self._debug:
             from pprint import pprint

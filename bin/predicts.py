@@ -37,8 +37,8 @@ if __name__ == '__main__':
 
         print()
         results = run_chat(chat(prediction=results),
-                 model_style=Style("<<< ", color=Style.BRIGHT_CYAN),
-                 event_style=Style("::: ", color=Style.RESET),
-                 tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))
+                           model_style=Style("<<< ", color=Style.BRIGHT_CYAN),
+                           event_style=Style("::: ", color=Style.RESET),
+                           tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))
 
     print()

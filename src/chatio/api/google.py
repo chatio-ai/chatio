@@ -8,7 +8,7 @@ from html2text import HTML2Text
 from ._common import ChatBase
 from ._common import ChatConfig
 
-from ._events import *
+from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 log = logging.getLogger(__name__)
@@ -61,10 +61,10 @@ class GooglePump:
             yield DoneEvent(final_text)
 
             yield StatEvent(
-                    usage.prompt_token_count or 0,
-                    usage.candidates_token_count or 0,
-                    0, usage.cached_content_token_count or 0,
-                    0, 0)
+                usage.prompt_token_count or 0,
+                usage.candidates_token_count or 0,
+                0, usage.cached_content_token_count or 0,
+                0, 0)
 
             for call in calls:
                 yield CallEvent(call.id, call.name, call.args, call.args)
@@ -73,8 +73,8 @@ class GooglePump:
 class GoogleChat(ChatBase):
     def _setup_context(self, config: ChatConfig, **kwargs):
         self._client = Client(
-                #base_url=config.api_url,
-                api_key=config.api_key)
+            # base_url=config.api_url,
+            api_key=config.api_key)
 
         self._grounding = config.features.get('grounding')
 
@@ -141,6 +141,7 @@ class GoogleChat(ChatBase):
             "role": "model",
             "parts": self._as_contents(content)
         }
+
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
         return {
             "role": "model",

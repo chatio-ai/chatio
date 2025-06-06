@@ -10,15 +10,15 @@ class LlmDialogTool(ToolBase):
     __desc__ = "Peform request to another LLM. Another LLM preserves history across session."
 
     __schema__ = {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "description": "The message to send to another LLM",
-                }
-            },
-            "required": ["message"],
-        }
+        "type": "object",
+        "properties": {
+            "message": {
+                "type": "string",
+                "description": "The message to send to another LLM",
+            }
+        },
+        "required": ["message"],
+    }
 
     _agent = None
 

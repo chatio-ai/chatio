@@ -6,7 +6,7 @@ from openai import OpenAI
 from ._common import ChatBase
 from ._common import ChatConfig
 
-from ._events import *
+from ._events import TextEvent, DoneEvent, StatEvent, CallEvent
 
 
 log = logging.getLogger(__name__)
@@ -33,12 +33,12 @@ class OpenAIPump:
             output_details = usage.completion_tokens_details
 
             yield StatEvent(
-                    usage.prompt_tokens,
-                    usage.completion_tokens,
-                    0,
-                    input_details and input_details.cached_tokens or 0,
-                    output_details and output_details.accepted_prediction_tokens or 0,
-                    output_details and output_details.rejected_prediction_tokens or 0,
+                usage.prompt_tokens,
+                usage.completion_tokens,
+                0,
+                input_details and input_details.cached_tokens or 0,
+                output_details and output_details.accepted_prediction_tokens or 0,
+                output_details and output_details.rejected_prediction_tokens or 0,
             )
 
             for call in final.tool_calls or ():
@@ -49,8 +49,8 @@ class OpenAIPump:
 class OpenAIChat(ChatBase):
     def _setup_context(self, config: ChatConfig, **kwargs):
         self._client = OpenAI(
-                base_url=config.api_url,
-                api_key=config.api_key)
+            base_url=config.api_url,
+            api_key=config.api_key)
 
         self._prediction = config.features.get('prediction')
 
