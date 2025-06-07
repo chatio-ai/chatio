@@ -1,4 +1,6 @@
 
+from collections.abc import Iterable
+
 from typing import override
 
 from contextlib import suppress
@@ -10,7 +12,7 @@ from . import ToolBase
 
 class ShellToolBase(ToolBase):
 
-    def _iterate(self, command=None, iterate=None):
+    def _iterate(self, command: str, iterate: Iterable[str]):
         yield f"""```
 $ {command}
 """
@@ -21,13 +23,13 @@ $ {command}
         yield f"""```
 """
 
-    def _command(self, command=None):
+    def _command(self, command: str):
 
         with Popen(command, shell=True, stdout=PIPE, stderr=STDOUT, text=True) as process:
+            if process.stdout is not None:
+                yield from self._iterate(command, process.stdout)
+                process.stdout.close()
 
-            yield from self._iterate(command, process.stdout)
-
-            process.stdout.close()
             exit_code = process.wait()
             yield {'command': command, 'exit_code': exit_code}
 
@@ -53,7 +55,7 @@ class ShellCalcTool(ShellToolBase):
             "required": ["expr"],
         }
 
-    def __call__(self, expr):
+    def __call__(self, expr: str):
         return self._command(f"echo '{expr}' | bc")
 
 
@@ -78,5 +80,5 @@ class ShellExecTool(ShellToolBase):
             "required": ["command"],
         }
 
-    def __call__(self, command=None):
+    def __call__(self, command: str):
         return self._command(command)

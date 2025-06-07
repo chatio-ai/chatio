@@ -29,8 +29,11 @@ class WebSearchTool(ToolBase):
             "required": ["text"],
         }
 
-    def __call__(self, text=None):
-        yield "\n".join(search(text))
+    def _result_to_str(self, result):
+        return result if isinstance(result, str) else result.url
+
+    def __call__(self, text: str):
+        yield "\n".join(self._result_to_str(result) for result in search(text))
 
 
 class WebBrowseTool(ToolBase):
@@ -54,5 +57,5 @@ class WebBrowseTool(ToolBase):
             "required": ["url"],
         }
 
-    def __call__(self, url=None):
+    def __call__(self, url: str):
         yield html2text(get(url, timeout=10).text)

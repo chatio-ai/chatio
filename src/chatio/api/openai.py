@@ -1,6 +1,8 @@
 
 import logging
 
+from typing import override
+
 from openai import OpenAI
 
 from ._common import ChatBase
@@ -43,6 +45,8 @@ def _pump(streamctx):
 
 
 class OpenAIChat(ChatBase):
+
+    @override
     def _setup_context(self, config: ChatConfig, **_kwargs):
         self._client = OpenAI(
             base_url=config.api_url,
@@ -72,6 +76,7 @@ class OpenAIChat(ChatBase):
 
         return result
 
+    @override
     def _format_tool_definition(self, name, desc, schema):
         schema = self._tool_schema(schema)
         return {
@@ -84,6 +89,7 @@ class OpenAIChat(ChatBase):
             },
         }
 
+    @override
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
             return None
@@ -95,15 +101,18 @@ class OpenAIChat(ChatBase):
 
     # messages
 
+    @override
     def _format_text_chunk(self, text):
         return {"type": "text", "text": text}
 
+    @override
     def _format_image_blob(self, blob, mimetype):
         return {
             "type": "image_url",
             "image_url": {"url": f"data:{mimetype};base64,{blob}"},
         }
 
+    @override
     def _format_dev_message(self, content):
         if not content:
             return [], []
@@ -113,18 +122,21 @@ class OpenAIChat(ChatBase):
             "content": self._as_contents(content),
         }]
 
+    @override
     def _format_user_message(self, content):
         return {
             "role": "user",
             "content": self._as_contents(content),
         }
 
+    @override
     def _format_model_message(self, content):
         return {
             "role": "assistant",
             "content": self._as_contents(content),
         }
 
+    @override
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
         return {
             "role": "assistant",
@@ -138,7 +150,8 @@ class OpenAIChat(ChatBase):
             }],
         }
 
-    def _format_tool_response(self, tool_call_id, _tool_name, tool_output):
+    @override
+    def _format_tool_response(self, tool_call_id, tool_name, tool_output):
         return {
             "role": "tool",
             "tool_call_id": tool_call_id,
@@ -160,6 +173,7 @@ class OpenAIChat(ChatBase):
             messages=messages,
             prediction=prediction))
 
+    @override
     def _iterate_model_events(self, model, system, messages, tools, **kwargs):
         prediction = kwargs.pop('prediction', None)
         if self._prediction and prediction:
@@ -173,5 +187,6 @@ class OpenAIChat(ChatBase):
             tools=tools,
             messages=messages))
 
+    @override
     def _count_message_tokens(self, model, system, messages, tools):
         raise NotImplementedError

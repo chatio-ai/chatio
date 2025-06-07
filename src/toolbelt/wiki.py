@@ -1,7 +1,7 @@
 
 from typing import override
 
-from mediawiki import MediaWiki
+from mediawiki import MediaWiki, MediaWikiPage
 
 from . import ToolBase
 
@@ -29,7 +29,7 @@ class WikiPageToolBase(ToolBase):
         self.wiki = wiki
         self.page_cache = page_cache
 
-    def _get_page(self, title=None):
+    def _get_page(self, title=None) -> tuple[MediaWikiPage, bool]:
         cached = True
         if title not in self.page_cache:
             title = self.wiki.suggest(title)
@@ -38,7 +38,7 @@ class WikiPageToolBase(ToolBase):
             cached = False
         return self.page_cache[title], cached
 
-    def _run_tool(self, page=None, **kwargs):
+    def _run_tool(self, page: MediaWikiPage, **kwargs):
         raise NotImplementedError
 
     def __call__(self, title=None, **kwargs):
@@ -96,7 +96,7 @@ class WikiContentTool(WikiPageToolBase):
             "required": ["title"],
         }
 
-    def _run_tool(self, page=None, **_kwargs):
+    def _run_tool(self, page: MediaWikiPage, **_kwargs):
         yield "\n".join(page.sections)
 
 
@@ -121,7 +121,7 @@ class WikiSummaryTool(WikiPageToolBase):
             "required": ["title"],
         }
 
-    def _run_tool(self, page=None, **_kwargs):
+    def _run_tool(self, page: MediaWikiPage, **_kwargs):
         yield page.section(None)
 
 
@@ -150,5 +150,5 @@ class WikiSectionTool(WikiPageToolBase):
             "required": ["title", "section"],
         }
 
-    def _run_tool(self, page=None, section=None, **_kwargs):
+    def _run_tool(self, page: MediaWikiPage, section=None, **_kwargs):
         yield page.section(section)

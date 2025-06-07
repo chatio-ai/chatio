@@ -18,16 +18,20 @@ from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 @dataclass
 class ChatConfig:
     model: str
-    api_key: str
-    api_url: str
-    api_type: str
+    api_key: str | None
+    api_url: str | None
+    api_type: str | None
 
     features: dict
 
     def __init__(self, configpath=None):
         self._config = self._fromfile(configpath)
 
-        self.model = self._config.get('model')
+        model = self._config.get('model')
+        if model is None:
+            raise RuntimeError
+        self.model = model
+
         self.api_key = self._config.get('api_key')
         self.api_url = self._config.get('api_url')
         self.api_type = self._config.get('api_type')
@@ -70,17 +74,23 @@ class ChatBase:
                  tools: ToolConfig | None = None,
                  config: ChatConfig | None = None, **kwargs):
 
-        self._model = config.model
-
         self._ready = False
+
+        if config is None:
+            raise RuntimeError
+
+        self._model = config.model
 
         self._setup_context(config, **kwargs)
 
         self._system = None
 
-        self._messages = None
+        self._messages: list[dict] = []
 
         self._setup_messages(system, messages)
+
+        if tools is None:
+            tools = ToolConfig()
 
         self._setup_tools(tools)
 

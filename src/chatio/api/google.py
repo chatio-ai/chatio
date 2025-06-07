@@ -1,6 +1,8 @@
 
 import logging
 
+from typing import override
+
 from google.genai import Client
 
 from html2text import HTML2Text
@@ -46,19 +48,19 @@ def _pump(stream):
             yield TextEvent(entry, label="search.sources")
 
         search_entry_point = (search and search.search_entry_point) or None
-        if search_entry_point:
+        if search_entry_point is not None:
             parser = HTML2Text(bodywidth=0)
             parser.inline_links = False
             parser.protect_links = True
-            entry = parser.handle(search.search_entry_point.rendered_content)
+            entry = parser.handle(search_entry_point.rendered_content)
             yield TextEvent(entry, label="search.suggest")
 
         yield DoneEvent(final_text)
 
         yield StatEvent(
-            usage.prompt_token_count or 0,
-            usage.candidates_token_count or 0,
-            0, usage.cached_content_token_count or 0,
+            (usage and usage.prompt_token_count) or 0,
+            (usage and usage.candidates_token_count) or 0,
+            0, (usage and usage.cached_content_token_count) or 0,
             0, 0)
 
         for call in calls:
@@ -66,6 +68,8 @@ def _pump(stream):
 
 
 class GoogleChat(ChatBase):
+
+    @override
     def _setup_context(self, config: ChatConfig, **_kwargs):
         self._client = Client(
             # base_url=config.api_url,
@@ -75,6 +79,7 @@ class GoogleChat(ChatBase):
 
     # tools
 
+    @override
     def _format_tool_definition(self, name, desc, schema):
         return {
             "name": name,
@@ -82,6 +87,7 @@ class GoogleChat(ChatBase):
             "parameters": schema,
         }
 
+    @override
     def _format_tool_definitions(self, tools):
         tools_config = []
 
@@ -100,6 +106,7 @@ class GoogleChat(ChatBase):
 
         return tools_config
 
+    @override
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
             return None
@@ -111,33 +118,39 @@ class GoogleChat(ChatBase):
 
     # messages
 
+    @override
     def _format_text_chunk(self, text):
         return {"text": text}
 
+    @override
     def _format_image_blob(self, blob, mimetype):
         return {"inline_data": {
             "mime_type": mimetype,
             "data": blob,
         }}
 
+    @override
     def _format_dev_message(self, content):
         if not content:
             return None, []
 
         return {"parts": self._as_contents(content)}, []
 
+    @override
     def _format_user_message(self, content):
         return {
             "role": "user",
             "parts": self._as_contents(content),
         }
 
+    @override
     def _format_model_message(self, content):
         return {
             "role": "model",
             "parts": self._as_contents(content),
         }
 
+    @override
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
         return {
             "role": "model",
@@ -150,6 +163,7 @@ class GoogleChat(ChatBase):
             }],
         }
 
+    @override
     def _format_tool_response(self, tool_call_id, tool_name, tool_output):
         return {
             "role": "user",
@@ -166,6 +180,7 @@ class GoogleChat(ChatBase):
 
     # events
 
+    @override
     def _iterate_model_events(self, model, system, messages, tools, **_kwargs):
         return _pump(self._client.models.generate_content_stream(
             model=model,
@@ -176,5 +191,6 @@ class GoogleChat(ChatBase):
             },
             contents=messages))
 
+    @override
     def _count_message_tokens(self, model, system, messages, tools):
         raise NotImplementedError

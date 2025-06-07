@@ -8,9 +8,12 @@ from .openai import OpenAIChat
 
 
 def build_chat(*args, **kwargs) -> ChatBase:
-    config = kwargs.setdefault('config', ChatConfig())
+    config: ChatConfig | None = kwargs.setdefault('config')
     model = kwargs.get('model')
 
+    if config is None:
+        err_msg = "no config specified!"
+        raise RuntimeError
     if model is not None:
         config.model = model
     if config.model is None:

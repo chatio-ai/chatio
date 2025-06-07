@@ -1,6 +1,8 @@
 
 import logging
 
+from typing import override
+
 from anthropic import Anthropic
 
 from ._common import ChatBase
@@ -37,6 +39,8 @@ def _pump(streamctx):
 
 
 class ClaudeChat(ChatBase):
+
+    @override
     def _setup_context(self, config, *, use_cache=True, **_kwargs):
         self._client = Anthropic(
             base_url=config.api_url,
@@ -62,6 +66,7 @@ class ClaudeChat(ChatBase):
 
     # tools
 
+    @override
     def _format_tool_definition(self, name, desc, schema):
         return {
             "name": name,
@@ -69,9 +74,11 @@ class ClaudeChat(ChatBase):
             "input_schema": schema,
         }
 
+    @override
     def _format_tool_definitions(self, tools):
         return self._setup_cache(tools)
 
+    @override
     def _format_tool_selection(self, tool_choice, tool_choice_name):
         if not tool_choice:
             return None
@@ -83,12 +90,15 @@ class ClaudeChat(ChatBase):
 
     # messages
 
+    @override
     def _format_chat_messages(self, messages):
         return self._setup_messages_cache(messages)
 
+    @override
     def _format_text_chunk(self, text):
         return {"type": "text", "text": text}
 
+    @override
     def _format_image_blob(self, blob, mimetype):
         return {
             "type": "image",
@@ -99,24 +109,28 @@ class ClaudeChat(ChatBase):
             },
         }
 
+    @override
     def _format_dev_message(self, content):
         if not content:
             return [], []
 
         return self._setup_cache(self._as_contents(content)), []
 
+    @override
     def _format_user_message(self, content):
         return {
             "role": "user",
             "content": self._as_contents(content),
         }
 
+    @override
     def _format_model_message(self, content):
         return {
             "role": "assistant",
             "content": self._as_contents(content),
         }
 
+    @override
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
         return self._format_model_message({
             "type": "tool_use",
@@ -125,7 +139,8 @@ class ClaudeChat(ChatBase):
             "input": tool_input,
         })
 
-    def _format_tool_response(self, tool_call_id, _tool_name, tool_output):
+    @override
+    def _format_tool_response(self, tool_call_id, tool_name, tool_output):
         return self._format_user_message({
             "type": "tool_result",
             "tool_use_id": tool_call_id,
@@ -134,6 +149,7 @@ class ClaudeChat(ChatBase):
 
     # events
 
+    @override
     def _iterate_model_events(self, model, system, messages, tools, **_kwargs):
         return _pump(self._client.messages.stream(
             model=model,
@@ -144,6 +160,7 @@ class ClaudeChat(ChatBase):
 
     # helpers
 
+    @override
     def _count_message_tokens(self, model, system, messages, tools):
         return self._client.messages.count_tokens(
             model=model,
