@@ -43,24 +43,33 @@ def init_config(env_name: str | None = None) -> ChatConfig:
     return ChatConfig(vendor_name, model_name, ApiConfig(**vendor_json))
 
 
-def default_tools() -> ToolConfig:
-    wiki = WikiToolFactory()
+def default_tools(env_name: str | None = None) -> ToolConfig:
+    if env_name is None:
+        env_name = 'CHATIO_TOOLS_CASE'
 
-    return ToolConfig({
-        "run_command": ShellExecTool(),
-        "run_bc_calc": ShellCalcTool(),
-        "run_imgdump": ImageDumpTool(),
-        "wiki_content": wiki.wiki_content(),
-        "wiki_summary": wiki.wiki_summary(),
-        "wiki_section": wiki.wiki_section(),
-        "wiki_search": wiki.wiki_search(),
-        "web_search": WebSearchTool(),
-        "web_browse": WebBrowseTool(),
-        "run_nothing": DummyTool(),
-    })
+    tools_case = os.environ.get(env_name)
+    if not tools_case:
+        tools_case = 'empty'
 
-    # tools = {
-    #     "llm_message": LlmDialogTool(),
-    # }
+    match tools_case:
+        # case 'llmtool':
+        #    return ToolConfig({
+        #        "llm_message": LlmDialogTool(),
+        #    })
+        case 'default':
+            wiki = WikiToolFactory()
 
-    # tools = {}
+            return ToolConfig({
+                "run_command": ShellExecTool(),
+                "run_bc_calc": ShellCalcTool(),
+                "run_imgdump": ImageDumpTool(),
+                "wiki_content": wiki.wiki_content(),
+                "wiki_summary": wiki.wiki_summary(),
+                "wiki_section": wiki.wiki_section(),
+                "wiki_search": wiki.wiki_search(),
+                "web_search": WebSearchTool(),
+                "web_browse": WebBrowseTool(),
+                "run_nothing": DummyTool(),
+            })
+        case _:
+            return ToolConfig()
