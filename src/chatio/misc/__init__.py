@@ -1,6 +1,7 @@
 
 import os
 import json
+import logging
 
 from pathlib import Path
 
@@ -16,6 +17,12 @@ from toolbelt.wiki import WikiToolFactory
 from toolbelt.web import WebSearchTool, WebBrowseTool
 
 # from toolbelt.llm import LlmDialogTool
+
+
+def setup_logging() -> None:
+    logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
+                        format='%(asctime)s %(name)s %(levelname)s %(message)s')
+    logging.getLogger('chatio.api').setLevel(logging.INFO)
 
 
 def init_config(env_name: str | None = None) -> ChatConfig:

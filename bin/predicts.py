@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
 import sys
-import logging
 
 from chatio.api import build_chat
 from chatio.cli.stdio import run_info, run_user, run_chat
 from chatio.cli.style import Style
 from chatio.misc import init_config
+from chatio.misc import setup_logging
 
-logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
-                    format='%(asctime)s %(name)s %(levelname)s %(message)s')
-logging.getLogger('chatio.api').setLevel(logging.INFO)
+
+setup_logging()
 
 
 def main():

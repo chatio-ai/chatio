@@ -4,7 +4,12 @@ import sys
 
 from chatio.api import build_chat
 from chatio.cli.stdio import run_info
-from chatio.misc import init_config, default_tools
+from chatio.misc import init_config
+from chatio.misc import default_tools
+from chatio.misc import setup_logging
+
+
+setup_logging()
 
 
 def main():

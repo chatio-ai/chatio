@@ -7,8 +7,12 @@ from chatio.api._common import ToolConfig
 from chatio.api import build_chat
 from chatio.cli.stdio import run_info, run_chat
 from chatio.misc import init_config
+from chatio.misc import setup_logging
 
 from toolbelt.image import ImageDumpTool
+
+
+setup_logging()
 
 
 def main():
