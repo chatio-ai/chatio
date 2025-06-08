@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 @dataclass
 class OpenAIParams(ApiParams):
     prediction: bool = False
+    legacy: bool = False
 
 
 def _pump(streamctx):
@@ -39,12 +40,12 @@ def _pump(streamctx):
 
         usage = stream.get_final_completion().usage
 
-        input_details = usage.prompt_tokens_details
-        output_details = usage.completion_tokens_details
+        input_details = usage and usage.prompt_tokens_details
+        output_details = usage and usage.completion_tokens_details
 
         yield StatEvent(
-            usage.prompt_tokens,
-            usage.completion_tokens,
+            (usage and usage.prompt_tokens) or 0,
+            (usage and usage.completion_tokens) or 0,
             0,
             (input_details and input_details.cached_tokens) or 0,
             (output_details and output_details.accepted_prediction_tokens) or 0,
@@ -116,6 +117,8 @@ class OpenAIChat(ChatBase):
 
     @override
     def _format_text_chunk(self, text):
+        if self._params.legacy:
+            return text
         return {"type": "text", "text": text}
 
     @override

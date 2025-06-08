@@ -102,7 +102,8 @@ class ChatBase:
 
     def _as_contents(self, content):
         if isinstance(content, str):
-            return [self._format_text_chunk(content)]
+            chunk = self._format_text_chunk(content)
+            return chunk if isinstance(chunk, str) else [chunk]
         if isinstance(content, dict):
             return [content]
         if isinstance(content, list):
