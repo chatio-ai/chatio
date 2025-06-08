@@ -3,9 +3,12 @@ import logging
 
 from typing import override
 
+from google.genai.types import HttpOptions
 from google.genai import Client
 
 from html2text import HTML2Text
+
+from ._utils import httpx_args
 
 from ._common import ApiConfig
 from ._common import ChatBase
@@ -73,7 +76,8 @@ class GoogleChat(ChatBase):
     def _setup_context(self, config: ApiConfig, **_kwargs):
         self._client = Client(
             # base_url=config.api_url,
-            api_key=config.api_key)
+            api_key=config.api_key,
+            http_options=HttpOptions(client_args=httpx_args()))
 
         self._grounding = config.features and config.features.get('grounding')
 

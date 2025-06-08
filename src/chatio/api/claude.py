@@ -3,7 +3,11 @@ import logging
 
 from typing import override
 
+from httpx import Client as HttpxClient
+
 from anthropic import Anthropic
+
+from ._utils import httpx_args
 
 from ._common import ApiConfig
 from ._common import ChatBase
@@ -45,7 +49,8 @@ class ClaudeChat(ChatBase):
     def _setup_context(self, config: ApiConfig, *, use_cache=True, **_kwargs):
         self._client = Anthropic(
             base_url=config.api_url,
-            api_key=config.api_key)
+            api_key=config.api_key,
+            http_client=HttpxClient(**httpx_args()))
 
         self._use_cache = use_cache
 

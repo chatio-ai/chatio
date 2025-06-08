@@ -3,7 +3,11 @@ import logging
 
 from typing import override
 
+from httpx import Client as HttpxClient
+
 from openai import OpenAI
+
+from ._utils import httpx_args
 
 from ._common import ApiConfig
 from ._common import ChatBase
@@ -50,7 +54,8 @@ class OpenAIChat(ChatBase):
     def _setup_context(self, config: ApiConfig, **_kwargs):
         self._client = OpenAI(
             base_url=config.api_url,
-            api_key=config.api_key)
+            api_key=config.api_key,
+            http_client=HttpxClient(**httpx_args()))
 
         self._prediction = config.features and config.features.get('prediction')
 
