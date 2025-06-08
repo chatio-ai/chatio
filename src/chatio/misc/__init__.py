@@ -40,6 +40,8 @@ def init_config(env_name: str | None = None) -> ChatConfig:
     with vendor_conf.open() as vendorfp:
         vendor_json = json.load(vendorfp)
 
+    vendor_json = {k: v for k, v in vendor_json.items() if not k.startswith('_')}
+
     return ChatConfig(vendor_name, model_name, ApiConfig(**vendor_json))
 
 
