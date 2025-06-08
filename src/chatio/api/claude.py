@@ -1,6 +1,8 @@
 
 import logging
 
+from dataclasses import dataclass
+
 from typing import override
 
 from httpx import Client as HttpxClient
@@ -10,12 +12,18 @@ from anthropic import Anthropic
 from ._utils import httpx_args
 
 from ._common import ApiConfig
+from ._common import ApiParams
 from ._common import ChatBase
 
 from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 log = logging.getLogger(__name__)
+
+
+@dataclass
+class ClaudeParams(ApiParams):
+    use_cache: bool = True
 
 
 def _pump(streamctx):
@@ -46,16 +54,16 @@ def _pump(streamctx):
 class ClaudeChat(ChatBase):
 
     @override
-    def _setup_context(self, config: ApiConfig, *, use_cache=True, **_kwargs):
+    def _setup_context(self, config: ApiConfig):
         self._client = Anthropic(
             base_url=config.api_url,
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
-        self._use_cache = use_cache
+        self._params = ClaudeParams(**config.options if config.options else {})
 
     def _setup_cache(self, param):
-        if self._use_cache and param:
+        if self._params.use_cache and param:
             param[-1].update({"cache_control": {"type": "ephemeral"}})
 
         return param

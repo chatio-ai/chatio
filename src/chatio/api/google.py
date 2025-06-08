@@ -1,6 +1,8 @@
 
 import logging
 
+from dataclasses import dataclass
+
 from typing import override
 
 from google.genai.types import HttpOptions
@@ -11,12 +13,18 @@ from html2text import HTML2Text
 from ._utils import httpx_args
 
 from ._common import ApiConfig
+from ._common import ApiParams
 from ._common import ChatBase
 
 from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 log = logging.getLogger(__name__)
+
+
+@dataclass
+class GoogleParams(ApiParams):
+    grounding: bool = False
 
 
 def _pump(stream):
@@ -73,13 +81,13 @@ def _pump(stream):
 class GoogleChat(ChatBase):
 
     @override
-    def _setup_context(self, config: ApiConfig, **_kwargs):
+    def _setup_context(self, config: ApiConfig):
         self._client = Client(
             # base_url=config.api_url,
             api_key=config.api_key,
             http_options=HttpOptions(client_args=httpx_args()))
 
-        self._grounding = config.features and config.features.get('grounding')
+        self._params = GoogleParams(**config.options if config.options else {})
 
     # tools
 
@@ -100,7 +108,7 @@ class GoogleChat(ChatBase):
                 "function_declarations": tools,
             })
 
-        if self._grounding:
+        if self._params.grounding:
             tools_config.append({
                 "google_search": {},
             })

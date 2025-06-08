@@ -19,7 +19,12 @@ class ApiConfig:
     api_url: str | None = None
     api_key: str | None = None
 
-    features: dict | None = None
+    options: dict | None = None
+
+
+@dataclass
+class ApiParams:
+    pass
 
 
 @dataclass
@@ -51,7 +56,7 @@ class ChatBase:
     def __init__(self,
                  system=None, messages=None,
                  tools: ToolConfig | None = None,
-                 config: ChatConfig | None = None, **kwargs):
+                 config: ChatConfig | None = None):
 
         self._ready = False
 
@@ -60,7 +65,7 @@ class ChatBase:
 
         self._config = config
 
-        self._setup_context(config.config, **kwargs)
+        self._setup_context(config.config)
 
         self._system = None
 
@@ -75,7 +80,7 @@ class ChatBase:
 
         self._stats = ChatStat()
 
-    def _setup_context(self, config: ApiConfig, **kwargs):
+    def _setup_context(self, config: ApiConfig):
         raise NotImplementedError
 
     # messages

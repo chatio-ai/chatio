@@ -1,6 +1,8 @@
 
 import logging
 
+from dataclasses import dataclass
+
 from typing import override
 
 from httpx import Client as HttpxClient
@@ -10,12 +12,18 @@ from openai import OpenAI
 from ._utils import httpx_args
 
 from ._common import ApiConfig
+from ._common import ApiParams
 from ._common import ChatBase
 
 from ._events import TextEvent, DoneEvent, StatEvent, CallEvent
 
 
 log = logging.getLogger(__name__)
+
+
+@dataclass
+class OpenAIParams(ApiParams):
+    prediction: bool = False
 
 
 def _pump(streamctx):
@@ -51,13 +59,13 @@ def _pump(streamctx):
 class OpenAIChat(ChatBase):
 
     @override
-    def _setup_context(self, config: ApiConfig, **_kwargs):
+    def _setup_context(self, config: ApiConfig):
         self._client = OpenAI(
             base_url=config.api_url,
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
-        self._prediction = config.features and config.features.get('prediction')
+        self._params = OpenAIParams(**config.options if config.options else {})
 
     # tools
 
@@ -181,7 +189,7 @@ class OpenAIChat(ChatBase):
     @override
     def _iterate_model_events(self, model, system, messages, tools, **kwargs):
         prediction = kwargs.pop('prediction', None)
-        if self._prediction and prediction:
+        if self._params.prediction and prediction:
             prediction = self._format_predict_content(prediction)
             return self._iterate_model_events_prediction(model, system, messages, prediction)
 
