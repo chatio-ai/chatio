@@ -1,17 +1,23 @@
 
 
 class StyleWrap:
-    def __init__(self, prefix, suffix, end=None, file=None):
-        self.prefix = prefix
-        self.suffix = suffix
+    def __init__(self, style, end=None, file=None, *, prompt=False):
+        self.style = style
         self.file = file
         self.end = end
+        self.prompt = prompt
 
     def __enter__(self):
-        print(self.prefix, end="", flush=True, file=self.file)
+        print(self.style.color, end="", flush=True, file=self.file)
+        if self.prompt:
+            return self.style.prefix
+
+        print(self.style.prefix, end="", flush=True, file=self.file)
+        return ""
 
     def __exit__(self, *exc_info):
-        print(self.suffix, end=self.end, flush=True, file=self.file)
+        print(self.style.suffix, end="", flush=True, file=self.file)
+        print(self.style.reset, end=self.end, flush=True, file=self.file)
 
 
 class Style:
@@ -40,9 +46,10 @@ class Style:
         self.conf(prefix, suffix, color)
 
     def conf(self, prefix=None, suffix=None, color=None):
-        reset = Style.RESET
+        self.reset = Style.RESET
         if color is None:
-            color = reset
+            color = self.reset
+        self.color = color
 
         if prefix is None:
             prefix = ""
@@ -50,11 +57,14 @@ class Style:
         if suffix is None:
             suffix = ""
 
-        self.prefix = color + prefix
-        self.suffix = suffix + reset
+        self.prefix = prefix
+        self.suffix = suffix
 
-    def wrap(self, end=None, file=None):
-        return StyleWrap(self.prefix, self.suffix, end=end, file=file)
+    def wrap_print(self, end=None, file=None):
+        return StyleWrap(self, end=end, file=file)
+
+    def wrap_input(self, end=None, file=None):
+        return StyleWrap(self, end=end, file=file, prompt=True)
 
 
 Empty = Style("", "", Style.RESET)

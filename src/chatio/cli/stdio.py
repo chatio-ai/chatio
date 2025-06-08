@@ -1,5 +1,10 @@
 
+import readline
+
 from .style import Style, Empty
+
+
+readline.set_completer(None)
 
 
 def _mk_style(style=None):
@@ -13,7 +18,7 @@ def _mk_style(style=None):
 
 
 def run_text(text, style=None, file=None):
-    with _mk_style(style).wrap(file=file):
+    with _mk_style(style).wrap_print(file=file):
         print(text, end="", flush=True, file=file)
 
 
@@ -27,9 +32,9 @@ def run_info(chat, style=None, file=None):
 
 
 def run_user(style=None, file=None):
-    with _mk_style(style).wrap(end="", file=file):
+    with _mk_style(style).wrap_input(end="", file=file) as prompt:
         try:
-            return input()
+            return input(prompt)
         except (EOFError, KeyboardInterrupt):
             return None
 
@@ -64,7 +69,7 @@ def _run_chat_event(event, style, file=None):
         case _:
             raise RuntimeError
 
-    with style.wrap(file=file):
+    with style.wrap_print(file=file):
         print(etext, end="", flush=True, file=file)
 
 
@@ -73,7 +78,7 @@ def _run_chat_chunk(chunk, style, hascr, file=None):
     for chunk_line in chunk.splitlines(keepends=True):
         result = ""
         if hascr:
-            result += style.prefix
+            result += style.color + style.prefix
 
         hascr = chunk_line.endswith("\n")
         if hascr:
