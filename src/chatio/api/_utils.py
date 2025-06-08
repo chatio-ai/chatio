@@ -2,6 +2,8 @@
 
 import os
 
+from typing import Any
+
 import httpx
 
 
@@ -17,12 +19,19 @@ def log_response(response: httpx.Response) -> None:
 
 
 def httpx_args() -> dict:
-    if not os.getenv("CHATIO_HTTPX_DEBUG"):
-        return {}
+    args: dict[str, Any] = {}
 
-    return {
-        "event_hooks": {
-            "request": [log_request],
-            "response": [log_response],
-        },
-    }
+    if os.getenv("CHATIO_HTTPX_DEBUG"):
+        args.update({
+            "event_hooks": {
+                "request": [log_request],
+                "response": [log_response],
+            },
+        })
+
+    if os.getenv("CHATIO_HTTPX_INSECURE"):
+        args.update({
+            "verify": False,
+        })
+
+    return args
