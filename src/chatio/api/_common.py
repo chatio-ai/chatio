@@ -3,6 +3,7 @@ import base64
 import mimetypes
 
 from collections.abc import Iterator
+from collections.abc import Callable
 
 from dataclasses import dataclass
 
@@ -52,6 +53,20 @@ class ChatInfo:
     messages: int
 
 
+@dataclass
+class ChatState:
+    system: list[object]
+    messages: list[object]
+    tools: list[object]
+    funcs: dict[str, Callable]
+
+    def __init__(self):
+        self.system = []
+        self.messages = []
+        self.tools = []
+        self.funcs = {}
+
+
 class ChatBase:
 
     def __init__(self,
@@ -68,9 +83,7 @@ class ChatBase:
 
         self._setup_context(config.config)
 
-        self._system = None
-
-        self._messages: list[dict] = []
+        self._state = ChatState()
 
         self._setup_messages(system, messages)
 
@@ -87,7 +100,7 @@ class ChatBase:
     # messages
 
     def _setup_messages(self, system, messages):
-        self._system, self._messages = self._format_dev_message(system)
+        self._state.system, self._state.messages = self._format_dev_message(system)
 
         if messages is None:
             messages = []
@@ -122,28 +135,28 @@ class ChatBase:
         raise NotImplementedError
 
     def _commit_user_message(self, content):
-        self._messages.append(self._format_user_message(content))
+        self._state.messages.append(self._format_user_message(content))
         self._ready = True
 
     def _format_model_message(self, content):
         raise NotImplementedError
 
     def _commit_model_message(self, content):
-        self._messages.append(self._format_model_message(content))
+        self._state.messages.append(self._format_model_message(content))
         self._ready = False
 
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
         raise NotImplementedError
 
     def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
-        self._messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
+        self._state.messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
         self._ready = False
 
     def _format_tool_response(self, tool_call_id, tool_name, tool_output):
         raise NotImplementedError
 
     def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
-        self._messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
+        self._state.messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
         self._ready = True
 
     # tools
@@ -158,8 +171,8 @@ class ChatBase:
         raise NotImplementedError
 
     def _setup_tools(self, tools: ToolConfig):
-        self._tools = []
-        self._funcs = {}
+        self._state.tools = []
+        self._state.funcs = {}
 
         if tools.tools is None:
             tools.tools = {}
@@ -171,17 +184,17 @@ class ChatBase:
             if not name or not desc or not schema:
                 raise RuntimeError
 
-            self._tools.append(self._format_tool_definition(name, desc, schema))
+            self._state.tools.append(self._format_tool_definition(name, desc, schema))
 
-            self._funcs[name] = tool
+            self._state.funcs[name] = tool
 
-        self._tools = self._format_tool_definitions(self._tools)
+        self._state.tools = self._format_tool_definitions(self._state.tools)
 
         # self._tool_choice = self._format_tool_selection(tools.tool_choice, tools.tool_choice_name)
         return self._format_tool_selection(tools.tool_choice, tools.tool_choice_name)
 
     def _process_tool(self, tool_call_id, tool_name, tool_args):
-        tool_func = self._funcs.get(tool_name)
+        tool_func = self._state.funcs.get(tool_name)
         if not tool_func:
             return
 
@@ -215,15 +228,15 @@ class ChatBase:
 
     def _iterate(self, **kwargs) -> Iterator[dict]:
         while self._ready:
-            self._messages = self._format_chat_messages(self._messages)
+            self._state.messages = self._format_chat_messages(self._state.messages)
 
             self._debug_base_chat_state()
 
             events = self._iterate_model_events(
                 model=self._config.model,
-                system=self._system,
-                messages=self._messages,
-                tools=self._tools,
+                system=self._state.system,
+                messages=self._state.messages,
+                tools=self._state.tools,
                 **kwargs,
             )
 
@@ -258,9 +271,9 @@ class ChatBase:
 
         return self._count_message_tokens(
             model=self._config.model,
-            system=self._system,
-            messages=self._messages,
-            tools=self._tools,
+            system=self._state.system,
+            messages=self._state.messages,
+            tools=self._state.tools,
         )
 
     # debug
@@ -269,9 +282,9 @@ class ChatBase:
         return ChatInfo(
             self._config.vendor,
             self._config.model,
-            len(self._funcs or ()),
-            len(self._system or ()),
-            len(self._messages),
+            len(self._state.funcs or {}),
+            len(self._state.system or []),
+            len(self._state.messages),
         )
 
     def _debug_base_chat_state(self):
@@ -280,9 +293,9 @@ class ChatBase:
 
         if _debug:
             print()
-            pprint(self._system)
+            pprint(self._state.system)
             print()
-            pprint(self._messages)
+            pprint(self._state.messages)
             print()
 
     # history
