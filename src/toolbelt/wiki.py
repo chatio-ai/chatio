@@ -29,13 +29,18 @@ class WikiPageToolBase(ToolBase):
         self.wiki = wiki
         self.page_cache = page_cache
 
-    def _get_page(self, title=None) -> tuple[MediaWikiPage, bool]:
-        cached = True
-        if title not in self.page_cache:
+    def _get_page(self, title=None) -> tuple[MediaWikiPage | None, bool | None]:
+        cached = title in self.page_cache
+        if not cached:
             title = self.wiki.suggest(title)
-        if title not in self.page_cache:
+
+        if title is None:
+            return None, None
+
+        cached = cached or title in self.page_cache
+        if not cached:
             self.page_cache[title] = self.wiki.page(title, auto_suggest=False)
-            cached = False
+
         return self.page_cache[title], cached
 
     def _run_tool(self, page: MediaWikiPage, **kwargs):
@@ -44,7 +49,9 @@ class WikiPageToolBase(ToolBase):
     def __call__(self, title=None, **kwargs):
         page, cached = self._get_page(title)
         yield {"title": title, "cache": cached}
-        yield from self._run_tool(page, **kwargs)
+
+        if page is not None:
+            yield from self._run_tool(page, **kwargs)
 
 
 class WikiSearchTool(ToolBase):
