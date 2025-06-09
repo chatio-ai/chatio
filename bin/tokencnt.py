@@ -2,11 +2,12 @@
 
 import sys
 
-from chatio.api import build_chat
 from chatio.cli.stdio import run_info
-from chatio.misc import init_config
-from chatio.misc import default_tools
+
 from chatio.misc import setup_logging
+from chatio.misc import default_tools
+from chatio.misc import init_config
+from chatio.misc import build_chat
 
 
 setup_logging()
@@ -18,7 +19,7 @@ def main():
     if not content.strip():
         raise SystemExit
 
-    chat = build_chat(prompt, messages=[content], tools=default_tools(), config=init_config())
+    chat = build_chat(prompt, messages=[content], config=init_config(), tools=default_tools())
 
     run_info(chat, file=sys.stderr)
 

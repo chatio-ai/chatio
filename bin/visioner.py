@@ -2,28 +2,19 @@
 
 import sys
 
-from chatio.api._common import ToolConfig
-
-from chatio.api import build_chat
 from chatio.cli.stdio import run_info, run_chat
-from chatio.misc import init_config
-from chatio.misc import setup_logging
 
-from toolbelt.image import ImageDumpTool
+from chatio.misc import setup_logging
+from chatio.misc import default_tools
+from chatio.misc import init_config
+from chatio.misc import build_chat
 
 
 setup_logging()
 
 
 def main():
-    chat = build_chat(
-        tools=ToolConfig(
-            tools={"run_imgdump": ImageDumpTool()},
-            tool_choice='name',
-            tool_choice_name='run_imgdump',
-        ),
-        config=init_config(),
-    )
+    chat = build_chat(config=init_config(), tools=default_tools(tools_name='imgtool'))
 
     filenames = sys.argv[1:]
     if not filenames:

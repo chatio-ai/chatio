@@ -2,10 +2,11 @@
 
 import sys
 
-from chatio.api import build_chat
 from chatio.cli.stdio import run_info, run_chat
-from chatio.misc import init_config
+
 from chatio.misc import setup_logging
+from chatio.misc import init_config
+from chatio.misc import build_chat
 
 
 setup_logging()
