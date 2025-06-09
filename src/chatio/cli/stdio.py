@@ -1,10 +1,23 @@
 
+import atexit
 import readline
+
+from contextlib import suppress
 
 from .style import Style, Empty
 
 
-readline.set_completer(None)
+HISTORY_FILE = '.chatio_history'
+
+
+def setup_history():
+    with suppress(FileNotFoundError):
+        readline.read_history_file(HISTORY_FILE)
+
+    atexit.register(readline.write_history_file, HISTORY_FILE)
+
+
+setup_history()
 
 
 def _mk_style(style=None):
