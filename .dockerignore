@@ -7,6 +7,7 @@
 !src/chatio/api/openai/*.py
 !src/chatio/api/google/*.py
 !src/chatio/api/claude/*.py
+!src/chatio/api/helper/*.py
 !src/chatio/api/*.py
 !src/chatio/*.py
 !lints/run.sh

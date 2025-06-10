@@ -14,7 +14,7 @@ from chatio.core.client import ChatClient
 
 from chatio.core.config import ApiConfig
 
-from chatio.api._utils import httpx_args
+from chatio.api.helper.httpx import httpx_args
 
 
 from .params import ClaudeParams
