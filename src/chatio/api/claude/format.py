@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.api._common import ChatFormat
+from chatio.core.format import ChatFormat
 
 from .params import ClaudeParams
 

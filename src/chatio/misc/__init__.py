@@ -5,9 +5,9 @@ import logging
 
 from pathlib import Path
 
-from chatio.api._common import ApiConfig
-from chatio.api._common import ChatConfig
-from chatio.api._common import ToolConfig
+from chatio.core.config import ApiConfig
+from chatio.core.config import ChatConfig
+from chatio.core.config import ToolConfig
 
 from chatio.api._common import ChatBase
 from chatio.api.claude import ClaudeApi

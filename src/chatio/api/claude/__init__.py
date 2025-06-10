@@ -1,9 +1,8 @@
 
 from typing import override
 
-from chatio.api._common import ChatConfig
-
-from chatio.api._common import ChatApi
+from chatio.core.config import ChatConfig
+from chatio.core.config import ChatApi
 
 
 from .params import ClaudeParams

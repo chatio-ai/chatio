@@ -10,9 +10,9 @@ from openai import OpenAI
 
 
 from chatio.core.events import ChatEvent
+from chatio.core.client import ChatClient
 
-from chatio.api._common import ChatClient
-from chatio.api._common import ApiConfig
+from chatio.core.config import ApiConfig
 
 from chatio.api._utils import httpx_args
 

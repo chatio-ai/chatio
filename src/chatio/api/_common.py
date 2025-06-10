@@ -2,8 +2,6 @@
 import base64
 import mimetypes
 
-from abc import ABC, abstractmethod
-
 from collections.abc import Iterator
 from collections.abc import Callable
 
@@ -12,36 +10,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from chatio.core.stats import ChatStats
-from chatio.core.events import ChatEvent, CallEvent, DoneEvent, StatEvent, TextEvent
+from chatio.core.config import ToolConfig
+from chatio.core.config import ChatApi
 
-
-@dataclass
-class ApiConfig:
-    api_cls: str | None
-    api_url: str | None = None
-    api_key: str | None = None
-
-    options: dict | None = None
-
-
-@dataclass
-class ApiParams:
-    pass
-
-
-@dataclass
-class ChatConfig:
-    vendor: str
-    model: str
-
-    config: ApiConfig
-
-
-@dataclass
-class ToolConfig:
-    tools: dict | None = None
-    tool_choice: str | None = None
-    tool_choice_name: str | None = None
+from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 @dataclass
@@ -65,97 +37,6 @@ class ChatState:
         self.messages = []
         self.tools = None
         self.funcs = {}
-
-
-class ChatClient(ABC):
-
-    @abstractmethod
-    def iterate_model_events(self, model, system, messages, tools) -> Iterator[ChatEvent]:
-        ...
-
-    @abstractmethod
-    def count_message_tokens(self, model, system, messages, tools) -> int:
-        ...
-
-
-class ChatFormat(ABC):
-
-    @abstractmethod
-    def chat_messages(self, messages: list[dict]) -> list[dict]:
-        ...
-
-    @abstractmethod
-    def text_chunk(self, text: str) -> dict:
-        ...
-
-    @abstractmethod
-    def image_blob(self, blob: str, mimetype: str) -> dict:
-        ...
-
-    # messages
-
-    def _as_contents(self, content: list[dict] | dict | str) -> list[dict]:
-        match content:
-            case str():
-                return [self.text_chunk(content)]
-            case dict():
-                return [content]
-            case list():
-                return content
-            case _:
-                raise RuntimeError
-
-    @abstractmethod
-    def system_message(self, content: str) -> tuple[list[dict] | dict | None, list[dict]]:
-        ...
-
-    @abstractmethod
-    def input_message(self, content: str) -> dict:
-        ...
-
-    @abstractmethod
-    def output_message(self, content: str) -> dict:
-        ...
-
-    @abstractmethod
-    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: dict) -> dict:
-        ...
-
-    @abstractmethod
-    def tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
-        ...
-
-    # functions
-
-    @abstractmethod
-    def tool_definition(self, name: str, desc: str, schema: dict) -> dict:
-        ...
-
-    @abstractmethod
-    def tool_definitions(self, tools: list[dict]) -> list[dict] | None:
-        ...
-
-    @abstractmethod
-    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:
-        ...
-
-
-class ChatApi(ABC):
-
-    @property
-    @abstractmethod
-    def config(self) -> ChatConfig:
-        ...
-
-    @property
-    @abstractmethod
-    def format(self) -> ChatFormat:
-        ...
-
-    @property
-    @abstractmethod
-    def client(self) -> ChatClient:
-        ...
 
 
 class ChatBase:

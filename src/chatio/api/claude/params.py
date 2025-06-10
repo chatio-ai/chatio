@@ -1,7 +1,7 @@
 
 from dataclasses import dataclass
 
-from chatio.api._common import ApiParams
+from chatio.core.config import ApiParams
 
 
 @dataclass
