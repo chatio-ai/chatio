@@ -2,6 +2,8 @@
 import base64
 import mimetypes
 
+from abc import ABC, abstractmethod
+
 from collections.abc import Iterator
 from collections.abc import Callable
 
@@ -67,12 +69,99 @@ class ChatState:
         self.funcs = {}
 
 
-class ChatBase:
+class ChatClient(ABC):
 
-    def __init__(self,
+    @abstractmethod
+    def iterate_model_events(self, model, system, messages, tools) -> Iterator[ChatEvent]:
+        ...
+
+    @abstractmethod
+    def count_message_tokens(self, model, system, messages, tools):
+        ...
+
+
+class ChatFormat(ABC):
+
+    @abstractmethod
+    def chat_messages(self, messages):
+        ...
+
+    @abstractmethod
+    def text_chunk(self, text):
+        ...
+
+    @abstractmethod
+    def image_blob(self, blob, mimetype):
+        ...
+
+    # messages
+
+    def _as_contents(self, content):
+        if isinstance(content, str):
+            chunk = self.text_chunk(content)
+            return chunk if isinstance(chunk, str) else [chunk]
+        if isinstance(content, dict):
+            return [content]
+        if isinstance(content, list):
+            return content
+
+        raise RuntimeError
+
+    @abstractmethod
+    def system_message(self, content):
+        ...
+
+    @abstractmethod
+    def input_message(self, content):
+        ...
+
+    @abstractmethod
+    def output_message(self, content):
+        ...
+
+    @abstractmethod
+    def tool_request(self, tool_call_id, tool_name, tool_input):
+        ...
+
+    @abstractmethod
+    def tool_response(self, tool_call_id, tool_name, tool_output):
+        ...
+
+    # functions
+
+    @abstractmethod
+    def tool_definition(self, name, desc, schema):
+        ...
+
+    @abstractmethod
+    def tool_definitions(self, tools):
+        ...
+
+    @abstractmethod
+    def tool_selection(self, tool_choice, tool_choice_name):
+        ...
+
+
+class ChatApi(ABC):
+
+    @property
+    @abstractmethod
+    def format(self) -> ChatFormat:
+        ...
+
+    @property
+    @abstractmethod
+    def client(self) -> ChatClient:
+        ...
+
+
+class ChatBase:
+    def __init__(self, api: ChatApi,
                  system=None, messages=None,
                  tools: ToolConfig | None = None,
                  config: ChatConfig | None = None):
+
+        self._api = api
 
         self._ready = False
 
@@ -80,8 +169,6 @@ class ChatBase:
             raise RuntimeError
 
         self._config = config
-
-        self._setup_context(config.config)
 
         self._state = ChatState()
 
@@ -94,13 +181,10 @@ class ChatBase:
 
         self._stats = ChatStats()
 
-    def _setup_context(self, config: ApiConfig):
-        raise NotImplementedError
-
     # messages
 
     def _setup_messages(self, system, messages):
-        self._state.system, self._state.messages = self._format_system_message(system)
+        self._state.system, self._state.messages = self._api.format.system_message(system)
 
         if messages is None:
             messages = []
@@ -111,64 +195,21 @@ class ChatBase:
             else:
                 self._commit_output_message(message)
 
-    def _format_chat_messages(self, messages):
-        return messages
-
-    def _as_contents(self, content):
-        if isinstance(content, str):
-            chunk = self._format_text_chunk(content)
-            return chunk if isinstance(chunk, str) else [chunk]
-        if isinstance(content, dict):
-            return [content]
-        if isinstance(content, list):
-            return content
-
-        raise RuntimeError
-
-    def _format_text_chunk(self, text):
-        raise NotImplementedError
-
-    def _format_system_message(self, content):
-        raise NotImplementedError
-
-    def _format_input_message(self, content):
-        raise NotImplementedError
-
     def _commit_input_message(self, content):
-        self._state.messages.append(self._format_input_message(content))
+        self._state.messages.append(self._api.format.input_message(content))
         self._ready = True
-
-    def _format_output_message(self, content):
-        raise NotImplementedError
 
     def _commit_output_message(self, content):
-        self._state.messages.append(self._format_output_message(content))
+        self._state.messages.append(self._api.format.output_message(content))
         self._ready = False
-
-    def _format_tool_request(self, tool_call_id, tool_name, tool_input):
-        raise NotImplementedError
 
     def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
-        self._state.messages.append(self._format_tool_request(tool_call_id, tool_name, tool_input))
+        self._state.messages.append(self._api.format.tool_request(tool_call_id, tool_name, tool_input))
         self._ready = False
 
-    def _format_tool_response(self, tool_call_id, tool_name, tool_output):
-        raise NotImplementedError
-
     def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
-        self._state.messages.append(self._format_tool_response(tool_call_id, tool_name, tool_output))
+        self._state.messages.append(self._api.format.tool_response(tool_call_id, tool_name, tool_output))
         self._ready = True
-
-    # tools
-
-    def _format_tool_definition(self, name, desc, schema):
-        raise NotImplementedError
-
-    def _format_tool_definitions(self, tools):
-        return tools
-
-    def _format_tool_selection(self, tool_choice, tool_choice_name):
-        raise NotImplementedError
 
     def _setup_tools(self, tools: ToolConfig):
         self._state.tools = []
@@ -184,14 +225,14 @@ class ChatBase:
             if not name or not desc or not schema:
                 raise RuntimeError
 
-            self._state.tools.append(self._format_tool_definition(name, desc, schema))
+            self._state.tools.append(self._api.format.tool_definition(name, desc, schema))
 
             self._state.funcs[name] = tool
 
-        self._state.tools = self._format_tool_definitions(self._state.tools)
+        self._state.tools = self._api.format.tool_definitions(self._state.tools)
 
-        # self._tool_choice = self._format_tool_selection(tools.tool_choice, tools.tool_choice_name)
-        return self._format_tool_selection(tools.tool_choice, tools.tool_choice_name)
+        # self._tool_choice = self._api.format.tool_selection(tools.tool_choice, tools.tool_choice_name)
+        return self._api.format.tool_selection(tools.tool_choice, tools.tool_choice_name)
 
     def _process_tool(self, tool_call_id, tool_name, tool_args):
         tool_func = self._state.funcs.get(tool_name)
@@ -217,9 +258,6 @@ class ChatBase:
 
     # stream
 
-    def _iterate_model_events(self, model, system, messages, tools) -> Iterator[ChatEvent]:
-        raise NotImplementedError
-
     def __call__(self, content=None, **kwargs) -> Iterator[dict]:
         if content:
             self._commit_input_message(content)
@@ -228,11 +266,11 @@ class ChatBase:
 
     def _iterate(self, **kwargs) -> Iterator[dict]:
         while self._ready:
-            self._state.messages = self._format_chat_messages(self._state.messages)
+            self._state.messages = self._api.format.chat_messages(self._state.messages)
 
             self._debug_base_chat_state()
 
-            events = self._iterate_model_events(
+            events = self._api.client.iterate_model_events(
                 model=self._config.model,
                 system=self._state.system,
                 messages=self._state.messages,
@@ -262,14 +300,11 @@ class ChatBase:
                     case StatEvent():
                         yield from self._stats(event)
 
-    def _count_message_tokens(self, model, system, messages, tools):
-        raise NotImplementedError
-
     def count_tokens(self, content=None):
         if content:
             self._commit_input_message(content)
 
-        return self._count_message_tokens(
+        return self._api.client.count_message_tokens(
             model=self._config.model,
             system=self._state.system,
             messages=self._state.messages,
@@ -300,9 +335,6 @@ class ChatBase:
 
     # history
 
-    def _format_image_blob(self, blob, mimetype):
-        raise NotImplementedError
-
     def commit_image(self, filepath):
         with Path(filepath).open("rb") as file:
             data = file.read()
@@ -311,7 +343,7 @@ class ChatBase:
 
             self._commit_input_message(filepath)
 
-            self._commit_input_message(self._format_image_blob(blob, mimetype))
+            self._commit_input_message(self._api.format.image_blob(blob, mimetype))
 
     def commit_chunk(self, chunk, *, model=False):
         if model:

@@ -10,9 +10,9 @@ from chatio.api._common import ChatConfig
 from chatio.api._common import ToolConfig
 
 from chatio.api._common import ChatBase
-from chatio.api.claude import ClaudeChat
-from chatio.api.google import GoogleChat
-from chatio.api.openai import OpenAIChat
+from chatio.api.claude import ClaudeApi
+from chatio.api.google import GoogleApi
+from chatio.api.openai import OpenAIApi
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 from toolbelt.dummy import DummyTool
@@ -56,7 +56,7 @@ def init_config(model_name: str | None = None, env_name: str | None = None) -> C
 
 
 def build_chat(*args, **kwargs) -> ChatBase:
-    config: ChatConfig | None = kwargs.get('config')
+    config: ChatConfig | None = kwargs.pop('config')
 
     if config is None:
         err_msg = "no config specified!"
@@ -67,11 +67,11 @@ def build_chat(*args, **kwargs) -> ChatBase:
 
     match config.config.api_cls:
         case 'claude':
-            return ClaudeChat(*args, **kwargs)
+            return ChatBase(ClaudeApi(config), *args, **kwargs)
         case 'google':
-            return GoogleChat(*args, **kwargs)
+            return ChatBase(GoogleApi(config), *args, **kwargs)
         case 'openai':
-            return OpenAIChat(*args, **kwargs)
+            return ChatBase(OpenAIApi(config), *args, **kwargs)
         case _:
             err_msg = f"api_cls not supported: {config.config.api_cls}"
             raise RuntimeError(err_msg)

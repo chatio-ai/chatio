@@ -1,0 +1,62 @@
+
+from collections.abc import Iterator
+
+from typing import override
+
+
+from httpx import Client as HttpxClient
+
+from openai import OpenAI
+
+
+from chatio.core.events import ChatEvent
+
+from chatio.api._common import ChatClient
+from chatio.api._common import ApiConfig
+
+from chatio.api._utils import httpx_args
+
+
+from .params import OpenAIParams
+from .format import OpenAIFormat
+
+from .events import _pump
+
+
+class OpenAIClient(ChatClient):
+
+    def __init__(self, config: ApiConfig, params: OpenAIParams, format_: OpenAIFormat):
+        self._client = OpenAI(
+            base_url=config.api_url,
+            api_key=config.api_key,
+            http_client=HttpxClient(**httpx_args()))
+
+        self._params = params
+        self._format = format_
+
+    # events
+
+    def _iterate_model_events_prediction(self, model, _system, messages, prediction) -> Iterator[ChatEvent]:
+        return _pump(self._client.beta.chat.completions.stream(
+            model=model,
+            stream_options={'include_usage': True},
+            messages=messages,
+            prediction=prediction))
+
+    @override
+    def iterate_model_events(self, model, system, messages, tools, **kwargs) -> Iterator[ChatEvent]:
+        prediction = kwargs.pop('prediction', None)
+        if self._params.prediction and prediction:
+            prediction = self._format.predict_content(prediction)
+            return self._iterate_model_events_prediction(model, system, messages, prediction)
+
+        return _pump(self._client.beta.chat.completions.stream(
+            model=model,
+            max_completion_tokens=4096,
+            stream_options={'include_usage': True},
+            tools=tools,
+            messages=messages))
+
+    @override
+    def count_message_tokens(self, model, system, messages, tools):
+        raise NotImplementedError
