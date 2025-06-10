@@ -22,14 +22,16 @@ class ClaudeFormat(ChatFormat):
         return entries
 
     def _setup_messages_cache(self, messages: list[dict]) -> list[dict]:
+        content: list[dict] | None = None
+
         for message in messages:
-            content: list[dict] | None = message.get("content")
+            content = message.get("content")
             if content is not None:
                 for entry in content:
                     entry.pop("cache_control", None)
 
         if messages:
-            content: list[dict] | None = messages[-1].get("content")
+            content = messages[-1].get("content")
             if content is not None:
                 self._setup_cache(content)
 

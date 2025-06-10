@@ -95,7 +95,7 @@ class GoogleFormat(ChatFormat):
 
     @override
     def tool_definitions(self, tools: list[dict]) -> list[dict] | None:
-        tools_config = []
+        tools_config: list[dict] = []
 
         if tools:
             tools_config.append({

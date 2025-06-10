@@ -87,7 +87,7 @@ class ChatFormat(ABC):
         ...
 
     @abstractmethod
-    def text_chunk(self, text: str) -> dict | str:
+    def text_chunk(self, text: str) -> dict:
         ...
 
     @abstractmethod
@@ -96,16 +96,16 @@ class ChatFormat(ABC):
 
     # messages
 
-    def _as_contents(self, content: str | dict | list) -> list[dict] | str:
-        if isinstance(content, str):
-            chunk = self.text_chunk(content)
-            return chunk if isinstance(chunk, str) else [chunk]
-        if isinstance(content, dict):
-            return [content]
-        if isinstance(content, list):
-            return content
-
-        raise RuntimeError
+    def _as_contents(self, content: list[dict] | dict | str) -> list[dict]:
+        match content:
+            case str():
+                return [self.text_chunk(content)]
+            case dict():
+                return [content]
+            case list():
+                return content
+            case _:
+                raise RuntimeError
 
     @abstractmethod
     def system_message(self, content: str) -> tuple[list[dict] | dict | None, list[dict]]:

@@ -18,10 +18,7 @@ class OpenAIFormat(ChatFormat):
         return messages
 
     @override
-    def text_chunk(self, text: str) -> dict | str:
-        if self._params.legacy:
-            return text
-
+    def text_chunk(self, text: str) -> dict:
         return {
             "type": "text",
             "text": text,
@@ -34,6 +31,15 @@ class OpenAIFormat(ChatFormat):
             "image_url": {"url": f"data:{mimetype};base64,{blob}"},
         }
 
+    # messages
+
+    def _as_contents_compat(self, content: list[dict] | dict | str) -> list[dict] | str:
+        match content, self._params.legacy:
+            case str(), True:
+                return content
+            case _:
+                return self._as_contents(content)
+
     @override
     def system_message(self, content: str) -> tuple[list[dict], list[dict]]:
         if not content:
@@ -41,21 +47,21 @@ class OpenAIFormat(ChatFormat):
 
         return [], [{
             "role": "developer",
-            "content": self._as_contents(content),
+            "content": self._as_contents_compat(content),
         }]
 
     @override
     def input_message(self, content: str) -> dict:
         return {
             "role": "user",
-            "content": self._as_contents(content),
+            "content": self._as_contents_compat(content),
         }
 
     @override
     def output_message(self, content: str) -> dict:
         return {
             "role": "assistant",
-            "content": self._as_contents(content),
+            "content": self._as_contents_compat(content),
         }
 
     @override
