@@ -15,11 +15,11 @@ from anthropic.lib.streaming import MessageStreamManager
 
 from chatio.core.events import ChatEvent, CallEvent, DoneEvent, StatEvent, TextEvent
 
-from ._utils import httpx_args
+from chatio.api._utils import httpx_args
 
-from ._common import ApiConfig
-from ._common import ApiParams
-from ._common import ChatBase
+from chatio.api._common import ApiConfig
+from chatio.api._common import ApiParams
+from chatio.api._common import ChatBase
 
 
 log = logging.getLogger(__name__)
