@@ -33,7 +33,7 @@ class GoogleFormat(ChatFormat):
         }
 
     @override
-    def system_message(self, content: str) -> tuple[dict | None, list[dict]]:
+    def system_message(self, content: str | None) -> tuple[dict | None, list[dict]]:
         if not content:
             return None, []
 
@@ -56,7 +56,7 @@ class GoogleFormat(ChatFormat):
         }
 
     @override
-    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: dict) -> dict:
+    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
         return {
             "role": "model",
             "parts": [{

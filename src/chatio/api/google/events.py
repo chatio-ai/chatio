@@ -67,9 +67,7 @@ def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterato
                 usage = chunk.usage_metadata
                 search = chunk.candidates[0].grounding_metadata
 
-        for event in _pump_grounding(search):
-            if event is not None:
-                yield event
+        yield from _pump_grounding(search)
 
         yield DoneEvent(final_text)
 
@@ -80,4 +78,6 @@ def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterato
             0, 0)
 
         for call in calls:
-            yield CallEvent(call.id or "", call.name or "", call.args, call.args)
+            if call.name is None or call.args is None:
+                raise ValueError(call.id, call.name, call.args)
+            yield CallEvent(call.id or "", call.name, call.args, call.args)

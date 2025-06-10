@@ -30,7 +30,7 @@ class ChatFormat(ABC):
                 raise RuntimeError
 
     @abstractmethod
-    def system_message(self, content: str) -> tuple[list[dict] | dict | None, list[dict]]:
+    def system_message(self, content: str | None) -> tuple[list[dict] | dict | None, list[dict]]:
         ...
 
     @abstractmethod
@@ -42,7 +42,7 @@ class ChatFormat(ABC):
         ...
 
     @abstractmethod
-    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: dict) -> dict:
+    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
         ...
 
     @abstractmethod

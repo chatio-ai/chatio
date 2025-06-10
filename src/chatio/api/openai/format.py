@@ -41,7 +41,7 @@ class OpenAIFormat(ChatFormat):
                 return self._as_contents(content)
 
     @override
-    def system_message(self, content: str) -> tuple[list[dict], list[dict]]:
+    def system_message(self, content: str | None) -> tuple[list[dict], list[dict]]:
         if not content:
             return [], []
 
@@ -65,7 +65,7 @@ class OpenAIFormat(ChatFormat):
         }
 
     @override
-    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: dict) -> dict:
+    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
         return {
             "role": "assistant",
             "tool_calls": [{

@@ -37,4 +37,6 @@ def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:
 
         for message in final.content:
             if message.type == 'tool_use':
+                if not isinstance(message.input, dict):
+                    raise TypeError(message.input)
                 yield CallEvent(message.id, message.name, message.input, message.input)

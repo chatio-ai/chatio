@@ -40,5 +40,7 @@ def _pump(streamctx: ChatCompletionStreamManager) -> Iterator[ChatEvent]:
         )
 
         for call in final_message.tool_calls or ():
+            if not isinstance(call.function.parsed_arguments, dict):
+                raise TypeError(call.function.parsed_arguments)
             yield CallEvent(call.id, call.function.name,
                             call.function.parsed_arguments, call.function.arguments)

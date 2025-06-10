@@ -33,6 +33,7 @@ class ChatState:
     messages: list[dict]
     tools: list[dict] | None
     funcs: dict[str, Callable]
+    tool_choice: dict | None
 
     def __init__(self):
         self.system = None
@@ -43,8 +44,9 @@ class ChatState:
 
 class ChatBase:
     def __init__(self, api: ChatApi,
-                 system=None, messages=None,
-                 tools: ToolConfig | None = None):
+                 system: str | None = None,
+                 messages: list[str] | None = None,
+                 tools: ToolConfig | None = None) -> None:
 
         self._api = api
 
@@ -63,7 +65,7 @@ class ChatBase:
 
     # messages
 
-    def _setup_messages(self, system, messages):
+    def _setup_messages(self, system: str | None, messages: list[str] | None) -> None:
         self._state.system, self._state.messages = self._api.format.system_message(system)
 
         if messages is None:
@@ -75,23 +77,23 @@ class ChatBase:
             else:
                 self._commit_output_message(message)
 
-    def _commit_input_message(self, content):
+    def _commit_input_message(self, content: str) -> None:
         self._state.messages.append(self._api.format.input_message(content))
         self._ready = True
 
-    def _commit_output_message(self, content):
+    def _commit_output_message(self, content: str) -> None:
         self._state.messages.append(self._api.format.output_message(content))
         self._ready = False
 
-    def _commit_tool_request(self, tool_call_id, tool_name, tool_input):
+    def _commit_tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> None:
         self._state.messages.append(self._api.format.tool_request(tool_call_id, tool_name, tool_input))
         self._ready = False
 
-    def _commit_tool_response(self, tool_call_id, tool_name, tool_output):
+    def _commit_tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> None:
         self._state.messages.append(self._api.format.tool_response(tool_call_id, tool_name, tool_output))
         self._ready = True
 
-    def _setup_tools(self, tools: ToolConfig):
+    def _setup_tools(self, tools: ToolConfig) -> None:
         self._state.tools = []
         self._state.funcs = {}
 
@@ -111,10 +113,9 @@ class ChatBase:
 
         self._state.tools = self._api.format.tool_definitions(self._state.tools)
 
-        # self._tool_choice = self._api.format.tool_selection(tools.tool_choice, tools.tool_choice_name)
-        return self._api.format.tool_selection(tools.tool_choice, tools.tool_choice_name)
+        self._state.tool_choice = self._api.format.tool_selection(tools.tool_choice, tools.tool_choice_name)
 
-    def _process_tool(self, tool_call_id, tool_name, tool_args):
+    def _process_tool(self, tool_call_id: str, tool_name: str, tool_args: dict) -> Iterator[dict]:
         tool_func = self._state.funcs.get(tool_name)
         if not tool_func:
             return
@@ -138,7 +139,7 @@ class ChatBase:
 
     # stream
 
-    def __call__(self, content=None, **kwargs) -> Iterator[dict]:
+    def __call__(self, content: str | None = None, **kwargs) -> Iterator[dict]:
         if content:
             self._commit_input_message(content)
 
@@ -178,7 +179,7 @@ class ChatBase:
                     case StatEvent():
                         yield from self._stats(event)
 
-    def count_tokens(self, content=None):
+    def count_tokens(self, content: str | None = None) -> int:
         if content:
             self._commit_input_message(content)
 
@@ -191,7 +192,7 @@ class ChatBase:
 
     # helpers
 
-    def info(self):
+    def info(self) -> ChatInfo:
         return ChatInfo(
             self._api.config.vendor,
             self._api.config.model,
@@ -202,7 +203,7 @@ class ChatBase:
 
     # history
 
-    def commit_image(self, filepath):
+    def commit_image(self, filepath: str) -> None:
         with Path(filepath).open("rb") as file:
             data = file.read()
             blob = base64.b64encode(data).decode()
@@ -215,7 +216,7 @@ class ChatBase:
 
             self._commit_input_message(self._api.format.image_blob(blob, mimetype))
 
-    def commit_chunk(self, chunk, *, model=False):
+    def commit_chunk(self, chunk: str, *, model: bool = False) -> None:
         if model:
             self._commit_output_message(chunk)
         else:
