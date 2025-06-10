@@ -3,47 +3,45 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ChatStatInputData:
+class ChatStatsInputData:
     input_tokens: int = 0
     input_history_tokens: int = 0
     input_current_tokens: int = 0
 
 
 @dataclass
-class ChatStatOutputData:
+class ChatStatsOutputData:
     output_tokens: int = 0
     predict_accepted: int = 0
     predict_rejected: int = 0
 
 
 @dataclass
-class ChatStatCacheData:
+class ChatStatsCacheData:
     cache_missed: int = 0
     cache_written: int = 0
     cache_read: int = 0
 
 
 @dataclass
-class ChatStatData:
-    input: ChatStatInputData
-    output: ChatStatOutputData
-    cache: ChatStatCacheData
+class ChatStatsData:
+    input: ChatStatsInputData
+    output: ChatStatsOutputData
+    cache: ChatStatsCacheData
 
     def __init__(self, label):
-        self.input = ChatStatInputData()
-        self.output = ChatStatOutputData()
-        self.cache = ChatStatCacheData()
+        self.input = ChatStatsInputData()
+        self.output = ChatStatsOutputData()
+        self.cache = ChatStatsCacheData()
         self.label = label
 
 
 @dataclass
-class ChatStat:
-    _round: ChatStatData
-    _total: ChatStatData
+class ChatStats:
 
     def __init__(self):
-        self._round = ChatStatData("round")
-        self._total = ChatStatData("total")
+        self._round = ChatStatsData("round")
+        self._total = ChatStatsData("total")
 
     def __call__(self, usage):
         return self._process(usage)

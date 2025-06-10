@@ -8,9 +8,8 @@ from pprint import pprint
 
 from dataclasses import dataclass
 
-from chatio.chat.stats import ChatStat
-
-from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
+from chatio.core.stats import ChatStats
+from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 @dataclass
@@ -78,7 +77,7 @@ class ChatBase:
 
         self._setup_tools(tools)
 
-        self._stats = ChatStat()
+        self._stats = ChatStats()
 
     def _setup_context(self, config: ApiConfig):
         raise NotImplementedError

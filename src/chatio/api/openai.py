@@ -9,13 +9,14 @@ from httpx import Client as HttpxClient
 
 from openai import OpenAI
 
+
+from chatio.core.events import TextEvent, DoneEvent, StatEvent, CallEvent
+
 from ._utils import httpx_args
 
 from ._common import ApiConfig
 from ._common import ApiParams
 from ._common import ChatBase
-
-from ._events import TextEvent, DoneEvent, StatEvent, CallEvent
 
 
 log = logging.getLogger(__name__)

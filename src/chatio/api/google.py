@@ -10,13 +10,14 @@ from google.genai import Client
 
 from html2text import HTML2Text
 
+
+from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
+
 from ._utils import httpx_args
 
 from ._common import ApiConfig
 from ._common import ApiParams
 from ._common import ChatBase
-
-from ._events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 log = logging.getLogger(__name__)
