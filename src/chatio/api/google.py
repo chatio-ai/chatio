@@ -2,11 +2,14 @@
 import logging
 
 from collections.abc import Iterator
+from collections.abc import Callable
 
 from dataclasses import dataclass
 
 from typing import override
 
+from google.genai.types import GenerateContentResponse
+from google.genai.types import GroundingMetadata
 from google.genai.types import HttpOptions
 from google.genai import Client
 
@@ -30,8 +33,32 @@ class GoogleParams(ApiParams):
     grounding: bool = False
 
 
-def _pump(stream) -> Iterator[ChatEvent]:
-    if stream:
+def _pump_grounding(search: GroundingMetadata | None) -> Iterator[ChatEvent]:
+    if search is None:
+        return
+
+    if search.grounding_chunks is not None:
+        for index, chunk in enumerate(search.grounding_chunks, 1):
+            uri, title = "", ""
+            if chunk.web is not None and chunk.web.uri is not None:
+                uri = chunk.web.uri
+            if chunk.web is not None and chunk.web.title is not None:
+                title = chunk.web.title
+            entry = f"   [{index}]: <{uri}> {title}\n"
+            yield TextEvent(entry, label="search.sources")
+
+    if search.search_entry_point is not None:
+        parser = HTML2Text(bodywidth=0)
+        parser.inline_links = False
+        parser.protect_links = True
+        entry = parser.handle(search.search_entry_point.rendered_content or "")
+        yield TextEvent(entry, label="search.suggest")
+
+
+def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterator[ChatEvent]:
+    stream = streamfun()
+
+    if stream is not None:
 
         usage = None
         calls = []
@@ -56,18 +83,9 @@ def _pump(stream) -> Iterator[ChatEvent]:
                 usage = chunk.usage_metadata
                 search = chunk.candidates[0].grounding_metadata
 
-        grounding_chunks = (search and search.grounding_chunks) or ()
-        for index, chunk in enumerate(grounding_chunks, 1):
-            entry = f"   [{index}]: <{chunk.web.uri}> {chunk.web.title}\n"
-            yield TextEvent(entry, label="search.sources")
-
-        search_entry_point = (search and search.search_entry_point) or None
-        if search_entry_point is not None:
-            parser = HTML2Text(bodywidth=0)
-            parser.inline_links = False
-            parser.protect_links = True
-            entry = parser.handle(search_entry_point.rendered_content)
-            yield TextEvent(entry, label="search.suggest")
+        for event in _pump_grounding(search):
+            if event is not None:
+                yield event
 
         yield DoneEvent(final_text)
 
@@ -78,7 +96,7 @@ def _pump(stream) -> Iterator[ChatEvent]:
             0, 0)
 
         for call in calls:
-            yield CallEvent(call.id, call.name, call.args, call.args)
+            yield CallEvent(call.id or "", call.name or "", call.args, call.args)
 
 
 class GoogleChat(ChatBase):
@@ -197,7 +215,7 @@ class GoogleChat(ChatBase):
 
     @override
     def _iterate_model_events(self, model, system, messages, tools, **_kwargs) -> Iterator[ChatEvent]:
-        return _pump(self._client.models.generate_content_stream(
+        return _pump(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
                 'max_output_tokens': 4096,

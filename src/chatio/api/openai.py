@@ -10,6 +10,7 @@ from typing import override
 from httpx import Client as HttpxClient
 
 from openai import OpenAI
+from openai.lib.streaming.chat._completions import ChatCompletionStreamManager
 
 
 from chatio.core.events import ChatEvent, TextEvent, DoneEvent, StatEvent, CallEvent
@@ -30,7 +31,7 @@ class OpenAIParams(ApiParams):
     legacy: bool = False
 
 
-def _pump(streamctx) -> Iterator[ChatEvent]:
+def _pump(streamctx: ChatCompletionStreamManager) -> Iterator[ChatEvent]:
     with streamctx as stream:
         for chunk in stream:
             log.info("%s", chunk.model_dump_json(indent=2))
@@ -38,10 +39,11 @@ def _pump(streamctx) -> Iterator[ChatEvent]:
             if chunk.type == 'content.delta':
                 yield TextEvent(chunk.delta)
 
-        final = stream.get_final_completion().choices[0].message
-        yield DoneEvent(final.content)
+        final = stream.get_final_completion()
+        final_message = final.choices[0].message
+        yield DoneEvent(final_message.content or "")
 
-        usage = stream.get_final_completion().usage
+        usage = final.usage
 
         input_details = usage and usage.prompt_tokens_details
         output_details = usage and usage.completion_tokens_details
@@ -55,7 +57,7 @@ def _pump(streamctx) -> Iterator[ChatEvent]:
             (output_details and output_details.rejected_prediction_tokens) or 0,
         )
 
-        for call in final.tool_calls or ():
+        for call in final_message.tool_calls or ():
             yield CallEvent(call.id, call.function.name,
                             call.function.parsed_arguments, call.function.arguments)
 
