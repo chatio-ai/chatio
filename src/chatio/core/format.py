@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 
 class ChatFormat(ABC):
 
+    # messages
+
     @abstractmethod
     def chat_messages(self, messages: list[dict]) -> list[dict]:
         ...
@@ -16,21 +18,8 @@ class ChatFormat(ABC):
     def image_blob(self, blob: str, mimetype: str) -> dict:
         ...
 
-    # messages
-
-    def _as_contents(self, content: list[dict] | dict | str) -> list[dict]:
-        match content:
-            case str():
-                return [self.text_chunk(content)]
-            case dict():
-                return [content]
-            case list():
-                return content
-            case _:
-                raise RuntimeError
-
     @abstractmethod
-    def system_message(self, content: str | None) -> tuple[list[dict] | dict | None, list[dict]]:
+    def system_message(self, message: str | None) -> tuple[list[dict] | dict | None, list[dict]]:
         ...
 
     @abstractmethod

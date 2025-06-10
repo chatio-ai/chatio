@@ -32,13 +32,16 @@ class GoogleFormat(ChatFormat):
             },
         }
 
+    def _as_contents(self, content: dict) -> list[dict]:
+        return [content]
+
     @override
-    def system_message(self, content: str | None) -> tuple[dict | None, list[dict]]:
-        if not content:
+    def system_message(self, message: str | None) -> tuple[dict | None, list[dict]]:
+        if not message:
             return None, []
 
         return {
-            "parts": self._as_contents(content),
+            "parts": self._as_contents(self.text_chunk(message)),
         }, []
 
     @override

@@ -31,37 +31,35 @@ class OpenAIFormat(ChatFormat):
             "image_url": {"url": f"data:{mimetype};base64,{blob}"},
         }
 
-    # messages
-
-    def _as_contents_compat(self, content: list[dict] | dict | str) -> list[dict] | str:
-        match content, self._params.legacy:
-            case str(), True:
-                return content
+    def _as_contents(self, content: dict) -> list[dict] | str:
+        match content['type'], self._params.legacy:
+            case 'text', True:
+                return content['text']
             case _:
-                return self._as_contents(content)
+                return [content]
 
     @override
-    def system_message(self, content: str | None) -> tuple[list[dict], list[dict]]:
-        if not content:
+    def system_message(self, message: str | None) -> tuple[list[dict], list[dict]]:
+        if not message:
             return [], []
 
         return [], [{
-            "role": "developer",
-            "content": self._as_contents_compat(content),
+            "role": "system" if self._params.legacy else "developer",
+            "content": self._as_contents(self.text_chunk(message)),
         }]
 
     @override
     def input_content(self, content: dict) -> dict:
         return {
             "role": "user",
-            "content": self._as_contents_compat(content),
+            "content": self._as_contents(content),
         }
 
     @override
     def output_content(self, content: dict) -> dict:
         return {
             "role": "assistant",
-            "content": self._as_contents_compat(content),
+            "content": self._as_contents(content),
         }
 
     @override
