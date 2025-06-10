@@ -51,14 +51,14 @@ class OpenAIFormat(ChatFormat):
         }]
 
     @override
-    def input_message(self, content: str) -> dict:
+    def input_content(self, content: dict) -> dict:
         return {
             "role": "user",
             "content": self._as_contents_compat(content),
         }
 
     @override
-    def output_message(self, content: str) -> dict:
+    def output_content(self, content: dict) -> dict:
         return {
             "role": "assistant",
             "content": self._as_contents_compat(content),

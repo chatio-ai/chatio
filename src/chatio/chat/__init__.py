@@ -77,13 +77,19 @@ class ChatBase:
             else:
                 self._commit_output_message(message)
 
-    def _commit_input_message(self, content: str) -> None:
-        self._state.messages.append(self._api.format.input_message(content))
+    def _commit_input_content(self, content: dict) -> None:
+        self._state.messages.append(self._api.format.input_content(content))
         self._ready = True
 
-    def _commit_output_message(self, content: str) -> None:
-        self._state.messages.append(self._api.format.output_message(content))
+    def _commit_input_message(self, message: str) -> None:
+        self._commit_input_content(self._api.format.text_chunk(message))
+
+    def _commit_output_content(self, content: dict) -> None:
+        self._state.messages.append(self._api.format.output_content(content))
         self._ready = False
+
+    def _commit_output_message(self, message: str) -> None:
+        self._commit_output_content(self._api.format.text_chunk(message))
 
     def _commit_tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> None:
         self._state.messages.append(self._api.format.tool_request(tool_call_id, tool_name, tool_input))
@@ -214,7 +220,7 @@ class ChatBase:
 
             self._commit_input_message(filepath)
 
-            self._commit_input_message(self._api.format.image_blob(blob, mimetype))
+            self._commit_input_content(self._api.format.image_blob(blob, mimetype))
 
     def commit_chunk(self, chunk: str, *, model: bool = False) -> None:
         if model:

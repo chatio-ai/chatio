@@ -34,11 +34,11 @@ class ChatFormat(ABC):
         ...
 
     @abstractmethod
-    def input_message(self, content: str) -> dict:
+    def input_content(self, content: dict) -> dict:
         ...
 
     @abstractmethod
-    def output_message(self, content: str) -> dict:
+    def output_content(self, content: dict) -> dict:
         ...
 
     @abstractmethod

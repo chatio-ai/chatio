@@ -68,29 +68,23 @@ class ClaudeFormat(ChatFormat):
 
         return self._setup_cache(self._as_contents(content)), []
 
-    def _input_message(self, content: str | dict) -> dict:
+    @override
+    def input_content(self, content: dict) -> dict:
         return {
             "role": "user",
             "content": self._as_contents(content),
         }
 
     @override
-    def input_message(self, content: str) -> dict:
-        return self._input_message(content)
-
-    def _output_message(self, content: str | dict) -> dict:
+    def output_content(self, content: dict) -> dict:
         return {
             "role": "assistant",
             "content": self._as_contents(content),
         }
 
     @override
-    def output_message(self, content: str) -> dict:
-        return self._output_message(content)
-
-    @override
     def tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
-        return self._output_message({
+        return self.output_content({
             "type": "tool_use",
             "id": tool_call_id,
             "name": tool_name,
@@ -99,7 +93,7 @@ class ClaudeFormat(ChatFormat):
 
     @override
     def tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
-        return self._input_message({
+        return self.input_content({
             "type": "tool_result",
             "tool_use_id": tool_call_id,
             "content": tool_output,

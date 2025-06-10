@@ -42,14 +42,14 @@ class GoogleFormat(ChatFormat):
         }, []
 
     @override
-    def input_message(self, content: str) -> dict:
+    def input_content(self, content: dict) -> dict:
         return {
             "role": "user",
             "parts": self._as_contents(content),
         }
 
     @override
-    def output_message(self, content: str) -> dict:
+    def output_content(self, content: dict) -> dict:
         return {
             "role": "model",
             "parts": self._as_contents(content),
