@@ -40,7 +40,7 @@ class ChatStatsData:
 class ChatStats:
 
     def __init__(self):
-        self._round = ChatStatsData("round")
+        self._delta = ChatStatsData("delta")
         self._total = ChatStatsData("total")
 
     def __call__(self, usage):
@@ -62,30 +62,30 @@ class ChatStats:
         }
 
     def _process(self, usage):
-        self._round.input.input_history_tokens = self._round.input.input_tokens
-        self._round.input.input_current_tokens = usage.input_tokens - self._round.input.input_history_tokens
-        self._round.input.input_tokens = usage.input_tokens
-        self._round.output.output_tokens = usage.output_tokens
+        self._delta.input.input_history_tokens = self._delta.input.input_tokens
+        self._delta.input.input_current_tokens = usage.input_tokens - self._delta.input.input_history_tokens
+        self._delta.input.input_tokens = usage.input_tokens
+        self._delta.output.output_tokens = usage.output_tokens
 
-        self._round.cache.cache_missed = usage.input_tokens - usage.cache_written - usage.cache_read
-        self._round.cache.cache_written = usage.cache_written
-        self._round.cache.cache_read = usage.cache_read
+        self._delta.cache.cache_missed = usage.input_tokens - usage.cache_written - usage.cache_read
+        self._delta.cache.cache_written = usage.cache_written
+        self._delta.cache.cache_read = usage.cache_read
 
-        self._round.output.predict_accepted = usage.predict_accepted
-        self._round.output.predict_rejected = usage.predict_rejected
+        self._delta.output.predict_accepted = usage.predict_accepted
+        self._delta.output.predict_rejected = usage.predict_rejected
 
-        yield self._mkevent(self._round)
+        yield self._mkevent(self._delta)
 
-        self._total.input.input_history_tokens += self._round.input.input_history_tokens
-        self._total.input.input_current_tokens += self._round.input.input_current_tokens
-        self._total.input.input_tokens += self._round.input.input_tokens
-        self._total.output.output_tokens += self._round.output.output_tokens
+        self._total.input.input_history_tokens += self._delta.input.input_history_tokens
+        self._total.input.input_current_tokens += self._delta.input.input_current_tokens
+        self._total.input.input_tokens += self._delta.input.input_tokens
+        self._total.output.output_tokens += self._delta.output.output_tokens
 
-        self._total.cache.cache_missed += self._round.cache.cache_missed
-        self._total.cache.cache_written += self._round.cache.cache_written
-        self._total.cache.cache_read += self._round.cache.cache_read
+        self._total.cache.cache_missed += self._delta.cache.cache_missed
+        self._total.cache.cache_written += self._delta.cache.cache_written
+        self._total.cache.cache_read += self._delta.cache.cache_read
 
-        self._total.output.predict_accepted += self._round.output.predict_accepted
-        self._total.output.predict_rejected += self._round.output.predict_rejected
+        self._total.output.predict_accepted += self._delta.output.predict_accepted
+        self._total.output.predict_rejected += self._delta.output.predict_rejected
 
         yield self._mkevent(self._total)
