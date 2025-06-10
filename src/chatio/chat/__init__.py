@@ -9,11 +9,13 @@ from dataclasses import dataclass
 
 from pathlib import Path
 
-from chatio.core.stats import ChatStats
 from chatio.core.config import ToolConfig
 from chatio.core.config import ChatApi
 
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
+
+
+from .stats import ChatStats
 
 
 @dataclass

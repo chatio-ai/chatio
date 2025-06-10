@@ -9,10 +9,11 @@ from chatio.core.config import ApiConfig
 from chatio.core.config import ChatConfig
 from chatio.core.config import ToolConfig
 
-from chatio.api._common import ChatBase
 from chatio.api.claude import ClaudeApi
 from chatio.api.google import GoogleApi
 from chatio.api.openai import OpenAIApi
+
+from chatio.chat import ChatBase
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 from toolbelt.dummy import DummyTool

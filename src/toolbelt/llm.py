@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.api._common import ChatBase
+from chatio.chat import ChatBase
 
 from . import ToolBase
 

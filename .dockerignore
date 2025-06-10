@@ -1,14 +1,15 @@
 *
 !bin/*.py
 !src/toolbelt/*.py
-!src/chatio/core/*.py
 !src/chatio/misc/*.py
-!src/chatio/cli/*.py
+!src/chatio/chat/*.py
+!src/chatio/core/*.py
 !src/chatio/api/openai/*.py
 !src/chatio/api/google/*.py
 !src/chatio/api/claude/*.py
 !src/chatio/api/helper/*.py
 !src/chatio/api/*.py
+!src/chatio/cli/*.py
 !src/chatio/*.py
 !lints/run.sh
 !requirements.dev.txt
