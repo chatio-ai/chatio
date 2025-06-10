@@ -21,7 +21,6 @@ ignore = [
 	"I001",		# unsorted imports
 
 	"T201",		# print found
-	"T203",		# pprint found
 
 	"S602",		# shell equals true
 ]

@@ -11,8 +11,6 @@ from dataclasses import dataclass
 
 from pathlib import Path
 
-from pprint import pprint
-
 from chatio.core.stats import ChatStats
 from chatio.core.events import ChatEvent, CallEvent, DoneEvent, StatEvent, TextEvent
 
@@ -267,8 +265,6 @@ class ChatBase:
         while self._ready:
             self._state.messages = self._api.format.chat_messages(self._state.messages)
 
-            self._debug_base_chat_state()
-
             events = self._api.client.iterate_model_events(
                 model=self._api.config.model,
                 system=self._state.system,
@@ -310,7 +306,7 @@ class ChatBase:
             tools=self._state.tools,
         )
 
-    # debug
+    # helpers
 
     def info(self):
         return ChatInfo(
@@ -320,17 +316,6 @@ class ChatBase:
             len(self._state.system or []),
             len(self._state.messages),
         )
-
-    def _debug_base_chat_state(self):
-        _debug = False
-        # _debug = True
-
-        if _debug:
-            print()
-            pprint(self._state.system)
-            print()
-            pprint(self._state.messages)
-            print()
 
     # history
 
