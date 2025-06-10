@@ -1,5 +1,9 @@
 
+import sys
+
 from collections.abc import Iterable
+
+from contextlib import suppress
 
 from .style import Style, Empty
 from .input import setup_history
@@ -31,11 +35,16 @@ def run_info(chat, style=None, file=None):
 
 def run_user(style=None, file=None):
     setup_history()
+
     with _mk_style(style).wrap_input(end="", file=file) as prompt:
-        try:
-            return input(prompt)
-        except (EOFError, KeyboardInterrupt):
-            return None
+
+        user_input = None
+        with suppress(EOFError, KeyboardInterrupt):
+            user_input = input(prompt)
+            if not sys.stdin.isatty():
+                print(user_input, flush=True, file=file)
+
+        return user_input
 
 
 def _run_chat_event(event: dict, style: Style, file=None):
