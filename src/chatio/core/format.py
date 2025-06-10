@@ -19,7 +19,7 @@ class ChatFormat(ABC):
         ...
 
     @abstractmethod
-    def system_message(self, message: str | None) -> tuple[list[dict] | dict | None, list[dict]]:
+    def system_content(self, content: dict) -> dict:
         ...
 
     @abstractmethod

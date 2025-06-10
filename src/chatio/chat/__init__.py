@@ -66,7 +66,8 @@ class ChatBase:
     # messages
 
     def _setup_messages(self, system: str | None, messages: list[str] | None) -> None:
-        self._state.system, self._state.messages = self._api.format.system_message(system)
+        if system:
+            self._state.system = self._api.format.system_content(self._api.format.text_chunk(system))
 
         if messages is None:
             messages = []
@@ -202,8 +203,8 @@ class ChatBase:
         return ChatInfo(
             self._api.config.vendor,
             self._api.config.model,
-            len(self._state.funcs or {}),
-            len(self._state.system or []),
+            len(self._state.funcs),
+            bool(self._state.system),
             len(self._state.messages),
         )
 

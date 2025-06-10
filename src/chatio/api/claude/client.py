@@ -37,6 +37,8 @@ class ClaudeClient(ChatClient):
 
     @override
     def iterate_model_events(self, model, system, messages, tools, **_kwargs) -> Iterator[ChatEvent]:
+        system = [system] if system is not None else []
+
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
@@ -48,6 +50,8 @@ class ClaudeClient(ChatClient):
 
     @override
     def count_message_tokens(self, model, system, messages, tools):
+        system = [system] if system is not None else []
+
         return self._client.messages.count_tokens(
             model=model,
             tools=tools,

@@ -45,6 +45,9 @@ class OpenAIClient(ChatClient):
 
     @override
     def iterate_model_events(self, model, system, messages, tools, **kwargs) -> Iterator[ChatEvent]:
+        if system is not None:
+            messages = [system, *messages]
+
         prediction = kwargs.pop('prediction', None)
         if self._params.prediction and prediction:
             prediction = self._format.predict_content(prediction)

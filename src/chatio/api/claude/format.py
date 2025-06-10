@@ -65,11 +65,8 @@ class ClaudeFormat(ChatFormat):
         return [content]
 
     @override
-    def system_message(self, message: str | None) -> tuple[list[dict], list[dict]]:
-        if not message:
-            return [], []
-
-        return self._setup_cache([self.text_chunk(message)]), []
+    def system_content(self, content: dict) -> dict:
+        return self._setup_cache([content])[0]
 
     @override
     def input_content(self, content: dict) -> dict:

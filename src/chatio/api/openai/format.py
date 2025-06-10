@@ -39,14 +39,11 @@ class OpenAIFormat(ChatFormat):
                 return [content]
 
     @override
-    def system_message(self, message: str | None) -> tuple[list[dict], list[dict]]:
-        if not message:
-            return [], []
-
-        return [], [{
+    def system_content(self, content: dict) -> dict:
+        return {
             "role": "system" if self._params.legacy else "developer",
-            "content": self._as_contents(self.text_chunk(message)),
-        }]
+            "content": self._as_contents(content),
+        }
 
     @override
     def input_content(self, content: dict) -> dict:
