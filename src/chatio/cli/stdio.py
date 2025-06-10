@@ -1,9 +1,11 @@
 
+from collections.abc import Iterable
+
 from .style import Style, Empty
 from .input import setup_history
 
 
-def _mk_style(style=None):
+def _mk_style(style=None) -> Style:
     if style is None:
         return Empty
 
@@ -36,7 +38,7 @@ def run_user(style=None, file=None):
             return None
 
 
-def _run_chat_event(event, style, file=None):
+def _run_chat_event(event: dict, style: Style, file=None):
 
     etype = event['type']
     etext = ""
@@ -70,8 +72,7 @@ def _run_chat_event(event, style, file=None):
         print(etext, end="", flush=True, file=file)
 
 
-def _run_chat_chunk(chunk, style, hascr, file=None):
-
+def _run_chat_chunk(chunk: str, style: Style, file=None, *, hascr: bool = False):
     for chunk_line in chunk.splitlines(keepends=True):
         result = ""
         if hascr:
@@ -90,44 +91,42 @@ def _run_chat_chunk(chunk, style, hascr, file=None):
     return hascr
 
 
-def _run_chat(events, model_style=None, event_style=None, tools_style=None, file=None):
-    model_style = _mk_style(model_style)
-    tools_style = _mk_style(tools_style)
-    event_style = _mk_style(event_style)
+def _run_chat(events: Iterable[dict], model_style=None, event_style=None, tools_style=None, file=None):
+    _model_style: Style = _mk_style(model_style)
+    _tools_style: Style = _mk_style(tools_style)
+    _event_style: Style = _mk_style(event_style)
 
     defer = None
     for event in events:
         etype = event.get("type")
         label = event.get("label")
 
-        style = None
+        style = _event_style
         match etype, label:
             case "model_chunk", None:
-                style = model_style
+                style = _model_style
             case "model_chunk", _:
-                style = tools_style
+                style = _tools_style
             case "tools_chunk", _:
-                style = tools_style
-            case _, _:
-                style = event_style
+                style = _tools_style
 
         if defer != style and defer:
-            _run_chat_chunk('\n', style, not defer, file)
+            _run_chat_chunk('\n', style, file=file, hascr=not defer)
             defer = None
 
-        chunk = event.get("text")
+        chunk = event.get("text") or ""
         match etype:
             case "model_chunk":
-                hascr = _run_chat_chunk(chunk, style, not defer, file)
+                hascr = _run_chat_chunk(chunk, style, hascr=not defer, file=file)
                 defer = None if hascr else style
                 yield chunk
             case "tools_chunk":
-                hascr = _run_chat_chunk(chunk, style, not defer, file)
+                hascr = _run_chat_chunk(chunk, style, hascr=not defer, file=file)
                 defer = None if hascr else style
             case _:
-                _run_chat_event(event, style, file)
+                _run_chat_event(event, style, file=file)
                 defer = None
 
 
-def run_chat(events, model_style=None, event_style=None, tools_style=None, file=None):
+def run_chat(events: Iterable[dict], model_style=None, event_style=None, tools_style=None, file=None):
     return "".join(_run_chat(events, model_style, event_style, tools_style, file))

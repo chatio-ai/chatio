@@ -2,14 +2,16 @@
 import base64
 import mimetypes
 
+from collections.abc import Iterator
+
+from dataclasses import dataclass
+
 from pathlib import Path
 
 from pprint import pprint
 
-from dataclasses import dataclass
-
 from chatio.core.stats import ChatStats
-from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
+from chatio.core.events import ChatEvent, CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 @dataclass
@@ -202,13 +204,16 @@ class ChatBase:
 
     # stream
 
-    def _iterate_model_events(self, model, system, messages, tools):
+    def _iterate_model_events(self, model, system, messages, tools) -> Iterator[ChatEvent]:
         raise NotImplementedError
 
-    def __call__(self, content=None, **kwargs):
+    def __call__(self, content=None, **kwargs) -> Iterator[dict]:
         if content:
             self._commit_user_message(content)
 
+        return self._iterate(**kwargs)
+
+    def _iterate(self, **kwargs) -> Iterator[dict]:
         while self._ready:
             self._messages = self._format_chat_messages(self._messages)
 

@@ -1,6 +1,8 @@
 
 import logging
 
+from collections.abc import Iterator
+
 from dataclasses import dataclass
 
 from typing import override
@@ -11,7 +13,7 @@ from google.genai import Client
 from html2text import HTML2Text
 
 
-from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
+from chatio.core.events import ChatEvent, CallEvent, DoneEvent, StatEvent, TextEvent
 
 from ._utils import httpx_args
 
@@ -28,7 +30,7 @@ class GoogleParams(ApiParams):
     grounding: bool = False
 
 
-def _pump(stream):
+def _pump(stream) -> Iterator[ChatEvent]:
     if stream:
 
         usage = None
@@ -194,7 +196,7 @@ class GoogleChat(ChatBase):
     # events
 
     @override
-    def _iterate_model_events(self, model, system, messages, tools, **_kwargs):
+    def _iterate_model_events(self, model, system, messages, tools, **_kwargs) -> Iterator[ChatEvent]:
         return _pump(self._client.models.generate_content_stream(
             model=model,
             config={

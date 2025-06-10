@@ -69,7 +69,7 @@ def main():
     print()
 
     if filenames:
-        run_chat(chat, "<<< ", "::: ")
+        run_chat(chat(), "<<< ", "::: ")
 
     # chat.commit_chunk("what is the exact text on first image? duplicate my message as is")
     chat.commit_chunk("what is the exact text on first image?")

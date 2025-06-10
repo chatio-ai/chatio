@@ -1,6 +1,8 @@
 
 import logging
 
+from collections.abc import Iterator
+
 from dataclasses import dataclass
 
 from typing import override
@@ -10,7 +12,7 @@ from httpx import Client as HttpxClient
 from anthropic import Anthropic
 
 
-from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
+from chatio.core.events import ChatEvent, CallEvent, DoneEvent, StatEvent, TextEvent
 
 from ._utils import httpx_args
 
@@ -27,7 +29,7 @@ class ClaudeParams(ApiParams):
     use_cache: bool = True
 
 
-def _pump(streamctx):
+def _pump(streamctx) -> Iterator[ChatEvent]:
     with streamctx as stream:
         for chunk in stream:
             log.info("%s", chunk.model_dump_json(indent=2))
@@ -165,7 +167,7 @@ class ClaudeChat(ChatBase):
     # events
 
     @override
-    def _iterate_model_events(self, model, system, messages, tools, **_kwargs):
+    def _iterate_model_events(self, model, system, messages, tools, **_kwargs) -> Iterator[ChatEvent]:
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,

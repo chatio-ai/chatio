@@ -1,6 +1,8 @@
 
 import logging
 
+from collections.abc import Iterator
+
 from dataclasses import dataclass
 
 from typing import override
@@ -10,7 +12,7 @@ from httpx import Client as HttpxClient
 from openai import OpenAI
 
 
-from chatio.core.events import TextEvent, DoneEvent, StatEvent, CallEvent
+from chatio.core.events import ChatEvent, TextEvent, DoneEvent, StatEvent, CallEvent
 
 from ._utils import httpx_args
 
@@ -28,7 +30,7 @@ class OpenAIParams(ApiParams):
     legacy: bool = False
 
 
-def _pump(streamctx):
+def _pump(streamctx) -> Iterator[ChatEvent]:
     with streamctx as stream:
         for chunk in stream:
             log.info("%s", chunk.model_dump_json(indent=2))
@@ -183,7 +185,7 @@ class OpenAIChat(ChatBase):
 
     # events
 
-    def _iterate_model_events_prediction(self, model, _system, messages, prediction):
+    def _iterate_model_events_prediction(self, model, _system, messages, prediction) -> Iterator[ChatEvent]:
         return _pump(self._client.beta.chat.completions.stream(
             model=model,
             stream_options={'include_usage': True},
@@ -191,7 +193,7 @@ class OpenAIChat(ChatBase):
             prediction=prediction))
 
     @override
-    def _iterate_model_events(self, model, system, messages, tools, **kwargs):
+    def _iterate_model_events(self, model, system, messages, tools, **kwargs) -> Iterator[ChatEvent]:
         prediction = kwargs.pop('prediction', None)
         if self._params.prediction and prediction:
             prediction = self._format_predict_content(prediction)

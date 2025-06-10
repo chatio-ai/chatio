@@ -3,7 +3,12 @@ from dataclasses import dataclass
 
 
 @dataclass
-class StatEvent:
+class ChatEvent:
+    pass
+
+
+@dataclass
+class StatEvent(ChatEvent):
     input_tokens: int
     output_tokens: int
     cache_written: int
@@ -13,7 +18,7 @@ class StatEvent:
 
 
 @dataclass
-class CallEvent:
+class CallEvent(ChatEvent):
     call_id: str
     name: str
     args: dict
@@ -21,11 +26,11 @@ class CallEvent:
 
 
 @dataclass
-class TextEvent:
+class TextEvent(ChatEvent):
     text: str
     label: str | None = None
 
 
 @dataclass
-class DoneEvent:
+class DoneEvent(ChatEvent):
     text: str
