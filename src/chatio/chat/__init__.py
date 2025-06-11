@@ -7,6 +7,7 @@ from collections.abc import Callable
 
 from dataclasses import dataclass
 
+from os import PathLike
 from pathlib import Path
 
 from chatio.core.config import ToolConfig
@@ -216,16 +217,16 @@ class ChatBase:
 
     # history
 
-    def commit_image(self, filepath: str) -> None:
-        with Path(filepath).open("rb") as file:
-            data = file.read()
+    def attach_image_content(self, *, file: str | PathLike) -> None:
+        with Path(file).open("rb") as filep:
+            data = filep.read()
             blob = base64.b64encode(data).decode()
 
-            mimetype, _ = mimetypes.guess_type(filepath)
+            mimetype, _ = mimetypes.guess_type(file)
             if mimetype is None:
                 raise RuntimeError
 
-            self._commit_input_message(filepath)
+            self._commit_input_message(str(file))
 
             self._commit_input_content(self._api.format.image_blob(blob, mimetype))
 

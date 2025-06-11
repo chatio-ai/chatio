@@ -21,7 +21,7 @@ def main():
         raise SystemExit
 
     for filename in filenames:
-        chat.commit_image(filename)
+        chat.attach_image_content(file=filename)
 
     run_info(chat, "::: ")
 
