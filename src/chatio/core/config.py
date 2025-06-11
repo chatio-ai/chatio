@@ -37,7 +37,7 @@ class ToolConfig:
     tool_choice_name: str | None = None
 
 
-class ChatApi(ABC):
+class ChatApi[SystemContent, MessageContent, TextMessage, ImageMessage](ABC):
 
     @property
     @abstractmethod
@@ -46,10 +46,10 @@ class ChatApi(ABC):
 
     @property
     @abstractmethod
-    def format(self) -> ChatFormat:
+    def format(self) -> ChatFormat[SystemContent, MessageContent, TextMessage, ImageMessage]:
         ...
 
     @property
     @abstractmethod
-    def client(self) -> ChatClient:
+    def client(self) -> ChatClient[SystemContent, MessageContent]:
         ...

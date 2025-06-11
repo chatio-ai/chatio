@@ -8,6 +8,8 @@ from httpx import Client as HttpxClient
 
 from openai import OpenAI
 
+from openai.types.chat import ChatCompletionMessageParam
+
 
 from chatio.core.events import ChatEvent
 from chatio.core.client import ChatClient
@@ -23,7 +25,7 @@ from .format import OpenAIFormat
 from .events import _pump
 
 
-class OpenAIClient(ChatClient):
+class OpenAIClient(ChatClient[ChatCompletionMessageParam, ChatCompletionMessageParam]):
 
     def __init__(self, config: ApiConfig, params: OpenAIParams, format_: OpenAIFormat):
         self._client = OpenAI(
@@ -44,14 +46,15 @@ class OpenAIClient(ChatClient):
             prediction=prediction))
 
     @override
-    def iterate_model_events(self, model, system, messages, tools, **kwargs) -> Iterator[ChatEvent]:
+    def iterate_model_events(self, model: str, system: ChatCompletionMessageParam | None,
+                             messages: list[ChatCompletionMessageParam], tools) -> Iterator[ChatEvent]:
         if system is not None:
             messages = [system, *messages]
 
-        prediction = kwargs.pop('prediction', None)
-        if self._params.prediction and prediction:
-            prediction = self._format.predict_content(prediction)
-            return self._iterate_model_events_prediction(model, system, messages, prediction)
+        # prediction = kwargs.pop('prediction', None)
+        # if self._params.prediction and prediction:
+        #     prediction = self._format.predict_content(prediction)
+        #     return self._iterate_model_events_prediction(model, system, messages, prediction)
 
         return _pump(self._client.beta.chat.completions.stream(
             model=model,
@@ -61,5 +64,6 @@ class OpenAIClient(ChatClient):
             messages=messages))
 
     @override
-    def count_message_tokens(self, model, system, messages, tools):
+    def count_message_tokens(self, model: str, system: ChatCompletionMessageParam | None,
+                             messages: list[ChatCompletionMessageParam], tools) -> int:
         raise NotImplementedError

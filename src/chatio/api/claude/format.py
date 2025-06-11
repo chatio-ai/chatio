@@ -1,14 +1,28 @@
 
+import base64
+
 from typing import override
+
+from anthropic.types import MessageParam
+from anthropic.types import TextBlockParam
+from anthropic.types import ImageBlockParam
+from anthropic.types import ToolUseBlockParam
+from anthropic.types import ToolResultBlockParam
+
 
 from chatio.core.format import ChatFormat
 
 from .params import ClaudeParams
 
 
-class ClaudeFormat(ChatFormat):
+type _ContentBlockParamBase = TextBlockParam | ImageBlockParam
+type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
+type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
-    def __init__(self, params: ClaudeParams):
+
+class ClaudeFormat(ChatFormat[TextBlockParam, MessageParam, TextBlockParam, ImageBlockParam]):
+
+    def __init__(self, params: ClaudeParams) -> None:
         self._params = params
 
     def _setup_cache(self, entries: list[dict]) -> list[dict]:
@@ -21,70 +35,99 @@ class ClaudeFormat(ChatFormat):
 
         return entries
 
-    def _setup_messages_cache(self, messages: list[dict]) -> list[dict]:
-        content: list[dict] | None = None
+    def _setup_messages_cache(self, messages: list[MessageParam]) -> list[MessageParam]:
+        last_entry = None
 
         for message in messages:
             content = message.get("content")
-            if content is not None:
-                for entry in content:
-                    entry.pop("cache_control", None)
 
-        if messages:
-            content = messages[-1].get("content")
-            if content is not None:
-                self._setup_cache(content)
+            if not isinstance(content, list):
+                raise TypeError
+
+            for entry in content:
+                if not isinstance(entry, dict):
+                    raise TypeError
+
+                match entry['type']:
+                    case 'text' | 'image' | 'tool_use' | 'tool_result':
+                        entry.pop('cache_control', None)
+                        last_entry = entry
+                    case _:
+                        raise TypeError
+
+        if last_entry is not None:
+            last_entry.update({'cache_control': {
+                "type": "ephemeral",
+            }})
 
         return messages
 
     # messages
 
     @override
-    def chat_messages(self, messages: list[dict]) -> list[dict]:
+    def chat_messages(self, messages: list[MessageParam]) -> list[MessageParam]:
         return self._setup_messages_cache(messages)
 
     @override
-    def text_chunk(self, text: str) -> dict:
+    def text_chunk(self, text: str) -> TextBlockParam:
         return {
             "type": "text",
             "text": text,
         }
 
     @override
-    def image_blob(self, blob: str, mimetype: str) -> dict:
+    def image_blob(self, blob: bytes, mimetype: str) -> ImageBlockParam:
+        match mimetype:
+            case 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp':
+                pass
+            case _:
+                raise ValueError
+
+        data = base64.b64encode(blob).decode('ascii')
+
         return {
             "type": "image",
             "source": {
                 "type": "base64",
                 "media_type": mimetype,
-                "data": blob,
+                "data": data,
             },
         }
 
-    def _as_contents(self, content: dict) -> list[dict]:
-        return [content]
-
     @override
-    def system_content(self, content: dict) -> dict:
-        return self._setup_cache([content])[0]
+    def system_content(self, content: TextBlockParam) -> TextBlockParam:
+        if self._params.use_cache:
+            content.update({
+                "cache_control": {
+                    "type": "ephemeral",
+                },
+            })
 
-    @override
-    def input_content(self, content: dict) -> dict:
+        return content
+
+    def _input_content(self, content: _InputContentBlockParam) -> MessageParam:
         return {
             "role": "user",
-            "content": self._as_contents(content),
+            "content": [content],
         }
 
     @override
-    def output_content(self, content: dict) -> dict:
+    def input_content(self, content: _ContentBlockParamBase) -> MessageParam:
+        return self._input_content(content)
+
+    def _output_content(self, content: _OutputContentBlockParam) -> MessageParam:
         return {
             "role": "assistant",
-            "content": self._as_contents(content),
+            "content": [content],
         }
 
     @override
-    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
-        return self.output_content({
+    def output_content(self, content: _ContentBlockParamBase) -> MessageParam:
+        return self._output_content(content)
+
+    @override
+    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> MessageParam:
+        return self._output_content({
             "type": "tool_use",
             "id": tool_call_id,
             "name": tool_name,
@@ -92,8 +135,8 @@ class ClaudeFormat(ChatFormat):
         })
 
     @override
-    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
-        return self.input_content({
+    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> MessageParam:
+        return self._input_content({
             "type": "tool_result",
             "tool_use_id": tool_call_id,
             "content": tool_output,

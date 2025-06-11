@@ -8,6 +8,9 @@ from httpx import Client as HttpxClient
 
 from anthropic import Anthropic
 
+from anthropic.types import MessageParam
+from anthropic.types import TextBlockParam
+
 
 from chatio.core.events import ChatEvent
 from chatio.core.client import ChatClient
@@ -22,10 +25,10 @@ from .params import ClaudeParams
 from .events import _pump
 
 
-class ClaudeClient(ChatClient):
+class ClaudeClient(ChatClient[TextBlockParam, MessageParam]):
 
     @override
-    def __init__(self, config: ApiConfig, params: ClaudeParams):
+    def __init__(self, config: ApiConfig, params: ClaudeParams) -> None:
         self._client = Anthropic(
             base_url=config.api_url,
             api_key=config.api_key,
@@ -36,24 +39,26 @@ class ClaudeClient(ChatClient):
     # events
 
     @override
-    def iterate_model_events(self, model, system, messages, tools, **_kwargs) -> Iterator[ChatEvent]:
-        system = [system] if system is not None else []
+    def iterate_model_events(self, model, system: TextBlockParam | None,
+                             messages: list[MessageParam], tools) -> Iterator[ChatEvent]:
+        system_ = [system] if system is not None else []
 
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
             tools=tools,
-            system=system,
+            system=system_,
             messages=messages))
 
     # helpers
 
     @override
-    def count_message_tokens(self, model, system, messages, tools):
-        system = [system] if system is not None else []
+    def count_message_tokens(self, model, system: TextBlockParam | None,
+                             messages: list[MessageParam], tools) -> int:
+        system_ = [system] if system is not None else []
 
         return self._client.messages.count_tokens(
             model=model,
             tools=tools,
-            system=system,
+            system=system_,
             messages=messages).input_tokens

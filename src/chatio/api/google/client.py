@@ -4,8 +4,10 @@ from collections.abc import Iterator
 from typing import override
 
 
-from google.genai.types import HttpOptions
 from google.genai import Client
+from google.genai.types import HttpOptions
+
+from google.genai.types import ContentDict
 
 
 from chatio.core.events import ChatEvent
@@ -21,7 +23,7 @@ from .params import GoogleParams
 from .events import _pump
 
 
-class GoogleClient(ChatClient):
+class GoogleClient(ChatClient[ContentDict, ContentDict]):
 
     def __init__(self, config: ApiConfig, params: GoogleParams):
         self._client = Client(
@@ -32,7 +34,8 @@ class GoogleClient(ChatClient):
         self._params = params
 
     @override
-    def iterate_model_events(self, model, system, messages, tools, **_kwargs) -> Iterator[ChatEvent]:
+    def iterate_model_events(self, model: str, system: ContentDict | None,
+                             messages: list[ContentDict], tools) -> Iterator[ChatEvent]:
         return _pump(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
@@ -43,5 +46,6 @@ class GoogleClient(ChatClient):
             contents=messages))
 
     @override
-    def count_message_tokens(self, model, system, messages, tools):
+    def count_message_tokens(self, model: str, system: ContentDict | None,
+                             messages: list[ContentDict], tools) -> int:
         raise NotImplementedError

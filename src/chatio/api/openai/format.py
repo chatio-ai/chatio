@@ -1,12 +1,23 @@
 
+import base64
+
 from typing import override
+
+from openai.types.chat import ChatCompletionMessageParam
+from openai.types.chat import ChatCompletionContentPartTextParam
+from openai.types.chat import ChatCompletionContentPartImageParam
+
 
 from chatio.core.format import ChatFormat
 
 from .params import OpenAIParams
 
 
-class OpenAIFormat(ChatFormat):
+type _ChatCompletionContentPartParam = ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam
+
+
+class OpenAIFormat(ChatFormat[ChatCompletionMessageParam, ChatCompletionMessageParam,
+                              ChatCompletionContentPartTextParam, ChatCompletionContentPartImageParam]):
 
     def __init__(self, params: OpenAIParams):
         self._params = params
@@ -14,55 +25,74 @@ class OpenAIFormat(ChatFormat):
     # messages
 
     @override
-    def chat_messages(self, messages: list[dict]) -> list[dict]:
+    def chat_messages(self, messages: list[ChatCompletionMessageParam]) -> list[ChatCompletionMessageParam]:
         return messages
 
     @override
-    def text_chunk(self, text: str) -> dict:
+    def text_chunk(self, text: str) -> ChatCompletionContentPartTextParam:
         return {
             "type": "text",
             "text": text,
         }
 
     @override
-    def image_blob(self, blob: str, mimetype: str) -> dict:
+    def image_blob(self, blob: bytes, mimetype: str) -> ChatCompletionContentPartImageParam:
+        data = base64.b64encode(blob).decode('ascii')
+
         return {
             "type": "image_url",
-            "image_url": {"url": f"data:{mimetype};base64,{blob}"},
+            "image_url": {
+                "url": f"data:{mimetype};base64,{data}",
+            },
         }
 
-    def _as_contents(self, content: dict) -> list[dict] | str:
-        match content['type'], self._params.legacy:
-            case 'text', True:
-                return content['text']
-            case _:
-                return [content]
-
     @override
-    def system_content(self, content: dict) -> dict:
+    def system_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
+        if content['type'] != 'text':
+            raise TypeError
+
+        if self._params.legacy:
+            return {
+                "role": "system",
+                "content": content['text'],
+            }
+
         return {
-            "role": "system" if self._params.legacy else "developer",
-            "content": self._as_contents(content),
+            "role": "developer",
+            "content": [content],
         }
 
     @override
-    def input_content(self, content: dict) -> dict:
+    def input_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
+        if content['type'] != 'text':
+            return {
+                "role": "user",
+                "content": [content],
+            }
+
         return {
             "role": "user",
-            "content": self._as_contents(content),
+            "content": content['text'] if self._params.legacy else [content],
         }
 
     @override
-    def output_content(self, content: dict) -> dict:
+    def output_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
+        if content['type'] != 'text':
+            raise TypeError
+
         return {
             "role": "assistant",
-            "content": self._as_contents(content),
+            "content": [content],
         }
 
     @override
-    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
+    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> ChatCompletionMessageParam:
+        if not isinstance(tool_input, str):
+            raise TypeError
+
         return {
             "role": "assistant",
+            "content": None,
             "tool_calls": [{
                 "id": tool_call_id,
                 "type": "function",
@@ -74,7 +104,7 @@ class OpenAIFormat(ChatFormat):
         }
 
     @override
-    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
+    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> ChatCompletionMessageParam:
         return {
             "role": "tool",
             "tool_call_id": tool_call_id,

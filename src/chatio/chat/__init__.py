@@ -1,5 +1,4 @@
 
-import base64
 import mimetypes
 
 from collections.abc import Iterator
@@ -9,6 +8,7 @@ from dataclasses import dataclass
 
 from os import PathLike
 from pathlib import Path
+
 
 from chatio.core.config import ToolConfig
 from chatio.core.config import ChatApi
@@ -29,9 +29,9 @@ class ChatInfo:
 
 
 @dataclass
-class ChatState:
-    system: list[dict] | dict | None
-    messages: list[dict]
+class ChatState[SystemContent, MessageContent]:
+    system: SystemContent | None
+    messages: list[MessageContent]
     tools: list[dict] | None
     funcs: dict[str, Callable]
     tool_choice: dict | None
@@ -43,17 +43,17 @@ class ChatState:
         self.funcs = {}
 
 
-class ChatBase:
-    def __init__(self, api: ChatApi,
+class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage]:
+    def __init__(self, api: ChatApi[SystemContent, MessageContent, TextMessage, ImageMessage],
                  system: str | None = None,
                  messages: list[str] | None = None,
                  tools: ToolConfig | None = None) -> None:
 
-        self._api = api
+        self._api: ChatApi[SystemContent, MessageContent, TextMessage, ImageMessage] = api
 
         self._ready = False
 
-        self._state = ChatState()
+        self._state: ChatState[SystemContent, MessageContent] = ChatState()
 
         self._update_system_message(system)
 
@@ -68,14 +68,14 @@ class ChatBase:
 
     # messages
 
-    def _commit_input_content(self, content: dict) -> None:
+    def _commit_input_content(self, content: TextMessage | ImageMessage) -> None:
         self._state.messages.append(self._api.format.input_content(content))
         self._ready = True
 
     def _commit_input_message(self, message: str) -> None:
         self._commit_input_content(self._api.format.text_chunk(message))
 
-    def _commit_output_content(self, content: dict) -> None:
+    def _commit_output_content(self, content: TextMessage | ImageMessage) -> None:
         self._state.messages.append(self._api.format.output_content(content))
         self._ready = False
 
@@ -219,8 +219,7 @@ class ChatBase:
 
     def attach_image_content(self, *, file: str | PathLike) -> None:
         with Path(file).open("rb") as filep:
-            data = filep.read()
-            blob = base64.b64encode(data).decode()
+            blob = filep.read()
 
             mimetype, _ = mimetypes.guess_type(file)
             if mimetype is None:

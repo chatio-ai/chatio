@@ -3,16 +3,17 @@ from abc import ABC, abstractmethod
 
 from collections.abc import Iterator
 
-
 from .events import ChatEvent
 
 
-class ChatClient(ABC):
+class ChatClient[SystemContent, MessageContent](ABC):
 
     @abstractmethod
-    def iterate_model_events(self, model, system, messages, tools) -> Iterator[ChatEvent]:
+    def iterate_model_events(self, model: str, system: SystemContent | None,
+                             messages: list[MessageContent], tools) -> Iterator[ChatEvent]:
         ...
 
     @abstractmethod
-    def count_message_tokens(self, model, system, messages, tools) -> int:
+    def count_message_tokens(self, model: str, system: SystemContent | None,
+                             messages: list[MessageContent], tools) -> int:
         ...

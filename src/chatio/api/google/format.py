@@ -1,12 +1,16 @@
 
 from typing import override
 
+from google.genai.types import ContentDict
+from google.genai.types import PartDict
+
+
 from chatio.core.format import ChatFormat
 
 from .params import GoogleParams
 
 
-class GoogleFormat(ChatFormat):
+class GoogleFormat(ChatFormat[ContentDict, ContentDict, PartDict, PartDict]):
 
     def __init__(self, params: GoogleParams):
         self._params = params
@@ -14,17 +18,17 @@ class GoogleFormat(ChatFormat):
     # messages
 
     @override
-    def chat_messages(self, messages: list[dict]) -> list[dict]:
+    def chat_messages(self, messages: list[ContentDict]) -> list[ContentDict]:
         return messages
 
     @override
-    def text_chunk(self, text: str) -> dict:
+    def text_chunk(self, text: str) -> PartDict:
         return {
             "text": text,
         }
 
     @override
-    def image_blob(self, blob: str, mimetype: str) -> dict:
+    def image_blob(self, blob: bytes, mimetype: str) -> PartDict:
         return {
             "inline_data": {
                 "mime_type": mimetype,
@@ -32,31 +36,31 @@ class GoogleFormat(ChatFormat):
             },
         }
 
-    def _as_contents(self, content: dict) -> list[dict]:
-        return [content]
-
     @override
-    def system_content(self, content: dict) -> dict:
+    def system_content(self, content: PartDict) -> ContentDict:
         return {
-            "parts": self._as_contents(content),
+            "parts": [content],
         }
 
     @override
-    def input_content(self, content: dict) -> dict:
+    def input_content(self, content: PartDict) -> ContentDict:
         return {
             "role": "user",
-            "parts": self._as_contents(content),
+            "parts": [content],
         }
 
     @override
-    def output_content(self, content: dict) -> dict:
+    def output_content(self, content: PartDict) -> ContentDict:
         return {
             "role": "model",
-            "parts": self._as_contents(content),
+            "parts": [content],
         }
 
     @override
-    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
+    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> ContentDict:
+        if not isinstance(tool_input, dict):
+            raise TypeError
+
         return {
             "role": "model",
             "parts": [{
@@ -69,7 +73,7 @@ class GoogleFormat(ChatFormat):
         }
 
     @override
-    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
+    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> ContentDict:
         return {
             "role": "user",
             "parts": [{

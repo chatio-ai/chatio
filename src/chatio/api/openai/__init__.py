@@ -1,6 +1,11 @@
 
 from typing import override
 
+from openai.types.chat import ChatCompletionMessageParam
+from openai.types.chat import ChatCompletionContentPartTextParam
+from openai.types.chat import ChatCompletionContentPartImageParam
+
+
 from chatio.core.config import ChatConfig
 from chatio.core.config import ChatApi
 
@@ -10,7 +15,8 @@ from .format import OpenAIFormat
 from .client import OpenAIClient
 
 
-class OpenAIApi(ChatApi):
+class OpenAIApi(ChatApi[ChatCompletionMessageParam, ChatCompletionMessageParam,
+                        ChatCompletionContentPartTextParam, ChatCompletionContentPartImageParam]):
     def __init__(self, config: ChatConfig):
         super().__init__()
 
@@ -23,15 +29,15 @@ class OpenAIApi(ChatApi):
 
     @property
     @override
-    def config(self):
+    def config(self) -> ChatConfig:
         return self._config
 
     @property
     @override
-    def format(self):
+    def format(self) -> OpenAIFormat:
         return self._format
 
     @property
     @override
-    def client(self):
+    def client(self) -> OpenAIClient:
         return self._client

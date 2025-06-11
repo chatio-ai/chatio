@@ -2,40 +2,40 @@
 from abc import ABC, abstractmethod
 
 
-class ChatFormat(ABC):
+class ChatFormat[SystemContent, MessageContent, TextMessage, ImageMessage](ABC):
 
     # messages
 
     @abstractmethod
-    def chat_messages(self, messages: list[dict]) -> list[dict]:
+    def chat_messages(self, messages: list[MessageContent]) -> list[MessageContent]:
         ...
 
     @abstractmethod
-    def text_chunk(self, text: str) -> dict:
+    def text_chunk(self, text: str) -> TextMessage:
         ...
 
     @abstractmethod
-    def image_blob(self, blob: str, mimetype: str) -> dict:
+    def image_blob(self, blob: bytes, mimetype: str) -> ImageMessage:
         ...
 
     @abstractmethod
-    def system_content(self, content: dict) -> dict:
+    def system_content(self, content: TextMessage) -> SystemContent:
         ...
 
     @abstractmethod
-    def input_content(self, content: dict) -> dict:
+    def input_content(self, content: TextMessage | ImageMessage) -> MessageContent:
         ...
 
     @abstractmethod
-    def output_content(self, content: dict) -> dict:
+    def output_content(self, content: TextMessage | ImageMessage) -> MessageContent:
         ...
 
     @abstractmethod
-    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
+    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> MessageContent:
         ...
 
     @abstractmethod
-    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
+    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> MessageContent:
         ...
 
     # functions
