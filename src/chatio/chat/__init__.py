@@ -67,23 +67,6 @@ class ChatBase:
 
     # messages
 
-    def _setup_message_history(self, messages: list[str] | None) -> None:
-        if messages is None:
-            messages = []
-
-        for index, message in enumerate(messages):
-            if not index % 2:
-                self._commit_input_message(message)
-            else:
-                self._commit_output_message(message)
-
-    def _update_system_message(self, message: str | None) -> None:
-        if not message:
-            self._state.system = None
-            return
-
-        self._state.system = self._api.format.system_content(self._api.format.text_chunk(message))
-
     def _commit_input_content(self, content: dict) -> None:
         self._state.messages.append(self._api.format.input_content(content))
         self._ready = True
@@ -105,6 +88,23 @@ class ChatBase:
     def _commit_call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> None:
         self._state.messages.append(self._api.format.call_response(tool_call_id, tool_name, tool_output))
         self._ready = True
+
+    def _update_system_message(self, message: str | None) -> None:
+        if not message:
+            self._state.system = None
+            return
+
+        self._state.system = self._api.format.system_content(self._api.format.text_chunk(message))
+
+    def _setup_message_history(self, messages: list[str] | None) -> None:
+        if messages is None:
+            messages = []
+
+        for index, message in enumerate(messages):
+            if not index % 2:
+                self._commit_input_message(message)
+            else:
+                self._commit_output_message(message)
 
     def _setup_tool_definitions(self, tools: ToolConfig) -> None:
         self._state.tools = []
@@ -128,6 +128,8 @@ class ChatBase:
 
         self._state.tool_choice = self._api.format.tool_selection(tools.tool_choice, tools.tool_choice_name)
 
+    # streams
+
     def _process_tool_call(self, tool_call_id: str, tool_name: str, tool_args: dict) -> Iterator[dict]:
         tool_func = self._state.funcs.get(tool_name)
         if not tool_func:
@@ -149,8 +151,6 @@ class ChatBase:
                 }
 
         self._commit_call_response(tool_call_id, tool_name, content)
-
-    # stream
 
     def __call__(self, content: str | None = None, **kwargs) -> Iterator[dict]:
         if content:
@@ -192,6 +192,8 @@ class ChatBase:
                     case StatEvent():
                         yield from self._stats(event)
 
+    # helpers
+
     def count_tokens(self, content: str | None = None) -> int:
         if content:
             self._commit_input_message(content)
@@ -202,8 +204,6 @@ class ChatBase:
             messages=self._state.messages,
             tools=self._state.tools,
         )
-
-    # helpers
 
     def info(self) -> ChatInfo:
         return ChatInfo(
@@ -229,11 +229,11 @@ class ChatBase:
 
             self._commit_input_content(self._api.format.image_blob(blob, mimetype))
 
-    def update_system_message(self, message: str | None) -> None:
-        self._update_system_message(message)
-
     def commit_input_message(self, message: str) -> None:
         self._commit_input_message(message)
 
     def commit_output_message(self, message: str) -> None:
         self._commit_output_message(message)
+
+    def update_system_message(self, message: str | None) -> None:
+        self._update_system_message(message)
