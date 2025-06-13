@@ -3,6 +3,8 @@ from typing import override
 
 from google.genai.types import PartDict
 from google.genai.types import ContentDict
+from google.genai.types import ToolUnionDict
+from google.genai.types import FunctionDeclarationDict
 
 
 from chatio.core.config import ChatConfig
@@ -14,7 +16,7 @@ from .format import GoogleFormat
 from .client import GoogleClient
 
 
-class GoogleApi(ChatApi[ContentDict, ContentDict, PartDict, PartDict]):
+class GoogleApi(ChatApi[ContentDict, ContentDict, PartDict, PartDict, FunctionDeclarationDict, ToolUnionDict]):
     def __init__(self, config: ChatConfig):
         super().__init__()
 

@@ -4,6 +4,8 @@ import base64
 from typing import override
 
 from anthropic.types import MessageParam
+
+from anthropic.types import ToolParam
 from anthropic.types import TextBlockParam
 from anthropic.types import ImageBlockParam
 from anthropic.types import ToolUseBlockParam
@@ -20,14 +22,16 @@ type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
 type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
 
-class ClaudeFormat(ChatFormat[TextBlockParam, MessageParam, TextBlockParam, ImageBlockParam]):
+class ClaudeFormat(ChatFormat[TextBlockParam, MessageParam, TextBlockParam, ImageBlockParam, ToolParam, ToolParam]):
 
     def __init__(self, params: ClaudeParams) -> None:
         self._params = params
 
-    def _setup_cache(self, entries: list[dict]) -> list[dict]:
+    def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
         if self._params.use_cache and entries:
-            entries[-1].update({
+            entry = entries[-1]
+
+            entry.update({
                 "cache_control": {
                     "type": "ephemeral",
                 },
@@ -55,10 +59,12 @@ class ClaudeFormat(ChatFormat[TextBlockParam, MessageParam, TextBlockParam, Imag
                     case _:
                         raise TypeError
 
-        if last_entry is not None:
-            last_entry.update({'cache_control': {
-                "type": "ephemeral",
-            }})
+        if self._params.use_cache and last_entry is not None:
+            last_entry.update({
+                'cache_control': {
+                    "type": "ephemeral",
+                },
+            })
 
         return messages
 
@@ -145,7 +151,7 @@ class ClaudeFormat(ChatFormat[TextBlockParam, MessageParam, TextBlockParam, Imag
     # functions
 
     @override
-    def tool_definition(self, name: str, desc: str, schema: dict) -> dict:
+    def tool_definition(self, name: str, desc: str, schema: dict) -> ToolParam:
         return {
             "name": name,
             "description": desc,
@@ -153,8 +159,8 @@ class ClaudeFormat(ChatFormat[TextBlockParam, MessageParam, TextBlockParam, Imag
         }
 
     @override
-    def tool_definitions(self, tools: list[dict]) -> list[dict]:
-        return self._setup_cache(tools)
+    def tool_definitions(self, tools: list[ToolParam]) -> list[ToolParam]:
+        return self._setup_tools_cache(tools)
 
     @override
     def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:

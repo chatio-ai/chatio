@@ -9,6 +9,8 @@ from httpx import Client as HttpxClient
 from anthropic import Anthropic
 
 from anthropic.types import MessageParam
+
+from anthropic.types import ToolParam
 from anthropic.types import TextBlockParam
 
 
@@ -25,7 +27,7 @@ from .params import ClaudeParams
 from .events import _pump
 
 
-class ClaudeClient(ChatClient[TextBlockParam, MessageParam]):
+class ClaudeClient(ChatClient[TextBlockParam, MessageParam, ToolParam]):
 
     @override
     def __init__(self, config: ApiConfig, params: ClaudeParams) -> None:
@@ -40,8 +42,12 @@ class ClaudeClient(ChatClient[TextBlockParam, MessageParam]):
 
     @override
     def iterate_model_events(self, model, system: TextBlockParam | None,
-                             messages: list[MessageParam], tools) -> Iterator[ChatEvent]:
+                             messages: list[MessageParam],
+                             tools: list[ToolParam] | None) -> Iterator[ChatEvent]:
         system_ = [system] if system is not None else []
+
+        if tools is None:
+            tools = []
 
         return _pump(self._client.messages.stream(
             model=model,
@@ -54,8 +60,12 @@ class ClaudeClient(ChatClient[TextBlockParam, MessageParam]):
 
     @override
     def count_message_tokens(self, model, system: TextBlockParam | None,
-                             messages: list[MessageParam], tools) -> int:
+                             messages: list[MessageParam],
+                             tools: list[ToolParam] | None) -> int:
         system_ = [system] if system is not None else []
+
+        if tools is None:
+            tools = []
 
         return self._client.messages.count_tokens(
             model=model,

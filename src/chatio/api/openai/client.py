@@ -9,6 +9,7 @@ from httpx import Client as HttpxClient
 from openai import OpenAI
 
 from openai.types.chat import ChatCompletionMessageParam
+from openai.types.chat import ChatCompletionToolParam
 
 
 from chatio.core.events import ChatEvent
@@ -25,7 +26,7 @@ from .format import OpenAIFormat
 from .events import _pump
 
 
-class OpenAIClient(ChatClient[ChatCompletionMessageParam, ChatCompletionMessageParam]):
+class OpenAIClient(ChatClient[ChatCompletionMessageParam, ChatCompletionMessageParam, ChatCompletionToolParam]):
 
     def __init__(self, config: ApiConfig, params: OpenAIParams, format_: OpenAIFormat):
         self._client = OpenAI(
@@ -47,9 +48,13 @@ class OpenAIClient(ChatClient[ChatCompletionMessageParam, ChatCompletionMessageP
 
     @override
     def iterate_model_events(self, model: str, system: ChatCompletionMessageParam | None,
-                             messages: list[ChatCompletionMessageParam], tools) -> Iterator[ChatEvent]:
+                             messages: list[ChatCompletionMessageParam],
+                             tools: list[ChatCompletionToolParam] | None) -> Iterator[ChatEvent]:
         if system is not None:
             messages = [system, *messages]
+
+        if tools is None:
+            tools = []
 
         # prediction = kwargs.pop('prediction', None)
         # if self._params.prediction and prediction:
@@ -65,5 +70,6 @@ class OpenAIClient(ChatClient[ChatCompletionMessageParam, ChatCompletionMessageP
 
     @override
     def count_message_tokens(self, model: str, system: ChatCompletionMessageParam | None,
-                             messages: list[ChatCompletionMessageParam], tools) -> int:
+                             messages: list[ChatCompletionMessageParam],
+                             tools: list[ChatCompletionToolParam] | None) -> int:
         raise NotImplementedError

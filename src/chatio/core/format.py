@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 
 
-class ChatFormat[SystemContent, MessageContent, TextMessage, ImageMessage](ABC):
+class ChatFormat[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDefinitionBase, ToolDefinition](ABC):
 
     # messages
 
@@ -41,11 +41,11 @@ class ChatFormat[SystemContent, MessageContent, TextMessage, ImageMessage](ABC):
     # functions
 
     @abstractmethod
-    def tool_definition(self, name: str, desc: str, schema: dict) -> dict:
+    def tool_definition(self, name: str, desc: str, schema: dict) -> ToolDefinitionBase:
         ...
 
     @abstractmethod
-    def tool_definitions(self, tools: list[dict]) -> list[dict] | None:
+    def tool_definitions(self, tools: list[ToolDefinitionBase]) -> list[ToolDefinition] | None:
         ...
 
     @abstractmethod

@@ -1,8 +1,14 @@
 
 from typing import override
+from typing import TypeGuard
 
 from google.genai.types import ContentDict
 from google.genai.types import PartDict
+
+from google.genai.types import SchemaDict
+from google.genai.types import ToolUnionDict
+from google.genai.types import ToolListUnionDict
+from google.genai.types import FunctionDeclarationDict
 
 
 from chatio.core.format import ChatFormat
@@ -10,7 +16,7 @@ from chatio.core.format import ChatFormat
 from .params import GoogleParams
 
 
-class GoogleFormat(ChatFormat[ContentDict, ContentDict, PartDict, PartDict]):
+class GoogleFormat(ChatFormat[ContentDict, ContentDict, PartDict, PartDict, FunctionDeclarationDict, ToolUnionDict]):
 
     def __init__(self, params: GoogleParams):
         self._params = params
@@ -89,8 +95,14 @@ class GoogleFormat(ChatFormat[ContentDict, ContentDict, PartDict, PartDict]):
 
     # functions
 
+    def _is_tool_schema(self, _schema: dict) -> TypeGuard[SchemaDict]:
+        return True
+
     @override
-    def tool_definition(self, name: str, desc: str, schema: dict) -> dict:
+    def tool_definition(self, name: str, desc: str, schema: dict) -> FunctionDeclarationDict:
+        if not self._is_tool_schema(schema):
+            raise TypeError
+
         return {
             "name": name,
             "description": desc,
@@ -98,8 +110,8 @@ class GoogleFormat(ChatFormat[ContentDict, ContentDict, PartDict, PartDict]):
         }
 
     @override
-    def tool_definitions(self, tools: list[dict]) -> list[dict] | None:
-        tools_config: list[dict] = []
+    def tool_definitions(self, tools: list[FunctionDeclarationDict]) -> ToolListUnionDict | None:
+        tools_config: ToolListUnionDict = []
 
         if tools:
             tools_config.append({

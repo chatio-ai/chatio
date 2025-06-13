@@ -29,10 +29,10 @@ class ChatInfo:
 
 
 @dataclass
-class ChatState[SystemContent, MessageContent]:
+class ChatState[SystemContent, MessageContent, ToolDefinition]:
     system: SystemContent | None
     messages: list[MessageContent]
-    tools: list[dict] | None
+    tools: list[ToolDefinition] | None
     funcs: dict[str, Callable]
     tool_choice: dict | None
 
@@ -43,17 +43,20 @@ class ChatState[SystemContent, MessageContent]:
         self.funcs = {}
 
 
-class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage]:
-    def __init__(self, api: ChatApi[SystemContent, MessageContent, TextMessage, ImageMessage],
-                 system: str | None = None,
-                 messages: list[str] | None = None,
-                 tools: ToolConfig | None = None) -> None:
+class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDefinitionBase, ToolDefinition]:
+    def __init__(
+            self,
+            api: ChatApi[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDefinitionBase, ToolDefinition],
+            system: str | None = None,
+            messages: list[str] | None = None,
+            tools: ToolConfig | None = None) -> None:
 
-        self._api: ChatApi[SystemContent, MessageContent, TextMessage, ImageMessage] = api
+        self._api: ChatApi[
+            SystemContent, MessageContent, TextMessage, ImageMessage, ToolDefinitionBase, ToolDefinition] = api
 
         self._ready = False
 
-        self._state: ChatState[SystemContent, MessageContent] = ChatState()
+        self._state: ChatState[SystemContent, MessageContent, ToolDefinition] = ChatState()
 
         self._update_system_message(system)
 
@@ -108,7 +111,7 @@ class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage]:
                 self._commit_output_message(message)
 
     def _setup_tool_definitions(self, tools: ToolConfig) -> None:
-        self._state.tools = []
+        _tool_definitions = []
         self._state.funcs = {}
 
         if tools.tools is None:
@@ -121,11 +124,11 @@ class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage]:
             if not name or not desc or not schema:
                 raise RuntimeError
 
-            self._state.tools.append(self._api.format.tool_definition(name, desc, schema))
+            _tool_definitions.append(self._api.format.tool_definition(name, desc, schema))
 
             self._state.funcs[name] = tool
 
-        self._state.tools = self._api.format.tool_definitions(self._state.tools)
+        self._state.tools = self._api.format.tool_definitions(_tool_definitions)
 
         self._state.tool_choice = self._api.format.tool_selection(tools.tool_choice, tools.tool_choice_name)
 

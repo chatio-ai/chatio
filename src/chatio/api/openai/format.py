@@ -6,6 +6,7 @@ from typing import override
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
+from openai.types.chat import ChatCompletionToolParam
 
 
 from chatio.core.format import ChatFormat
@@ -17,7 +18,8 @@ type _ChatCompletionContentPartParam = ChatCompletionContentPartTextParam | Chat
 
 
 class OpenAIFormat(ChatFormat[ChatCompletionMessageParam, ChatCompletionMessageParam,
-                              ChatCompletionContentPartTextParam, ChatCompletionContentPartImageParam]):
+                              ChatCompletionContentPartTextParam, ChatCompletionContentPartImageParam,
+                              ChatCompletionToolParam, ChatCompletionToolParam]):
 
     def __init__(self, params: OpenAIParams):
         self._params = params
@@ -140,7 +142,7 @@ class OpenAIFormat(ChatFormat[ChatCompletionMessageParam, ChatCompletionMessageP
         return result
 
     @override
-    def tool_definition(self, name: str, desc: str, schema: dict) -> dict:
+    def tool_definition(self, name: str, desc: str, schema: dict) -> ChatCompletionToolParam:
         schema = self._tool_schema(schema)
         return {
             "type": "function",
@@ -153,7 +155,7 @@ class OpenAIFormat(ChatFormat[ChatCompletionMessageParam, ChatCompletionMessageP
         }
 
     @override
-    def tool_definitions(self, tools: list[dict]) -> list[dict]:
+    def tool_definitions(self, tools: list[ChatCompletionToolParam]) -> list[ChatCompletionToolParam] | None:
         return tools
 
     @override

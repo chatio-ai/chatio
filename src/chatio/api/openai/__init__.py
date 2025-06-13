@@ -4,6 +4,7 @@ from typing import override
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
+from openai.types.chat import ChatCompletionToolParam
 
 
 from chatio.core.config import ChatConfig
@@ -16,7 +17,8 @@ from .client import OpenAIClient
 
 
 class OpenAIApi(ChatApi[ChatCompletionMessageParam, ChatCompletionMessageParam,
-                        ChatCompletionContentPartTextParam, ChatCompletionContentPartImageParam]):
+                        ChatCompletionContentPartTextParam, ChatCompletionContentPartImageParam,
+                        ChatCompletionToolParam, ChatCompletionToolParam]):
     def __init__(self, config: ChatConfig):
         super().__init__()
 
