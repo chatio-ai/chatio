@@ -146,6 +146,11 @@ class ChatApi(ABC):
 
     @property
     @abstractmethod
+    def config(self) -> ChatConfig:
+        ...
+
+    @property
+    @abstractmethod
     def format(self) -> ChatFormat:
         ...
 
@@ -158,17 +163,11 @@ class ChatApi(ABC):
 class ChatBase:
     def __init__(self, api: ChatApi,
                  system=None, messages=None,
-                 tools: ToolConfig | None = None,
-                 config: ChatConfig | None = None):
+                 tools: ToolConfig | None = None):
 
         self._api = api
 
         self._ready = False
-
-        if config is None:
-            raise RuntimeError
-
-        self._config = config
 
         self._state = ChatState()
 
@@ -271,7 +270,7 @@ class ChatBase:
             self._debug_base_chat_state()
 
             events = self._api.client.iterate_model_events(
-                model=self._config.model,
+                model=self._api.config.model,
                 system=self._state.system,
                 messages=self._state.messages,
                 tools=self._state.tools,
@@ -305,7 +304,7 @@ class ChatBase:
             self._commit_input_message(content)
 
         return self._api.client.count_message_tokens(
-            model=self._config.model,
+            model=self._api.config.model,
             system=self._state.system,
             messages=self._state.messages,
             tools=self._state.tools,
@@ -315,8 +314,8 @@ class ChatBase:
 
     def info(self):
         return ChatInfo(
-            self._config.vendor,
-            self._config.model,
+            self._api.config.vendor,
+            self._api.config.model,
             len(self._state.funcs or {}),
             len(self._state.system or []),
             len(self._state.messages),

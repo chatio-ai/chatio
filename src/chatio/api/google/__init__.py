@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.api._common import ApiConfig
+from chatio.api._common import ChatConfig
 
 from chatio.api._common import ChatApi
 
@@ -12,13 +12,20 @@ from .client import GoogleClient
 
 
 class GoogleApi(ChatApi):
-    def __init__(self, config: ApiConfig):
-        super().__init__(config)
+    def __init__(self, config: ChatConfig):
+        super().__init__()
 
-        params = GoogleParams(**config.options if config.options else {})
+        self._config = config
+
+        params = GoogleParams(**config.config.options if config.config.options else {})
 
         self._format = GoogleFormat(params)
-        self._client = GoogleClient(config, params)
+        self._client = GoogleClient(config.config, params)
+
+    @property
+    @override
+    def config(self):
+        return self._config
 
     @property
     @override

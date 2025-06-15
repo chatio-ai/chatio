@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.api._common import ApiConfig
+from chatio.api._common import ChatConfig
 
 from chatio.api._common import ChatApi
 
@@ -12,13 +12,20 @@ from .client import ClaudeClient
 
 
 class ClaudeApi(ChatApi):
-    def __init__(self, config: ApiConfig):
-        super().__init__(config)
+    def __init__(self, config: ChatConfig):
+        super().__init__()
 
-        params = ClaudeParams(**config.options if config.options else {})
+        self._config = config
+
+        params = ClaudeParams(**config.config.options if config.config.options else {})
 
         self._format = ClaudeFormat(params)
-        self._client = ClaudeClient(config, params)
+        self._client = ClaudeClient(config.config, params)
+
+    @property
+    @override
+    def config(self):
+        return self._config
 
     @property
     @override
