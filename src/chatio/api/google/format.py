@@ -6,8 +6,10 @@ from google.genai.types import ContentDict
 from google.genai.types import PartDict
 
 from google.genai.types import SchemaDict
+from google.genai.types import ToolConfigDict
 from google.genai.types import ToolListUnionDict
 from google.genai.types import FunctionDeclarationDict
+from google.genai.types import FunctionCallingConfigMode
 
 
 from chatio.core.format import ChatFormat
@@ -22,6 +24,7 @@ class GoogleFormat(ChatFormat[
     PartDict,
     FunctionDeclarationDict,
     ToolListUnionDict,
+    ToolConfigDict,
 ]):
 
     def __init__(self, params: GoogleParams):
@@ -135,18 +138,40 @@ class GoogleFormat(ChatFormat[
         return tools_config
 
     @override
-    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:
+    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> ToolConfigDict | None:
         if not tool_choice:
             return None
 
-        if not tool_choice_name:
-            return {
-                "type": tool_choice,
-            }
-
-        return {
-            "type": tool_choice,
-            "function": {
-                "name": tool_choice_name,
-            },
-        }
+        if tool_choice_name is None:
+            match tool_choice:
+                case FunctionCallingConfigMode.NONE:
+                    return {
+                        "function_calling_config": {
+                            "mode": tool_choice,
+                        },
+                    }
+                case FunctionCallingConfigMode.AUTO:
+                    return {
+                        "function_calling_config": {
+                            "mode": tool_choice,
+                        },
+                    }
+                case FunctionCallingConfigMode.ANY:
+                    return {
+                        "function_calling_config": {
+                            "mode": tool_choice,
+                        },
+                    }
+                case _:
+                    raise ValueError
+        else:
+            match tool_choice:
+                case FunctionCallingConfigMode.ANY:
+                    return {
+                        "function_calling_config": {
+                            "mode": tool_choice,
+                            "allowed_function_names": [tool_choice_name],
+                        },
+                    }
+                case _:
+                    raise ValueError

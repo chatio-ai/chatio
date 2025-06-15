@@ -11,6 +11,7 @@ from openai import NOT_GIVEN
 
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionToolParam
+from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
 from chatio.core.client import ChatClient
@@ -32,6 +33,7 @@ class OpenAIClient(ChatClient[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
     list[ChatCompletionToolParam],
+    ChatCompletionToolChoiceOptionParam,
 ]):
 
     def __init__(self, config: ApiConfig, params: OpenAIParams, format_: OpenAIFormat):
@@ -59,6 +61,7 @@ class OpenAIClient(ChatClient[
             ChatCompletionMessageParam,
             ChatCompletionMessageParam,
             list[ChatCompletionToolParam],
+            ChatCompletionToolChoiceOptionParam,
         ],
     ) -> Iterator[ChatEvent]:
         # prediction = kwargs.pop('prediction', None)
@@ -72,6 +75,7 @@ class OpenAIClient(ChatClient[
             stream_options={'include_usage': True},
             tools=state.tools if state.tools is not None else NOT_GIVEN,
             messages=[state.system, *state.messages] if state.system is not None else state.messages,
+            tool_choice=state.tool_choice if state.tool_choice is not None else NOT_GIVEN,
         ))
 
     @override
@@ -81,6 +85,7 @@ class OpenAIClient(ChatClient[
             ChatCompletionMessageParam,
             ChatCompletionMessageParam,
             list[ChatCompletionToolParam],
+            ChatCompletionToolChoiceOptionParam,
         ],
     ) -> int:
         raise NotImplementedError

@@ -6,6 +6,7 @@ from typing import override
 from anthropic.types import MessageParam
 
 from anthropic.types import ToolParam
+from anthropic.types import ToolChoiceParam
 from anthropic.types import TextBlockParam
 from anthropic.types import ImageBlockParam
 from anthropic.types import ToolUseBlockParam
@@ -29,6 +30,7 @@ class ClaudeFormat(ChatFormat[
     ImageBlockParam,
     ToolParam,
     list[ToolParam],
+    ToolChoiceParam,
 ]):
 
     def __init__(self, params: ClaudeParams) -> None:
@@ -170,16 +172,32 @@ class ClaudeFormat(ChatFormat[
         return self._setup_tools_cache(tools)
 
     @override
-    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:
+    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> ToolChoiceParam | None:
         if not tool_choice:
             return None
 
-        if not tool_choice_name:
-            return {
-                "type": tool_choice,
-            }
-
-        return {
-            "type": tool_choice,
-            "name": tool_choice_name,
-        }
+        if tool_choice_name is None:
+            match tool_choice:
+                case 'any':
+                    return {
+                        "type": tool_choice,
+                    }
+                case 'auto':
+                    return {
+                        "type": tool_choice,
+                    }
+                case 'none':
+                    return {
+                        "type": tool_choice,
+                    }
+                case _:
+                    raise ValueError
+        else:
+            match tool_choice:
+                case 'tool':
+                    return {
+                        "type": tool_choice,
+                        "name": tool_choice_name,
+                    }
+                case _:
+                    raise ValueError

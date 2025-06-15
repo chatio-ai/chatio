@@ -11,6 +11,7 @@ class ChatClient[
     SystemContent,
     MessageContent,
     ToolDefinitions,
+    ToolSelection,
 ](ABC):
 
     @abstractmethod
@@ -20,6 +21,7 @@ class ChatClient[
             SystemContent,
             MessageContent,
             ToolDefinitions,
+            ToolSelection,
         ],
     ) -> Iterator[ChatEvent]:
         ...
@@ -31,6 +33,7 @@ class ChatClient[
             SystemContent,
             MessageContent,
             ToolDefinitions,
+            ToolSelection,
         ],
     ) -> int:
         ...

@@ -9,6 +9,7 @@ class ChatFormat[
     ImageMessage,
     ToolDefinition,
     ToolDefinitions,
+    ToolSelection,
 ](ABC):
 
     # messages
@@ -56,5 +57,5 @@ class ChatFormat[
         ...
 
     @abstractmethod
-    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:
+    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> ToolSelection | None:
         ...

@@ -5,6 +5,7 @@ from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
 from openai.types.chat import ChatCompletionToolParam
+from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
 from chatio.core.config import ChatConfig
@@ -23,6 +24,7 @@ class OpenAIApi(ChatApi[
     ChatCompletionContentPartImageParam,
     ChatCompletionToolParam,
     list[ChatCompletionToolParam],
+    ChatCompletionToolChoiceOptionParam,
 ]):
 
     def __init__(self, config: ChatConfig):

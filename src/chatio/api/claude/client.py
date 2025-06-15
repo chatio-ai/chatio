@@ -12,6 +12,7 @@ from anthropic import NOT_GIVEN
 from anthropic.types import MessageParam
 
 from anthropic.types import ToolParam
+from anthropic.types import ToolChoiceParam
 from anthropic.types import TextBlockParam
 
 
@@ -33,6 +34,7 @@ class ClaudeClient(ChatClient[
     TextBlockParam,
     MessageParam,
     list[ToolParam],
+    ToolChoiceParam,
 ]):
 
     @override
@@ -53,6 +55,7 @@ class ClaudeClient(ChatClient[
             TextBlockParam,
             MessageParam,
             list[ToolParam],
+            ToolChoiceParam,
         ],
     ) -> Iterator[ChatEvent]:
 
@@ -62,6 +65,7 @@ class ClaudeClient(ChatClient[
             tools=state.tools if state.tools is not None else NOT_GIVEN,
             system=[state.system] if state.system is not None else NOT_GIVEN,
             messages=state.messages,
+            tool_choice=state.tool_choice if state.tool_choice is not None else NOT_GIVEN,
         ))
 
     # helpers
@@ -73,6 +77,7 @@ class ClaudeClient(ChatClient[
             TextBlockParam,
             MessageParam,
             list[ToolParam],
+            ToolChoiceParam,
         ],
     ) -> int:
 
@@ -81,4 +86,5 @@ class ClaudeClient(ChatClient[
             tools=state.tools if state.tools is not None else NOT_GIVEN,
             system=[state.system] if state.system is not None else NOT_GIVEN,
             messages=state.messages,
+            tool_choice=state.tool_choice if state.tool_choice is not None else NOT_GIVEN,
         ).input_tokens

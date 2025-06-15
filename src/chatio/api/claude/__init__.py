@@ -4,6 +4,7 @@ from typing import override
 from anthropic.types import MessageParam
 
 from anthropic.types import ToolParam
+from anthropic.types import ToolChoiceParam
 from anthropic.types import TextBlockParam
 from anthropic.types import ImageBlockParam
 
@@ -24,6 +25,7 @@ class ClaudeApi(ChatApi[
     ImageBlockParam,
     ToolParam,
     list[ToolParam],
+    ToolChoiceParam,
 ]):
 
     def __init__(self, config: ChatConfig) -> None:

@@ -44,6 +44,7 @@ class ChatApi[
     ImageMessage,
     ToolDefinition,
     ToolDefinitions,
+    ToolSelection,
 ](ABC):
 
     @property
@@ -60,6 +61,7 @@ class ChatApi[
         ImageMessage,
         ToolDefinition,
         ToolDefinitions,
+        ToolSelection,
     ]:
         ...
 
@@ -69,5 +71,6 @@ class ChatApi[
         SystemContent,
         MessageContent,
         ToolDefinitions,
+        ToolSelection,
     ]:
         ...

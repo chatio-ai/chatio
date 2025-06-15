@@ -34,13 +34,14 @@ class ChatState[
     SystemContent,
     MessageContent,
     ToolDefinitions,
+    ToolSelection,
 ]:
 
     system: SystemContent | None
     messages: list[MessageContent]
     tools: ToolDefinitions | None
     funcs: dict[str, Callable]
-    tool_choice: dict | None
+    tool_choice: ToolSelection | None
 
     def __init__(self):
         self.system = None
@@ -54,6 +55,7 @@ class ChatState[
             system=self.system,
             messages=self.messages,
             tools=self.tools,
+            tool_choice=self.tool_choice,
         )
 
 
@@ -64,6 +66,7 @@ class ChatBase[
     ImageMessage,
     ToolDefinition,
     ToolDefinitions,
+    ToolSelection,
 ]:
 
     def __init__(
@@ -75,6 +78,7 @@ class ChatBase[
                 ImageMessage,
                 ToolDefinition,
                 ToolDefinitions,
+                ToolSelection,
             ],
             system: str | None = None,
             messages: list[str] | None = None,
@@ -88,6 +92,7 @@ class ChatBase[
             SystemContent,
             MessageContent,
             ToolDefinitions,
+            ToolSelection,
         ] = ChatState()
 
         self._update_system_message(system)

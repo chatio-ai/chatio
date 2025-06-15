@@ -7,6 +7,7 @@ from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
 from openai.types.chat import ChatCompletionToolParam
+from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
 from chatio.core.format import ChatFormat
@@ -25,6 +26,7 @@ class OpenAIFormat(ChatFormat[
     ChatCompletionContentPartImageParam,
     ChatCompletionToolParam,
     list[ChatCompletionToolParam],
+    ChatCompletionToolChoiceOptionParam,
 ]):
 
     def __init__(self, params: OpenAIParams):
@@ -165,18 +167,25 @@ class OpenAIFormat(ChatFormat[
         return tools
 
     @override
-    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:
+    def tool_selection(self, tool_choice: str | None,
+                       tool_choice_name: str | None) -> ChatCompletionToolChoiceOptionParam | None:
         if not tool_choice:
             return None
 
-        if not tool_choice_name:
-            return {
-                "type": tool_choice,
-            }
-
-        return {
-            "type": tool_choice,
-            "function": {
-                "name": tool_choice_name,
-            },
-        }
+        if tool_choice_name is None:
+            match tool_choice:
+                case 'required' | 'auto' | 'none':
+                    return tool_choice
+                case _:
+                    raise ValueError
+        else:
+            match tool_choice:
+                case 'function':
+                    return {
+                        "type": tool_choice,
+                        "function": {
+                            "name": tool_choice_name,
+                        },
+                    }
+                case _:
+                    raise ValueError
