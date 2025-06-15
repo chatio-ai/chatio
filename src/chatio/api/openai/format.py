@@ -60,7 +60,7 @@ class OpenAIFormat(ChatFormat):
         }
 
     @override
-    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
+    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
         return {
             "role": "assistant",
             "tool_calls": [{
@@ -74,7 +74,7 @@ class OpenAIFormat(ChatFormat):
         }
 
     @override
-    def tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
+    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
         return {
             "role": "tool",
             "tool_call_id": tool_call_id,

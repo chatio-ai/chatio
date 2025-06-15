@@ -59,7 +59,7 @@ class ChatBase:
         if tools is None:
             tools = ToolConfig()
 
-        self._setup_tools(tools)
+        self._setup_tool_definitions(tools)
 
         self._stats = ChatStats()
 
@@ -92,15 +92,15 @@ class ChatBase:
     def _commit_output_message(self, message: str) -> None:
         self._commit_output_content(self._api.format.text_chunk(message))
 
-    def _commit_tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> None:
-        self._state.messages.append(self._api.format.tool_request(tool_call_id, tool_name, tool_input))
+    def _commit_call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> None:
+        self._state.messages.append(self._api.format.call_request(tool_call_id, tool_name, tool_input))
         self._ready = False
 
-    def _commit_tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> None:
-        self._state.messages.append(self._api.format.tool_response(tool_call_id, tool_name, tool_output))
+    def _commit_call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> None:
+        self._state.messages.append(self._api.format.call_response(tool_call_id, tool_name, tool_output))
         self._ready = True
 
-    def _setup_tools(self, tools: ToolConfig) -> None:
+    def _setup_tool_definitions(self, tools: ToolConfig) -> None:
         self._state.tools = []
         self._state.funcs = {}
 
@@ -122,7 +122,7 @@ class ChatBase:
 
         self._state.tool_choice = self._api.format.tool_selection(tools.tool_choice, tools.tool_choice_name)
 
-    def _process_tool(self, tool_call_id: str, tool_name: str, tool_args: dict) -> Iterator[dict]:
+    def _process_tool_call(self, tool_call_id: str, tool_name: str, tool_args: dict) -> Iterator[dict]:
         tool_func = self._state.funcs.get(tool_name)
         if not tool_func:
             return
@@ -142,7 +142,7 @@ class ChatBase:
                     "tool_data": chunk,
                 }
 
-        self._commit_tool_response(tool_call_id, tool_name, content)
+        self._commit_call_response(tool_call_id, tool_name, content)
 
     # stream
 
@@ -176,13 +176,13 @@ class ChatBase:
                         if text:
                             self._commit_output_message(text)
                     case CallEvent(call_id, name, args, args_raw):
-                        self._commit_tool_request(call_id, name, args_raw)
+                        self._commit_call_request(call_id, name, args_raw)
                         yield {
                             "type": "tools_usage",
                             "tool_name": name,
                             "tool_args": args,
                         }
-                        yield from self._process_tool(call_id, name, args)
+                        yield from self._process_tool_call(call_id, name, args)
                     case StatEvent():
                         yield from self._stats(event)
 

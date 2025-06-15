@@ -83,7 +83,7 @@ class ClaudeFormat(ChatFormat):
         }
 
     @override
-    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
+    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
         return self.output_content({
             "type": "tool_use",
             "id": tool_call_id,
@@ -92,7 +92,7 @@ class ClaudeFormat(ChatFormat):
         })
 
     @override
-    def tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
+    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
         return self.input_content({
             "type": "tool_result",
             "tool_use_id": tool_call_id,

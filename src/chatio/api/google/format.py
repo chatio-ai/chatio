@@ -56,7 +56,7 @@ class GoogleFormat(ChatFormat):
         }
 
     @override
-    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
+    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> dict:
         return {
             "role": "model",
             "parts": [{
@@ -69,7 +69,7 @@ class GoogleFormat(ChatFormat):
         }
 
     @override
-    def tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
+    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
         return {
             "role": "user",
             "parts": [{
