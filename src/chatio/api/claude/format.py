@@ -11,41 +11,45 @@ class ClaudeFormat(ChatFormat):
     def __init__(self, params: ClaudeParams):
         self._params = params
 
-    def _setup_cache(self, entry):
-        if self._params.use_cache and entry:
-            entry[-1].update({
+    def _setup_cache(self, entries: list[dict]) -> list[dict]:
+        if self._params.use_cache and entries:
+            entries[-1].update({
                 "cache_control": {
                     "type": "ephemeral",
                 },
             })
 
-        return entry
+        return entries
 
-    def _setup_messages_cache(self, messages):
+    def _setup_messages_cache(self, messages: list[dict]) -> list[dict]:
         for message in messages:
-            for content in message.get("content"):
-                content.pop("cache_control", None)
+            content: list[dict] | None = message.get("content")
+            if content is not None:
+                for entry in content:
+                    entry.pop("cache_control", None)
 
         if messages:
-            self._setup_cache(messages[-1].get("content"))
+            content: list[dict] | None = messages[-1].get("content")
+            if content is not None:
+                self._setup_cache(content)
 
         return messages
 
     # messages
 
     @override
-    def chat_messages(self, messages):
+    def chat_messages(self, messages: list[dict]) -> list[dict]:
         return self._setup_messages_cache(messages)
 
     @override
-    def text_chunk(self, text):
+    def text_chunk(self, text: str) -> dict:
         return {
             "type": "text",
             "text": text,
         }
 
     @override
-    def image_blob(self, blob, mimetype):
+    def image_blob(self, blob: str, mimetype: str) -> dict:
         return {
             "type": "image",
             "source": {
@@ -56,29 +60,35 @@ class ClaudeFormat(ChatFormat):
         }
 
     @override
-    def system_message(self, content):
+    def system_message(self, content: str) -> tuple[list[dict], list[dict]]:
         if not content:
             return [], []
 
         return self._setup_cache(self._as_contents(content)), []
 
-    @override
-    def input_message(self, content):
+    def _input_message(self, content: str | dict) -> dict:
         return {
             "role": "user",
             "content": self._as_contents(content),
         }
 
     @override
-    def output_message(self, content):
+    def input_message(self, content: str) -> dict:
+        return self._input_message(content)
+
+    def _output_message(self, content: str | dict) -> dict:
         return {
             "role": "assistant",
             "content": self._as_contents(content),
         }
 
     @override
-    def tool_request(self, tool_call_id, tool_name, tool_input):
-        return self.output_message({
+    def output_message(self, content: str) -> dict:
+        return self._output_message(content)
+
+    @override
+    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: dict) -> dict:
+        return self._output_message({
             "type": "tool_use",
             "id": tool_call_id,
             "name": tool_name,
@@ -86,8 +96,8 @@ class ClaudeFormat(ChatFormat):
         })
 
     @override
-    def tool_response(self, tool_call_id, tool_name, tool_output):
-        return self.input_message({
+    def tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
+        return self._input_message({
             "type": "tool_result",
             "tool_use_id": tool_call_id,
             "content": tool_output,
@@ -96,7 +106,7 @@ class ClaudeFormat(ChatFormat):
     # functions
 
     @override
-    def tool_definition(self, name, desc, schema):
+    def tool_definition(self, name: str, desc: str, schema: dict) -> dict:
         return {
             "name": name,
             "description": desc,
@@ -104,11 +114,11 @@ class ClaudeFormat(ChatFormat):
         }
 
     @override
-    def tool_definitions(self, tools):
+    def tool_definitions(self, tools: list[dict]) -> list[dict]:
         return self._setup_cache(tools)
 
     @override
-    def tool_selection(self, tool_choice, tool_choice_name):
+    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:
         if not tool_choice:
             return None
 

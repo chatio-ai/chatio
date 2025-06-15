@@ -14,11 +14,11 @@ class OpenAIFormat(ChatFormat):
     # messages
 
     @override
-    def chat_messages(self, messages):
+    def chat_messages(self, messages: list[dict]) -> list[dict]:
         return messages
 
     @override
-    def text_chunk(self, text):
+    def text_chunk(self, text: str) -> dict | str:
         if self._params.legacy:
             return text
 
@@ -28,14 +28,14 @@ class OpenAIFormat(ChatFormat):
         }
 
     @override
-    def image_blob(self, blob, mimetype):
+    def image_blob(self, blob: str, mimetype: str) -> dict:
         return {
             "type": "image_url",
             "image_url": {"url": f"data:{mimetype};base64,{blob}"},
         }
 
     @override
-    def system_message(self, content):
+    def system_message(self, content: str) -> tuple[list[dict], list[dict]]:
         if not content:
             return [], []
 
@@ -45,21 +45,21 @@ class OpenAIFormat(ChatFormat):
         }]
 
     @override
-    def input_message(self, content):
+    def input_message(self, content: str) -> dict:
         return {
             "role": "user",
             "content": self._as_contents(content),
         }
 
     @override
-    def output_message(self, content):
+    def output_message(self, content: str) -> dict:
         return {
             "role": "assistant",
             "content": self._as_contents(content),
         }
 
     @override
-    def tool_request(self, tool_call_id, tool_name, tool_input):
+    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: dict) -> dict:
         return {
             "role": "assistant",
             "tool_calls": [{
@@ -73,14 +73,14 @@ class OpenAIFormat(ChatFormat):
         }
 
     @override
-    def tool_response(self, tool_call_id, tool_name, tool_output):
+    def tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
         return {
             "role": "tool",
             "tool_call_id": tool_call_id,
             "content": tool_output,
         }
 
-    def predict_content(self, prediction):
+    def predict_content(self, prediction: str) -> dict:
         return {
             "type": "content",
             "content": prediction,
@@ -88,7 +88,7 @@ class OpenAIFormat(ChatFormat):
 
     # functions
 
-    def _tool_schema(self, schema):
+    def _tool_schema(self, schema: dict) -> dict:
         result = schema.copy()
 
         props = None
@@ -109,7 +109,7 @@ class OpenAIFormat(ChatFormat):
         return result
 
     @override
-    def tool_definition(self, name, desc, schema):
+    def tool_definition(self, name: str, desc: str, schema: dict) -> dict:
         schema = self._tool_schema(schema)
         return {
             "type": "function",
@@ -122,11 +122,11 @@ class OpenAIFormat(ChatFormat):
         }
 
     @override
-    def tool_definitions(self, tools):
+    def tool_definitions(self, tools: list[dict]) -> list[dict]:
         return tools
 
     @override
-    def tool_selection(self, tool_choice, tool_choice_name):
+    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:
         if not tool_choice:
             return None
 

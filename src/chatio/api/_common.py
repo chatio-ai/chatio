@@ -57,15 +57,15 @@ class ChatInfo:
 
 @dataclass
 class ChatState:
-    system: list[object]
-    messages: list[object]
-    tools: list[object]
+    system: list[dict] | dict | None
+    messages: list[dict]
+    tools: list[dict] | None
     funcs: dict[str, Callable]
 
     def __init__(self):
-        self.system = []
+        self.system = None
         self.messages = []
-        self.tools = []
+        self.tools = None
         self.funcs = {}
 
 
@@ -76,27 +76,27 @@ class ChatClient(ABC):
         ...
 
     @abstractmethod
-    def count_message_tokens(self, model, system, messages, tools):
+    def count_message_tokens(self, model, system, messages, tools) -> int:
         ...
 
 
 class ChatFormat(ABC):
 
     @abstractmethod
-    def chat_messages(self, messages):
+    def chat_messages(self, messages: list[dict]) -> list[dict]:
         ...
 
     @abstractmethod
-    def text_chunk(self, text):
+    def text_chunk(self, text: str) -> dict | str:
         ...
 
     @abstractmethod
-    def image_blob(self, blob, mimetype):
+    def image_blob(self, blob: str, mimetype: str) -> dict:
         ...
 
     # messages
 
-    def _as_contents(self, content):
+    def _as_contents(self, content: str | dict | list) -> list[dict] | str:
         if isinstance(content, str):
             chunk = self.text_chunk(content)
             return chunk if isinstance(chunk, str) else [chunk]
@@ -108,37 +108,37 @@ class ChatFormat(ABC):
         raise RuntimeError
 
     @abstractmethod
-    def system_message(self, content):
+    def system_message(self, content: str) -> tuple[list[dict] | dict | None, list[dict]]:
         ...
 
     @abstractmethod
-    def input_message(self, content):
+    def input_message(self, content: str) -> dict:
         ...
 
     @abstractmethod
-    def output_message(self, content):
+    def output_message(self, content: str) -> dict:
         ...
 
     @abstractmethod
-    def tool_request(self, tool_call_id, tool_name, tool_input):
+    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: dict) -> dict:
         ...
 
     @abstractmethod
-    def tool_response(self, tool_call_id, tool_name, tool_output):
+    def tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
         ...
 
     # functions
 
     @abstractmethod
-    def tool_definition(self, name, desc, schema):
+    def tool_definition(self, name: str, desc: str, schema: dict) -> dict:
         ...
 
     @abstractmethod
-    def tool_definitions(self, tools):
+    def tool_definitions(self, tools: list[dict]) -> list[dict] | None:
         ...
 
     @abstractmethod
-    def tool_selection(self, tool_choice, tool_choice_name):
+    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:
         ...
 
 
@@ -338,7 +338,10 @@ class ChatBase:
         with Path(filepath).open("rb") as file:
             data = file.read()
             blob = base64.b64encode(data).decode()
+
             mimetype, _ = mimetypes.guess_type(filepath)
+            if mimetype is None:
+                raise RuntimeError
 
             self._commit_input_message(filepath)
 

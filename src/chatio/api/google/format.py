@@ -14,17 +14,17 @@ class GoogleFormat(ChatFormat):
     # messages
 
     @override
-    def chat_messages(self, messages):
+    def chat_messages(self, messages: list[dict]) -> list[dict]:
         return messages
 
     @override
-    def text_chunk(self, text):
+    def text_chunk(self, text: str) -> dict:
         return {
             "text": text,
         }
 
     @override
-    def image_blob(self, blob, mimetype):
+    def image_blob(self, blob: str, mimetype: str) -> dict:
         return {
             "inline_data": {
                 "mime_type": mimetype,
@@ -33,7 +33,7 @@ class GoogleFormat(ChatFormat):
         }
 
     @override
-    def system_message(self, content):
+    def system_message(self, content: str) -> tuple[dict | None, list[dict]]:
         if not content:
             return None, []
 
@@ -42,21 +42,21 @@ class GoogleFormat(ChatFormat):
         }, []
 
     @override
-    def input_message(self, content):
+    def input_message(self, content: str) -> dict:
         return {
             "role": "user",
             "parts": self._as_contents(content),
         }
 
     @override
-    def output_message(self, content):
+    def output_message(self, content: str) -> dict:
         return {
             "role": "model",
             "parts": self._as_contents(content),
         }
 
     @override
-    def tool_request(self, tool_call_id, tool_name, tool_input):
+    def tool_request(self, tool_call_id: str, tool_name: str, tool_input: dict) -> dict:
         return {
             "role": "model",
             "parts": [{
@@ -69,7 +69,7 @@ class GoogleFormat(ChatFormat):
         }
 
     @override
-    def tool_response(self, tool_call_id, tool_name, tool_output):
+    def tool_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> dict:
         return {
             "role": "user",
             "parts": [{
@@ -86,7 +86,7 @@ class GoogleFormat(ChatFormat):
     # functions
 
     @override
-    def tool_definition(self, name, desc, schema):
+    def tool_definition(self, name: str, desc: str, schema: dict) -> dict:
         return {
             "name": name,
             "description": desc,
@@ -94,7 +94,7 @@ class GoogleFormat(ChatFormat):
         }
 
     @override
-    def tool_definitions(self, tools):
+    def tool_definitions(self, tools: list[dict]) -> list[dict] | None:
         tools_config = []
 
         if tools:
@@ -113,7 +113,7 @@ class GoogleFormat(ChatFormat):
         return tools_config
 
     @override
-    def tool_selection(self, tool_choice, tool_choice_name):
+    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> dict | None:
         if not tool_choice:
             return None
 
