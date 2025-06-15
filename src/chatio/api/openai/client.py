@@ -29,7 +29,7 @@ from .events import _pump
 class OpenAIClient(ChatClient[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
-    ChatCompletionToolParam,
+    list[ChatCompletionToolParam],
 ]):
 
     def __init__(self, config: ApiConfig, params: OpenAIParams, format_: OpenAIFormat):

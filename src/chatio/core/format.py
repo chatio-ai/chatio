@@ -7,8 +7,8 @@ class ChatFormat[
     MessageContent,
     TextMessage,
     ImageMessage,
-    ToolDefinitionBase,
     ToolDefinition,
+    ToolDefinitions,
 ](ABC):
 
     # messages
@@ -48,11 +48,11 @@ class ChatFormat[
     # functions
 
     @abstractmethod
-    def tool_definition(self, name: str, desc: str, schema: dict) -> ToolDefinitionBase:
+    def tool_definition(self, name: str, desc: str, schema: dict) -> ToolDefinition:
         ...
 
     @abstractmethod
-    def tool_definitions(self, tools: list[ToolDefinitionBase]) -> list[ToolDefinition] | None:
+    def tool_definitions(self, tools: list[ToolDefinition]) -> ToolDefinitions | None:
         ...
 
     @abstractmethod

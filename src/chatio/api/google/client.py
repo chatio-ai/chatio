@@ -8,7 +8,6 @@ from google.genai import Client
 from google.genai.types import HttpOptions
 
 from google.genai.types import ContentDict
-from google.genai.types import ToolUnionDict
 from google.genai.types import ToolListUnionDict
 
 
@@ -28,7 +27,7 @@ from .events import _pump
 class GoogleClient(ChatClient[
     ContentDict,
     ContentDict,
-    ToolUnionDict,
+    ToolListUnionDict,
 ]):
 
     def __init__(self, config: ApiConfig, params: GoogleParams):

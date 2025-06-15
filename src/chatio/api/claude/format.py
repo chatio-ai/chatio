@@ -28,7 +28,7 @@ class ClaudeFormat(ChatFormat[
     TextBlockParam,
     ImageBlockParam,
     ToolParam,
-    ToolParam,
+    list[ToolParam],
 ]):
 
     def __init__(self, params: ClaudeParams) -> None:

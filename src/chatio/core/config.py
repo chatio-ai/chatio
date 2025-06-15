@@ -42,8 +42,8 @@ class ChatApi[
     MessageContent,
     TextMessage,
     ImageMessage,
-    ToolDefinitionBase,
     ToolDefinition,
+    ToolDefinitions,
 ](ABC):
 
     @property
@@ -58,8 +58,8 @@ class ChatApi[
         MessageContent,
         TextMessage,
         ImageMessage,
-        ToolDefinitionBase,
         ToolDefinition,
+        ToolDefinitions,
     ]:
         ...
 
@@ -68,6 +68,6 @@ class ChatApi[
     def client(self) -> ChatClient[
         SystemContent,
         MessageContent,
-        ToolDefinition,
+        ToolDefinitions,
     ]:
         ...

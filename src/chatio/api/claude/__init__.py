@@ -23,7 +23,7 @@ class ClaudeApi(ChatApi[
     TextBlockParam,
     ImageBlockParam,
     ToolParam,
-    ToolParam,
+    list[ToolParam],
 ]):
 
     def __init__(self, config: ChatConfig) -> None:

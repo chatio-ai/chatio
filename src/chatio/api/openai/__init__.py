@@ -22,7 +22,7 @@ class OpenAIApi(ChatApi[
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     ChatCompletionToolParam,
-    ChatCompletionToolParam,
+    list[ChatCompletionToolParam],
 ]):
 
     def __init__(self, config: ChatConfig):

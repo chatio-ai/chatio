@@ -24,7 +24,7 @@ class OpenAIFormat(ChatFormat[
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     ChatCompletionToolParam,
-    ChatCompletionToolParam,
+    list[ChatCompletionToolParam],
 ]):
 
     def __init__(self, params: OpenAIParams):

@@ -6,7 +6,6 @@ from google.genai.types import ContentDict
 from google.genai.types import PartDict
 
 from google.genai.types import SchemaDict
-from google.genai.types import ToolUnionDict
 from google.genai.types import ToolListUnionDict
 from google.genai.types import FunctionDeclarationDict
 
@@ -22,7 +21,7 @@ class GoogleFormat(ChatFormat[
     PartDict,
     PartDict,
     FunctionDeclarationDict,
-    ToolUnionDict,
+    ToolListUnionDict,
 ]):
 
     def __init__(self, params: GoogleParams):

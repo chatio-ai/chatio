@@ -30,7 +30,7 @@ from .events import _pump
 class ClaudeClient(ChatClient[
     TextBlockParam,
     MessageParam,
-    ToolParam,
+    list[ToolParam],
 ]):
 
     @override
