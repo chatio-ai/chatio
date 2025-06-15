@@ -54,7 +54,9 @@ class ChatBase:
 
         self._state = ChatState()
 
-        self._setup_messages(system, messages)
+        self._update_system_message(system)
+
+        self._setup_message_history(messages)
 
         if tools is None:
             tools = ToolConfig()
@@ -65,10 +67,7 @@ class ChatBase:
 
     # messages
 
-    def _setup_messages(self, system: str | None, messages: list[str] | None) -> None:
-        if system:
-            self._state.system = self._api.format.system_content(self._api.format.text_chunk(system))
-
+    def _setup_message_history(self, messages: list[str] | None) -> None:
         if messages is None:
             messages = []
 
@@ -77,6 +76,13 @@ class ChatBase:
                 self._commit_input_message(message)
             else:
                 self._commit_output_message(message)
+
+    def _update_system_message(self, message: str | None) -> None:
+        if not message:
+            self._state.system = None
+            return
+
+        self._state.system = self._api.format.system_content(self._api.format.text_chunk(message))
 
     def _commit_input_content(self, content: dict) -> None:
         self._state.messages.append(self._api.format.input_content(content))
@@ -223,8 +229,11 @@ class ChatBase:
 
             self._commit_input_content(self._api.format.image_blob(blob, mimetype))
 
-    def commit_chunk(self, chunk: str, *, model: bool = False) -> None:
-        if model:
-            self._commit_output_message(chunk)
-        else:
-            self._commit_input_message(chunk)
+    def update_system_message(self, message: str | None) -> None:
+        self._update_system_message(message)
+
+    def commit_input_message(self, message: str) -> None:
+        self._commit_input_message(message)
+
+    def commit_output_message(self, message: str) -> None:
+        self._commit_output_message(message)

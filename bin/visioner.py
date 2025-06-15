@@ -27,7 +27,7 @@ def main():
 
     print()
 
-    chat.commit_chunk(sys.stdin.read())
+    chat.commit_input_message(sys.stdin.read())
     run_chat(chat(), "<<< ", "::: ")
 
     print()

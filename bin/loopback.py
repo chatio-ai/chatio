@@ -77,8 +77,8 @@ def main():
             if not content:
                 continue
 
-            chats[index].commit_chunk(content, model=True)
-            chats[not index].commit_chunk(content)
+            chats[index].commit_output_message(content)
+            chats[not index].commit_input_message(content)
 
             run_text(content, model_styles[index])
             print()
@@ -97,7 +97,7 @@ def main():
                                model_style=model_styles[index],
                                event_style=event_styles[index])
 
-            chats[not index].commit_chunk(content)
+            chats[not index].commit_input_message(content)
             print()
 
             index = not index

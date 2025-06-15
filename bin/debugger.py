@@ -72,7 +72,7 @@ def main():
         run_chat(chat(), "<<< ", "::: ")
 
     # chat.commit_chunk("what is the exact text on first image? duplicate my message as is")
-    chat.commit_chunk("what is the exact text on first image?")
+    chat.commit_input_message("what is the exact text on first image?")
 
     run_chat(chat(), "<<< ", "::: ")
 

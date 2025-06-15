@@ -29,7 +29,7 @@ def main():
         if not content:
             continue
 
-        chat.commit_chunk(content)
+        chat.commit_input_message(content)
 
         print()
         run_chat(chat(),
