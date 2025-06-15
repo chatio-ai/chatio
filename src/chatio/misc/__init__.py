@@ -56,8 +56,11 @@ def init_config(model_name: str | None = None, env_name: str | None = None) -> C
     return ChatConfig(vendor_name, model_name, ApiConfig(**vendor_json))
 
 
-def build_chat(*args, **kwargs) -> ChatBase:
-    config: ChatConfig | None = kwargs.pop('config')
+def build_chat(
+        system: str | None = None,
+        messages: list[str] | None = None,
+        tools: ToolConfig | None = None,
+        config: ChatConfig | None = None) -> ChatBase:
 
     if config is None:
         err_msg = "no config specified!"
@@ -68,11 +71,11 @@ def build_chat(*args, **kwargs) -> ChatBase:
 
     match config.config.api_cls:
         case 'claude':
-            return ChatBase(ClaudeApi(config), *args, **kwargs)
+            return ChatBase(ClaudeApi(config), system, messages, tools)
         case 'google':
-            return ChatBase(GoogleApi(config), *args, **kwargs)
+            return ChatBase(GoogleApi(config), system, messages, tools)
         case 'openai':
-            return ChatBase(OpenAIApi(config), *args, **kwargs)
+            return ChatBase(OpenAIApi(config), system, messages, tools)
         case _:
             err_msg = f"api_cls not supported: {config.config.api_cls}"
             raise RuntimeError(err_msg)

@@ -31,8 +31,10 @@ def main():
 
         chat.commit_input_message(content)
 
+        chat.use_prediction_content(results)
+
         print()
-        results = run_chat(chat(prediction=results),
+        results = run_chat(chat(),
                            model_style=Style("<<< ", color=Style.BRIGHT_CYAN),
                            event_style=Style("::: ", color=Style.RESET),
                            tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))

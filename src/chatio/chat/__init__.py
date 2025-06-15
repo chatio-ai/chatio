@@ -156,13 +156,13 @@ class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDef
 
         self._commit_call_response(tool_call_id, tool_name, content)
 
-    def __call__(self, content: str | None = None, **kwargs) -> Iterator[dict]:
+    def __call__(self, content: str | None = None) -> Iterator[dict]:
         if content:
             self._commit_input_message(content)
 
-        return self._iterate(**kwargs)
+        return self._iterate()
 
-    def _iterate(self, **kwargs) -> Iterator[dict]:
+    def _iterate(self) -> Iterator[dict]:
         while self._ready:
             self._state.messages = self._api.format.chat_messages(self._state.messages)
 
@@ -171,7 +171,6 @@ class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDef
                 system=self._state.system,
                 messages=self._state.messages,
                 tools=self._state.tools,
-                **kwargs,
             )
 
             for event in events:
@@ -240,3 +239,6 @@ class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDef
 
     def update_system_message(self, message: str | None) -> None:
         self._update_system_message(message)
+
+    def use_prediction_content(self, content: str | None) -> None:
+        pass

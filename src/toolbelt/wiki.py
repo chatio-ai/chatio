@@ -1,4 +1,6 @@
 
+from collections.abc import Callable
+
 from typing import override
 
 from mediawiki import MediaWiki, MediaWikiPage
@@ -29,7 +31,7 @@ class WikiPageToolBase(ToolBase):
         self.wiki = wiki
         self.page_cache = page_cache
 
-    def _get_page(self, title=None) -> tuple[MediaWikiPage | None, bool | None]:
+    def _get_page(self, title: str | None) -> tuple[MediaWikiPage | None, bool | None]:
         cached = title in self.page_cache
         if not cached:
             title = self.wiki.suggest(title)
@@ -43,15 +45,12 @@ class WikiPageToolBase(ToolBase):
 
         return self.page_cache[title], cached
 
-    def _run_tool(self, page: MediaWikiPage, **kwargs):
-        raise NotImplementedError
-
-    def __call__(self, title=None, **kwargs):
+    def _page_do(self, title: str | None, func: Callable[[MediaWikiPage], object]):
         page, cached = self._get_page(title)
         yield {"title": title, "cache": cached}
 
         if page is not None:
-            yield from self._run_tool(page, **kwargs)
+            yield func(page)
 
 
 class WikiSearchTool(ToolBase):
@@ -103,8 +102,8 @@ class WikiContentTool(WikiPageToolBase):
             "required": ["title"],
         }
 
-    def _run_tool(self, page: MediaWikiPage, **_kwargs):
-        yield "\n".join(page.sections)
+    def __call__(self, title: str | None = None):
+        return self._page_do(title, lambda page: "\n".join(page.sections))
 
 
 class WikiSummaryTool(WikiPageToolBase):
@@ -128,8 +127,8 @@ class WikiSummaryTool(WikiPageToolBase):
             "required": ["title"],
         }
 
-    def _run_tool(self, page: MediaWikiPage, **_kwargs):
-        yield page.section(None)
+    def __call__(self, title: str | None = None):
+        return self._page_do(title, lambda page: page.section(None))
 
 
 class WikiSectionTool(WikiPageToolBase):
@@ -157,5 +156,5 @@ class WikiSectionTool(WikiPageToolBase):
             "required": ["title", "section"],
         }
 
-    def _run_tool(self, page: MediaWikiPage, section=None, **_kwargs):
-        yield page.section(section)
+    def __call__(self, title: str | None = None, section: str | None = None):
+        return self._page_do(title, lambda page: page.section(section))
