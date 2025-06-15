@@ -6,7 +6,11 @@ from collections.abc import Iterator
 from .events import ChatEvent
 
 
-class ChatClient[SystemContent, MessageContent, ToolDefinition](ABC):
+class ChatClient[
+    SystemContent,
+    MessageContent,
+    ToolDefinition,
+](ABC):
 
     @abstractmethod
     def iterate_model_events(self, model: str, system: SystemContent | None,

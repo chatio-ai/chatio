@@ -26,7 +26,11 @@ from .format import OpenAIFormat
 from .events import _pump
 
 
-class OpenAIClient(ChatClient[ChatCompletionMessageParam, ChatCompletionMessageParam, ChatCompletionToolParam]):
+class OpenAIClient(ChatClient[
+    ChatCompletionMessageParam,
+    ChatCompletionMessageParam,
+    ChatCompletionToolParam,
+]):
 
     def __init__(self, config: ApiConfig, params: OpenAIParams, format_: OpenAIFormat):
         self._client = OpenAI(

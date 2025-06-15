@@ -25,7 +25,11 @@ from .params import GoogleParams
 from .events import _pump
 
 
-class GoogleClient(ChatClient[ContentDict, ContentDict, ToolUnionDict]):
+class GoogleClient(ChatClient[
+    ContentDict,
+    ContentDict,
+    ToolUnionDict,
+]):
 
     def __init__(self, config: ApiConfig, params: GoogleParams):
         self._client = Client(

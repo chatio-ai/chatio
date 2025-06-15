@@ -17,7 +17,15 @@ from .format import ClaudeFormat
 from .client import ClaudeClient
 
 
-class ClaudeApi(ChatApi[TextBlockParam, MessageParam, TextBlockParam, ImageBlockParam, ToolParam, ToolParam]):
+class ClaudeApi(ChatApi[
+    TextBlockParam,
+    MessageParam,
+    TextBlockParam,
+    ImageBlockParam,
+    ToolParam,
+    ToolParam,
+]):
+
     def __init__(self, config: ChatConfig) -> None:
         super().__init__()
 

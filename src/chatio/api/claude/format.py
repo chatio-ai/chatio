@@ -22,7 +22,14 @@ type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
 type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
 
-class ClaudeFormat(ChatFormat[TextBlockParam, MessageParam, TextBlockParam, ImageBlockParam, ToolParam, ToolParam]):
+class ClaudeFormat(ChatFormat[
+    TextBlockParam,
+    MessageParam,
+    TextBlockParam,
+    ImageBlockParam,
+    ToolParam,
+    ToolParam,
+]):
 
     def __init__(self, params: ClaudeParams) -> None:
         self._params = params

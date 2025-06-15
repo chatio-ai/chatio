@@ -29,7 +29,12 @@ class ChatInfo:
 
 
 @dataclass
-class ChatState[SystemContent, MessageContent, ToolDefinition]:
+class ChatState[
+    SystemContent,
+    MessageContent,
+    ToolDefinition,
+]:
+
     system: SystemContent | None
     messages: list[MessageContent]
     tools: list[ToolDefinition] | None
@@ -41,22 +46,41 @@ class ChatState[SystemContent, MessageContent, ToolDefinition]:
         self.messages = []
         self.tools = None
         self.funcs = {}
+        self.tool_choice = None
 
 
-class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDefinitionBase, ToolDefinition]:
+class ChatBase[
+    SystemContent,
+    MessageContent,
+    TextMessage,
+    ImageMessage,
+    ToolDefinitionBase,
+    ToolDefinition,
+]:
+
     def __init__(
             self,
-            api: ChatApi[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDefinitionBase, ToolDefinition],
+            api: ChatApi[
+                SystemContent,
+                MessageContent,
+                TextMessage,
+                ImageMessage,
+                ToolDefinitionBase,
+                ToolDefinition,
+            ],
             system: str | None = None,
             messages: list[str] | None = None,
             tools: ToolConfig | None = None) -> None:
 
-        self._api: ChatApi[
-            SystemContent, MessageContent, TextMessage, ImageMessage, ToolDefinitionBase, ToolDefinition] = api
+        self._api = api
 
         self._ready = False
 
-        self._state: ChatState[SystemContent, MessageContent, ToolDefinition] = ChatState()
+        self._state: ChatState[
+            SystemContent,
+            MessageContent,
+            ToolDefinition,
+        ] = ChatState()
 
         self._update_system_message(system)
 

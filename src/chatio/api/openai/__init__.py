@@ -16,9 +16,15 @@ from .format import OpenAIFormat
 from .client import OpenAIClient
 
 
-class OpenAIApi(ChatApi[ChatCompletionMessageParam, ChatCompletionMessageParam,
-                        ChatCompletionContentPartTextParam, ChatCompletionContentPartImageParam,
-                        ChatCompletionToolParam, ChatCompletionToolParam]):
+class OpenAIApi(ChatApi[
+    ChatCompletionMessageParam,
+    ChatCompletionMessageParam,
+    ChatCompletionContentPartTextParam,
+    ChatCompletionContentPartImageParam,
+    ChatCompletionToolParam,
+    ChatCompletionToolParam,
+]):
+
     def __init__(self, config: ChatConfig):
         super().__init__()
 

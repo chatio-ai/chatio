@@ -16,7 +16,14 @@ from chatio.core.format import ChatFormat
 from .params import GoogleParams
 
 
-class GoogleFormat(ChatFormat[ContentDict, ContentDict, PartDict, PartDict, FunctionDeclarationDict, ToolUnionDict]):
+class GoogleFormat(ChatFormat[
+    ContentDict,
+    ContentDict,
+    PartDict,
+    PartDict,
+    FunctionDeclarationDict,
+    ToolUnionDict,
+]):
 
     def __init__(self, params: GoogleParams):
         self._params = params

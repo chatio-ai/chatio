@@ -16,7 +16,15 @@ from .format import GoogleFormat
 from .client import GoogleClient
 
 
-class GoogleApi(ChatApi[ContentDict, ContentDict, PartDict, PartDict, FunctionDeclarationDict, ToolUnionDict]):
+class GoogleApi(ChatApi[
+    ContentDict,
+    ContentDict,
+    PartDict,
+    PartDict,
+    FunctionDeclarationDict,
+    ToolUnionDict,
+]):
+
     def __init__(self, config: ChatConfig):
         super().__init__()
 

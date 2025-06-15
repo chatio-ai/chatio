@@ -27,7 +27,11 @@ from .params import ClaudeParams
 from .events import _pump
 
 
-class ClaudeClient(ChatClient[TextBlockParam, MessageParam, ToolParam]):
+class ClaudeClient(ChatClient[
+    TextBlockParam,
+    MessageParam,
+    ToolParam,
+]):
 
     @override
     def __init__(self, config: ApiConfig, params: ClaudeParams) -> None:

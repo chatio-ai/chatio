@@ -14,12 +14,18 @@ from chatio.core.format import ChatFormat
 from .params import OpenAIParams
 
 
-type _ChatCompletionContentPartParam = ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam
+type _ChatCompletionContentPartParam = \
+    ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam
 
 
-class OpenAIFormat(ChatFormat[ChatCompletionMessageParam, ChatCompletionMessageParam,
-                              ChatCompletionContentPartTextParam, ChatCompletionContentPartImageParam,
-                              ChatCompletionToolParam, ChatCompletionToolParam]):
+class OpenAIFormat(ChatFormat[
+    ChatCompletionMessageParam,
+    ChatCompletionMessageParam,
+    ChatCompletionContentPartTextParam,
+    ChatCompletionContentPartImageParam,
+    ChatCompletionToolParam,
+    ChatCompletionToolParam,
+]):
 
     def __init__(self, params: OpenAIParams):
         self._params = params

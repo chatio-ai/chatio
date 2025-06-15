@@ -2,7 +2,14 @@
 from abc import ABC, abstractmethod
 
 
-class ChatFormat[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDefinitionBase, ToolDefinition](ABC):
+class ChatFormat[
+    SystemContent,
+    MessageContent,
+    TextMessage,
+    ImageMessage,
+    ToolDefinitionBase,
+    ToolDefinition,
+](ABC):
 
     # messages
 
