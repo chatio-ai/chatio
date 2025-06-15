@@ -14,6 +14,7 @@ from anthropic.types import ToolResultBlockParam
 
 
 from chatio.core.format import ChatFormat
+from chatio.core.format import ToolChoice
 
 from .params import ClaudeParams
 
@@ -172,31 +173,32 @@ class ClaudeFormat(ChatFormat[
         return self._setup_tools_cache(tools)
 
     @override
-    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> ToolChoiceParam | None:
-        if not tool_choice:
+    def tool_selection(self, tool_choice: ToolChoice | None,
+                       tool_choice_name: str | None) -> ToolChoiceParam | None:
+        if tool_choice is None:
             return None
 
         if tool_choice_name is None:
             match tool_choice:
-                case 'any':
+                case ToolChoice.NONE:
                     return {
-                        "type": tool_choice,
+                        "type": 'none',
                     }
-                case 'auto':
+                case ToolChoice.AUTO:
                     return {
-                        "type": tool_choice,
+                        "type": 'auto',
                     }
-                case 'none':
+                case ToolChoice.ANY:
                     return {
-                        "type": tool_choice,
+                        "type": 'any',
                     }
                 case _:
                     raise ValueError
         else:
             match tool_choice:
-                case 'tool':
+                case ToolChoice.NAME:
                     return {
-                        "type": tool_choice,
+                        "type": 'tool',
                         "name": tool_choice_name,
                     }
                 case _:

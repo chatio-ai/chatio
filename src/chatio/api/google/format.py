@@ -13,6 +13,7 @@ from google.genai.types import FunctionCallingConfigMode
 
 
 from chatio.core.format import ChatFormat
+from chatio.core.format import ToolChoice
 
 from .params import GoogleParams
 
@@ -138,38 +139,39 @@ class GoogleFormat(ChatFormat[
         return tools_config
 
     @override
-    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> ToolConfigDict | None:
-        if not tool_choice:
+    def tool_selection(self, tool_choice: ToolChoice | None,
+                       tool_choice_name: str | None) -> ToolConfigDict | None:
+        if tool_choice is None:
             return None
 
         if tool_choice_name is None:
             match tool_choice:
-                case FunctionCallingConfigMode.NONE:
+                case ToolChoice.NONE:
                     return {
                         "function_calling_config": {
-                            "mode": tool_choice,
+                            "mode": FunctionCallingConfigMode.NONE,
                         },
                     }
-                case FunctionCallingConfigMode.AUTO:
+                case ToolChoice.AUTO:
                     return {
                         "function_calling_config": {
-                            "mode": tool_choice,
+                            "mode": FunctionCallingConfigMode.AUTO,
                         },
                     }
-                case FunctionCallingConfigMode.ANY:
+                case ToolChoice.ANY:
                     return {
                         "function_calling_config": {
-                            "mode": tool_choice,
+                            "mode": FunctionCallingConfigMode.ANY,
                         },
                     }
                 case _:
                     raise ValueError
         else:
             match tool_choice:
-                case FunctionCallingConfigMode.ANY:
+                case ToolChoice.NAME:
                     return {
                         "function_calling_config": {
-                            "mode": tool_choice,
+                            "mode": FunctionCallingConfigMode.ANY,
                             "allowed_function_names": [tool_choice_name],
                         },
                     }

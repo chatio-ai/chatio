@@ -1,5 +1,14 @@
 
+from enum import StrEnum
+
 from abc import ABC, abstractmethod
+
+
+class ToolChoice(StrEnum):
+    NONE = 'none'
+    AUTO = 'auto'
+    ANY = 'any'
+    NAME = 'name'
 
 
 class ChatFormat[
@@ -57,5 +66,5 @@ class ChatFormat[
         ...
 
     @abstractmethod
-    def tool_selection(self, tool_choice: str | None, tool_choice_name: str | None) -> ToolSelection | None:
+    def tool_selection(self, tool_choice: ToolChoice | None, tool_choice_name: str | None) -> ToolSelection | None:
         ...

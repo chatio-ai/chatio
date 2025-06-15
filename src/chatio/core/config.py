@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 
 from .format import ChatFormat
+from .format import ToolChoice
+
 from .client import ChatClient
 
 
@@ -33,7 +35,7 @@ class ChatConfig:
 @dataclass
 class ToolConfig:
     tools: dict | None = None
-    tool_choice: str | None = None
+    tool_choice: ToolChoice | None = None
     tool_choice_name: str | None = None
 
 

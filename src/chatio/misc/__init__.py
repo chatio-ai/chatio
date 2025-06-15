@@ -9,6 +9,8 @@ from chatio.core.config import ApiConfig
 from chatio.core.config import ChatConfig
 from chatio.core.config import ToolConfig
 
+from chatio.core.format import ToolChoice
+
 from chatio.api.claude import ClaudeApi
 from chatio.api.google import GoogleApi
 from chatio.api.openai import OpenAIApi
@@ -119,6 +121,6 @@ def default_tools(tools_name: str | None = None, env_name: str | None = None) ->
         case 'imgtool':
             return ToolConfig({
                 "run_imgdump": ImageDumpTool(),
-            }, tool_choice='name', tool_choice_name='run_imgdump')
+            }, tool_choice=ToolChoice.NAME, tool_choice_name='run_imgdump')
         case _:
             return ToolConfig()
