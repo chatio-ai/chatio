@@ -12,8 +12,9 @@ from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionToolParam
 
 
-from chatio.core.events import ChatEvent
 from chatio.core.client import ChatClient
+from chatio.core.kwargs import ChatKwargs
+from chatio.core.events import ChatEvent
 
 from chatio.core.config import ApiConfig
 
@@ -51,15 +52,14 @@ class OpenAIClient(ChatClient[
             prediction=prediction))
 
     @override
-    def iterate_model_events(self, model: str, system: ChatCompletionMessageParam | None,
-                             messages: list[ChatCompletionMessageParam],
-                             tools: list[ChatCompletionToolParam] | None) -> Iterator[ChatEvent]:
-        if system is not None:
-            messages = [system, *messages]
-
-        if tools is None:
-            tools = []
-
+    def iterate_model_events(
+        self, model: str,
+        state: ChatKwargs[
+            ChatCompletionMessageParam,
+            ChatCompletionMessageParam,
+            list[ChatCompletionToolParam],
+        ],
+    ) -> Iterator[ChatEvent]:
         # prediction = kwargs.pop('prediction', None)
         # if self._params.prediction and prediction:
         #     prediction = self._format.predict_content(prediction)
@@ -69,11 +69,17 @@ class OpenAIClient(ChatClient[
             model=model,
             max_completion_tokens=4096,
             stream_options={'include_usage': True},
-            tools=tools,
-            messages=messages))
+            tools=state.tools if state.tools is not None else [],
+            messages=[state.system, *state.messages] if state.system is not None else state.messages,
+        ))
 
     @override
-    def count_message_tokens(self, model: str, system: ChatCompletionMessageParam | None,
-                             messages: list[ChatCompletionMessageParam],
-                             tools: list[ChatCompletionToolParam] | None) -> int:
+    def count_message_tokens(
+        self, model: str,
+        state: ChatKwargs[
+            ChatCompletionMessageParam,
+            ChatCompletionMessageParam,
+            list[ChatCompletionToolParam],
+        ],
+    ) -> int:
         raise NotImplementedError

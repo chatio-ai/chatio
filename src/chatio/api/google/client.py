@@ -11,8 +11,9 @@ from google.genai.types import ContentDict
 from google.genai.types import ToolListUnionDict
 
 
-from chatio.core.events import ChatEvent
 from chatio.core.client import ChatClient
+from chatio.core.kwargs import ChatKwargs
+from chatio.core.events import ChatEvent
 
 from chatio.core.config import ApiConfig
 
@@ -39,20 +40,31 @@ class GoogleClient(ChatClient[
         self._params = params
 
     @override
-    def iterate_model_events(self, model: str, system: ContentDict | None,
-                             messages: list[ContentDict],
-                             tools: ToolListUnionDict | None) -> Iterator[ChatEvent]:
+    def iterate_model_events(
+        self, model: str,
+        state: ChatKwargs[
+            ContentDict,
+            ContentDict,
+            ToolListUnionDict,
+        ],
+    ) -> Iterator[ChatEvent]:
         return _pump(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
                 'max_output_tokens': 4096,
-                'tools': tools,
-                'system_instruction': system,
+                'tools': state.tools,
+                'system_instruction': state.system,
             },
-            contents=messages))
+            contents=state.messages,
+        ))
 
     @override
-    def count_message_tokens(self, model: str, system: ContentDict | None,
-                             messages: list[ContentDict],
-                             tools: ToolListUnionDict | None) -> int:
+    def count_message_tokens(
+        self, model: str,
+        state: ChatKwargs[
+            ContentDict,
+            ContentDict,
+            ToolListUnionDict,
+        ],
+    ) -> int:
         raise NotImplementedError

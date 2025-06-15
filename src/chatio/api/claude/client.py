@@ -14,8 +14,9 @@ from anthropic.types import ToolParam
 from anthropic.types import TextBlockParam
 
 
-from chatio.core.events import ChatEvent
 from chatio.core.client import ChatClient
+from chatio.core.kwargs import ChatKwargs
+from chatio.core.events import ChatEvent
 
 from chatio.core.config import ApiConfig
 
@@ -45,34 +46,38 @@ class ClaudeClient(ChatClient[
     # events
 
     @override
-    def iterate_model_events(self, model, system: TextBlockParam | None,
-                             messages: list[MessageParam],
-                             tools: list[ToolParam] | None) -> Iterator[ChatEvent]:
-        system_ = [system] if system is not None else []
-
-        if tools is None:
-            tools = []
+    def iterate_model_events(
+        self, model: str,
+        state: ChatKwargs[
+            TextBlockParam,
+            MessageParam,
+            list[ToolParam],
+        ],
+    ) -> Iterator[ChatEvent]:
 
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
-            tools=tools,
-            system=system_,
-            messages=messages))
+            tools=state.tools if state.tools is not None else [],
+            system=[state.system] if state.system is not None else [],
+            messages=state.messages,
+        ))
 
     # helpers
 
     @override
-    def count_message_tokens(self, model, system: TextBlockParam | None,
-                             messages: list[MessageParam],
-                             tools: list[ToolParam] | None) -> int:
-        system_ = [system] if system is not None else []
-
-        if tools is None:
-            tools = []
+    def count_message_tokens(
+        self, model: str,
+        state: ChatKwargs[
+            TextBlockParam,
+            MessageParam,
+            list[ToolParam],
+        ],
+    ) -> int:
 
         return self._client.messages.count_tokens(
             model=model,
-            tools=tools,
-            system=system_,
-            messages=messages).input_tokens
+            tools=state.tools if state.tools is not None else [],
+            system=[state.system] if state.system is not None else [],
+            messages=state.messages,
+        ).input_tokens

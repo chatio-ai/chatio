@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from os import PathLike
 from pathlib import Path
 
+from chatio.core.kwargs import ChatKwargs
 
 from chatio.core.config import ToolConfig
 from chatio.core.config import ChatApi
@@ -47,6 +48,13 @@ class ChatState[
         self.tools = None
         self.funcs = {}
         self.tool_choice = None
+
+    def __call__(self) -> ChatKwargs:
+        return ChatKwargs(
+            system=self.system,
+            messages=self.messages,
+            tools=self.tools,
+        )
 
 
 class ChatBase[
@@ -192,9 +200,7 @@ class ChatBase[
 
             events = self._api.client.iterate_model_events(
                 model=self._api.config.model,
-                system=self._state.system,
-                messages=self._state.messages,
-                tools=self._state.tools,
+                state=self._state(),
             )
 
             for event in events:
@@ -227,9 +233,7 @@ class ChatBase[
 
         return self._api.client.count_message_tokens(
             model=self._api.config.model,
-            system=self._state.system,
-            messages=self._state.messages,
-            tools=self._state.tools,
+            state=self._state(),
         )
 
     def info(self) -> ChatInfo:
