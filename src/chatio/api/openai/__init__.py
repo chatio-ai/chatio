@@ -134,7 +134,7 @@ class OpenAIChat(ChatBase):
         }
 
     @override
-    def _format_dev_message(self, content):
+    def _format_system_message(self, content):
         if not content:
             return [], []
 
@@ -144,14 +144,14 @@ class OpenAIChat(ChatBase):
         }]
 
     @override
-    def _format_user_message(self, content):
+    def _format_input_message(self, content):
         return {
             "role": "user",
             "content": self._as_contents(content),
         }
 
     @override
-    def _format_model_message(self, content):
+    def _format_output_message(self, content):
         return {
             "role": "assistant",
             "content": self._as_contents(content),

@@ -100,16 +100,16 @@ class ChatBase:
     # messages
 
     def _setup_messages(self, system, messages):
-        self._state.system, self._state.messages = self._format_dev_message(system)
+        self._state.system, self._state.messages = self._format_system_message(system)
 
         if messages is None:
             messages = []
 
         for index, message in enumerate(messages):
             if not index % 2:
-                self._commit_user_message(message)
+                self._commit_input_message(message)
             else:
-                self._commit_model_message(message)
+                self._commit_output_message(message)
 
     def _format_chat_messages(self, messages):
         return messages
@@ -128,21 +128,21 @@ class ChatBase:
     def _format_text_chunk(self, text):
         raise NotImplementedError
 
-    def _format_dev_message(self, content):
+    def _format_system_message(self, content):
         raise NotImplementedError
 
-    def _format_user_message(self, content):
+    def _format_input_message(self, content):
         raise NotImplementedError
 
-    def _commit_user_message(self, content):
-        self._state.messages.append(self._format_user_message(content))
+    def _commit_input_message(self, content):
+        self._state.messages.append(self._format_input_message(content))
         self._ready = True
 
-    def _format_model_message(self, content):
+    def _format_output_message(self, content):
         raise NotImplementedError
 
-    def _commit_model_message(self, content):
-        self._state.messages.append(self._format_model_message(content))
+    def _commit_output_message(self, content):
+        self._state.messages.append(self._format_output_message(content))
         self._ready = False
 
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
@@ -222,7 +222,7 @@ class ChatBase:
 
     def __call__(self, content=None, **kwargs) -> Iterator[dict]:
         if content:
-            self._commit_user_message(content)
+            self._commit_input_message(content)
 
         return self._iterate(**kwargs)
 
@@ -250,7 +250,7 @@ class ChatBase:
                         }
                     case DoneEvent(text):
                         if text:
-                            self._commit_model_message(text)
+                            self._commit_output_message(text)
                     case CallEvent(call_id, name, args, args_raw):
                         self._commit_tool_request(call_id, name, args_raw)
                         yield {
@@ -267,7 +267,7 @@ class ChatBase:
 
     def count_tokens(self, content=None):
         if content:
-            self._commit_user_message(content)
+            self._commit_input_message(content)
 
         return self._count_message_tokens(
             model=self._config.model,
@@ -309,12 +309,12 @@ class ChatBase:
             blob = base64.b64encode(data).decode()
             mimetype, _ = mimetypes.guess_type(filepath)
 
-            self._commit_user_message(filepath)
+            self._commit_input_message(filepath)
 
-            self._commit_user_message(self._format_image_blob(blob, mimetype))
+            self._commit_input_message(self._format_image_blob(blob, mimetype))
 
     def commit_chunk(self, chunk, *, model=False):
         if model:
-            self._commit_model_message(chunk)
+            self._commit_output_message(chunk)
         else:
-            self._commit_user_message(chunk)
+            self._commit_input_message(chunk)

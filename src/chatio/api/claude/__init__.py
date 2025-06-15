@@ -130,21 +130,21 @@ class ClaudeChat(ChatBase):
         }
 
     @override
-    def _format_dev_message(self, content):
+    def _format_system_message(self, content):
         if not content:
             return [], []
 
         return self._setup_cache(self._as_contents(content)), []
 
     @override
-    def _format_user_message(self, content):
+    def _format_input_message(self, content):
         return {
             "role": "user",
             "content": self._as_contents(content),
         }
 
     @override
-    def _format_model_message(self, content):
+    def _format_output_message(self, content):
         return {
             "role": "assistant",
             "content": self._as_contents(content),
@@ -152,7 +152,7 @@ class ClaudeChat(ChatBase):
 
     @override
     def _format_tool_request(self, tool_call_id, tool_name, tool_input):
-        return self._format_model_message({
+        return self._format_output_message({
             "type": "tool_use",
             "id": tool_call_id,
             "name": tool_name,
@@ -161,7 +161,7 @@ class ClaudeChat(ChatBase):
 
     @override
     def _format_tool_response(self, tool_call_id, tool_name, tool_output):
-        return self._format_user_message({
+        return self._format_input_message({
             "type": "tool_result",
             "tool_use_id": tool_call_id,
             "content": tool_output,
