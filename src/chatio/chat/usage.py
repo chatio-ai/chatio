@@ -3,62 +3,62 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ChatStatsInputData:
+class ChatUsageInputData:
     input_tokens: int = 0
     input_history_tokens: int = 0
     input_current_tokens: int = 0
 
 
 @dataclass
-class ChatStatsOutputData:
+class ChatUsageOutputData:
     output_tokens: int = 0
     predict_accepted: int = 0
     predict_rejected: int = 0
 
 
 @dataclass
-class ChatStatsCacheData:
+class ChatUsageCacheData:
     cache_missed: int = 0
     cache_written: int = 0
     cache_read: int = 0
 
 
 @dataclass
-class ChatStatsData:
-    input: ChatStatsInputData
-    output: ChatStatsOutputData
-    cache: ChatStatsCacheData
+class ChatUsageData:
+    input: ChatUsageInputData
+    output: ChatUsageOutputData
+    cache: ChatUsageCacheData
 
     def __init__(self, label):
-        self.input = ChatStatsInputData()
-        self.output = ChatStatsOutputData()
-        self.cache = ChatStatsCacheData()
+        self.input = ChatUsageInputData()
+        self.output = ChatUsageOutputData()
+        self.cache = ChatUsageCacheData()
         self.label = label
 
 
 @dataclass
-class ChatStats:
+class ChatUsage:
 
     def __init__(self):
-        self._delta = ChatStatsData("delta")
-        self._total = ChatStatsData("total")
+        self._delta = ChatUsageData("delta")
+        self._total = ChatUsageData("total")
 
     def __call__(self, usage):
         return self._process(usage)
 
-    def _mkevent(self, stats):
+    def _mkevent(self, usage):
         return {
-            "type": "token_stats",
-            "scope": stats.label,
-            "input_tokens": stats.input.input_tokens,
-            "input_history_tokens": stats.input.input_history_tokens,
-            "input_current_tokens": stats.input.input_current_tokens,
-            "output_tokens": stats.output.output_tokens,
-            "cache_missed": stats.cache.cache_missed,
-            "cache_written": stats.cache.cache_written,
-            "cache_read": stats.cache.cache_read,
-            "predict_accepted": stats.output.predict_accepted,
-            "predict_rejected": stats.output.predict_rejected,
+            "type": "token_usage",
+            "scope": usage.label,
+            "input_tokens": usage.input.input_tokens,
+            "input_history_tokens": usage.input.input_history_tokens,
+            "input_current_tokens": usage.input.input_current_tokens,
+            "output_tokens": usage.output.output_tokens,
+            "cache_missed": usage.cache.cache_missed,
+            "cache_written": usage.cache.cache_written,
+            "cache_read": usage.cache.cache_read,
+            "predict_accepted": usage.output.predict_accepted,
+            "predict_rejected": usage.output.predict_rejected,
         }
 
     def _process(self, usage):

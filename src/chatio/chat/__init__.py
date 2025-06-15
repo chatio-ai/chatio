@@ -16,7 +16,7 @@ from chatio.core.config import ChatApi
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
-from .stats import ChatStats
+from .usage import ChatUsage
 
 
 @dataclass
@@ -67,7 +67,7 @@ class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDef
 
         self._setup_tool_definitions(tools)
 
-        self._stats = ChatStats()
+        self._usage = ChatUsage()
 
     # messages
 
@@ -194,7 +194,7 @@ class ChatBase[SystemContent, MessageContent, TextMessage, ImageMessage, ToolDef
                         }
                         yield from self._process_tool_call(call_id, name, args)
                     case StatEvent():
-                        yield from self._stats(event)
+                        yield from self._usage(event)
 
     # helpers
 

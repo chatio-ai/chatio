@@ -54,8 +54,8 @@ def _run_chat_event(event: dict, style: Style, file=None):
 
     match etype:
 
-        case 'token_stats':
-            etext = f"token_stats: {event['scope']}:"
+        case 'token_usage':
+            etext = f"token_usage: {event['scope']}:"
             etext += f" in: {event['input_tokens']}"
             etext += f" (hist: {event['input_history_tokens']}"
             etext += f" curr: {event['input_current_tokens']})"
