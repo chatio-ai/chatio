@@ -11,7 +11,6 @@ from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
 from chatio.core.format import ChatFormat
-from chatio.core.format import ToolChoice
 
 from .params import OpenAIParams
 
@@ -168,29 +167,22 @@ class OpenAIFormat(ChatFormat[
         return tools
 
     @override
-    def tool_selection(self, tool_choice: ToolChoice | None,
-                       tool_choice_name: str | None) -> ChatCompletionToolChoiceOptionParam | None:
-        if tool_choice is None:
-            return None
+    def tool_selection_none(self) -> ChatCompletionToolChoiceOptionParam | None:
+        return 'none'
 
-        if tool_choice_name is None:
-            match tool_choice:
-                case ToolChoice.NONE:
-                    return 'none'
-                case ToolChoice.AUTO:
-                    return 'auto'
-                case ToolChoice.ANY:
-                    return 'required'
-                case _:
-                    raise ValueError
-        else:
-            match tool_choice:
-                case ToolChoice.NAME:
-                    return {
-                        "type": 'function',
-                        "function": {
-                            "name": tool_choice_name,
-                        },
-                    }
-                case _:
-                    raise ValueError
+    @override
+    def tool_selection_auto(self) -> ChatCompletionToolChoiceOptionParam | None:
+        return 'auto'
+
+    @override
+    def tool_selection_any(self) -> ChatCompletionToolChoiceOptionParam | None:
+        return 'required'
+
+    @override
+    def tool_selection_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam | None:
+        return {
+            "type": 'function',
+            "function": {
+                "name": tool_name,
+            },
+        }

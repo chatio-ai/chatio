@@ -13,7 +13,6 @@ from google.genai.types import FunctionCallingConfigMode
 
 
 from chatio.core.format import ChatFormat
-from chatio.core.format import ToolChoice
 
 from .params import GoogleParams
 
@@ -139,41 +138,34 @@ class GoogleFormat(ChatFormat[
         return tools_config
 
     @override
-    def tool_selection(self, tool_choice: ToolChoice | None,
-                       tool_choice_name: str | None) -> ToolConfigDict | None:
-        if tool_choice is None:
-            return None
+    def tool_selection_none(self) -> ToolConfigDict | None:
+        return {
+            "function_calling_config": {
+                "mode": FunctionCallingConfigMode.NONE,
+            },
+        }
 
-        if tool_choice_name is None:
-            match tool_choice:
-                case ToolChoice.NONE:
-                    return {
-                        "function_calling_config": {
-                            "mode": FunctionCallingConfigMode.NONE,
-                        },
-                    }
-                case ToolChoice.AUTO:
-                    return {
-                        "function_calling_config": {
-                            "mode": FunctionCallingConfigMode.AUTO,
-                        },
-                    }
-                case ToolChoice.ANY:
-                    return {
-                        "function_calling_config": {
-                            "mode": FunctionCallingConfigMode.ANY,
-                        },
-                    }
-                case _:
-                    raise ValueError
-        else:
-            match tool_choice:
-                case ToolChoice.NAME:
-                    return {
-                        "function_calling_config": {
-                            "mode": FunctionCallingConfigMode.ANY,
-                            "allowed_function_names": [tool_choice_name],
-                        },
-                    }
-                case _:
-                    raise ValueError
+    @override
+    def tool_selection_auto(self) -> ToolConfigDict | None:
+        return {
+            "function_calling_config": {
+                "mode": FunctionCallingConfigMode.AUTO,
+            },
+        }
+
+    @override
+    def tool_selection_any(self) -> ToolConfigDict | None:
+        return {
+            "function_calling_config": {
+                "mode": FunctionCallingConfigMode.ANY,
+            },
+        }
+
+    @override
+    def tool_selection_name(self, tool_name: str) -> ToolConfigDict | None:
+        return {
+            "function_calling_config": {
+                "mode": FunctionCallingConfigMode.ANY,
+                "allowed_function_names": [tool_name],
+            },
+        }

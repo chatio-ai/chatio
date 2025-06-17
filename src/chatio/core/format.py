@@ -66,5 +66,17 @@ class ChatFormat[
         ...
 
     @abstractmethod
-    def tool_selection(self, tool_choice: ToolChoice | None, tool_choice_name: str | None) -> ToolSelection | None:
+    def tool_selection_none(self) -> ToolSelection | None:
+        ...
+
+    @abstractmethod
+    def tool_selection_auto(self) -> ToolSelection | None:
+        ...
+
+    @abstractmethod
+    def tool_selection_any(self) -> ToolSelection | None:
+        ...
+
+    @abstractmethod
+    def tool_selection_name(self, tool_name: str) -> ToolSelection | None:
         ...
