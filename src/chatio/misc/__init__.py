@@ -5,10 +5,12 @@ import logging
 
 from pathlib import Path
 
-from chatio.core.config import ApiConfig
 from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
+
+from chatio.core.config import ApiTuning
+from chatio.core.config import ApiConfig
 
 from chatio.api.claude.config import ClaudeTuning
 from chatio.api.claude.config import ClaudeConfig
@@ -81,26 +83,29 @@ def build_chat(
         err_msg = "no model specified!"
         raise RuntimeError(err_msg)
 
-    vendor_data = vendor_json(model.vendor)
-    vendor_data_api: dict = vendor_data.setdefault('options', {})
+    config_data = vendor_json(model.vendor)
+    tuning_data = config_data.pop('options', {})
 
-    config: ApiConfig = ApiConfig(**vendor_data)
+    api_class = config_data.get('api_cls')
 
-    match config.api_cls:
+    tuning: ApiTuning
+    config: ApiConfig
+
+    match api_class:
         case 'claude':
-            vendor_data['options'] = ClaudeTuning(**vendor_data_api)
-            config = ClaudeConfig(**vendor_data)
+            tuning = ClaudeTuning(**tuning_data)
+            config = ClaudeConfig(**config_data, options=tuning)
             return ChatBase(ClaudeApi(config), model, state, tools)
         case 'google':
-            vendor_data['options'] = GoogleTuning(**vendor_data_api)
-            config = GoogleConfig(**vendor_data)
+            tuning = GoogleTuning(**tuning_data)
+            config = GoogleConfig(**config_data, options=tuning)
             return ChatBase(GoogleApi(config), model, state, tools)
         case 'openai':
-            vendor_data['options'] = OpenAITuning(**vendor_data_api)
-            config = OpenAIConfig(**vendor_data)
+            tuning = OpenAITuning(**tuning_data)
+            config = OpenAIConfig(**config_data, options=tuning)
             return ChatBase(OpenAIApi(config), model, state, tools)
         case _:
-            err_msg = f"api cls not supported: {config.api_cls}"
+            err_msg = f"api class not supported: {api_class}"
             raise RuntimeError(err_msg)
 
 
