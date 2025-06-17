@@ -70,6 +70,21 @@ def vendor_json(vendor_name: str) -> dict:
     return {k: v for k, v in vendor_data.items() if not k.startswith('_')}
 
 
+def parse_opts(api_options: str | None = None, env_name: str | None = None) -> dict:
+    if api_options is not None and env_name is not None:
+        raise ValueError
+
+    if api_options is None:
+        if env_name is None:
+            env_name = 'CHATIO_API_OPTIONS'
+
+        api_options = os.environ.get(env_name)
+        if not api_options:
+            return {}
+
+    return json.loads(api_options)
+
+
 def build_chat(
     model: ModelConfig,
     state: StateConfig | None = None,
@@ -84,7 +99,7 @@ def build_chat(
         raise RuntimeError(err_msg)
 
     config_data = vendor_json(model.vendor)
-    options_data = config_data.pop('options', {})
+    options_data = config_data.pop('options', {}) | parse_opts()
 
     api_class = config_data.get('api_cls')
 
