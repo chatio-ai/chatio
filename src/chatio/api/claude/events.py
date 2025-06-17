@@ -21,9 +21,10 @@ def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:
             if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
                 yield TextEvent(chunk.delta.text)
 
-        yield DoneEvent(stream.get_final_text())
-
         final = stream.get_final_message()
+
+        final_content = "".join(block.text for block in final.content if block.type == 'text')
+        yield DoneEvent(final_content)
 
         usage = final.usage
         usage.input_tokens += usage.cache_creation_input_tokens or 0
