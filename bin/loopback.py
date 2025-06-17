@@ -8,6 +8,7 @@ from chatio.cli.style import Style
 
 from chatio.misc import setup_logging
 from chatio.misc import init_model
+from chatio.misc import init_state
 from chatio.misc import build_chat
 
 
@@ -64,8 +65,8 @@ def main():
         run_text(response_prompt, prompt_styles[True])
 
     chats = [
-        build_chat(request_prompt, messages=["."], model=model),
-        build_chat(response_prompt, messages=None, model=model),
+        build_chat(state=init_state(request_prompt, ["."]), model=model),
+        build_chat(state=init_state(response_prompt, None), model=model),
     ]
 
     index = False

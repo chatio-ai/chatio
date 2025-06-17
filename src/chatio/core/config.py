@@ -29,7 +29,13 @@ class ModelConfig:
 
 
 @dataclass
-class ToolConfig:
+class StateConfig:
+    system: str | None = None
+    messages: list[str] | None = None
+
+
+@dataclass
+class ToolsConfig:
     tools: dict | None = None
     tool_choice_mode: str | None = None
     tool_choice_name: str | None = None
@@ -48,7 +54,7 @@ class ApiHelper[
 
     @property
     @abstractmethod
-    def config(self) -> ModelConfig:
+    def config(self) -> ApiConfig:
         ...
 
     @property

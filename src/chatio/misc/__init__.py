@@ -7,7 +7,8 @@ from pathlib import Path
 
 from chatio.core.config import ApiConfig
 from chatio.core.config import ModelConfig
-from chatio.core.config import ToolConfig
+from chatio.core.config import StateConfig
+from chatio.core.config import ToolsConfig
 
 from chatio.api.claude.config import ClaudeTuning
 from chatio.api.claude.config import ClaudeConfig
@@ -68,10 +69,10 @@ def vendor_json(vendor_name: str) -> dict:
 
 
 def build_chat(
-        system: str | None = None,
-        messages: list[str] | None = None,
-        tools: ToolConfig | None = None,
-        model: ModelConfig | None = None) -> ChatBase:
+    model: ModelConfig,
+    state: StateConfig | None = None,
+    tools: ToolsConfig | None = None,
+) -> ChatBase:
 
     if model is None:
         err_msg = "no model specified!"
@@ -89,21 +90,25 @@ def build_chat(
         case 'claude':
             vendor_data['options'] = ClaudeTuning(**vendor_data_api)
             config = ClaudeConfig(**vendor_data)
-            return ChatBase(ClaudeApi(model, config), system, messages, tools)
+            return ChatBase(ClaudeApi(config), model, state, tools)
         case 'google':
             vendor_data['options'] = GoogleTuning(**vendor_data_api)
             config = GoogleConfig(**vendor_data)
-            return ChatBase(GoogleApi(model, config), system, messages, tools)
+            return ChatBase(GoogleApi(config), model, state, tools)
         case 'openai':
             vendor_data['options'] = OpenAITuning(**vendor_data_api)
             config = OpenAIConfig(**vendor_data)
-            return ChatBase(OpenAIApi(model, config), system, messages, tools)
+            return ChatBase(OpenAIApi(config), model, state, tools)
         case _:
             err_msg = f"api cls not supported: {config.api_cls}"
             raise RuntimeError(err_msg)
 
 
-def default_tools(tools_name: str | None = None, env_name: str | None = None) -> ToolConfig:
+def init_state(system: str | None = None, messages: list[str] | None = None) -> StateConfig:
+    return StateConfig(system, messages)
+
+
+def init_tools(tools_name: str | None = None, env_name: str | None = None) -> ToolsConfig:
     if tools_name is not None and env_name is not None:
         raise ValueError
 
@@ -137,7 +142,7 @@ def default_tools(tools_name: str | None = None, env_name: str | None = None) ->
         case 'llmtool':
             llm = build_chat(
                 model=init_model(env_name='CHATIO_NESTED_MODEL_NAME'),
-                tools=default_tools(env_name='CHATIO_NESTED_TOOLS_NAME'))
+                tools=init_tools(env_name='CHATIO_NESTED_TOOLS_NAME'))
 
             tools = {
                 "llm_message": LlmDialogTool(llm),
@@ -147,4 +152,4 @@ def default_tools(tools_name: str | None = None, env_name: str | None = None) ->
                 "run_imgdump": ImageDumpTool(),
             }
 
-    return ToolConfig(tools, tool_choice_mode=tool_choice_mode, tool_choice_name=tool_choice_name)
+    return ToolsConfig(tools, tool_choice_mode=tool_choice_mode, tool_choice_name=tool_choice_name)

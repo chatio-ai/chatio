@@ -10,7 +10,6 @@ from anthropic.types import ImageBlockParam
 
 
 from chatio.core.config import ApiHelper
-from chatio.core.config import ModelConfig
 
 
 from .config import ClaudeConfig
@@ -29,18 +28,16 @@ class ClaudeApi(ApiHelper[
     ToolChoiceParam,
 ]):
 
-    def __init__(self, model: ModelConfig, config: ClaudeConfig) -> None:
-        self._model = model
-
-        # params = ClaudeParams(**config.config.api if config.config.api else {})
+    def __init__(self, config: ClaudeConfig) -> None:
+        self._config = config
 
         self._format = ClaudeFormat(config)
         self._client = ClaudeClient(config)
 
     @property
     @override
-    def config(self) -> ModelConfig:
-        return self._model
+    def config(self) -> ClaudeConfig:
+        return self._config
 
     @property
     @override

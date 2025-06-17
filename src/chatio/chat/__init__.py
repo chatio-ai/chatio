@@ -9,10 +9,12 @@ from dataclasses import dataclass
 from os import PathLike
 from pathlib import Path
 
-from chatio.core.params import ApiParams
+from chatio.core.config import ModelConfig
+from chatio.core.config import StateConfig
+from chatio.core.config import ToolsConfig
 
-from chatio.core.config import ToolConfig
 from chatio.core.config import ApiHelper
+from chatio.core.params import ApiParams
 
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
@@ -86,13 +88,15 @@ class ChatBase[
                 ToolDefinitions,
                 ToolSelection,
             ],
-            system: str | None = None,
-            messages: list[str] | None = None,
-            tools: ToolConfig | None = None) -> None:
+            model: ModelConfig,
+            state: StateConfig | None = None,
+            tools: ToolsConfig | None = None) -> None:
 
         self._api = api
 
         self._ready = False
+
+        self._model = model
 
         self._state: ChatState[
             SystemContent,
@@ -102,12 +106,9 @@ class ChatBase[
             ToolSelection,
         ] = ChatState()
 
-        self._update_system_message(system)
+        self._update_system_message(state.system if state is not None else None)
 
-        self._setup_message_history(messages)
-
-        if tools is None:
-            tools = ToolConfig()
+        self._setup_message_history(state.messages if state is not None else None)
 
         self._setup_tool_definitions(tools)
 
@@ -163,7 +164,10 @@ class ChatBase[
 
     # functions
 
-    def _setup_tool_definitions(self, tools: ToolConfig) -> None:
+    def _setup_tool_definitions(self, tools: ToolsConfig | None) -> None:
+        if tools is None:
+            tools = ToolsConfig()
+
         _tool_definitions = []
         self._state.funcs = {}
 
@@ -185,7 +189,7 @@ class ChatBase[
 
         self._state.tool_choice = self._setup_tool_selection(tools)
 
-    def _setup_tool_selection(self, tools: ToolConfig):
+    def _setup_tool_selection(self, tools: ToolsConfig):
         if not tools.tool_choice_mode and not tools.tool_choice_name:
             return None
 
@@ -247,7 +251,7 @@ class ChatBase[
             self._state.messages = self._api.format.chat_messages(self._state.messages)
 
             events = self._api.client.iterate_model_events(
-                model=self._api.config.model,
+                model=self._model.model,
                 params=self._state(),
             )
 
@@ -280,14 +284,14 @@ class ChatBase[
             self._commit_input_message(content)
 
         return self._api.client.count_message_tokens(
-            model=self._api.config.model,
+            model=self._model.model,
             params=self._state(),
         )
 
     def info(self) -> ChatInfo:
         return ChatInfo(
-            self._api.config.vendor,
-            self._api.config.model,
+            self._model.vendor,
+            self._model.model,
             len(self._state.funcs),
             bool(self._state.system),
             len(self._state.messages),

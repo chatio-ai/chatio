@@ -5,8 +5,8 @@ import sys
 from chatio.cli.stdio import run_info, run_chat
 
 from chatio.misc import setup_logging
-from chatio.misc import default_tools
 from chatio.misc import init_model
+from chatio.misc import init_tools
 from chatio.misc import build_chat
 
 
@@ -14,7 +14,7 @@ setup_logging()
 
 
 def main():
-    chat = build_chat(model=init_model(), tools=default_tools(tools_name='imgtool'))
+    chat = build_chat(model=init_model(), tools=init_tools(tools_name='imgtool'))
 
     filenames = sys.argv[1:]
     if not filenames:
