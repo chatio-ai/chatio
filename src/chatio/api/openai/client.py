@@ -10,6 +10,7 @@ from openai import OpenAI
 from openai import NOT_GIVEN
 
 from openai.types.chat import ChatCompletionMessageParam
+from openai.types.chat import ChatCompletionPredictionContentParam
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
@@ -32,6 +33,7 @@ from .events import _pump
 class OpenAIClient(ChatClient[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
+    ChatCompletionPredictionContentParam,
     list[ChatCompletionToolParam],
     ChatCompletionToolChoiceOptionParam,
 ]):
@@ -47,35 +49,25 @@ class OpenAIClient(ChatClient[
 
     # events
 
-    def _iterate_model_events_prediction(self, model, _system, messages, prediction) -> Iterator[ChatEvent]:
-        return _pump(self._client.beta.chat.completions.stream(
-            model=model,
-            stream_options={'include_usage': True},
-            messages=messages,
-            prediction=prediction))
-
     @override
     def iterate_model_events(
         self, model: str,
         state: ChatKwargs[
             ChatCompletionMessageParam,
             ChatCompletionMessageParam,
+            ChatCompletionPredictionContentParam,
             list[ChatCompletionToolParam],
             ChatCompletionToolChoiceOptionParam,
         ],
     ) -> Iterator[ChatEvent]:
-        # prediction = kwargs.pop('prediction', None)
-        # if self._params.prediction and prediction:
-        #     prediction = self._format.predict_content(prediction)
-        #     return self._iterate_model_events_prediction(model, system, messages, prediction)
-
         return _pump(self._client.beta.chat.completions.stream(
             model=model,
-            max_completion_tokens=4096,
+            max_completion_tokens=4096 if state.prediction is None else NOT_GIVEN,
             stream_options={'include_usage': True},
-            tools=state.tools if state.tools is not None else NOT_GIVEN,
+            tools=state.tools if state.tools is not None and state.prediction is None else NOT_GIVEN,
             messages=[state.system, *state.messages] if state.system is not None else state.messages,
             tool_choice=state.tool_choice if state.tool_choice is not None else NOT_GIVEN,
+            prediction=state.prediction if state.prediction is not None else NOT_GIVEN,
         ))
 
     @override
@@ -84,6 +76,7 @@ class OpenAIClient(ChatClient[
         state: ChatKwargs[
             ChatCompletionMessageParam,
             ChatCompletionMessageParam,
+            ChatCompletionPredictionContentParam,
             list[ChatCompletionToolParam],
             ChatCompletionToolChoiceOptionParam,
         ],

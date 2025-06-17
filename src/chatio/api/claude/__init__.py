@@ -21,6 +21,7 @@ from .client import ClaudeClient
 class ClaudeApi(ChatApi[
     TextBlockParam,
     MessageParam,
+    None,
     TextBlockParam,
     ImageBlockParam,
     ToolParam,

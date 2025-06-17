@@ -26,6 +26,7 @@ type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 class ClaudeFormat(ChatFormat[
     TextBlockParam,
     MessageParam,
+    None,
     TextBlockParam,
     ImageBlockParam,
     ToolParam,
@@ -119,6 +120,10 @@ class ClaudeFormat(ChatFormat[
             })
 
         return content
+
+    @override
+    def prediction_content(self, content: TextBlockParam) -> None:
+        pass
 
     def _input_content(self, content: _InputContentBlockParam) -> MessageParam:
         return {

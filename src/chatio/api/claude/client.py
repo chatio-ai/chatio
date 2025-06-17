@@ -33,6 +33,7 @@ from .events import _pump
 class ClaudeClient(ChatClient[
     TextBlockParam,
     MessageParam,
+    None,
     list[ToolParam],
     ToolChoiceParam,
 ]):
@@ -54,6 +55,7 @@ class ClaudeClient(ChatClient[
         state: ChatKwargs[
             TextBlockParam,
             MessageParam,
+            None,
             list[ToolParam],
             ToolChoiceParam,
         ],
@@ -76,6 +78,7 @@ class ClaudeClient(ChatClient[
         state: ChatKwargs[
             TextBlockParam,
             MessageParam,
+            None,
             list[ToolParam],
             ToolChoiceParam,
         ],

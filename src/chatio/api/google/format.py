@@ -20,6 +20,7 @@ from .params import GoogleParams
 class GoogleFormat(ChatFormat[
     ContentDict,
     ContentDict,
+    None,
     PartDict,
     PartDict,
     FunctionDeclarationDict,
@@ -56,6 +57,10 @@ class GoogleFormat(ChatFormat[
         return {
             "parts": [content],
         }
+
+    @override
+    def prediction_content(self, content: PartDict) -> None:
+        pass
 
     @override
     def input_content(self, content: PartDict) -> ContentDict:

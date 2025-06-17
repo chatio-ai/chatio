@@ -33,12 +33,14 @@ class ChatInfo:
 class ChatState[
     SystemContent,
     MessageContent,
+    PredictionContent,
     ToolDefinitions,
     ToolSelection,
 ]:
 
     system: SystemContent | None
     messages: list[MessageContent]
+    prediction: PredictionContent | None
     tools: ToolDefinitions | None
     funcs: dict[str, Callable]
     tool_choice: ToolSelection | None
@@ -46,6 +48,7 @@ class ChatState[
     def __init__(self):
         self.system = None
         self.messages = []
+        self.prediction = None
         self.tools = None
         self.funcs = {}
         self.tool_choice = None
@@ -54,6 +57,7 @@ class ChatState[
         return ChatKwargs(
             system=self.system,
             messages=self.messages,
+            prediction=self.prediction,
             tools=self.tools,
             tool_choice=self.tool_choice,
         )
@@ -62,6 +66,7 @@ class ChatState[
 class ChatBase[
     SystemContent,
     MessageContent,
+    PredictionContent,
     TextMessage,
     ImageMessage,
     ToolDefinition,
@@ -74,6 +79,7 @@ class ChatBase[
             api: ChatApi[
                 SystemContent,
                 MessageContent,
+                PredictionContent,
                 TextMessage,
                 ImageMessage,
                 ToolDefinition,
@@ -91,6 +97,7 @@ class ChatBase[
         self._state: ChatState[
             SystemContent,
             MessageContent,
+            PredictionContent,
             ToolDefinitions,
             ToolSelection,
         ] = ChatState()
@@ -146,6 +153,15 @@ class ChatBase[
                 self._commit_input_message(message)
             else:
                 self._commit_output_message(message)
+
+    def _use_prediction_content(self, message: str | None) -> None:
+        if message is None:
+            self._state.prediction = None
+            return
+
+        self._state.prediction = self._api.format.prediction_content(self._api.format.text_chunk(message))
+
+    # functions
 
     def _setup_tool_definitions(self, tools: ToolConfig) -> None:
         _tool_definitions = []
@@ -300,5 +316,5 @@ class ChatBase[
     def update_system_message(self, message: str | None) -> None:
         self._update_system_message(message)
 
-    def use_prediction_content(self, content: str | None) -> None:
-        pass
+    def use_prediction_content(self, message: str | None) -> None:
+        self._use_prediction_content(message)

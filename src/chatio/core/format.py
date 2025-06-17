@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 class ChatFormat[
     SystemContent,
     MessageContent,
+    PredictionContent,
     TextMessage,
     ImageMessage,
     ToolDefinition,
@@ -28,6 +29,10 @@ class ChatFormat[
 
     @abstractmethod
     def system_content(self, content: TextMessage) -> SystemContent:
+        ...
+
+    @abstractmethod
+    def prediction_content(self, content: TextMessage) -> PredictionContent | None:
         ...
 
     @abstractmethod

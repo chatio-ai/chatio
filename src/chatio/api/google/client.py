@@ -29,6 +29,7 @@ from .events import _pump
 class GoogleClient(ChatClient[
     ContentDict,
     ContentDict,
+    None,
     ToolListUnionDict,
     ToolConfigDict,
 ]):
@@ -47,6 +48,7 @@ class GoogleClient(ChatClient[
         state: ChatKwargs[
             ContentDict,
             ContentDict,
+            None,
             ToolListUnionDict,
             ToolConfigDict,
         ],
@@ -68,6 +70,7 @@ class GoogleClient(ChatClient[
         state: ChatKwargs[
             ContentDict,
             ContentDict,
+            None,
             ToolListUnionDict,
             ToolConfigDict,
         ],

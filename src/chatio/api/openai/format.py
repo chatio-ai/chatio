@@ -6,6 +6,7 @@ from typing import override
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
+from openai.types.chat import ChatCompletionPredictionContentParam
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
@@ -22,6 +23,7 @@ type _ChatCompletionContentPartParam = \
 class OpenAIFormat(ChatFormat[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
+    ChatCompletionPredictionContentParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     ChatCompletionToolParam,
@@ -73,6 +75,17 @@ class OpenAIFormat(ChatFormat[
         }
 
     @override
+    def prediction_content(self,
+                           content: ChatCompletionContentPartTextParam) -> ChatCompletionPredictionContentParam | None:
+        if not self._params.prediction:
+            return None
+
+        return {
+            "type": "content",
+            "content": [content],
+        }
+
+    @override
     def input_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
         if content['type'] != 'text':
             return {
@@ -119,12 +132,6 @@ class OpenAIFormat(ChatFormat[
             "role": "tool",
             "tool_call_id": tool_call_id,
             "content": tool_output,
-        }
-
-    def predict_content(self, prediction: str) -> dict:
-        return {
-            "type": "content",
-            "content": prediction,
         }
 
     # functions

@@ -20,6 +20,7 @@ from .client import GoogleClient
 class GoogleApi(ChatApi[
     ContentDict,
     ContentDict,
+    None,
     PartDict,
     PartDict,
     FunctionDeclarationDict,

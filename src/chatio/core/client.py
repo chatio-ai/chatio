@@ -10,6 +10,7 @@ from .events import ChatEvent
 class ChatClient[
     SystemContent,
     MessageContent,
+    PredictionContent,
     ToolDefinitions,
     ToolSelection,
 ](ABC):
@@ -20,6 +21,7 @@ class ChatClient[
         state: ChatKwargs[
             SystemContent,
             MessageContent,
+            PredictionContent,
             ToolDefinitions,
             ToolSelection,
         ],
@@ -32,6 +34,7 @@ class ChatClient[
         state: ChatKwargs[
             SystemContent,
             MessageContent,
+            PredictionContent,
             ToolDefinitions,
             ToolSelection,
         ],

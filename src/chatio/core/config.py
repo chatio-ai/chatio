@@ -41,6 +41,7 @@ class ToolConfig:
 class ChatApi[
     SystemContent,
     MessageContent,
+    PredictionContent,
     TextMessage,
     ImageMessage,
     ToolDefinition,
@@ -58,6 +59,7 @@ class ChatApi[
     def format(self) -> ChatFormat[
         SystemContent,
         MessageContent,
+        PredictionContent,
         TextMessage,
         ImageMessage,
         ToolDefinition,
@@ -71,6 +73,7 @@ class ChatApi[
     def client(self) -> ChatClient[
         SystemContent,
         MessageContent,
+        PredictionContent,
         ToolDefinitions,
         ToolSelection,
     ]:
