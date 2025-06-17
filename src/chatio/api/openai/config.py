@@ -1,16 +1,16 @@
 
 from dataclasses import dataclass
 
-from chatio.core.config import ApiTuning
+from chatio.core.config import ApiConfigOptions
 from chatio.core.config import ApiConfig
 
 
 @dataclass
-class OpenAITuning(ApiTuning):
+class OpenAIConfigOptions(ApiConfigOptions):
     prediction: bool = False
     legacy: bool = False
 
 
 @dataclass
-class OpenAIConfig(ApiConfig[OpenAITuning]):
+class OpenAIConfig(ApiConfig[OpenAIConfigOptions]):
     pass

@@ -9,13 +9,13 @@ from .client import ApiClient
 
 
 @dataclass
-class ApiTuning:
+class ApiConfigOptions:
     pass
 
 
 @dataclass
-class ApiConfig[ApiTuningT: ApiTuning]:
-    options: ApiTuningT
+class ApiConfig[ApiConfigOptionsT: ApiConfigOptions]:
+    options: ApiConfigOptionsT
 
     api_cls: str | None
     api_url: str | None = None

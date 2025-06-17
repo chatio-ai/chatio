@@ -9,18 +9,18 @@ from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
-from chatio.core.config import ApiTuning
+from chatio.core.config import ApiConfigOptions
 from chatio.core.config import ApiConfig
 
-from chatio.api.claude.config import ClaudeTuning
+from chatio.api.claude.config import ClaudeConfigOptions
 from chatio.api.claude.config import ClaudeConfig
 from chatio.api.claude import ClaudeApi
 
-from chatio.api.google.config import GoogleTuning
+from chatio.api.google.config import GoogleConfigOptions
 from chatio.api.google.config import GoogleConfig
 from chatio.api.google import GoogleApi
 
-from chatio.api.openai.config import OpenAITuning
+from chatio.api.openai.config import OpenAIConfigOptions
 from chatio.api.openai.config import OpenAIConfig
 from chatio.api.openai import OpenAIApi
 
@@ -84,25 +84,25 @@ def build_chat(
         raise RuntimeError(err_msg)
 
     config_data = vendor_json(model.vendor)
-    tuning_data = config_data.pop('options', {})
+    options_data = config_data.pop('options', {})
 
     api_class = config_data.get('api_cls')
 
-    tuning: ApiTuning
+    options: ApiConfigOptions
     config: ApiConfig
 
     match api_class:
         case 'claude':
-            tuning = ClaudeTuning(**tuning_data)
-            config = ClaudeConfig(**config_data, options=tuning)
+            options = ClaudeConfigOptions(**options_data)
+            config = ClaudeConfig(**config_data, options=options)
             return ChatBase(ClaudeApi(config), model, state, tools)
         case 'google':
-            tuning = GoogleTuning(**tuning_data)
-            config = GoogleConfig(**config_data, options=tuning)
+            options = GoogleConfigOptions(**options_data)
+            config = GoogleConfig(**config_data, options=options)
             return ChatBase(GoogleApi(config), model, state, tools)
         case 'openai':
-            tuning = OpenAITuning(**tuning_data)
-            config = OpenAIConfig(**config_data, options=tuning)
+            options = OpenAIConfigOptions(**options_data)
+            config = OpenAIConfig(**config_data, options=options)
             return ChatBase(OpenAIApi(config), model, state, tools)
         case _:
             err_msg = f"api class not supported: {api_class}"
