@@ -34,8 +34,8 @@ class GoogleClient(ApiClient[
 
     def __init__(self, config: ApiConfig):
         self._client = Client(
-            # base_url=config.url,
-            api_key=config.key,
+            # base_url=config.api_url,
+            api_key=config.api_key,
             http_options=HttpOptions(client_args=httpx_args()))
 
     @override

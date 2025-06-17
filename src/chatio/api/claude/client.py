@@ -40,8 +40,8 @@ class ClaudeClient(ApiClient[
     @override
     def __init__(self, config: ApiConfig) -> None:
         self._client = Anthropic(
-            base_url=config.url,
-            api_key=config.key,
+            base_url=config.api_url,
+            api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
     # events

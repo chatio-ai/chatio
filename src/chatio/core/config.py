@@ -15,11 +15,11 @@ class ApiTuning:
 
 @dataclass
 class ApiConfig[ApiTuningT: ApiTuning]:
-    api: ApiTuningT
+    options: ApiTuningT
 
-    cls: str | None
-    url: str | None = None
-    key: str | None = None
+    api_cls: str | None
+    api_url: str | None = None
+    api_key: str | None = None
 
 
 @dataclass

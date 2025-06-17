@@ -38,8 +38,8 @@ class OpenAIClient(ApiClient[
 
     def __init__(self, config: ApiConfig):
         self._client = OpenAI(
-            base_url=config.url,
-            api_key=config.key,
+            base_url=config.api_url,
+            api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
     # events

@@ -132,7 +132,7 @@ class GoogleFormat(ApiFormat[
                 "function_declarations": tools,
             })
 
-        if self._config.api.grounding:
+        if self._config.options.grounding:
             tools_config.append({
                 "google_search": {},
             })

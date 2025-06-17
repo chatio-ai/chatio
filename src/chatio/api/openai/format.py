@@ -63,7 +63,7 @@ class OpenAIFormat(ApiFormat[
         if content['type'] != 'text':
             raise TypeError
 
-        if self._config.api.legacy:
+        if self._config.options.legacy:
             return {
                 "role": "system",
                 "content": content['text'],
@@ -77,7 +77,7 @@ class OpenAIFormat(ApiFormat[
     @override
     def prediction_content(self,
                            content: ChatCompletionContentPartTextParam) -> ChatCompletionPredictionContentParam | None:
-        if not self._config.api.prediction:
+        if not self._config.options.prediction:
             return None
 
         return {
@@ -95,7 +95,7 @@ class OpenAIFormat(ApiFormat[
 
         return {
             "role": "user",
-            "content": content['text'] if self._config.api.legacy else [content],
+            "content": content['text'] if self._config.options.legacy else [content],
         }
 
     @override

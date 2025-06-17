@@ -38,7 +38,7 @@ class ClaudeFormat(ApiFormat[
         self._config = config
 
     def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
-        if self._config.api.use_cache and entries:
+        if self._config.options.use_cache and entries:
             entry = entries[-1]
 
             entry.update({
@@ -69,7 +69,7 @@ class ClaudeFormat(ApiFormat[
                     case _:
                         raise TypeError
 
-        if self._config.api.use_cache and last_entry is not None:
+        if self._config.options.use_cache and last_entry is not None:
             last_entry.update({
                 'cache_control': {
                     "type": "ephemeral",
@@ -112,7 +112,7 @@ class ClaudeFormat(ApiFormat[
 
     @override
     def system_content(self, content: TextBlockParam) -> TextBlockParam:
-        if self._config.api.use_cache:
+        if self._config.options.use_cache:
             content.update({
                 "cache_control": {
                     "type": "ephemeral",

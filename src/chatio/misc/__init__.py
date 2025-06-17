@@ -81,25 +81,25 @@ def build_chat(
         raise RuntimeError(err_msg)
 
     vendor_data = vendor_json(model.vendor)
-    vendor_data_api: dict = vendor_data.setdefault('api', {})
+    vendor_data_api: dict = vendor_data.setdefault('options', {})
 
     config: ApiConfig = ApiConfig(**vendor_data)
 
-    match config.cls:
+    match config.api_cls:
         case 'claude':
-            vendor_data['api'] = ClaudeTuning(**vendor_data_api)
+            vendor_data['options'] = ClaudeTuning(**vendor_data_api)
             config = ClaudeConfig(**vendor_data)
             return ChatBase(ClaudeApi(model, config), system, messages, tools)
         case 'google':
-            vendor_data['api'] = GoogleTuning(**vendor_data_api)
+            vendor_data['options'] = GoogleTuning(**vendor_data_api)
             config = GoogleConfig(**vendor_data)
             return ChatBase(GoogleApi(model, config), system, messages, tools)
         case 'openai':
-            vendor_data['api'] = OpenAITuning(**vendor_data_api)
+            vendor_data['options'] = OpenAITuning(**vendor_data_api)
             config = OpenAIConfig(**vendor_data)
             return ChatBase(OpenAIApi(model, config), system, messages, tools)
         case _:
-            err_msg = f"api cls not supported: {config.cls}"
+            err_msg = f"api cls not supported: {config.api_cls}"
             raise RuntimeError(err_msg)
 
 
