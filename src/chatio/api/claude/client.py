@@ -16,21 +16,20 @@ from anthropic.types import ToolChoiceParam
 from anthropic.types import TextBlockParam
 
 
-from chatio.core.client import ChatClient
-from chatio.core.kwargs import ChatKwargs
+from chatio.core.client import ApiClient
+from chatio.core.config import ApiConfig
+from chatio.core.params import ApiParams
+
 from chatio.core.events import ChatEvent
 
-from chatio.core.config import ApiConfig
 
 from chatio.api.helper.httpx import httpx_args
 
 
-from .params import ClaudeParams
-
 from .events import _pump
 
 
-class ClaudeClient(ChatClient[
+class ClaudeClient(ApiClient[
     TextBlockParam,
     MessageParam,
     None,
@@ -39,20 +38,18 @@ class ClaudeClient(ChatClient[
 ]):
 
     @override
-    def __init__(self, config: ApiConfig, params: ClaudeParams) -> None:
+    def __init__(self, config: ApiConfig) -> None:
         self._client = Anthropic(
-            base_url=config.api_url,
-            api_key=config.api_key,
+            base_url=config.url,
+            api_key=config.key,
             http_client=HttpxClient(**httpx_args()))
-
-        self._params = params
 
     # events
 
     @override
     def iterate_model_events(
         self, model: str,
-        state: ChatKwargs[
+        params: ApiParams[
             TextBlockParam,
             MessageParam,
             None,
@@ -64,10 +61,10 @@ class ClaudeClient(ChatClient[
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
-            tools=state.tools if state.tools is not None else NOT_GIVEN,
-            system=[state.system] if state.system is not None else NOT_GIVEN,
-            messages=state.messages,
-            tool_choice=state.tool_choice if state.tool_choice is not None else NOT_GIVEN,
+            tools=params.tools if params.tools is not None else NOT_GIVEN,
+            system=[params.system] if params.system is not None else NOT_GIVEN,
+            messages=params.messages,
+            tool_choice=params.tool_choice if params.tool_choice is not None else NOT_GIVEN,
         ))
 
     # helpers
@@ -75,7 +72,7 @@ class ClaudeClient(ChatClient[
     @override
     def count_message_tokens(
         self, model: str,
-        state: ChatKwargs[
+        params: ApiParams[
             TextBlockParam,
             MessageParam,
             None,
@@ -86,8 +83,8 @@ class ClaudeClient(ChatClient[
 
         return self._client.messages.count_tokens(
             model=model,
-            tools=state.tools if state.tools is not None else NOT_GIVEN,
-            system=[state.system] if state.system is not None else NOT_GIVEN,
-            messages=state.messages,
-            tool_choice=state.tool_choice if state.tool_choice is not None else NOT_GIVEN,
+            tools=params.tools if params.tools is not None else NOT_GIVEN,
+            system=[params.system] if params.system is not None else NOT_GIVEN,
+            messages=params.messages,
+            tool_choice=params.tool_choice if params.tool_choice is not None else NOT_GIVEN,
         ).input_tokens

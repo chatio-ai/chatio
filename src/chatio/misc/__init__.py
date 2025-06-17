@@ -6,11 +6,19 @@ import logging
 from pathlib import Path
 
 from chatio.core.config import ApiConfig
-from chatio.core.config import ChatConfig
+from chatio.core.config import ModelConfig
 from chatio.core.config import ToolConfig
 
+from chatio.api.claude.config import ClaudeTuning
+from chatio.api.claude.config import ClaudeConfig
 from chatio.api.claude import ClaudeApi
+
+from chatio.api.google.config import GoogleTuning
+from chatio.api.google.config import GoogleConfig
 from chatio.api.google import GoogleApi
+
+from chatio.api.openai.config import OpenAITuning
+from chatio.api.openai.config import OpenAIConfig
 from chatio.api.openai import OpenAIApi
 
 from chatio.chat import ChatBase
@@ -32,7 +40,7 @@ def setup_logging() -> None:
     logging.getLogger('chatio.api').setLevel(logging.INFO)
 
 
-def init_config(model_name: str | None = None, env_name: str | None = None) -> ChatConfig:
+def init_model(model_name: str | None = None, env_name: str | None = None) -> ModelConfig:
     if model_name is not None and env_name is not None:
         raise ValueError
 
@@ -46,38 +54,52 @@ def init_config(model_name: str | None = None, env_name: str | None = None) -> C
             raise RuntimeError(err_msg)
 
     vendor_name, _, model_name = model_name.partition('/')
-    vendor_conf = Path("./vendors").joinpath(vendor_name + ".json")
 
-    with vendor_conf.open() as vendorfp:
-        vendor_json = json.load(vendorfp)
+    return ModelConfig(vendor_name, model_name)
 
-    vendor_json = {k: v for k, v in vendor_json.items() if not k.startswith('_')}
 
-    return ChatConfig(vendor_name, model_name, ApiConfig(**vendor_json))
+def vendor_json(vendor_name: str) -> dict:
+    vendor_file = Path("./vendors").joinpath(vendor_name + ".json")
+
+    with vendor_file.open() as vendorfp:
+        vendor_data = json.load(vendorfp)
+
+    return {k: v for k, v in vendor_data.items() if not k.startswith('_')}
 
 
 def build_chat(
         system: str | None = None,
         messages: list[str] | None = None,
         tools: ToolConfig | None = None,
-        config: ChatConfig | None = None) -> ChatBase:
+        model: ModelConfig | None = None) -> ChatBase:
 
-    if config is None:
-        err_msg = "no config specified!"
+    if model is None:
+        err_msg = "no model specified!"
         raise RuntimeError
-    if config.model is None:
+    if model.model is None:
         err_msg = "no model specified!"
         raise RuntimeError(err_msg)
 
-    match config.config.api_cls:
+    vendor_data = vendor_json(model.vendor)
+    vendor_data_api: dict = vendor_data.setdefault('api', {})
+
+    config: ApiConfig = ApiConfig(**vendor_data)
+
+    match config.cls:
         case 'claude':
-            return ChatBase(ClaudeApi(config), system, messages, tools)
+            vendor_data['api'] = ClaudeTuning(**vendor_data_api)
+            config = ClaudeConfig(**vendor_data)
+            return ChatBase(ClaudeApi(model, config), system, messages, tools)
         case 'google':
-            return ChatBase(GoogleApi(config), system, messages, tools)
+            vendor_data['api'] = GoogleTuning(**vendor_data_api)
+            config = GoogleConfig(**vendor_data)
+            return ChatBase(GoogleApi(model, config), system, messages, tools)
         case 'openai':
-            return ChatBase(OpenAIApi(config), system, messages, tools)
+            vendor_data['api'] = OpenAITuning(**vendor_data_api)
+            config = OpenAIConfig(**vendor_data)
+            return ChatBase(OpenAIApi(model, config), system, messages, tools)
         case _:
-            err_msg = f"api_cls not supported: {config.config.api_cls}"
+            err_msg = f"api cls not supported: {config.cls}"
             raise RuntimeError(err_msg)
 
 
@@ -114,7 +136,7 @@ def default_tools(tools_name: str | None = None, env_name: str | None = None) ->
             }
         case 'llmtool':
             llm = build_chat(
-                config=init_config(env_name='CHATIO_NESTED_MODEL_NAME'),
+                model=init_model(env_name='CHATIO_NESTED_MODEL_NAME'),
                 tools=default_tools(env_name='CHATIO_NESTED_TOOLS_NAME'))
 
             tools = {

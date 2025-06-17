@@ -9,10 +9,10 @@ from dataclasses import dataclass
 from os import PathLike
 from pathlib import Path
 
-from chatio.core.kwargs import ChatKwargs
+from chatio.core.params import ApiParams
 
 from chatio.core.config import ToolConfig
-from chatio.core.config import ChatApi
+from chatio.core.config import ApiHelper
 
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
@@ -53,8 +53,8 @@ class ChatState[
         self.funcs = {}
         self.tool_choice = None
 
-    def __call__(self) -> ChatKwargs:
-        return ChatKwargs(
+    def __call__(self) -> ApiParams:
+        return ApiParams(
             system=self.system,
             messages=self.messages,
             prediction=self.prediction,
@@ -76,7 +76,7 @@ class ChatBase[
 
     def __init__(
             self,
-            api: ChatApi[
+            api: ApiHelper[
                 SystemContent,
                 MessageContent,
                 PredictionContent,
@@ -248,7 +248,7 @@ class ChatBase[
 
             events = self._api.client.iterate_model_events(
                 model=self._api.config.model,
-                state=self._state(),
+                params=self._state(),
             )
 
             for event in events:
@@ -281,7 +281,7 @@ class ChatBase[
 
         return self._api.client.count_message_tokens(
             model=self._api.config.model,
-            state=self._state(),
+            params=self._state(),
         )
 
     def info(self) -> ChatInfo:

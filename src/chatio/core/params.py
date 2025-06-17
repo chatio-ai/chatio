@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ChatKwargs[
+class ApiParams[
     SystemContent,
     MessageContent,
     PredictionContent,

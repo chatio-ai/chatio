@@ -11,16 +11,16 @@ from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
-from chatio.core.format import ChatFormat
+from chatio.core.format import ApiFormat
 
-from .params import OpenAIParams
+from .config import OpenAIConfig
 
 
 type _ChatCompletionContentPartParam = \
     ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam
 
 
-class OpenAIFormat(ChatFormat[
+class OpenAIFormat(ApiFormat[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
     ChatCompletionPredictionContentParam,
@@ -31,8 +31,8 @@ class OpenAIFormat(ChatFormat[
     ChatCompletionToolChoiceOptionParam,
 ]):
 
-    def __init__(self, params: OpenAIParams):
-        self._params = params
+    def __init__(self, config: OpenAIConfig):
+        self._config = config
 
     # messages
 
@@ -63,7 +63,7 @@ class OpenAIFormat(ChatFormat[
         if content['type'] != 'text':
             raise TypeError
 
-        if self._params.legacy:
+        if self._config.api.legacy:
             return {
                 "role": "system",
                 "content": content['text'],
@@ -77,7 +77,7 @@ class OpenAIFormat(ChatFormat[
     @override
     def prediction_content(self,
                            content: ChatCompletionContentPartTextParam) -> ChatCompletionPredictionContentParam | None:
-        if not self._params.prediction:
+        if not self._config.api.prediction:
             return None
 
         return {
@@ -95,7 +95,7 @@ class OpenAIFormat(ChatFormat[
 
         return {
             "role": "user",
-            "content": content['text'] if self._params.legacy else [content],
+            "content": content['text'] if self._config.api.legacy else [content],
         }
 
     @override

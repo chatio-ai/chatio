@@ -8,16 +8,16 @@ from google.genai.types import ToolListUnionDict
 from google.genai.types import FunctionDeclarationDict
 
 
-from chatio.core.config import ChatConfig
-from chatio.core.config import ChatApi
+from chatio.core.config import ApiHelper
+from chatio.core.config import ModelConfig
 
 
-from .params import GoogleParams
 from .format import GoogleFormat
 from .client import GoogleClient
+from .config import GoogleConfig
 
 
-class GoogleApi(ChatApi[
+class GoogleApi(ApiHelper[
     ContentDict,
     ContentDict,
     None,
@@ -28,20 +28,18 @@ class GoogleApi(ChatApi[
     ToolConfigDict,
 ]):
 
-    def __init__(self, config: ChatConfig):
-        super().__init__()
+    def __init__(self, model: ModelConfig, config: GoogleConfig):
+        self._model = model
 
-        self._config = config
+        # config = GoogleConfig(**config.config.api if config.config.api else {})
 
-        params = GoogleParams(**config.config.options if config.config.options else {})
-
-        self._format = GoogleFormat(params)
-        self._client = GoogleClient(config.config, params)
+        self._format = GoogleFormat(config)
+        self._client = GoogleClient(config)
 
     @property
     @override
-    def config(self) -> ChatConfig:
-        return self._config
+    def config(self) -> ModelConfig:
+        return self._model
 
     @property
     @override

@@ -3,11 +3,11 @@ from abc import ABC, abstractmethod
 
 from collections.abc import Iterator
 
-from .kwargs import ChatKwargs
+from .params import ApiParams
 from .events import ChatEvent
 
 
-class ChatClient[
+class ApiClient[
     SystemContent,
     MessageContent,
     PredictionContent,
@@ -18,7 +18,7 @@ class ChatClient[
     @abstractmethod
     def iterate_model_events(
         self, model: str,
-        state: ChatKwargs[
+        params: ApiParams[
             SystemContent,
             MessageContent,
             PredictionContent,
@@ -31,7 +31,7 @@ class ChatClient[
     @abstractmethod
     def count_message_tokens(
         self, model: str,
-        state: ChatKwargs[
+        params: ApiParams[
             SystemContent,
             MessageContent,
             PredictionContent,

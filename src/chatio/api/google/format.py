@@ -12,12 +12,12 @@ from google.genai.types import FunctionDeclarationDict
 from google.genai.types import FunctionCallingConfigMode
 
 
-from chatio.core.format import ChatFormat
+from chatio.core.format import ApiFormat
 
-from .params import GoogleParams
+from .config import GoogleConfig
 
 
-class GoogleFormat(ChatFormat[
+class GoogleFormat(ApiFormat[
     ContentDict,
     ContentDict,
     None,
@@ -28,8 +28,8 @@ class GoogleFormat(ChatFormat[
     ToolConfigDict,
 ]):
 
-    def __init__(self, params: GoogleParams):
-        self._params = params
+    def __init__(self, config: GoogleConfig):
+        self._config = config
 
     # messages
 
@@ -132,7 +132,7 @@ class GoogleFormat(ChatFormat[
                 "function_declarations": tools,
             })
 
-        if self._params.grounding:
+        if self._config.api.grounding:
             tools_config.append({
                 "google_search": {},
             })

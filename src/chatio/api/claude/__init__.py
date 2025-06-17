@@ -9,16 +9,16 @@ from anthropic.types import TextBlockParam
 from anthropic.types import ImageBlockParam
 
 
-from chatio.core.config import ChatConfig
-from chatio.core.config import ChatApi
+from chatio.core.config import ApiHelper
+from chatio.core.config import ModelConfig
 
 
-from .params import ClaudeParams
+from .config import ClaudeConfig
 from .format import ClaudeFormat
 from .client import ClaudeClient
 
 
-class ClaudeApi(ChatApi[
+class ClaudeApi(ApiHelper[
     TextBlockParam,
     MessageParam,
     None,
@@ -29,20 +29,18 @@ class ClaudeApi(ChatApi[
     ToolChoiceParam,
 ]):
 
-    def __init__(self, config: ChatConfig) -> None:
-        super().__init__()
+    def __init__(self, model: ModelConfig, config: ClaudeConfig) -> None:
+        self._model = model
 
-        self._config = config
+        # params = ClaudeParams(**config.config.api if config.config.api else {})
 
-        params = ClaudeParams(**config.config.options if config.config.options else {})
-
-        self._format = ClaudeFormat(params)
-        self._client = ClaudeClient(config.config, params)
+        self._format = ClaudeFormat(config)
+        self._client = ClaudeClient(config)
 
     @property
     @override
-    def config(self) -> ChatConfig:
-        return self._config
+    def config(self) -> ModelConfig:
+        return self._model
 
     @property
     @override

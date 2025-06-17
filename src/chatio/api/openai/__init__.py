@@ -9,16 +9,16 @@ from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
-from chatio.core.config import ChatConfig
-from chatio.core.config import ChatApi
+from chatio.core.config import ApiHelper
+from chatio.core.config import ModelConfig
 
 
-from .params import OpenAIParams
+from .config import OpenAIConfig
 from .format import OpenAIFormat
 from .client import OpenAIClient
 
 
-class OpenAIApi(ChatApi[
+class OpenAIApi(ApiHelper[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
     ChatCompletionPredictionContentParam,
@@ -29,20 +29,18 @@ class OpenAIApi(ChatApi[
     ChatCompletionToolChoiceOptionParam,
 ]):
 
-    def __init__(self, config: ChatConfig):
-        super().__init__()
+    def __init__(self, model: ModelConfig, config: OpenAIConfig):
+        self._model = model
 
-        self._config = config
+        # params = OpenAIParams(**config.config.options if config.config.options else {})
 
-        params = OpenAIParams(**config.config.options if config.config.options else {})
-
-        self._format = OpenAIFormat(params)
-        self._client = OpenAIClient(config.config, params, self._format)
+        self._format = OpenAIFormat(config)
+        self._client = OpenAIClient(config)
 
     @property
     @override
-    def config(self) -> ChatConfig:
-        return self._config
+    def config(self) -> ModelConfig:
+        return self._model
 
     @property
     @override

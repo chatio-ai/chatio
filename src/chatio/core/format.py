@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 
 
-class ChatFormat[
+class ApiFormat[
     SystemContent,
     MessageContent,
     PredictionContent,

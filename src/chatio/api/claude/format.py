@@ -13,9 +13,9 @@ from anthropic.types import ToolUseBlockParam
 from anthropic.types import ToolResultBlockParam
 
 
-from chatio.core.format import ChatFormat
+from chatio.core.format import ApiFormat
 
-from .params import ClaudeParams
+from .config import ClaudeConfig
 
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam
@@ -23,7 +23,7 @@ type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
 type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
 
-class ClaudeFormat(ChatFormat[
+class ClaudeFormat(ApiFormat[
     TextBlockParam,
     MessageParam,
     None,
@@ -34,11 +34,11 @@ class ClaudeFormat(ChatFormat[
     ToolChoiceParam,
 ]):
 
-    def __init__(self, params: ClaudeParams) -> None:
-        self._params = params
+    def __init__(self, config: ClaudeConfig) -> None:
+        self._config = config
 
     def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
-        if self._params.use_cache and entries:
+        if self._config.api.use_cache and entries:
             entry = entries[-1]
 
             entry.update({
@@ -69,7 +69,7 @@ class ClaudeFormat(ChatFormat[
                     case _:
                         raise TypeError
 
-        if self._params.use_cache and last_entry is not None:
+        if self._config.api.use_cache and last_entry is not None:
             last_entry.update({
                 'cache_control': {
                     "type": "ephemeral",
@@ -112,7 +112,7 @@ class ClaudeFormat(ChatFormat[
 
     @override
     def system_content(self, content: TextBlockParam) -> TextBlockParam:
-        if self._params.use_cache:
+        if self._config.api.use_cache:
             content.update({
                 "cache_control": {
                     "type": "ephemeral",

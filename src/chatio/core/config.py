@@ -4,31 +4,28 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 
-from .format import ChatFormat
-
-from .client import ChatClient
-
-
-@dataclass
-class ApiConfig:
-    api_cls: str | None
-    api_url: str | None = None
-    api_key: str | None = None
-
-    options: dict | None = None
+from .format import ApiFormat
+from .client import ApiClient
 
 
 @dataclass
-class ApiParams:
+class ApiTuning:
     pass
 
 
 @dataclass
-class ChatConfig:
+class ApiConfig[ApiTuningT: ApiTuning]:
+    api: ApiTuningT
+
+    cls: str | None
+    url: str | None = None
+    key: str | None = None
+
+
+@dataclass
+class ModelConfig:
     vendor: str
     model: str
-
-    config: ApiConfig
 
 
 @dataclass
@@ -38,7 +35,7 @@ class ToolConfig:
     tool_choice_name: str | None = None
 
 
-class ChatApi[
+class ApiHelper[
     SystemContent,
     MessageContent,
     PredictionContent,
@@ -51,12 +48,12 @@ class ChatApi[
 
     @property
     @abstractmethod
-    def config(self) -> ChatConfig:
+    def config(self) -> ModelConfig:
         ...
 
     @property
     @abstractmethod
-    def format(self) -> ChatFormat[
+    def format(self) -> ApiFormat[
         SystemContent,
         MessageContent,
         PredictionContent,
@@ -70,7 +67,7 @@ class ChatApi[
 
     @property
     @abstractmethod
-    def client(self) -> ChatClient[
+    def client(self) -> ApiClient[
         SystemContent,
         MessageContent,
         PredictionContent,
