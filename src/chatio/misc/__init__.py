@@ -9,8 +9,6 @@ from chatio.core.config import ApiConfig
 from chatio.core.config import ChatConfig
 from chatio.core.config import ToolConfig
 
-from chatio.core.format import ToolChoice
-
 from chatio.api.claude import ClaudeApi
 from chatio.api.google import GoogleApi
 from chatio.api.openai import OpenAIApi
@@ -95,11 +93,8 @@ def default_tools(tools_name: str | None = None, env_name: str | None = None) ->
         if not tools_name:
             tools_name = 'empty'
 
-    tools_name, _, tools_mode = tools_name.partition(':')
-    tools_choice_mode, _, tools_choice_name = tools_mode.partition(':')
-
-    tool_choice = ToolChoice(tools_choice_mode) if tools_choice_mode else None
-    tool_choice_name = tools_choice_name if tools_choice_name else None
+    tools_name, _, tool_choice = tools_name.partition(':')
+    tool_choice_mode, _, tool_choice_name = tool_choice.partition(':')
 
     tools: dict | None = None
     match tools_name:
@@ -130,4 +125,4 @@ def default_tools(tools_name: str | None = None, env_name: str | None = None) ->
                 "run_imgdump": ImageDumpTool(),
             }
 
-    return ToolConfig(tools, tool_choice=tool_choice, tool_choice_name=tool_choice_name)
+    return ToolConfig(tools, tool_choice_mode=tool_choice_mode, tool_choice_name=tool_choice_name)

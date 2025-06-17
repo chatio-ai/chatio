@@ -1,14 +1,5 @@
 
-from enum import StrEnum
-
 from abc import ABC, abstractmethod
-
-
-class ToolChoice(StrEnum):
-    NONE = 'none'
-    AUTO = 'auto'
-    ANY = 'any'
-    NAME = 'name'
 
 
 class ChatFormat[

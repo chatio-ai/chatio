@@ -12,7 +12,6 @@ from pathlib import Path
 from chatio.core.kwargs import ChatKwargs
 
 from chatio.core.config import ToolConfig
-from chatio.core.config import ToolChoice
 from chatio.core.config import ChatApi
 
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
@@ -171,19 +170,19 @@ class ChatBase[
         self._state.tool_choice = self._setup_tool_selection(tools)
 
     def _setup_tool_selection(self, tools: ToolConfig):
-        if tools.tool_choice is None and tools.tool_choice_name is None:
+        if not tools.tool_choice_mode and not tools.tool_choice_name:
             return None
 
         if not tools.tools:
             raise ValueError
 
-        if tools.tool_choice_name is None:
-            match tools.tool_choice:
-                case ToolChoice.NONE:
+        if not tools.tool_choice_name:
+            match tools.tool_choice_mode:
+                case 'none':
                     return self._api.format.tool_selection_none()
-                case ToolChoice.AUTO:
+                case 'auto':
                     return self._api.format.tool_selection_auto()
-                case ToolChoice.ANY:
+                case 'any':
                     return self._api.format.tool_selection_any()
                 case _:
                     raise ValueError
@@ -191,8 +190,8 @@ class ChatBase[
             if tools.tool_choice_name not in tools.tools:
                 raise ValueError
 
-            match tools.tool_choice:
-                case ToolChoice.NAME:
+            match tools.tool_choice_mode:
+                case 'name':
                     return self._api.format.tool_selection_name(tools.tool_choice_name)
                 case _:
                     raise ValueError
