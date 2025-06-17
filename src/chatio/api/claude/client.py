@@ -7,6 +7,7 @@ from typing import override
 from httpx import Client as HttpxClient
 
 from anthropic import Anthropic
+from anthropic import NOT_GIVEN
 
 from anthropic.types import MessageParam
 
@@ -58,8 +59,8 @@ class ClaudeClient(ChatClient[
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
-            tools=state.tools if state.tools is not None else [],
-            system=[state.system] if state.system is not None else [],
+            tools=state.tools if state.tools is not None else NOT_GIVEN,
+            system=[state.system] if state.system is not None else NOT_GIVEN,
             messages=state.messages,
         ))
 
@@ -77,7 +78,7 @@ class ClaudeClient(ChatClient[
 
         return self._client.messages.count_tokens(
             model=model,
-            tools=state.tools if state.tools is not None else [],
-            system=[state.system] if state.system is not None else [],
+            tools=state.tools if state.tools is not None else NOT_GIVEN,
+            system=[state.system] if state.system is not None else NOT_GIVEN,
             messages=state.messages,
         ).input_tokens

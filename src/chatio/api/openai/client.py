@@ -7,6 +7,7 @@ from typing import override
 from httpx import Client as HttpxClient
 
 from openai import OpenAI
+from openai import NOT_GIVEN
 
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionToolParam
@@ -69,7 +70,7 @@ class OpenAIClient(ChatClient[
             model=model,
             max_completion_tokens=4096,
             stream_options={'include_usage': True},
-            tools=state.tools if state.tools is not None else [],
+            tools=state.tools if state.tools is not None else NOT_GIVEN,
             messages=[state.system, *state.messages] if state.system is not None else state.messages,
         ))
 
