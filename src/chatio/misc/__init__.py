@@ -95,11 +95,18 @@ def default_tools(tools_name: str | None = None, env_name: str | None = None) ->
         if not tools_name:
             tools_name = 'empty'
 
+    tools_name, _, tools_mode = tools_name.partition(':')
+    tools_choice_mode, _, tools_choice_name = tools_mode.partition(':')
+
+    tool_choice = ToolChoice(tools_choice_mode) if tools_choice_mode else None
+    tool_choice_name = tools_choice_name if tools_choice_name else None
+
+    tools: dict | None = None
     match tools_name:
         case 'default':
             wiki = WikiToolFactory()
 
-            return ToolConfig({
+            tools = {
                 "run_command": ShellExecTool(),
                 "run_bc_calc": ShellCalcTool(),
                 "wiki_content": wiki.wiki_content(),
@@ -109,18 +116,18 @@ def default_tools(tools_name: str | None = None, env_name: str | None = None) ->
                 "web_search": WebSearchTool(),
                 "web_browse": WebBrowseTool(),
                 "run_nothing": DummyTool(),
-            })
+            }
         case 'llmtool':
             llm = build_chat(
                 config=init_config(env_name='CHATIO_NESTED_MODEL_NAME'),
                 tools=default_tools(env_name='CHATIO_NESTED_TOOLS_NAME'))
 
-            return ToolConfig({
+            tools = {
                 "llm_message": LlmDialogTool(llm),
-            })
+            }
         case 'imgtool':
-            return ToolConfig({
+            tools = {
                 "run_imgdump": ImageDumpTool(),
-            }, tool_choice=ToolChoice.NAME, tool_choice_name='run_imgdump')
-        case _:
-            return ToolConfig()
+            }
+
+    return ToolConfig(tools, tool_choice=tool_choice, tool_choice_name=tool_choice_name)
