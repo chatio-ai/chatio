@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 
 from .config import ApiConfig
+from .params import ApiParams
 from .format import ApiFormat
 from .client import ApiClient
 
@@ -20,6 +21,17 @@ class ApiHelper[
     @property
     @abstractmethod
     def config(self) -> ApiConfig:
+        ...
+
+    @property
+    @abstractmethod
+    def params(self) -> ApiParams[
+        SystemContent,
+        MessageContent,
+        PredictionContent,
+        ToolDefinitions,
+        ToolSelection,
+    ]:
         ...
 
     @property

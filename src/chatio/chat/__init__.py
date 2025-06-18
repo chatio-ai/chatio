@@ -77,7 +77,7 @@ class ChatBase[
     # streams
 
     def _process_tool_call(self, tool_call_id: str, tool_name: str, tool_args: dict) -> Iterator[dict]:
-        tool_func = self._state.funcs.get(tool_name)
+        tool_func = self._state().funcs.get(tool_name)
         if not tool_func:
             return
 
@@ -154,9 +154,9 @@ class ChatBase[
         return ChatInfo(
             self._model.vendor,
             self._model.model,
-            len(self._state.funcs),
-            bool(self._state.system),
-            len(self._state.messages),
+            len(self._state().funcs),
+            bool(self._state().system),
+            len(self._state().messages),
         )
 
     # history

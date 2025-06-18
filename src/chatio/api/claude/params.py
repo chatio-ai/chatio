@@ -1,0 +1,22 @@
+
+from dataclasses import dataclass
+
+from anthropic.types import MessageParam
+
+from anthropic.types import ToolParam
+from anthropic.types import ToolChoiceParam
+from anthropic.types import TextBlockParam
+
+
+from chatio.core.params import ApiParams
+
+
+@dataclass(init=False)
+class ClaudeParams(ApiParams[
+    TextBlockParam,
+    MessageParam,
+    None,
+    list[ToolParam],
+    ToolChoiceParam,
+]):
+    pass

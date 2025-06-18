@@ -11,9 +11,10 @@ from google.genai.types import FunctionDeclarationDict
 from chatio.core import ApiHelper
 
 
+from .config import GoogleConfig
+from .params import GoogleParams
 from .format import GoogleFormat
 from .client import GoogleClient
-from .config import GoogleConfig
 
 
 class GoogleApi(ApiHelper[
@@ -30,6 +31,7 @@ class GoogleApi(ApiHelper[
     def __init__(self, config: GoogleConfig) -> None:
         self._config = config
 
+        self._params = GoogleParams()
         self._format = GoogleFormat(config)
         self._client = GoogleClient(config)
 
@@ -37,6 +39,11 @@ class GoogleApi(ApiHelper[
     @override
     def config(self) -> GoogleConfig:
         return self._config
+
+    @property
+    @override
+    def params(self) -> GoogleParams:
+        return self._params
 
     @property
     @override
