@@ -62,23 +62,20 @@ class ChatState[
 
     # messages
 
-    def commit_input_content(self, content: TextMessage | ImageMessage) -> None:
-        self.messages.append(self._api.format.input_content(content))
-
     def commit_input_message(self, message: str) -> None:
-        self.commit_input_content(self._api.format.text_chunk(message))
-
-    def commit_output_content(self, content: TextMessage | ImageMessage) -> None:
-        self.messages.append(self._api.format.output_content(content))
+        self.messages.append(self._api.format.input_message(message))
 
     def commit_output_message(self, message: str) -> None:
-        self.commit_output_content(self._api.format.text_chunk(message))
+        self.messages.append(self._api.format.input_message(message))
 
     def commit_call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> None:
         self.messages.append(self._api.format.call_request(tool_call_id, tool_name, tool_input))
 
     def commit_call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> None:
         self.messages.append(self._api.format.call_response(tool_call_id, tool_name, tool_output))
+
+    def attach_image_document(self, blob: bytes, mimetype: str) -> None:
+        self.messages.append(self._api.format.image_document(blob, mimetype))
 
     def update_system_message(self, message: str | None) -> None:
         if not message:

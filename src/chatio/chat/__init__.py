@@ -161,7 +161,7 @@ class ChatBase[
 
     # history
 
-    def attach_image_content(self, *, file: str | PathLike) -> None:
+    def attach_image_document(self, *, file: str | PathLike) -> None:
         with Path(file).open("rb") as filep:
             blob = filep.read()
 
@@ -171,7 +171,7 @@ class ChatBase[
 
             self._state.commit_input_message(str(file))
 
-            self._state.commit_input_content(self._api.format.image_blob(blob, mimetype))
+            self._state.attach_image_document(blob, mimetype)
 
     def commit_input_message(self, message: str) -> None:
         self._state.commit_input_message(message)

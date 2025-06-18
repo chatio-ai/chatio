@@ -39,9 +39,15 @@ class ApiFormat[
     def input_content(self, content: TextMessage | ImageMessage) -> MessageContent:
         ...
 
+    def input_message(self, message: str) -> MessageContent:
+        return self.input_content(self.text_chunk(message))
+
     @abstractmethod
     def output_content(self, content: TextMessage | ImageMessage) -> MessageContent:
         ...
+
+    def output_message(self, message: str) -> MessageContent:
+        return self.output_content(self.text_chunk(message))
 
     @abstractmethod
     def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> MessageContent:
@@ -50,6 +56,9 @@ class ApiFormat[
     @abstractmethod
     def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> MessageContent:
         ...
+
+    def image_document(self, blob: bytes, mimetype: str) -> MessageContent:
+        return self.input_content(self.image_blob(blob, mimetype))
 
     # functions
 

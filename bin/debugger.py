@@ -61,7 +61,7 @@ def main():
 
     filenames = sys.argv[1:]
     for filename in filenames:
-        chat.attach_image_content(file=filename)
+        chat.attach_image_document(file=filename)
 
     # chat.commit_chunk("duplicate my message as is")
 
