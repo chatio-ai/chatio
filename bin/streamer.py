@@ -22,6 +22,7 @@ def main():
 
     run_info(chat, Style("::: ", color=Style.BRIGHT_GREEN))
 
+    results = None
     while True:
         print()
         content = run_user(Style(">>> ", color=Style.BRIGHT_GREEN))
@@ -32,11 +33,13 @@ def main():
 
         chat.commit_input_message(content)
 
+        chat.use_prediction_content(results)
+
         print()
-        run_chat(chat(),
-                 model_style=Style("<<< ", color=Style.BRIGHT_CYAN),
-                 event_style=Style("::: ", color=Style.RESET),
-                 tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))
+        results = run_chat(chat(),
+                           model_style=Style("<<< ", color=Style.BRIGHT_CYAN),
+                           event_style=Style("::: ", color=Style.RESET),
+                           tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))
 
     print()
 
