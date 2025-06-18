@@ -7,30 +7,20 @@ from typing import override
 from google.genai import Client
 from google.genai.types import HttpOptions
 
-from google.genai.types import ContentDict
-from google.genai.types import ToolListUnionDict
-from google.genai.types import ToolConfigDict
-
 
 from chatio.core.client import ApiClient
 from chatio.core.config import ApiConfig
-from chatio.core.params import ApiParams
 
 from chatio.core.events import ChatEvent
 
 from chatio.api.helper.httpx import httpx_args
 
 
+from .params import GoogleParams
 from .events import _pump
 
 
-class GoogleClient(ApiClient[
-    ContentDict,
-    ContentDict,
-    None,
-    ToolListUnionDict,
-    ToolConfigDict,
-]):
+class GoogleClient(ApiClient[GoogleParams]):
 
     def __init__(self, config: ApiConfig):
         self._client = Client(
@@ -41,16 +31,7 @@ class GoogleClient(ApiClient[
     # streams
 
     @override
-    def iterate_model_events(
-        self, model: str,
-        params: ApiParams[
-            ContentDict,
-            ContentDict,
-            None,
-            ToolListUnionDict,
-            ToolConfigDict,
-        ],
-    ) -> Iterator[ChatEvent]:
+    def iterate_model_events(self, model: str, params: GoogleParams) -> Iterator[ChatEvent]:
         return _pump(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
@@ -65,14 +46,5 @@ class GoogleClient(ApiClient[
     # helpers
 
     @override
-    def count_message_tokens(
-        self, model: str,
-        params: ApiParams[
-            ContentDict,
-            ContentDict,
-            None,
-            ToolListUnionDict,
-            ToolConfigDict,
-        ],
-    ) -> int:
+    def count_message_tokens(self, model: str, params: GoogleParams) -> int:
         raise NotImplementedError

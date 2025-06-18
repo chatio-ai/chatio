@@ -9,15 +9,9 @@ from httpx import Client as HttpxClient
 from openai import OpenAI
 from openai import NOT_GIVEN
 
-from openai.types.chat import ChatCompletionMessageParam
-from openai.types.chat import ChatCompletionPredictionContentParam
-from openai.types.chat import ChatCompletionToolParam
-from openai.types.chat import ChatCompletionToolChoiceOptionParam
-
 
 from chatio.core.client import ApiClient
 from chatio.core.config import ApiConfig
-from chatio.core.params import ApiParams
 
 from chatio.core.events import ChatEvent
 
@@ -25,16 +19,11 @@ from chatio.core.events import ChatEvent
 from chatio.api.helper.httpx import httpx_args
 
 
+from .params import OpenAIParams
 from .events import _pump
 
 
-class OpenAIClient(ApiClient[
-    ChatCompletionMessageParam,
-    ChatCompletionMessageParam,
-    ChatCompletionPredictionContentParam,
-    list[ChatCompletionToolParam],
-    ChatCompletionToolChoiceOptionParam,
-]):
+class OpenAIClient(ApiClient[OpenAIParams]):
 
     def __init__(self, config: ApiConfig):
         self._client = OpenAI(
@@ -45,16 +34,7 @@ class OpenAIClient(ApiClient[
     # streams
 
     @override
-    def iterate_model_events(
-        self, model: str,
-        params: ApiParams[
-            ChatCompletionMessageParam,
-            ChatCompletionMessageParam,
-            ChatCompletionPredictionContentParam,
-            list[ChatCompletionToolParam],
-            ChatCompletionToolChoiceOptionParam,
-        ],
-    ) -> Iterator[ChatEvent]:
+    def iterate_model_events(self, model: str, params: OpenAIParams) -> Iterator[ChatEvent]:
         return _pump(self._client.beta.chat.completions.stream(
             model=model,
             max_completion_tokens=4096 if params.prediction is None else NOT_GIVEN,
@@ -68,14 +48,5 @@ class OpenAIClient(ApiClient[
     # helpers
 
     @override
-    def count_message_tokens(
-        self, model: str,
-        params: ApiParams[
-            ChatCompletionMessageParam,
-            ChatCompletionMessageParam,
-            ChatCompletionPredictionContentParam,
-            list[ChatCompletionToolParam],
-            ChatCompletionToolChoiceOptionParam,
-        ],
-    ) -> int:
+    def count_message_tokens(self, model: str, params: OpenAIParams) -> int:
         raise NotImplementedError

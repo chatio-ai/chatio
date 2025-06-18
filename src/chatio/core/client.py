@@ -7,36 +7,12 @@ from .params import ApiParams
 from .events import ChatEvent
 
 
-class ApiClient[
-    SystemContent,
-    MessageContent,
-    PredictionContent,
-    ToolDefinitions,
-    ToolSelection,
-](ABC):
+class ApiClient[ApiParamsT: ApiParams](ABC):
 
     @abstractmethod
-    def iterate_model_events(
-        self, model: str,
-        params: ApiParams[
-            SystemContent,
-            MessageContent,
-            PredictionContent,
-            ToolDefinitions,
-            ToolSelection,
-        ],
-    ) -> Iterator[ChatEvent]:
+    def iterate_model_events(self, model: str, params: ApiParamsT) -> Iterator[ChatEvent]:
         ...
 
     @abstractmethod
-    def count_message_tokens(
-        self, model: str,
-        params: ApiParams[
-            SystemContent,
-            MessageContent,
-            PredictionContent,
-            ToolDefinitions,
-            ToolSelection,
-        ],
-    ) -> int:
+    def count_message_tokens(self, model: str, params: ApiParamsT) -> int:
         ...

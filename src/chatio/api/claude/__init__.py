@@ -1,16 +1,7 @@
 
 from typing import override
 
-from anthropic.types import MessageParam
-
-from anthropic.types import ToolParam
-from anthropic.types import ToolChoiceParam
-from anthropic.types import TextBlockParam
-from anthropic.types import ImageBlockParam
-
-
 from chatio.core import ApiHelper
-
 
 from .config import ClaudeConfig
 from .params import ClaudeParams
@@ -18,16 +9,7 @@ from .format import ClaudeFormat
 from .client import ClaudeClient
 
 
-class ClaudeApi(ApiHelper[
-    TextBlockParam,
-    MessageParam,
-    None,
-    TextBlockParam,
-    ImageBlockParam,
-    ToolParam,
-    list[ToolParam],
-    ToolChoiceParam,
-]):
+class ClaudeApi(ApiHelper[ClaudeParams]):
 
     def __init__(self, config: ClaudeConfig) -> None:
         self._config = config

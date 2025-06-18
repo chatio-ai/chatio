@@ -7,29 +7,11 @@ from chatio.core.params import ApiParams
 from chatio.core import ApiHelper
 
 
-class ChatState[
-    SystemContent,
-    MessageContent,
-    PredictionContent,
-    TextMessage,
-    ImageMessage,
-    ToolDefinition,
-    ToolDefinitions,
-    ToolSelection,
-]:
+class ChatState[ApiParamsT: ApiParams]:
 
     def __init__(
             self,
-            api: ApiHelper[
-                SystemContent,
-                MessageContent,
-                PredictionContent,
-                TextMessage,
-                ImageMessage,
-                ToolDefinition,
-                ToolDefinitions,
-                ToolSelection,
-            ],
+            api: ApiHelper[ApiParamsT],
             state: StateConfig | None = None,
             tools: ToolsConfig | None = None):
 
@@ -139,5 +121,5 @@ class ChatState[
                 case _:
                     raise ValueError
 
-    def __call__(self) -> ApiParams:
+    def __call__(self) -> ApiParamsT:
         return self._params

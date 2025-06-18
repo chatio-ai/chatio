@@ -12,6 +12,7 @@ from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
+from chatio.core.params import ApiParams
 from chatio.core import ApiHelper
 
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
@@ -30,29 +31,11 @@ class ChatInfo:
     messages: int
 
 
-class ChatBase[
-    SystemContent,
-    MessageContent,
-    PredictionContent,
-    TextMessage,
-    ImageMessage,
-    ToolDefinition,
-    ToolDefinitions,
-    ToolSelection,
-]:
+class ChatBase[ApiParamsT: ApiParams]:
 
     def __init__(
             self,
-            api: ApiHelper[
-                SystemContent,
-                MessageContent,
-                PredictionContent,
-                TextMessage,
-                ImageMessage,
-                ToolDefinition,
-                ToolDefinitions,
-                ToolSelection,
-            ],
+            api: ApiHelper[ApiParamsT],
             model: ModelConfig,
             state: StateConfig | None = None,
             tools: ToolsConfig | None = None) -> None:
@@ -61,16 +44,7 @@ class ChatBase[
 
         self._model = model
 
-        self._state: ChatState[
-            SystemContent,
-            MessageContent,
-            PredictionContent,
-            TextMessage,
-            ImageMessage,
-            ToolDefinition,
-            ToolDefinitions,
-            ToolSelection,
-        ] = ChatState(api, state, tools)
+        self._state: ChatState[ApiParamsT] = ChatState(api, state, tools)
 
         self._usage = ChatUsage()
 

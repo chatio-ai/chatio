@@ -9,16 +9,9 @@ from httpx import Client as HttpxClient
 from anthropic import Anthropic
 from anthropic import NOT_GIVEN
 
-from anthropic.types import MessageParam
-
-from anthropic.types import ToolParam
-from anthropic.types import ToolChoiceParam
-from anthropic.types import TextBlockParam
-
 
 from chatio.core.client import ApiClient
 from chatio.core.config import ApiConfig
-from chatio.core.params import ApiParams
 
 from chatio.core.events import ChatEvent
 
@@ -26,16 +19,11 @@ from chatio.core.events import ChatEvent
 from chatio.api.helper.httpx import httpx_args
 
 
+from .params import ClaudeParams
 from .events import _pump
 
 
-class ClaudeClient(ApiClient[
-    TextBlockParam,
-    MessageParam,
-    None,
-    list[ToolParam],
-    ToolChoiceParam,
-]):
+class ClaudeClient(ApiClient[ClaudeParams]):
 
     @override
     def __init__(self, config: ApiConfig) -> None:
@@ -47,17 +35,7 @@ class ClaudeClient(ApiClient[
     # streams
 
     @override
-    def iterate_model_events(
-        self, model: str,
-        params: ApiParams[
-            TextBlockParam,
-            MessageParam,
-            None,
-            list[ToolParam],
-            ToolChoiceParam,
-        ],
-    ) -> Iterator[ChatEvent]:
-
+    def iterate_model_events(self, model: str, params: ClaudeParams) -> Iterator[ChatEvent]:
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
@@ -70,17 +48,7 @@ class ClaudeClient(ApiClient[
     # helpers
 
     @override
-    def count_message_tokens(
-        self, model: str,
-        params: ApiParams[
-            TextBlockParam,
-            MessageParam,
-            None,
-            list[ToolParam],
-            ToolChoiceParam,
-        ],
-    ) -> int:
-
+    def count_message_tokens(self, model: str, params: ClaudeParams) -> int:
         return self._client.messages.count_tokens(
             model=model,
             tools=params.tools if params.tools is not None else NOT_GIVEN,

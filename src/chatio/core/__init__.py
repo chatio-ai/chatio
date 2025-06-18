@@ -7,16 +7,7 @@ from .format import ApiFormat
 from .client import ApiClient
 
 
-class ApiHelper[
-    SystemContent,
-    MessageContent,
-    PredictionContent,
-    TextMessage,
-    ImageMessage,
-    ToolDefinition,
-    ToolDefinitions,
-    ToolSelection,
-](ABC):
+class ApiHelper[ApiParamsT: ApiParams](ABC):
 
     @property
     @abstractmethod
@@ -25,36 +16,15 @@ class ApiHelper[
 
     @property
     @abstractmethod
-    def params(self) -> ApiParams[
-        SystemContent,
-        MessageContent,
-        PredictionContent,
-        ToolDefinitions,
-        ToolSelection,
-    ]:
+    def params(self) -> ApiParamsT:
         ...
 
     @property
     @abstractmethod
-    def format(self) -> ApiFormat[
-        SystemContent,
-        MessageContent,
-        PredictionContent,
-        TextMessage,
-        ImageMessage,
-        ToolDefinition,
-        ToolDefinitions,
-        ToolSelection,
-    ]:
+    def format(self) -> ApiFormat:
         ...
 
     @property
     @abstractmethod
-    def client(self) -> ApiClient[
-        SystemContent,
-        MessageContent,
-        PredictionContent,
-        ToolDefinitions,
-        ToolSelection,
-    ]:
+    def client(self) -> ApiClient[ApiParamsT]:
         ...
