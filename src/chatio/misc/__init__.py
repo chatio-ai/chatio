@@ -9,6 +9,10 @@ from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
+from chatio.core.params import ApiParams
+
+from chatio.api.custom import CustomApi
+
 from chatio.api.claude.config import ClaudeConfigOptions
 from chatio.api.claude.config import ClaudeConfig
 from chatio.api.claude.params import ClaudeParams
@@ -121,11 +125,30 @@ def build_chat_openai(
     return ChatBase(OpenAIApi(config), model, state, tools)
 
 
+def build_chat_custom(
+    config_data: dict,
+    options_data: dict,
+    model: ModelConfig,
+    state: StateConfig | None = None,
+    tools: ToolsConfig | None = None,
+) -> ChatBase[ApiParams]:
+
+    claude_options = ClaudeConfigOptions(**options_data)
+    claude_config = ClaudeConfig(**config_data, options=claude_options)
+
+    openai_options = OpenAIConfigOptions(**options_data)
+    openai_config = OpenAIConfig(**config_data, options=openai_options)
+
+    helper = CustomApi(claude_config, openai_config)
+
+    return ChatBase(model, state, tools, helper)
+
+
 def build_chat(
     model: ModelConfig,
     state: StateConfig | None = None,
     tools: ToolsConfig | None = None,
-) -> ChatBase[ClaudeParams] | ChatBase[GoogleParams] | ChatBase[OpenAIParams]:
+) -> ChatBase[ApiParams]:
 
     if model is None:
         err_msg = "no model specified!"

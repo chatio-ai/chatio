@@ -8,6 +8,7 @@
 !src/chatio/api/google/*.py
 !src/chatio/api/claude/*.py
 !src/chatio/api/helper/*.py
+!src/chatio/api/custom/*.py
 !src/chatio/api/*.py
 !src/chatio/cli/*.py
 !src/chatio/*.py
