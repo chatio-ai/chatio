@@ -5,7 +5,6 @@ from chatio.core import ApiHelper
 
 from .config import GoogleConfig
 from .params import GoogleParams
-from .format import GoogleFormat
 from .client import GoogleClient
 
 
@@ -14,8 +13,7 @@ class GoogleApi(ApiHelper[GoogleParams]):
     def __init__(self, config: GoogleConfig) -> None:
         self._config = config
 
-        self._params = GoogleParams()
-        self._format = GoogleFormat(config)
+        self._params = GoogleParams(config)
         self._client = GoogleClient(config)
 
     @property
@@ -27,11 +25,6 @@ class GoogleApi(ApiHelper[GoogleParams]):
     @override
     def params(self) -> GoogleParams:
         return self._params
-
-    @property
-    @override
-    def format(self) -> GoogleFormat:
-        return self._format
 
     @property
     @override

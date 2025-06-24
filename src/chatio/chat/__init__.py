@@ -44,7 +44,9 @@ class ChatBase[ApiParamsT: ApiParams]:
 
         self._model = model
 
-        self._state: ChatState[ApiParamsT] = ChatState(api, state, tools)
+        self._state: ChatState[ApiParamsT] = ChatState(api.params, state, tools)
+
+        self._client = api.client
 
         self._usage = ChatUsage()
 
@@ -85,7 +87,7 @@ class ChatBase[ApiParamsT: ApiParams]:
 
             self._state.touch_message_history()
 
-            events = self._api.client.iterate_model_events(
+            events = self._client.iterate_model_events(
                 model=self._model.model,
                 params=self._state(),
             )
@@ -119,7 +121,7 @@ class ChatBase[ApiParamsT: ApiParams]:
         if content:
             self._state.commit_input_message(content)
 
-        return self._api.client.count_message_tokens(
+        return self._client.count_message_tokens(
             model=self._model.model,
             params=self._state(),
         )

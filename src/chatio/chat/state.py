@@ -4,19 +4,17 @@ from chatio.core.config import ToolsConfig
 
 from chatio.core.params import ApiParams
 
-from chatio.core import ApiHelper
-
 
 class ChatState[ApiParamsT: ApiParams]:
 
     def __init__(
-            self,
-            api: ApiHelper[ApiParamsT],
-            state: StateConfig | None = None,
-            tools: ToolsConfig | None = None):
+        self,
+        params: ApiParamsT,
+        state: StateConfig | None = None,
+        tools: ToolsConfig | None = None,
+    ):
 
-        self._api = api
-        self._params = api.params
+        self._params = params
 
         self.update_system_message(state.system if state is not None else None)
 
@@ -27,26 +25,26 @@ class ChatState[ApiParamsT: ApiParams]:
     # messages
 
     def commit_input_message(self, message: str) -> None:
-        self._params.messages.append(self._api.format.input_message(message))
+        self._params.messages.append(self._params.format.input_message(message))
 
     def commit_output_message(self, message: str) -> None:
-        self._params.messages.append(self._api.format.input_message(message))
+        self._params.messages.append(self._params.format.input_message(message))
 
     def commit_call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> None:
-        self._params.messages.append(self._api.format.call_request(tool_call_id, tool_name, tool_input))
+        self._params.messages.append(self._params.format.call_request(tool_call_id, tool_name, tool_input))
 
     def commit_call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> None:
-        self._params.messages.append(self._api.format.call_response(tool_call_id, tool_name, tool_output))
+        self._params.messages.append(self._params.format.call_response(tool_call_id, tool_name, tool_output))
 
     def attach_image_document(self, blob: bytes, mimetype: str) -> None:
-        self._params.messages.append(self._api.format.image_document(blob, mimetype))
+        self._params.messages.append(self._params.format.image_document(blob, mimetype))
 
     def update_system_message(self, message: str | None) -> None:
         if not message:
             self._params.system = None
             return
 
-        self._params.system = self._api.format.system_content(self._api.format.text_chunk(message))
+        self._params.system = self._params.format.system_content(self._params.format.text_chunk(message))
 
     def setup_message_history(self, messages: list[str] | None) -> None:
         if messages is None:
@@ -59,14 +57,14 @@ class ChatState[ApiParamsT: ApiParams]:
                 self.commit_output_message(message)
 
     def touch_message_history(self):
-        self._params.messages = self._api.format.chat_messages(self._params.messages)
+        self._params.messages = self._params.format.chat_messages(self._params.messages)
 
     def use_prediction_content(self, message: str | None) -> None:
         if message is None:
             self._params.prediction = None
             return
 
-        self._params.prediction = self._api.format.prediction_content(self._api.format.text_chunk(message))
+        self._params.prediction = self._params.format.prediction_content(self._params.format.text_chunk(message))
 
     # functions
 
@@ -86,11 +84,11 @@ class ChatState[ApiParamsT: ApiParams]:
             if not name or not desc or not schema:
                 raise RuntimeError
 
-            _tool_definitions.append(self._api.format.tool_definition(name, desc, schema))
+            _tool_definitions.append(self._params.format.tool_definition(name, desc, schema))
 
             self._params.funcs[name] = tool
 
-        self._params.tools = self._api.format.tool_definitions(_tool_definitions)
+        self._params.tools = self._params.format.tool_definitions(_tool_definitions)
 
         self._params.tool_choice = self.setup_tool_selection(tools)
 
@@ -104,11 +102,11 @@ class ChatState[ApiParamsT: ApiParams]:
         if not tools.tool_choice_name:
             match tools.tool_choice_mode:
                 case 'none':
-                    return self._api.format.tool_selection_none()
+                    return self._params.format.tool_selection_none()
                 case 'auto':
-                    return self._api.format.tool_selection_auto()
+                    return self._params.format.tool_selection_auto()
                 case 'any':
-                    return self._api.format.tool_selection_any()
+                    return self._params.format.tool_selection_any()
                 case _:
                     raise ValueError
         else:
@@ -117,7 +115,7 @@ class ChatState[ApiParamsT: ApiParams]:
 
             match tools.tool_choice_mode:
                 case 'name':
-                    return self._api.format.tool_selection_name(tools.tool_choice_name)
+                    return self._params.format.tool_selection_name(tools.tool_choice_name)
                 case _:
                     raise ValueError
 

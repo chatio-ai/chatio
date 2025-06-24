@@ -5,7 +5,6 @@ from chatio.core import ApiHelper
 
 from .config import OpenAIConfig
 from .params import OpenAIParams
-from .format import OpenAIFormat
 from .client import OpenAIClient
 
 
@@ -14,8 +13,7 @@ class OpenAIApi(ApiHelper[OpenAIParams]):
     def __init__(self, config: OpenAIConfig) -> None:
         self._config = config
 
-        self._params = OpenAIParams()
-        self._format = OpenAIFormat(config)
+        self._params = OpenAIParams(config)
         self._client = OpenAIClient(config)
 
     @property
@@ -27,11 +25,6 @@ class OpenAIApi(ApiHelper[OpenAIParams]):
     @override
     def params(self) -> OpenAIParams:
         return self._params
-
-    @property
-    @override
-    def format(self) -> OpenAIFormat:
-        return self._format
 
     @property
     @override
