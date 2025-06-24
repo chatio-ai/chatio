@@ -49,15 +49,32 @@ def run_user(style=None, file=None) -> str | None:
         return user_input
 
 
-def run_user_extra(style=None, file=None) -> str | Path | None:
+def run_user_extra(style=None, file=None) -> tuple[str | None, list[Path]]:
     user_input = run_user(style, file)
     if user_input is None:
-        return None
+        return None, []
 
-    if user_input.startswith("@"):
-        return Path(user_input[1:].strip())
+    paths = []
+    ready = True
+    while ready:
+        ready = False
+        splits = user_input.split(maxsplit=1)
 
-    return user_input
+        part, rest = "", ""
+        match len(splits):
+            case 2:
+                part, rest = splits
+            case 1:
+                part = splits.pop()
+            case _:
+                pass
+
+        if part.startswith("@"):
+            paths.append(Path(part.removeprefix("@")))
+            user_input = rest
+            ready = True
+
+    return user_input, paths
 
 
 def _run_chat_event(event: dict, style: Style, file=None):

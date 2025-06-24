@@ -10,11 +10,15 @@ from contextlib import suppress
 class ChatCompleter:
     def complete(self, _text: str, state: int) -> str | None:
         line = readline.get_line_buffer()
-        if not line.startswith("@"):
+        if line != line.rstrip():
+            return None
+        parts = line.split()
+        if not all(part.startswith("@") for part in parts):
             return None
 
-        path = pathlib.Path(line[1:])
-        if line.endswith("/"):
+        part = parts.pop()
+        path = pathlib.Path(part[1:])
+        if part.endswith("/"):
             path_dir, path_name = path, ""
         else:
             path_dir, path_name = path.parent, path.name
@@ -25,6 +29,9 @@ class ChatCompleter:
 
         if state < len(matches):
             return matches[state]
+
+        # print()
+        # print(f"<{state}:{_text}:{part}:{path}:{matches}>")
 
         return None
 

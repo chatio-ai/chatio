@@ -2,8 +2,6 @@
 
 import sys
 
-from pathlib import Path
-
 
 from chatio.cli.stdio import run_info, run_user_extra, run_chat
 from chatio.cli.style import Style
@@ -28,17 +26,17 @@ def main():
     results = None
     while True:
         print()
-        content = run_user_extra(Style(">>> ", color=Style.BRIGHT_GREEN))
+        content, files = run_user_extra(Style(">>> ", color=Style.BRIGHT_GREEN))
+        if content is None:
+            break
+        if not files and not content:
+            continue
 
-        match content:
-            case None:
-                break
-            case str() if not content:
-                continue
-            case str():
-                chat.commit_input_message(content)
-            case Path():
-                chat.attach_image_content(file=content)
+        for file in files:
+            chat.attach_image_content(file=file)
+
+        if content:
+            chat.commit_input_message(content)
 
         chat.use_prediction_content(results)
 
