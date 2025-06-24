@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from contextlib import suppress
 
 from .style import Style, Empty
-from .input import setup_history
+from .input import setup_readline
 
 
 def _mk_style(style=None) -> Style:
@@ -34,7 +34,7 @@ def run_info(chat, style=None, file=None):
 
 
 def run_user(style=None, file=None):
-    setup_history()
+    setup_readline()
 
     with _mk_style(style).wrap_input(end="", file=file) as prompt:
 

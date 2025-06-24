@@ -1,29 +1,64 @@
 
 import atexit
+import pathlib
 import readline
+
 
 from contextlib import suppress
 
 
-class SetupHistory:
+class ChatCompleter:
+    def complete(self, _text: str, state: int) -> str | None:
+        line = readline.get_line_buffer()
+        if not line.startswith("@"):
+            return None
+
+        path = pathlib.Path(line[1:])
+        if line.endswith("/"):
+            path_dir, path_name = path, ""
+        else:
+            path_dir, path_name = path.parent, path.name
+
+        path_glob = path_dir.glob(f"{path_name}*")
+
+        matches = [str(p.name) + "/" if p.is_dir() else str(p.name) + " " for p in path_glob]
+
+        if state < len(matches):
+            return matches[state]
+
+        return None
+
+    def __call__(self, text: str, state: int) -> str | None:
+        return self.complete(text, state)
+
+
+class SetupReadLine:
     _HISTORY_FILE = '.chatio_history'
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._done = False
 
-    def __call__(self):
+    def __call__(self) -> None:
         self.do_setup()
 
-    def do_setup(self):
-        if self._done:
-            return
-
+    def _do_setup_history(self) -> None:
         with suppress(FileNotFoundError):
             readline.read_history_file(self._HISTORY_FILE)
 
         atexit.register(readline.write_history_file, self._HISTORY_FILE)
 
+    def _do_setup_complete(self) -> None:
+        readline.set_completer(ChatCompleter())
+        readline.parse_and_bind('tab: complete')
+
+    def do_setup(self) -> None:
+        if self._done:
+            return
+
+        self._do_setup_history()
+        self._do_setup_complete()
+
         self._done = True
 
 
-setup_history = SetupHistory()
+setup_readline = SetupReadLine()
