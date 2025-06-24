@@ -8,24 +8,25 @@ from contextlib import suppress
 
 
 class ChatCompleter:
-    def complete(self, _text: str, state: int) -> str | None:
-        line = readline.get_line_buffer()
-        if line != line.rstrip():
-            return None
-        parts = line.split()
-        if not all(part.startswith("@") for part in parts):
+    def complete(self, text: str, state: int) -> str | None:
+        begidx = readline.get_begidx()
+        line = readline.get_line_buffer()[:begidx]
+
+        if not begidx or line[begidx - 1] != "@":
             return None
 
-        part = parts.pop()
-        path = pathlib.Path(part[1:])
-        if part.endswith("/"):
+        if not all(p.startswith("@") for p in line.split()):
+            return None
+
+        path = pathlib.Path(text)
+        if text.endswith("/"):
             path_dir, path_name = path, ""
         else:
             path_dir, path_name = path.parent, path.name
 
         path_glob = path_dir.glob(f"{path_name}*")
 
-        matches = [str(p.name) + "/" if p.is_dir() else str(p.name) + " " for p in path_glob]
+        matches = [f"{p}/" if p.is_dir() else f"{p} " for p in path_glob]
 
         if state < len(matches):
             return matches[state]
@@ -55,6 +56,7 @@ class SetupReadLine:
         atexit.register(readline.write_history_file, self._HISTORY_FILE)
 
     def _do_setup_complete(self) -> None:
+        readline.set_completer_delims("@ \n\r\t\f")
         readline.set_completer(ChatCompleter())
         readline.parse_and_bind('tab: complete')
 
