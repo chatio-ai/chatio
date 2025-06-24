@@ -38,15 +38,20 @@ def run_info(chat, style=None, file=None):
 def run_user(style=None, file=None) -> str | None:
     setup_readline()
 
-    with _mk_style(style).wrap_input(end="", file=file) as prompt:
-
-        user_input = None
-        with suppress(EOFError, KeyboardInterrupt):
+    user_input = None
+    if sys.stdin.isatty():
+        with (
+            _mk_style(style).wrap_input(end="", file=file) as prompt,
+            suppress(EOFError, KeyboardInterrupt),
+        ):
             user_input = input(prompt)
-            if not sys.stdin.isatty():
+    else:
+        with suppress(EOFError, KeyboardInterrupt):
+            user_input = input()
+            with _mk_style(style).wrap_print(end="", file=file):
                 print(user_input, flush=True, file=file)
 
-        return user_input
+    return user_input
 
 
 def run_user_extra(style=None, file=None) -> tuple[str | None, list[Path]]:
