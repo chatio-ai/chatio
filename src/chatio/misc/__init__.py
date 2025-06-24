@@ -9,19 +9,19 @@ from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
-from chatio.core.config import ApiConfigOptions
-from chatio.core.config import ApiConfig
-
 from chatio.api.claude.config import ClaudeConfigOptions
 from chatio.api.claude.config import ClaudeConfig
+from chatio.api.claude.params import ClaudeParams
 from chatio.api.claude import ClaudeApi
 
 from chatio.api.google.config import GoogleConfigOptions
 from chatio.api.google.config import GoogleConfig
+from chatio.api.google.params import GoogleParams
 from chatio.api.google import GoogleApi
 
 from chatio.api.openai.config import OpenAIConfigOptions
 from chatio.api.openai.config import OpenAIConfig
+from chatio.api.openai.params import OpenAIParams
 from chatio.api.openai import OpenAIApi
 
 from chatio.chat import ChatBase
@@ -85,11 +85,47 @@ def parse_opts(api_options: str | None = None, env_name: str | None = None) -> d
     return json.loads(api_options)
 
 
+def build_chat_claude(
+    config_data: dict,
+    options_data: dict,
+    model: ModelConfig,
+    state: StateConfig | None = None,
+    tools: ToolsConfig | None = None,
+) -> ChatBase[ClaudeParams]:
+    options = ClaudeConfigOptions(**options_data)
+    config = ClaudeConfig(**config_data, options=options)
+    return ChatBase(ClaudeApi(config), model, state, tools)
+
+
+def build_chat_google(
+    config_data: dict,
+    options_data: dict,
+    model: ModelConfig,
+    state: StateConfig | None = None,
+    tools: ToolsConfig | None = None,
+) -> ChatBase[GoogleParams]:
+    options = GoogleConfigOptions(**options_data)
+    config = GoogleConfig(**config_data, options=options)
+    return ChatBase(GoogleApi(config), model, state, tools)
+
+
+def build_chat_openai(
+    config_data: dict,
+    options_data: dict,
+    model: ModelConfig,
+    state: StateConfig | None = None,
+    tools: ToolsConfig | None = None,
+) -> ChatBase[OpenAIParams]:
+    options = OpenAIConfigOptions(**options_data)
+    config = OpenAIConfig(**config_data, options=options)
+    return ChatBase(OpenAIApi(config), model, state, tools)
+
+
 def build_chat(
     model: ModelConfig,
     state: StateConfig | None = None,
     tools: ToolsConfig | None = None,
-) -> ChatBase:
+) -> ChatBase[ClaudeParams] | ChatBase[GoogleParams] | ChatBase[OpenAIParams]:
 
     if model is None:
         err_msg = "no model specified!"
@@ -103,22 +139,13 @@ def build_chat(
 
     api_class = config_data.get('api_cls')
 
-    options: ApiConfigOptions
-    config: ApiConfig
-
     match api_class:
         case 'claude':
-            options = ClaudeConfigOptions(**options_data)
-            config = ClaudeConfig(**config_data, options=options)
-            return ChatBase(ClaudeApi(config), model, state, tools)
+            return build_chat_claude(config_data, options_data, model, state, tools)
         case 'google':
-            options = GoogleConfigOptions(**options_data)
-            config = GoogleConfig(**config_data, options=options)
-            return ChatBase(GoogleApi(config), model, state, tools)
+            return build_chat_google(config_data, options_data, model, state, tools)
         case 'openai':
-            options = OpenAIConfigOptions(**options_data)
-            config = OpenAIConfig(**config_data, options=options)
-            return ChatBase(OpenAIApi(config), model, state, tools)
+            return build_chat_openai(config_data, options_data, model, state, tools)
         case _:
             err_msg = f"api class not supported: {api_class}"
             raise RuntimeError(err_msg)
