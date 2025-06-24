@@ -9,7 +9,7 @@ from anthropic.types import TextBlockParam
 from anthropic.types import ImageBlockParam
 
 
-from chatio.core.config import ApiHelper
+from chatio.core import ApiHelper
 
 
 from .config import ClaudeConfig

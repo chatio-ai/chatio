@@ -8,7 +8,7 @@ from chatio.core.config import ToolsConfig
 
 from chatio.core.params import ApiParams
 
-from chatio.core.config import ApiHelper
+from chatio.core import ApiHelper
 
 
 @dataclass

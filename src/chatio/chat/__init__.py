@@ -12,7 +12,7 @@ from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
-from chatio.core.config import ApiHelper
+from chatio.core import ApiHelper
 
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 

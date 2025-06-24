@@ -9,7 +9,7 @@ from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
-from chatio.core.config import ApiHelper
+from chatio.core import ApiHelper
 
 
 from .config import OpenAIConfig
