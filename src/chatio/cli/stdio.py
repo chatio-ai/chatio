@@ -5,6 +5,8 @@ from collections.abc import Iterable
 
 from contextlib import suppress
 
+from pathlib import Path
+
 from .style import Style, Empty
 from .input import setup_readline
 
@@ -33,7 +35,7 @@ def run_info(chat, style=None, file=None):
         style=style, file=file)
 
 
-def run_user(style=None, file=None):
+def run_user(style=None, file=None) -> str | None:
     setup_readline()
 
     with _mk_style(style).wrap_input(end="", file=file) as prompt:
@@ -45,6 +47,17 @@ def run_user(style=None, file=None):
                 print(user_input, flush=True, file=file)
 
         return user_input
+
+
+def run_user_extra(style=None, file=None) -> str | Path | None:
+    user_input = run_user(style, file)
+    if user_input is None:
+        return None
+
+    if user_input.startswith("@"):
+        return Path(user_input[1:].strip())
+
+    return user_input
 
 
 def _run_chat_event(event: dict, style: Style, file=None):

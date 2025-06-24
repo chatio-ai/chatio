@@ -2,7 +2,10 @@
 
 import sys
 
-from chatio.cli.stdio import run_info, run_user, run_chat
+from pathlib import Path
+
+
+from chatio.cli.stdio import run_info, run_user_extra, run_chat
 from chatio.cli.style import Style
 
 from chatio.misc import setup_logging
@@ -25,13 +28,17 @@ def main():
     results = None
     while True:
         print()
-        content = run_user(Style(">>> ", color=Style.BRIGHT_GREEN))
-        if content is None:
-            break
-        if not content:
-            continue
+        content = run_user_extra(Style(">>> ", color=Style.BRIGHT_GREEN))
 
-        chat.commit_input_message(content)
+        match content:
+            case None:
+                break
+            case str() if not content:
+                continue
+            case str():
+                chat.commit_input_message(content)
+            case Path():
+                chat.attach_image_content(file=content)
 
         chat.use_prediction_content(results)
 
