@@ -14,7 +14,7 @@ from chatio.core.params import CallRequest
 from chatio.core.params import ToolSchema
 from chatio.core.params import ToolChoice
 
-from chatio.core.params import ApiParams
+from chatio.core.params import ApiStates
 
 
 class ChatState:
@@ -24,7 +24,7 @@ class ChatState:
             state: StateConfig | None = None,
             tools: ToolsConfig | None = None):
 
-        self._params = ApiParams()
+        self._params = ApiStates()
 
         self.update_system_message(state.system if state is not None else None)
 
@@ -94,5 +94,5 @@ class ChatState:
         self._params.tool_choice = \
             ToolChoice(tools.tool_choice_mode, tools.tool_choice_name, list(tools.tools))
 
-    def __call__(self) -> ApiParams:
+    def __call__(self) -> ApiStates:
         return self._params

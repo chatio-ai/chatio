@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 class ApiFormat[
     SystemContent,
     MessageContent,
-    PredictionContent,
+    ChatPrediction,
     TextMessage,
     ImageMessage,
     ToolDefinition,
@@ -32,7 +32,7 @@ class ApiFormat[
         ...
 
     @abstractmethod
-    def prediction_content(self, content: TextMessage) -> PredictionContent | None:
+    def prediction_content(self, content: TextMessage) -> ChatPrediction | None:
         ...
 
     @abstractmethod

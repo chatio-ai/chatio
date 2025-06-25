@@ -83,10 +83,7 @@ class ChatBase:
         while calls:
             calls = 0
 
-            events = self._client.iterate_model_events(
-                model=self._model.model,
-                params=self._state(),
-            )
+            events = self._client.iterate_model_events(model=self._model.model, states=self._state())
 
             for event in events:
                 match event:
@@ -117,10 +114,7 @@ class ChatBase:
         if content:
             self._state.commit_input_message(content)
 
-        return self._client.count_message_tokens(
-            model=self._model.model,
-            params=self._state(),
-        )
+        return self._client.count_message_tokens(model=self._model.model, states=self._state())
 
     def info(self) -> ChatInfo:
         return ChatInfo(
