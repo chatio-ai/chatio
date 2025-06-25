@@ -2,39 +2,29 @@
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
+from chatio.core.params import PredictMessage
+from chatio.core.params import SystemMessage
+from chatio.core.params import OutputMessage
+from chatio.core.params import InputMessage
+
+from chatio.core.params import ImageDocument
+from chatio.core.params import CallResponse
+from chatio.core.params import CallRequest
+
+from chatio.core.params import ToolSchema
+from chatio.core.params import ToolChoice
+
 from chatio.core.params import ApiParams
 
-from chatio.core import ApiIfaces
 
-
-class ChatState[
-    SystemContent,
-    MessageContent,
-    PredictionContent,
-    TextMessage,
-    ImageMessage,
-    ToolDefinition,
-    ToolDefinitions,
-    ToolSelection,
-]:
+class ChatState:
 
     def __init__(
             self,
-            api: ApiIfaces[
-                SystemContent,
-                MessageContent,
-                PredictionContent,
-                TextMessage,
-                ImageMessage,
-                ToolDefinition,
-                ToolDefinitions,
-                ToolSelection,
-            ],
             state: StateConfig | None = None,
             tools: ToolsConfig | None = None):
 
-        self._api = api
-        self._params = api.params
+        self._params = ApiParams()
 
         self.update_system_message(state.system if state is not None else None)
 
@@ -45,26 +35,24 @@ class ChatState[
     # messages
 
     def commit_input_message(self, message: str) -> None:
-        self._params.messages.append(self._api.format.input_message(message))
+        self._params.messages.append(InputMessage(message))
 
     def commit_output_message(self, message: str) -> None:
-        self._params.messages.append(self._api.format.input_message(message))
+        self._params.messages.append(OutputMessage(message))
 
     def commit_call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> None:
-        self._params.messages.append(self._api.format.call_request(tool_call_id, tool_name, tool_input))
+        self._params.messages.append(CallRequest(tool_call_id, tool_name, tool_input))
 
     def commit_call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> None:
-        self._params.messages.append(self._api.format.call_response(tool_call_id, tool_name, tool_output))
+        self._params.messages.append(CallResponse(tool_call_id, tool_name, tool_output))
 
     def attach_image_document(self, blob: bytes, mimetype: str) -> None:
-        self._params.messages.append(self._api.format.image_document(blob, mimetype))
+        self._params.messages.append(ImageDocument(blob, mimetype))
 
     def update_system_message(self, message: str | None) -> None:
-        if not message:
-            self._params.system = None
-            return
-
-        self._params.system = self._api.format.system_content(self._api.format.text_chunk(message))
+        self._params.system = None
+        if message is not None:
+            self._params.system = SystemMessage(message)
 
     def setup_message_history(self, messages: list[str] | None) -> None:
         if messages is None:
@@ -76,23 +64,18 @@ class ChatState[
             else:
                 self.commit_output_message(message)
 
-    def touch_message_history(self):
-        self._params.messages = self._api.format.chat_messages(self._params.messages)
-
     def use_prediction_content(self, message: str | None) -> None:
-        if message is None:
-            self._params.prediction = None
-            return
-
-        self._params.prediction = self._api.format.prediction_content(self._api.format.text_chunk(message))
+        self._params.predict = None
+        if message is not None:
+            self._params.predict = PredictMessage(message)
 
     # functions
 
     def setup_tool_definitions(self, tools: ToolsConfig | None) -> None:
         if tools is None:
-            tools = ToolsConfig()
+            return
 
-        _tool_definitions = []
+        self._params.tools = []
 
         if tools.tools is None:
             tools.tools = {}
@@ -104,40 +87,12 @@ class ChatState[
             if not name or not desc or not schema:
                 raise RuntimeError
 
-            _tool_definitions.append(self._api.format.tool_definition(name, desc, schema))
-
             self._params.funcs[name] = tool
 
-        self._params.tools = self._api.format.tool_definitions(_tool_definitions)
+            self._params.tools.append(ToolSchema(name, desc, schema))
 
-        self._params.tool_choice = self.setup_tool_selection(tools)
-
-    def setup_tool_selection(self, tools: ToolsConfig):
-        if not tools.tool_choice_mode and not tools.tool_choice_name:
-            return None
-
-        if not tools.tools:
-            raise ValueError
-
-        if not tools.tool_choice_name:
-            match tools.tool_choice_mode:
-                case 'none':
-                    return self._api.format.tool_selection_none()
-                case 'auto':
-                    return self._api.format.tool_selection_auto()
-                case 'any':
-                    return self._api.format.tool_selection_any()
-                case _:
-                    raise ValueError
-        else:
-            if tools.tool_choice_name not in tools.tools:
-                raise ValueError
-
-            match tools.tool_choice_mode:
-                case 'name':
-                    return self._api.format.tool_selection_name(tools.tool_choice_name)
-                case _:
-                    raise ValueError
+        self._params.tool_choice = \
+            ToolChoice(tools.tool_choice_mode, tools.tool_choice_name, list(tools.tools))
 
     def __call__(self) -> ApiParams:
         return self._params

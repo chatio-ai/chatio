@@ -12,7 +12,7 @@ from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
-from chatio.core import ApiIfaces
+from chatio.core.client import ApiClient
 
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
@@ -30,47 +30,21 @@ class ChatInfo:
     messages: int
 
 
-class ChatBase[
-    SystemContent,
-    MessageContent,
-    PredictionContent,
-    TextMessage,
-    ImageMessage,
-    ToolDefinition,
-    ToolDefinitions,
-    ToolSelection,
-]:
+class ChatBase:
 
     def __init__(
-            self,
-            api: ApiIfaces[
-                SystemContent,
-                MessageContent,
-                PredictionContent,
-                TextMessage,
-                ImageMessage,
-                ToolDefinition,
-                ToolDefinitions,
-                ToolSelection,
-            ],
-            model: ModelConfig,
-            state: StateConfig | None = None,
-            tools: ToolsConfig | None = None) -> None:
+        self,
+        client: ApiClient,
+        model: ModelConfig,
+        state: StateConfig | None = None,
+        tools: ToolsConfig | None = None,
+    ) -> None:
 
-        self._api = api
+        self._client = client
 
         self._model = model
 
-        self._state: ChatState[
-            SystemContent,
-            MessageContent,
-            PredictionContent,
-            TextMessage,
-            ImageMessage,
-            ToolDefinition,
-            ToolDefinitions,
-            ToolSelection,
-        ] = ChatState(api, state, tools)
+        self._state = ChatState(state, tools)
 
         self._usage = ChatUsage()
 
@@ -109,9 +83,7 @@ class ChatBase[
         while calls:
             calls = 0
 
-            self._state.touch_message_history()
-
-            events = self._api.client.iterate_model_events(
+            events = self._client.iterate_model_events(
                 model=self._model.model,
                 params=self._state(),
             )
@@ -145,7 +117,7 @@ class ChatBase[
         if content:
             self._state.commit_input_message(content)
 
-        return self._api.client.count_message_tokens(
+        return self._client.count_message_tokens(
             model=self._model.model,
             params=self._state(),
         )

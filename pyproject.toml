@@ -36,7 +36,7 @@ disable = [
 ]
 
 [tool.pylint.similarities]
-min-similarity-lines = 9
+min-similarity-lines = 35
 
 [tool.pyright]
 analyzeUnannotatedFunctions = true

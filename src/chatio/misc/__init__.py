@@ -14,15 +14,15 @@ from chatio.core.config import ApiConfig
 
 from chatio.api.claude.config import ClaudeConfigOptions
 from chatio.api.claude.config import ClaudeConfig
-from chatio.api.claude import ClaudeApi
+from chatio.api.claude.client import ClaudeClient
 
 from chatio.api.google.config import GoogleConfigOptions
 from chatio.api.google.config import GoogleConfig
-from chatio.api.google import GoogleApi
+from chatio.api.google.client import GoogleClient
 
 from chatio.api.openai.config import OpenAIConfigOptions
 from chatio.api.openai.config import OpenAIConfig
-from chatio.api.openai import OpenAIApi
+from chatio.api.openai.client import OpenAIClient
 
 from chatio.chat import ChatBase
 
@@ -110,15 +110,15 @@ def build_chat(
         case 'claude':
             options = ClaudeConfigOptions(**options_data)
             config = ClaudeConfig(**config_data, options=options)
-            return ChatBase(ClaudeApi(config), model, state, tools)
+            return ChatBase(ClaudeClient(config), model, state, tools)
         case 'google':
             options = GoogleConfigOptions(**options_data)
             config = GoogleConfig(**config_data, options=options)
-            return ChatBase(GoogleApi(config), model, state, tools)
+            return ChatBase(GoogleClient(config), model, state, tools)
         case 'openai':
             options = OpenAIConfigOptions(**options_data)
             config = OpenAIConfig(**config_data, options=options)
-            return ChatBase(OpenAIApi(config), model, state, tools)
+            return ChatBase(OpenAIClient(config), model, state, tools)
         case _:
             err_msg = f"api class not supported: {api_class}"
             raise RuntimeError(err_msg)

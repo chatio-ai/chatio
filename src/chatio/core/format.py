@@ -85,3 +85,30 @@ class ApiFormat[
     @abstractmethod
     def tool_selection_name(self, tool_name: str) -> ToolSelection | None:
         ...
+
+    def tool_selection(self, tool_choice_mode: str | None, tool_choice_name: str | None, tools: list[str]):
+        if not tool_choice_mode and not tool_choice_name:
+            return None
+
+        if not tools:
+            raise ValueError
+
+        if not tool_choice_name:
+            match tool_choice_mode:
+                case 'none':
+                    return self.tool_selection_none()
+                case 'auto':
+                    return self.tool_selection_auto()
+                case 'any':
+                    return self.tool_selection_any()
+                case _:
+                    raise ValueError
+        else:
+            if tool_choice_name not in tools:
+                raise ValueError
+
+            match tool_choice_mode:
+                case 'name':
+                    return self.tool_selection_name(tool_choice_name)
+                case _:
+                    raise ValueError

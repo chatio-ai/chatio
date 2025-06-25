@@ -7,13 +7,8 @@ from typing import override
 from google.genai import Client
 from google.genai.types import HttpOptions
 
-from google.genai.types import ContentDict
-from google.genai.types import ToolListUnionDict
-from google.genai.types import ToolConfigDict
-
 
 from chatio.core.client import ApiClient
-from chatio.core.config import ApiConfig
 from chatio.core.params import ApiParams
 
 from chatio.core.events import ChatEvent
@@ -21,58 +16,40 @@ from chatio.core.events import ChatEvent
 from chatio.api.helper.httpx import httpx_args
 
 
+from .config import GoogleConfig
+from .format import GoogleFormat
+from .params import GoogleParams
 from .events import _pump
 
 
-class GoogleClient(ApiClient[
-    ContentDict,
-    ContentDict,
-    None,
-    ToolListUnionDict,
-    ToolConfigDict,
-]):
+class GoogleClient(ApiClient):
 
-    def __init__(self, config: ApiConfig):
+    def __init__(self, config: GoogleConfig):
         self._client = Client(
             # base_url=config.api_url,
             api_key=config.api_key,
             http_options=HttpOptions(client_args=httpx_args()))
 
+        self._format = GoogleFormat(config)
+
     # streams
 
     @override
-    def iterate_model_events(
-        self, model: str,
-        params: ApiParams[
-            ContentDict,
-            ContentDict,
-            None,
-            ToolListUnionDict,
-            ToolConfigDict,
-        ],
-    ) -> Iterator[ChatEvent]:
+    def iterate_model_events(self, model: str, params: ApiParams) -> Iterator[ChatEvent]:
+        _params = GoogleParams(params, self._format)
         return _pump(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
                 'max_output_tokens': 4096,
-                'tools': params.tools,
-                'system_instruction': params.system,
-                'tool_config': params.tool_choice,
+                'tools': _params.tools,
+                'system_instruction': _params.system,
+                'tool_config': _params.tool_choice,
             },
-            contents=params.messages,
+            contents=_params.messages,
         ))
 
     # helpers
 
     @override
-    def count_message_tokens(
-        self, model: str,
-        params: ApiParams[
-            ContentDict,
-            ContentDict,
-            None,
-            ToolListUnionDict,
-            ToolConfigDict,
-        ],
-    ) -> int:
+    def count_message_tokens(self, model: str, params: ApiParams) -> int:
         raise NotImplementedError

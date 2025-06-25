@@ -9,15 +9,7 @@ from httpx import Client as HttpxClient
 from anthropic import Anthropic
 from anthropic import NOT_GIVEN
 
-from anthropic.types import MessageParam
-
-from anthropic.types import ToolParam
-from anthropic.types import ToolChoiceParam
-from anthropic.types import TextBlockParam
-
-
 from chatio.core.client import ApiClient
-from chatio.core.config import ApiConfig
 from chatio.core.params import ApiParams
 
 from chatio.core.events import ChatEvent
@@ -26,65 +18,46 @@ from chatio.core.events import ChatEvent
 from chatio.api.helper.httpx import httpx_args
 
 
+from .config import ClaudeConfig
+from .format import ClaudeFormat
+from .params import ClaudeParams
 from .events import _pump
 
 
-class ClaudeClient(ApiClient[
-    TextBlockParam,
-    MessageParam,
-    None,
-    list[ToolParam],
-    ToolChoiceParam,
-]):
+class ClaudeClient(ApiClient):
 
     @override
-    def __init__(self, config: ApiConfig) -> None:
+    def __init__(self, config: ClaudeConfig) -> None:
         self._client = Anthropic(
             base_url=config.api_url,
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
+        self._format = ClaudeFormat(config)
+
     # streams
 
     @override
-    def iterate_model_events(
-        self, model: str,
-        params: ApiParams[
-            TextBlockParam,
-            MessageParam,
-            None,
-            list[ToolParam],
-            ToolChoiceParam,
-        ],
-    ) -> Iterator[ChatEvent]:
-
+    def iterate_model_events(self, model: str, params: ApiParams) -> Iterator[ChatEvent]:
+        _params = ClaudeParams(params, self._format)
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
-            tools=params.tools if params.tools is not None else NOT_GIVEN,
-            system=[params.system] if params.system is not None else NOT_GIVEN,
-            messages=params.messages,
-            tool_choice=params.tool_choice if params.tool_choice is not None else NOT_GIVEN,
+            tools=_params.tools if _params.tools is not None else NOT_GIVEN,
+            system=[_params.system] if _params.system is not None else NOT_GIVEN,
+            messages=_params.messages,
+            tool_choice=_params.tool_choice if _params.tool_choice is not None else NOT_GIVEN,
         ))
 
     # helpers
 
     @override
-    def count_message_tokens(
-        self, model: str,
-        params: ApiParams[
-            TextBlockParam,
-            MessageParam,
-            None,
-            list[ToolParam],
-            ToolChoiceParam,
-        ],
-    ) -> int:
-
+    def count_message_tokens(self, model: str, params: ApiParams) -> int:
+        _params = ClaudeParams(params, self._format)
         return self._client.messages.count_tokens(
             model=model,
-            tools=params.tools if params.tools is not None else NOT_GIVEN,
-            system=[params.system] if params.system is not None else NOT_GIVEN,
-            messages=params.messages,
-            tool_choice=params.tool_choice if params.tool_choice is not None else NOT_GIVEN,
+            tools=_params.tools if _params.tools is not None else NOT_GIVEN,
+            system=[_params.system] if _params.system is not None else NOT_GIVEN,
+            messages=_params.messages,
+            tool_choice=_params.tool_choice if _params.tool_choice is not None else NOT_GIVEN,
         ).input_tokens

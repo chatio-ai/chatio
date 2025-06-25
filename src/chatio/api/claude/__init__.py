@@ -13,7 +13,6 @@ from chatio.core import ApiIfaces
 
 
 from .config import ClaudeConfig
-from .params import ClaudeParams
 from .format import ClaudeFormat
 from .client import ClaudeClient
 
@@ -32,7 +31,6 @@ class ClaudeApi(ApiIfaces[
     def __init__(self, config: ClaudeConfig) -> None:
         self._config = config
 
-        self._params = ClaudeParams()
         self._format = ClaudeFormat(config)
         self._client = ClaudeClient(config)
 
@@ -40,11 +38,6 @@ class ClaudeApi(ApiIfaces[
     @override
     def config(self) -> ClaudeConfig:
         return self._config
-
-    @property
-    @override
-    def params(self) -> ClaudeParams:
-        return self._params
 
     @property
     @override
