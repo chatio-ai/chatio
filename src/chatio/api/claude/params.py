@@ -8,11 +8,11 @@ from anthropic.types import ToolChoiceParam
 from anthropic.types import TextBlockParam
 
 
-from chatio.core.mapper import ApiParams
+from chatio.core.params import ApiParamsBase
 
 
 @dataclass
-class ClaudeParams(ApiParams[
+class ClaudeParams(ApiParamsBase[
     TextBlockParam,
     MessageParam,
     list[ToolParam],

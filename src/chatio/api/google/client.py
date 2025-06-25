@@ -8,9 +8,9 @@ from google.genai import Client
 from google.genai.types import HttpOptions
 
 
-from chatio.core.client import ApiClient
+from chatio.core.params import ApiParams
 from chatio.core.mapper import ApiMapper
-from chatio.core.params import ApiStates
+from chatio.core.client import ApiClient
 
 from chatio.core.events import ChatEvent
 
@@ -36,8 +36,8 @@ class GoogleClient(ApiClient):
     # streams
 
     @override
-    def iterate_model_events(self, model: str, states: ApiStates) -> Iterator[ChatEvent]:
-        _params = self._mapper.map(states)
+    def iterate_model_events(self, model: str, params: ApiParams) -> Iterator[ChatEvent]:
+        _params = self._mapper(params)
         return _pump(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
@@ -52,5 +52,5 @@ class GoogleClient(ApiClient):
     # helpers
 
     @override
-    def count_message_tokens(self, model: str, states: ApiStates) -> int:
+    def count_message_tokens(self, model: str, params: ApiParams) -> int:
         raise NotImplementedError

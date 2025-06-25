@@ -1,7 +1,7 @@
 
 from collections.abc import Callable
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -69,18 +69,26 @@ class ToolChoice:
 
 
 @dataclass
-class ApiStates:
-    system: SystemMessage | None
-    messages: list[ContentEntry]
-    predict: PredictMessage | None
-    funcs: dict[str, Callable]
-    tools: list[ToolSchema] | None
-    tool_choice: ToolChoice | None
+class ApiParamsBase[
+    SystemContent,
+    MessageContent,
+    ToolDefinitions,
+    ToolSelection,
+    ChatPrediction,
+]:
+    system: SystemContent | None = None
+    messages: list[MessageContent] = field(default_factory=list)
+    predict: ChatPrediction | None = None
+    tools: ToolDefinitions | None = None
+    tool_choice: ToolSelection | None = None
 
-    def __init__(self):
-        self.system = None
-        self.messages = []
-        self.prediction = None
-        self.funcs = {}
-        self.tools = None
-        self.tool_choice = None
+
+@dataclass
+class ApiParams(ApiParamsBase[
+    SystemMessage,
+    ContentEntry,
+    list[ToolSchema],
+    ToolChoice,
+    PredictMessage,
+]):
+    funcs: dict[str, Callable] = field(default_factory=dict)
