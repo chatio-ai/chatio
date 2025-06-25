@@ -38,6 +38,8 @@ class GoogleClient(ApiClient[
             api_key=config.api_key,
             http_options=HttpOptions(client_args=httpx_args()))
 
+    # streams
+
     @override
     def iterate_model_events(
         self, model: str,
@@ -59,6 +61,8 @@ class GoogleClient(ApiClient[
             },
             contents=params.messages,
         ))
+
+    # helpers
 
     @override
     def count_message_tokens(

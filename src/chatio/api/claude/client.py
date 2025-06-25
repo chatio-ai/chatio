@@ -44,7 +44,7 @@ class ClaudeClient(ApiClient[
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
-    # events
+    # streams
 
     @override
     def iterate_model_events(

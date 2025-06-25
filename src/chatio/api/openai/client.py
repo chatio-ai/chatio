@@ -42,7 +42,7 @@ class OpenAIClient(ApiClient[
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
-    # events
+    # streams
 
     @override
     def iterate_model_events(
@@ -64,6 +64,8 @@ class OpenAIClient(ApiClient[
             tool_choice=params.tool_choice if params.tool_choice is not None else NOT_GIVEN,
             prediction=params.prediction if params.prediction is not None else NOT_GIVEN,
         ))
+
+    # helpers
 
     @override
     def count_message_tokens(
