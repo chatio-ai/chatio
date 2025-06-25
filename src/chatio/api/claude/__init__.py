@@ -9,7 +9,7 @@ from anthropic.types import TextBlockParam
 from anthropic.types import ImageBlockParam
 
 
-from chatio.core import ApiHelper
+from chatio.core import ApiIfaces
 
 
 from .config import ClaudeConfig
@@ -18,7 +18,7 @@ from .format import ClaudeFormat
 from .client import ClaudeClient
 
 
-class ClaudeApi(ApiHelper[
+class ClaudeApi(ApiIfaces[
     TextBlockParam,
     MessageParam,
     None,

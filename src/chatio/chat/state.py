@@ -4,7 +4,7 @@ from chatio.core.config import ToolsConfig
 
 from chatio.core.params import ApiParams
 
-from chatio.core import ApiHelper
+from chatio.core import ApiIfaces
 
 
 class ChatState[
@@ -20,7 +20,7 @@ class ChatState[
 
     def __init__(
             self,
-            api: ApiHelper[
+            api: ApiIfaces[
                 SystemContent,
                 MessageContent,
                 PredictionContent,

@@ -8,7 +8,7 @@ from google.genai.types import ToolListUnionDict
 from google.genai.types import FunctionDeclarationDict
 
 
-from chatio.core import ApiHelper
+from chatio.core import ApiIfaces
 
 
 from .config import GoogleConfig
@@ -17,7 +17,7 @@ from .format import GoogleFormat
 from .client import GoogleClient
 
 
-class GoogleApi(ApiHelper[
+class GoogleApi(ApiIfaces[
     ContentDict,
     ContentDict,
     None,

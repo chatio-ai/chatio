@@ -7,7 +7,7 @@ from .format import ApiFormat
 from .client import ApiClient
 
 
-class ApiHelper[
+class ApiIfaces[
     SystemContent,
     MessageContent,
     PredictionContent,

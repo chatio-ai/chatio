@@ -9,7 +9,7 @@ from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
-from chatio.core import ApiHelper
+from chatio.core import ApiIfaces
 
 
 from .config import OpenAIConfig
@@ -18,7 +18,7 @@ from .format import OpenAIFormat
 from .client import OpenAIClient
 
 
-class OpenAIApi(ApiHelper[
+class OpenAIApi(ApiIfaces[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
     ChatCompletionPredictionContentParam,

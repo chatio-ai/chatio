@@ -12,7 +12,7 @@ from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
-from chatio.core import ApiHelper
+from chatio.core import ApiIfaces
 
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
@@ -43,7 +43,7 @@ class ChatBase[
 
     def __init__(
             self,
-            api: ApiHelper[
+            api: ApiIfaces[
                 SystemContent,
                 MessageContent,
                 PredictionContent,
