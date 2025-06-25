@@ -20,35 +20,35 @@ from chatio.core.format import ApiFormat
 
 
 class ApiMapper[
-    SystemContent,
-    MessageContent,
-    ChatPrediction,
-    TextMessage,
-    ImageMessage,
-    ToolDefinition,
-    ToolDefinitions,
-    ToolSelection,
+    SystemContentT,
+    MessageContentT,
+    ChatPredictionT,
+    TextMessageT,
+    ImageDocumentT,
+    ToolDefinitionT,
+    ToolDefinitionsT,
+    ToolSelectionT,
 ]:
 
     def __init__(self, formatter: ApiFormat[
-        SystemContent,
-        MessageContent,
-        ChatPrediction,
-        TextMessage,
-        ImageMessage,
-        ToolDefinition,
-        ToolDefinitions,
-        ToolSelection,
+        SystemContentT,
+        MessageContentT,
+        ChatPredictionT,
+        TextMessageT,
+        ImageDocumentT,
+        ToolDefinitionT,
+        ToolDefinitionsT,
+        ToolSelectionT,
     ]):
         self._format = formatter
 
-    def _system(self, message: SystemMessage | None) -> SystemContent | None:
+    def _system(self, message: SystemMessage | None) -> SystemContentT | None:
         if message is None:
             return None
 
         return self._format.system_content(self._format.text_chunk(message.text))
 
-    def _messages(self, messages: list[ContentEntry]) -> list[MessageContent]:
+    def _messages(self, messages: list[ContentEntry]) -> list[MessageContentT]:
         _messages = []
 
         for message in messages:
@@ -68,7 +68,7 @@ class ApiMapper[
 
         return self._format.chat_messages(_messages)
 
-    def _tools(self, tools: list[ToolSchema] | None) -> ToolDefinitions | None:
+    def _tools(self, tools: list[ToolSchema] | None) -> ToolDefinitionsT | None:
         if tools is None:
             return None
 
@@ -76,24 +76,24 @@ class ApiMapper[
 
         return self._format.tool_definitions(_tools)
 
-    def _tool_choice(self, tool_choice: ToolChoice | None) -> ToolSelection | None:
+    def _tool_choice(self, tool_choice: ToolChoice | None) -> ToolSelectionT | None:
         if tool_choice is None:
             return None
 
         return self._format.tool_selection(tool_choice.mode, tool_choice.name, tool_choice.tools)
 
-    def _predict(self, message: PredictMessage | None) -> ChatPrediction | None:
+    def _predict(self, message: PredictMessage | None) -> ChatPredictionT | None:
         if message is None:
             return None
 
         return self._format.prediction_content(self._format.text_chunk(message.text))
 
     def map(self, params: ApiParams) -> ApiParamsBase[
-        SystemContent,
-        MessageContent,
-        ToolDefinitions,
-        ToolSelection,
-        ChatPrediction,
+        SystemContentT,
+        MessageContentT,
+        ToolDefinitionsT,
+        ToolSelectionT,
+        ChatPredictionT,
     ]:
         return ApiParamsBase(
             system=self._system(params.system),
@@ -104,10 +104,10 @@ class ApiMapper[
         )
 
     def __call__(self, params: ApiParams) -> ApiParamsBase[
-        SystemContent,
-        MessageContent,
-        ToolDefinitions,
-        ToolSelection,
-        ChatPrediction,
+        SystemContentT,
+        MessageContentT,
+        ToolDefinitionsT,
+        ToolSelectionT,
+        ChatPredictionT,
     ]:
         return self.map(params)

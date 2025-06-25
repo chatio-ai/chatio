@@ -53,6 +53,12 @@ class ImageDocument(ContentEntry):
 
 
 @dataclass
+class TextDocument(ContentEntry):
+    text: str
+    mimetype: str
+
+
+@dataclass
 class ToolSchema:
     name: str
     desc: str

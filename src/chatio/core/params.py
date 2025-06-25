@@ -13,17 +13,17 @@ from .models import PredictMessage
 
 @dataclass
 class ApiParamsBase[
-    SystemContent,
-    MessageContent,
-    ToolDefinitions,
-    ToolSelection,
-    ChatPrediction,
+    SystemContentT,
+    MessageContentT,
+    ToolDefinitionsT,
+    ToolSelectionT,
+    ChatPredictionT,
 ]:
-    system: SystemContent | None = None
-    messages: list[MessageContent] = field(default_factory=list)
-    predict: ChatPrediction | None = None
-    tools: ToolDefinitions | None = None
-    tool_choice: ToolSelection | None = None
+    system: SystemContentT | None = None
+    messages: list[MessageContentT] = field(default_factory=list)
+    predict: ChatPredictionT | None = None
+    tools: ToolDefinitionsT | None = None
+    tool_choice: ToolSelectionT | None = None
 
 
 @dataclass
