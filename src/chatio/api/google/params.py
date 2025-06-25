@@ -6,7 +6,7 @@ from google.genai.types import ToolListUnionDict
 from google.genai.types import ToolConfigDict
 
 
-from chatio.core.params import ApiParams
+from chatio.core.mapper import ApiParams
 
 
 @dataclass

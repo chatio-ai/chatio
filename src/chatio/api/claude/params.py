@@ -8,7 +8,7 @@ from anthropic.types import ToolChoiceParam
 from anthropic.types import TextBlockParam
 
 
-from chatio.core.params import ApiParams
+from chatio.core.mapper import ApiParams
 
 
 @dataclass

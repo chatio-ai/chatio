@@ -9,8 +9,8 @@ from google.genai.types import HttpOptions
 
 
 from chatio.core.client import ApiClient
+from chatio.core.mapper import ApiMapper
 from chatio.core.params import ApiStates
-from chatio.core.params import ApiMapper
 
 from chatio.core.events import ChatEvent
 
