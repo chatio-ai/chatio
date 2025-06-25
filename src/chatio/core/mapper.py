@@ -1,17 +1,17 @@
 
-from chatio.core.params import PredictMessage
-from chatio.core.params import SystemMessage
-from chatio.core.params import OutputMessage
-from chatio.core.params import InputMessage
+from chatio.core.models import PredictMessage
+from chatio.core.models import SystemMessage
+from chatio.core.models import OutputMessage
+from chatio.core.models import InputMessage
 
-from chatio.core.params import ImageDocument
-from chatio.core.params import CallResponse
-from chatio.core.params import CallRequest
+from chatio.core.models import ImageDocument
+from chatio.core.models import CallResponse
+from chatio.core.models import CallRequest
 
-from chatio.core.params import ToolSchema
-from chatio.core.params import ToolChoice
+from chatio.core.models import ToolSchema
+from chatio.core.models import ToolChoice
 
-from chatio.core.params import ContentEntry
+from chatio.core.models import ContentEntry
 
 from chatio.core.params import ApiParamsBase
 from chatio.core.params import ApiParams
