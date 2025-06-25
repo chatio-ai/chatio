@@ -7,6 +7,8 @@ from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
 from openai.types.chat import ChatCompletionPredictionContentParam
+from openai.types.chat.chat_completion_content_part_param import File
+
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
@@ -17,7 +19,7 @@ from .config import OpenAIConfig
 
 
 type _ChatCompletionContentPartParam = \
-    ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam
+    ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam | File
 
 
 class OpenAIFormat(ApiFormat[
@@ -26,6 +28,7 @@ class OpenAIFormat(ApiFormat[
     ChatCompletionPredictionContentParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
+    File,
     ChatCompletionToolParam,
     list[ChatCompletionToolParam],
     ChatCompletionToolChoiceOptionParam,
@@ -41,20 +44,31 @@ class OpenAIFormat(ApiFormat[
         return messages
 
     @override
-    def text_chunk(self, text: str) -> ChatCompletionContentPartTextParam:
+    def text_message(self, text: str) -> ChatCompletionContentPartTextParam:
         return {
             "type": "text",
             "text": text,
         }
 
     @override
-    def image_blob(self, blob: bytes, mimetype: str) -> ChatCompletionContentPartImageParam:
+    def image_document_blob(self, blob: bytes, mimetype: str) -> ChatCompletionContentPartImageParam:
         data = base64.b64encode(blob).decode('ascii')
 
         return {
             "type": "image_url",
             "image_url": {
                 "url": f"data:{mimetype};base64,{data}",
+            },
+        }
+
+    @override
+    def text_document_chunk(self, text: str, mimetype: str) -> File:
+        data = base64.b64encode(text.encode()).decode('ascii')
+
+        return {
+            "type": "file",
+            "file": {
+                "file_data": f"{data}",
             },
         }
 
@@ -185,7 +199,7 @@ class OpenAIFormat(ApiFormat[
     def tool_selection_any(self) -> ChatCompletionToolChoiceOptionParam | None:
         return 'required'
 
-    @override
+    # @override
     def tool_selection_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam | None:
         return {
             "type": 'function',

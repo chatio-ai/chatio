@@ -5,6 +5,7 @@ from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
 
 from chatio.core.models import ImageDocument
+from chatio.core.models import TextDocument
 from chatio.core.models import CallResponse
 from chatio.core.models import CallRequest
 
@@ -25,6 +26,7 @@ class ApiMapper[
     ChatPredictionT,
     TextMessageT,
     ImageDocumentT,
+    TextDocumentT,
     ToolDefinitionT,
     ToolDefinitionsT,
     ToolSelectionT,
@@ -36,6 +38,7 @@ class ApiMapper[
         ChatPredictionT,
         TextMessageT,
         ImageDocumentT,
+        TextDocumentT,
         ToolDefinitionT,
         ToolDefinitionsT,
         ToolSelectionT,
@@ -46,7 +49,7 @@ class ApiMapper[
         if message is None:
             return None
 
-        return self._format.system_content(self._format.text_chunk(message.text))
+        return self._format.system_content(self._format.text_message(message.text))
 
     def _messages(self, messages: list[ContentEntry]) -> list[MessageContentT]:
         _messages = []
@@ -61,6 +64,8 @@ class ApiMapper[
                     _messages.append(self._format.call_request(tool_call_id, tool_name, tool_input))
                 case CallResponse(tool_call_id, tool_name, tool_output):
                     _messages.append(self._format.call_response(tool_call_id, tool_name, tool_output))
+                case TextDocument(text, mimetype):
+                    _messages.append(self._format.text_document(text, mimetype))
                 case ImageDocument(blob, mimetype):
                     _messages.append(self._format.image_document(blob, mimetype))
                 case _:
@@ -86,7 +91,7 @@ class ApiMapper[
         if message is None:
             return None
 
-        return self._format.prediction_content(self._format.text_chunk(message.text))
+        return self._format.prediction_content(self._format.text_message(message.text))
 
     def map(self, params: ApiParams) -> ApiParamsBase[
         SystemContentT,

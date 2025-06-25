@@ -5,12 +5,15 @@ from typing import override
 
 from anthropic.types import MessageParam
 
-from anthropic.types import ToolParam
-from anthropic.types import ToolChoiceParam
 from anthropic.types import TextBlockParam
 from anthropic.types import ImageBlockParam
+from anthropic.types import DocumentBlockParam
+
 from anthropic.types import ToolUseBlockParam
 from anthropic.types import ToolResultBlockParam
+
+from anthropic.types import ToolParam
+from anthropic.types import ToolChoiceParam
 
 
 from chatio.core.format import ApiFormat
@@ -18,7 +21,7 @@ from chatio.core.format import ApiFormat
 from .config import ClaudeConfig
 
 
-type _ContentBlockParamBase = TextBlockParam | ImageBlockParam
+type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
 type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
 type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
@@ -29,6 +32,7 @@ class ClaudeFormat(ApiFormat[
     None,
     TextBlockParam,
     ImageBlockParam,
+    DocumentBlockParam,
     ToolParam,
     list[ToolParam],
     ToolChoiceParam,
@@ -63,7 +67,7 @@ class ClaudeFormat(ApiFormat[
                     raise TypeError
 
                 match entry['type']:
-                    case 'text' | 'image' | 'tool_use' | 'tool_result':
+                    case 'text' | 'image' | 'document' | 'tool_use' | 'tool_result':
                         entry.pop('cache_control', None)
                         last_entry = entry
                     case _:
@@ -85,14 +89,14 @@ class ClaudeFormat(ApiFormat[
         return self._setup_messages_cache(messages)
 
     @override
-    def text_chunk(self, text: str) -> TextBlockParam:
+    def text_message(self, text: str) -> TextBlockParam:
         return {
             "type": "text",
             "text": text,
         }
 
     @override
-    def image_blob(self, blob: bytes, mimetype: str) -> ImageBlockParam:
+    def image_document_blob(self, blob: bytes, mimetype: str) -> ImageBlockParam:
         match mimetype:
             case 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp':
                 pass
@@ -107,6 +111,23 @@ class ClaudeFormat(ApiFormat[
                 "type": "base64",
                 "media_type": mimetype,
                 "data": data,
+            },
+        }
+
+    @override
+    def text_document_chunk(self, text: str, mimetype: str) -> DocumentBlockParam:
+        match mimetype:
+            case 'text/plain':
+                pass
+            case _:
+                raise ValueError
+
+        return {
+            "type": "document",
+            "source": {
+                "type": "text",
+                "media_type": "text/plain",
+                "data": text,
             },
         }
 
@@ -194,7 +215,7 @@ class ClaudeFormat(ApiFormat[
             "type": 'any',
         }
 
-    @override
+    # @override
     def tool_selection_name(self, tool_name: str) -> ToolChoiceParam | None:
         return {
             "type": 'tool',

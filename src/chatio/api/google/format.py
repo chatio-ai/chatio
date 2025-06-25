@@ -23,6 +23,7 @@ class GoogleFormat(ApiFormat[
     None,
     PartDict,
     PartDict,
+    PartDict,
     FunctionDeclarationDict,
     ToolListUnionDict,
     ToolConfigDict,
@@ -38,13 +39,22 @@ class GoogleFormat(ApiFormat[
         return messages
 
     @override
-    def text_chunk(self, text: str) -> PartDict:
+    def text_message(self, text: str) -> PartDict:
         return {
             "text": text,
         }
 
     @override
-    def image_blob(self, blob: bytes, mimetype: str) -> PartDict:
+    def text_document_chunk(self, text: str, mimetype: str) -> PartDict:
+        return {
+            "inline_data": {
+                "mime_type": mimetype,
+                "data": text.encode(),
+            },
+        }
+
+    @override
+    def image_document_blob(self, blob: bytes, mimetype: str) -> PartDict:
         return {
             "inline_data": {
                 "mime_type": mimetype,
@@ -166,7 +176,7 @@ class GoogleFormat(ApiFormat[
             },
         }
 
-    @override
+    # @override
     def tool_selection_name(self, tool_name: str) -> ToolConfigDict | None:
         return {
             "function_calling_config": {

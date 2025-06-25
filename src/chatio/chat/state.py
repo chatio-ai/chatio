@@ -8,6 +8,7 @@ from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
 
 from chatio.core.models import ImageDocument
+from chatio.core.models import TextDocument
 from chatio.core.models import CallResponse
 from chatio.core.models import CallRequest
 
@@ -48,6 +49,9 @@ class ChatState:
 
     def attach_image_document(self, blob: bytes, mimetype: str) -> None:
         self._params.messages.append(ImageDocument(blob, mimetype))
+
+    def attach_text_document(self, text: str, mimetype: str) -> None:
+        self._params.messages.append(TextDocument(text, mimetype))
 
     def update_system_message(self, message: str | None) -> None:
         self._params.system = None

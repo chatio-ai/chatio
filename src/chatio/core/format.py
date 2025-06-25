@@ -8,6 +8,7 @@ class ApiFormat[
     ChatPredictionT,
     TextMessageT,
     ImageDocumentT,
+    TextDocumentT,
     ToolDefinitionT,
     ToolDefinitionsT,
     ToolSelectionT,
@@ -20,11 +21,15 @@ class ApiFormat[
         ...
 
     @abstractmethod
-    def text_chunk(self, text: str) -> TextMessageT:
+    def text_message(self, text: str) -> TextMessageT:
         ...
 
     @abstractmethod
-    def image_blob(self, blob: bytes, mimetype: str) -> ImageDocumentT:
+    def text_document_chunk(self, text: str, mimetype: str) -> TextDocumentT:
+        ...
+
+    @abstractmethod
+    def image_document_blob(self, blob: bytes, mimetype: str) -> ImageDocumentT:
         ...
 
     @abstractmethod
@@ -36,18 +41,18 @@ class ApiFormat[
         ...
 
     @abstractmethod
-    def input_content(self, content: TextMessageT | ImageDocumentT) -> MessageContentT:
+    def input_content(self, content: TextMessageT | ImageDocumentT | TextDocumentT) -> MessageContentT:
         ...
 
     def input_message(self, message: str) -> MessageContentT:
-        return self.input_content(self.text_chunk(message))
+        return self.input_content(self.text_message(message))
 
     @abstractmethod
-    def output_content(self, content: TextMessageT | ImageDocumentT) -> MessageContentT:
+    def output_content(self, content: TextMessageT | ImageDocumentT | TextDocumentT) -> MessageContentT:
         ...
 
     def output_message(self, message: str) -> MessageContentT:
-        return self.output_content(self.text_chunk(message))
+        return self.output_content(self.text_message(message))
 
     @abstractmethod
     def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> MessageContentT:
@@ -58,7 +63,10 @@ class ApiFormat[
         ...
 
     def image_document(self, blob: bytes, mimetype: str) -> MessageContentT:
-        return self.input_content(self.image_blob(blob, mimetype))
+        return self.input_content(self.image_document_blob(blob, mimetype))
+
+    def text_document(self, text: str, mimetype: str) -> MessageContentT:
+        return self.input_content(self.text_document_chunk(text, mimetype))
 
     # functions
 
@@ -82,9 +90,9 @@ class ApiFormat[
     def tool_selection_any(self) -> ToolSelectionT | None:
         ...
 
-    @abstractmethod
-    def tool_selection_name(self, tool_name: str) -> ToolSelectionT | None:
-        ...
+    # @abstractmethod
+    # def tool_selection_name(self, tool_name: str) -> ToolSelectionT | None:
+    #     ...
 
     def tool_selection(self, tool_choice_mode: str | None, tool_choice_name: str | None,
                        tools: list[str]) -> ToolSelectionT | None:
@@ -110,6 +118,7 @@ class ApiFormat[
 
             match tool_choice_mode:
                 case 'name':
-                    return self.tool_selection_name(tool_choice_name)
+                    # return self.tool_selection_name(tool_choice_name)
+                    raise NotImplementedError
                 case _:
                     raise ValueError

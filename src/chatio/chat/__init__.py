@@ -128,16 +128,35 @@ class ChatBase:
     # history
 
     def attach_image_document(self, *, file: str | PathLike) -> None:
+        mimetype, _ = mimetypes.guess_type(file)
+        if mimetype is None:
+            raise RuntimeError
+
         with Path(file).open("rb") as filep:
-            blob = filep.read()
+            self._state.attach_image_document(filep.read(), mimetype)
 
-            mimetype, _ = mimetypes.guess_type(file)
-            if mimetype is None:
-                raise RuntimeError
+    def attach_text_document(self, *, file: str | PathLike) -> None:
+        mimetype, _ = mimetypes.guess_type(file)
+        if mimetype is None:
+            raise RuntimeError
 
-            self._state.commit_input_message(str(file))
+        with Path(file).open("r") as filep:
+            self._state.attach_text_document(filep.read(), mimetype)
 
-            self._state.attach_image_document(blob, mimetype)
+    def attach_document_auto(self, *, file: str | PathLike) -> None:
+        mimetype, _ = mimetypes.guess_type(file)
+        if mimetype is None:
+            raise RuntimeError
+
+        match mimetype:
+            case "text/plain":
+                self._state.commit_input_message(str(file))
+                with Path(file).open("r") as filep:
+                    self._state.attach_text_document(filep.read(), mimetype)
+            case _:
+                self._state.commit_input_message(str(file))
+                with Path(file).open("rb") as filep:
+                    self._state.attach_image_document(filep.read(), mimetype)
 
     def commit_input_message(self, message: str) -> None:
         self._state.commit_input_message(message)

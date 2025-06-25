@@ -33,7 +33,7 @@ def main():
             continue
 
         for file in files:
-            chat.attach_image_document(file=file)
+            chat.attach_document_auto(file=file)
 
         if content:
             chat.commit_input_message(content)
