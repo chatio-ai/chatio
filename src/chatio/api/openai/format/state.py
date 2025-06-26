@@ -11,19 +11,9 @@ from openai.types.chat import ChatCompletionContentPartImageParam
 from openai.types.chat import ChatCompletionPredictionContentParam
 from openai.types.chat.chat_completion_content_part_param import File
 
-from openai.types.chat import ChatCompletionToolParam
-from openai.types.chat import ChatCompletionToolChoiceOptionParam
+from chatio.core.format.state import ApiFormatState
 
-
-from chatio.core.format import ApiFormatState
-from chatio.core.format import ApiFormatTools
-from chatio.core.format import ApiFormat
-
-from chatio.core.models import ChatState
-from chatio.core.models import ChatTools
-
-from .config import OpenAIConfig
-from .params import OpenAIParams
+from chatio.api.openai.config import OpenAIConfig
 
 
 type _ChatCompletionContentPartParam = \
@@ -157,101 +147,3 @@ class OpenAIFormatState(ApiFormatState[
             "tool_call_id": tool_call_id,
             "content": tool_output,
         }
-
-
-class OpenAIFormatTools(ApiFormatTools[
-    ChatCompletionToolParam,
-    list[ChatCompletionToolParam],
-    ChatCompletionToolChoiceOptionParam,
-]):
-
-    def __init__(self, config: OpenAIConfig):
-        self._config = config
-
-    def _tool_schema(self, schema: dict) -> dict:
-        result = schema.copy()
-
-        props = None
-        if result.get("type") == "object":
-            props = result.setdefault("properties", {})
-
-        if props is not None:
-            result.update({
-                "additionalProperties": False,
-                "required": list(props),
-            })
-
-            for key in props:
-                value = props.get(key, {})
-                value = self._tool_schema(value)
-                props[key] = value
-
-        return result
-
-    @override
-    def tool_definition(self, name: str, desc: str, schema: dict) -> ChatCompletionToolParam:
-        schema = self._tool_schema(schema)
-        return {
-            "type": "function",
-            "function": {
-                "name": name,
-                "description": desc,
-                "parameters": schema,
-                "strict": True,
-            },
-        }
-
-    @override
-    def tool_definitions(self, tools: list[ChatCompletionToolParam]) -> list[ChatCompletionToolParam] | None:
-        return tools
-
-    @override
-    def tool_selection_none(self) -> ChatCompletionToolChoiceOptionParam | None:
-        return 'none'
-
-    @override
-    def tool_selection_auto(self) -> ChatCompletionToolChoiceOptionParam | None:
-        return 'auto'
-
-    @override
-    def tool_selection_any(self) -> ChatCompletionToolChoiceOptionParam | None:
-        return 'required'
-
-    @override
-    def tool_selection_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam | None:
-        return {
-            "type": 'function',
-            "function": {
-                "name": tool_name,
-            },
-        }
-
-
-class OpenAIFormat(ApiFormat[
-    ChatCompletionMessageParam,
-    ChatCompletionMessageParam,
-    ChatCompletionPredictionContentParam,
-    ChatCompletionContentPartTextParam,
-    ChatCompletionContentPartImageParam,
-    File,
-    ChatCompletionToolParam,
-    list[ChatCompletionToolParam],
-    ChatCompletionToolChoiceOptionParam,
-]):
-    def __init__(self, config: OpenAIConfig) -> None:
-        self._config = config
-
-    @property
-    @override
-    def _format_state(self) -> OpenAIFormatState:
-        return OpenAIFormatState(self._config)
-
-    @property
-    @override
-    def _format_tools(self) -> OpenAIFormatTools:
-        return OpenAIFormatTools(self._config)
-
-    def build(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
-        params = OpenAIParams()
-        self.setup(params, state, tools)
-        return params

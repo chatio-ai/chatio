@@ -4,9 +4,13 @@
 !src/chatio/misc/*.py
 !src/chatio/chat/*.py
 !src/chatio/core/*.py
+!src/chatio/core/format/*.py
 !src/chatio/api/openai/*.py
+!src/chatio/api/openai/format/*.py
 !src/chatio/api/google/*.py
+!src/chatio/api/google/format/*.py
 !src/chatio/api/claude/*.py
+!src/chatio/api/claude/format/*.py
 !src/chatio/api/helper/*.py
 !src/chatio/api/*.py
 !src/chatio/cli/*.py

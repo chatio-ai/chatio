@@ -12,19 +12,9 @@ from anthropic.types import DocumentBlockParam
 from anthropic.types import ToolUseBlockParam
 from anthropic.types import ToolResultBlockParam
 
-from anthropic.types import ToolParam
-from anthropic.types import ToolChoiceParam
+from chatio.core.format.state import ApiFormatState
 
-
-from chatio.core.format import ApiFormatTools
-from chatio.core.format import ApiFormatState
-from chatio.core.format import ApiFormat
-
-from chatio.core.models import ChatState
-from chatio.core.models import ChatTools
-
-from .config import ClaudeConfig
-from .params import ClaudeParams
+from chatio.api.claude.config import ClaudeConfig
 
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
@@ -171,93 +161,3 @@ class ClaudeFormatState(ApiFormatState[
             "tool_use_id": tool_call_id,
             "content": tool_output,
         })
-
-
-class ClaudeFormatTools(ApiFormatTools[
-    ToolParam,
-    list[ToolParam],
-    ToolChoiceParam,
-]):
-
-    def __init__(self, config: ClaudeConfig) -> None:
-        self._config = config
-
-    def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
-        if self._config.options.use_cache and entries:
-            entry = entries[-1]
-
-            entry.update({
-                "cache_control": {
-                    "type": "ephemeral",
-                },
-            })
-
-        return entries
-
-    @override
-    def tool_definition(self, name: str, desc: str, schema: dict) -> ToolParam:
-        return {
-            "name": name,
-            "description": desc,
-            "input_schema": schema,
-        }
-
-    @override
-    def tool_definitions(self, tools: list[ToolParam]) -> list[ToolParam]:
-        return self._setup_tools_cache(tools)
-
-    @override
-    def tool_selection_none(self) -> ToolChoiceParam | None:
-        return {
-            "type": 'none',
-        }
-
-    @override
-    def tool_selection_auto(self) -> ToolChoiceParam | None:
-        return {
-            "type": 'auto',
-        }
-
-    @override
-    def tool_selection_any(self) -> ToolChoiceParam | None:
-        return {
-            "type": 'any',
-        }
-
-    @override
-    def tool_selection_name(self, tool_name: str) -> ToolChoiceParam | None:
-        return {
-            "type": 'tool',
-            "name": tool_name,
-        }
-
-
-class ClaudeFormat(ApiFormat[
-    TextBlockParam,
-    MessageParam,
-    None,
-    TextBlockParam,
-    ImageBlockParam,
-    DocumentBlockParam,
-    ToolParam,
-    list[ToolParam],
-    ToolChoiceParam,
-]):
-
-    def __init__(self, config: ClaudeConfig) -> None:
-        self._config = config
-
-    @property
-    @override
-    def _format_state(self) -> ClaudeFormatState:
-        return ClaudeFormatState(self._config)
-
-    @property
-    @override
-    def _format_tools(self) -> ClaudeFormatTools:
-        return ClaudeFormatTools(self._config)
-
-    def build(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
-        params = ClaudeParams()
-        self.setup(params, state, tools)
-        return params
