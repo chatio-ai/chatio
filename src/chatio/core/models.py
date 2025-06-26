@@ -64,7 +64,7 @@ class TextDocument(ContentEntry):
 
 
 @dataclass
-class ToolConfig:
+class ToolSchema:
     name: str
     desc: str
     schema: dict
@@ -105,7 +105,7 @@ class ChatState:
 @dataclass
 class ChatTools:
     funcs: dict[str, Callable] = field(default_factory=dict)
-    tools: list[ToolConfig] | None = None
+    tools: list[ToolSchema] | None = None
     tool_choice: ToolChoice | None = None
 
     def __init__(self, tools: ToolsConfig | None = None) -> None:
@@ -127,7 +127,7 @@ class ChatTools:
 
             self.funcs[name] = tool
 
-            self.tools.append(ToolConfig(name, desc, schema))
+            self.tools.append(ToolSchema(name, desc, schema))
 
         self.tool_choice = \
             ToolChoice(tools.tool_choice_mode, tools.tool_choice_name, list(tools.tools))

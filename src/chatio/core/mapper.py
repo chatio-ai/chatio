@@ -9,7 +9,7 @@ from chatio.core.models import TextDocument
 from chatio.core.models import CallResponse
 from chatio.core.models import CallRequest
 
-from chatio.core.models import ToolConfig
+from chatio.core.models import ToolSchema
 from chatio.core.models import ToolChoice
 
 from chatio.core.models import ContentEntry
@@ -75,7 +75,7 @@ class ApiMapper[
 
         return self._format.chat_messages(_messages)
 
-    def _tools(self, tools: list[ToolConfig] | None) -> ToolDefinitionsT | None:
+    def _tools(self, tools: list[ToolSchema] | None) -> ToolDefinitionsT | None:
         if tools is None:
             return None
 
