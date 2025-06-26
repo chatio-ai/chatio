@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.chat import ChatBase
+from chatio.chat import Chat
 
 from . import ToolBase
 
@@ -27,7 +27,7 @@ class LlmDialogTool(ToolBase):
             "required": ["message"],
         }
 
-    def __init__(self, agent: ChatBase):
+    def __init__(self, agent: Chat):
         self._agent = agent
 
     def __call__(self, message=None):

@@ -30,7 +30,7 @@ class ChatInfo:
     messages: int
 
 
-class ChatBase:
+class Chat:
 
     def __init__(
         self,

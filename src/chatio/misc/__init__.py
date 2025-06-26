@@ -24,7 +24,7 @@ from chatio.api.openai.config import OpenAIConfigOptions
 from chatio.api.openai.config import OpenAIConfig
 from chatio.api.openai.client import OpenAIClient
 
-from chatio.chat import ChatBase
+from chatio.chat import Chat
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 from toolbelt.dummy import DummyTool
@@ -89,7 +89,7 @@ def build_chat(
     model: ModelConfig,
     state: StateConfig | None = None,
     tools: ToolsConfig | None = None,
-) -> ChatBase:
+) -> Chat:
 
     if model is None:
         err_msg = "no model specified!"
@@ -110,15 +110,15 @@ def build_chat(
         case 'claude':
             options = ClaudeConfigOptions(**options_data)
             config = ClaudeConfig(**config_data, options=options)
-            return ChatBase(ClaudeClient(config), model, state, tools)
+            return Chat(ClaudeClient(config), model, state, tools)
         case 'google':
             options = GoogleConfigOptions(**options_data)
             config = GoogleConfig(**config_data, options=options)
-            return ChatBase(GoogleClient(config), model, state, tools)
+            return Chat(GoogleClient(config), model, state, tools)
         case 'openai':
             options = OpenAIConfigOptions(**options_data)
             config = OpenAIConfig(**config_data, options=options)
-            return ChatBase(OpenAIClient(config), model, state, tools)
+            return Chat(OpenAIClient(config), model, state, tools)
         case _:
             err_msg = f"api class not supported: {api_class}"
             raise RuntimeError(err_msg)
