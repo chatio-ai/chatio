@@ -17,7 +17,7 @@ from chatio.core.models import ContentEntry
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.core.params import ApiParamsBase
+from chatio.core.params import ApiParams
 
 from chatio.core.format import ApiFormat
 
@@ -95,7 +95,7 @@ class ApiMapper[
 
         return self._format.prediction_content(self._format.text_message(message.text))
 
-    def map(self, state: ChatState, tools: ChatTools) -> ApiParamsBase[
+    def map(self, state: ChatState, tools: ChatTools) -> ApiParams[
         SystemContentT,
         MessageContentT,
         ToolDefinitionsT,
@@ -106,7 +106,7 @@ class ApiMapper[
         if _predict is not None and not isinstance(_predict, PredictMessage):
             raise TypeError(_predict)
 
-        return ApiParamsBase(
+        return ApiParams(
             system=self._system(state.system),
             messages=self._messages(state.messages),
             predict=self._predict(_predict),
@@ -114,7 +114,7 @@ class ApiMapper[
             tool_choice=self._tool_choice(tools.tool_choice),
         )
 
-    def __call__(self, state: ChatState, tools: ChatTools) -> ApiParamsBase[
+    def __call__(self, state: ChatState, tools: ChatTools) -> ApiParams[
         SystemContentT,
         MessageContentT,
         ToolDefinitionsT,

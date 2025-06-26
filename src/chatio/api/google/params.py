@@ -7,11 +7,11 @@ from google.genai.types import ToolListUnionDict
 from google.genai.types import ToolConfigDict
 
 
-from chatio.core.params import ApiParamsBase
+from chatio.core.params import ApiParams
 
 
 @dataclass
-class GoogleParams(ApiParamsBase[
+class GoogleParams(ApiParams[
     ContentDict,
     ContentUnionDict,
     ToolListUnionDict,

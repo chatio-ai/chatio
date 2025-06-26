@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 
 @dataclass
-class ApiParamsBase[
+class ApiParams[
     SystemContentT,
     MessageContentT,
     ToolDefinitionsT,

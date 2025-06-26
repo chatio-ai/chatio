@@ -7,11 +7,11 @@ from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
-from chatio.core.mapper import ApiParamsBase
+from chatio.core.mapper import ApiParams
 
 
 @dataclass
-class OpenAIParams(ApiParamsBase[
+class OpenAIParams(ApiParams[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
     list[ChatCompletionToolParam],
