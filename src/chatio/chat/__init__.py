@@ -22,13 +22,13 @@ from chatio.core.models import TextDocument
 from chatio.core.models import CallResponse
 from chatio.core.models import CallRequest
 
-from chatio.core.models import ChatState
-from chatio.core.models import ChatTools
-
 from chatio.core.client import ApiClient
 
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
+
+from .state import build_state
+from .tools import build_tools
 
 from .usage import ChatUsage
 
@@ -56,9 +56,9 @@ class ChatBase:
 
         self._model = model
 
-        self._state = ChatState.build(state)
+        self._state = build_state(state)
 
-        self._tools = ChatTools.build(tools)
+        self._tools = build_tools(tools)
 
         self._usage = ChatUsage()
 
