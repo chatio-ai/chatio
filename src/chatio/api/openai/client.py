@@ -22,8 +22,8 @@ from chatio.api.helper.httpx import httpx_args
 
 
 from .config import OpenAIConfig
+from .format import OpenAIHelper
 from .format import OpenAIFormat
-from .params import OpenAIParamsBuilder
 from .events import _pump
 
 
@@ -35,13 +35,14 @@ class OpenAIClient(ApiClient):
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
-        self._format = OpenAIFormat(config)
+        _helper = OpenAIHelper(config)
+        self._format = OpenAIFormat(_helper)
 
     # streams
 
     @override
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-        _params = OpenAIParamsBuilder(state, tools, self._format).build()
+        _params = self._format.build(state, tools)
         return _pump(self._client.beta.chat.completions.stream(
             model=model,
             max_completion_tokens=4096 if _params.predict is None else NOT_GIVEN,

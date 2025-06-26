@@ -16,9 +16,14 @@ from anthropic.types import ToolParam
 from anthropic.types import ToolChoiceParam
 
 
+from chatio.core.format import ApiHelper
 from chatio.core.format import ApiFormat
 
+from chatio.core.models import ChatState
+from chatio.core.models import ChatTools
+
 from .config import ClaudeConfig
+from .params import ClaudeParams
 
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
@@ -26,7 +31,7 @@ type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
 type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
 
-class ClaudeFormat(ApiFormat[
+class ClaudeHelper(ApiHelper[
     TextBlockParam,
     MessageParam,
     None,
@@ -221,3 +226,23 @@ class ClaudeFormat(ApiFormat[
             "type": 'tool',
             "name": tool_name,
         }
+
+
+class ClaudeFormat(ApiFormat[
+    TextBlockParam,
+    MessageParam,
+    None,
+    TextBlockParam,
+    ImageBlockParam,
+    DocumentBlockParam,
+    ToolParam,
+    list[ToolParam],
+    ToolChoiceParam,
+]):
+    def spawn(self) -> ClaudeParams:
+        return ClaudeParams()
+
+    def build(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
+        params = ClaudeParams()
+        self.setup(params, state, tools)
+        return params

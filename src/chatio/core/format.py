@@ -1,8 +1,28 @@
 
 from abc import ABC, abstractmethod
 
+from chatio.core.models import PredictMessage
+from chatio.core.models import SystemMessage
+from chatio.core.models import OutputMessage
+from chatio.core.models import InputMessage
 
-class ApiFormat[
+from chatio.core.models import ImageDocument
+from chatio.core.models import TextDocument
+from chatio.core.models import CallResponse
+from chatio.core.models import CallRequest
+
+from chatio.core.models import ToolSchema
+from chatio.core.models import ToolChoice
+
+from chatio.core.models import ContentEntry
+
+from .models import ChatState
+from .models import ChatTools
+
+from .params import ApiParams
+
+
+class ApiHelper[
     SystemContentT,
     MessageContentT,
     ChatPredictionT,
@@ -122,3 +142,104 @@ class ApiFormat[
                     raise NotImplementedError
                 case _:
                     raise ValueError
+
+
+class ApiFormat[
+    SystemContentT,
+    MessageContentT,
+    ChatPredictionT,
+    TextMessageT,
+    ImageDocumentT,
+    TextDocumentT,
+    ToolDefinitionT,
+    ToolDefinitionsT,
+    ToolSelectionT,
+](ABC):
+
+    def __init__(self, helper: ApiHelper):
+        self._helper = helper
+
+    def _system(self, message: SystemMessage | None) -> SystemContentT | None:
+        if message is None:
+            return None
+
+        return self._helper.system_content(self._helper.text_message(message.text))
+
+    def _messages(self, messages: list[ContentEntry]) -> list[MessageContentT]:
+        _messages = []
+
+        for message in messages:
+            match message:
+                case InputMessage(text):
+                    _messages.append(self._helper.input_message(text))
+                case OutputMessage(text):
+                    _messages.append(self._helper.output_message(text))
+                case CallRequest(tool_call_id, tool_name, tool_input):
+                    _messages.append(self._helper.call_request(tool_call_id, tool_name, tool_input))
+                case CallResponse(tool_call_id, tool_name, tool_output):
+                    _messages.append(self._helper.call_response(tool_call_id, tool_name, tool_output))
+                case TextDocument(text, mimetype):
+                    _messages.append(self._helper.text_document(text, mimetype))
+                case ImageDocument(blob, mimetype):
+                    _messages.append(self._helper.image_document(blob, mimetype))
+                case _:
+                    raise RuntimeError(message)
+
+        return self._helper.chat_messages(_messages)
+
+    def _tool_specs(self, tools: list[ToolSchema] | None) -> ToolDefinitionsT | None:
+        if tools is None:
+            return None
+
+        _tools = [self._helper.tool_definition(tool.name, tool.desc, tool.schema) for tool in tools]
+
+        return self._helper.tool_definitions(_tools)
+
+    def _tool_choice(self, tool_choice: ToolChoice | None) -> ToolSelectionT | None:
+        if tool_choice is None:
+            return None
+
+        return self._helper.tool_selection(tool_choice.mode, tool_choice.name, tool_choice.tools)
+
+    def _predict(self, message: PredictMessage | None) -> ChatPredictionT | None:
+        if message is None:
+            return None
+
+        return self._helper.prediction_content(self._helper.text_message(message.text))
+
+    def setup(self, params: ApiParams[
+        SystemContentT,
+        MessageContentT,
+        ChatPredictionT,
+        ToolDefinitionsT,
+        ToolSelectionT,
+    ], state: ChatState, tools: ChatTools):
+        # _predict = state.extras.get('prediction')
+        # if _predict is not None and not isinstance(_predict, PredictMessage):
+        #     raise TypeError(_predict)
+
+        params.system = self._system(state.system)
+        params.messages = self._messages(state.messages)
+        # params.predict = self._predict(_predict)
+        params.tools = self._tool_specs(tools.tools)
+        params.tool_choice = self._tool_choice(tools.tool_choice)
+
+    @abstractmethod
+    def spawn(self) -> ApiParams[
+        SystemContentT,
+        MessageContentT,
+        ChatPredictionT,
+        ToolDefinitionsT,
+        ToolSelectionT,
+    ]:
+        pass
+
+    @abstractmethod
+    def build(self, state: ChatState, tools: ChatTools) -> ApiParams[
+        SystemContentT,
+        MessageContentT,
+        ChatPredictionT,
+        ToolDefinitionsT,
+        ToolSelectionT,
+    ]:
+        ...

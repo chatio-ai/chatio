@@ -21,8 +21,8 @@ from chatio.api.helper.httpx import httpx_args
 
 
 from .config import ClaudeConfig
+from .format import ClaudeHelper
 from .format import ClaudeFormat
-from .params import ClaudeParamsBuilder
 from .events import _pump
 
 
@@ -35,13 +35,14 @@ class ClaudeClient(ApiClient):
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
-        self._format = ClaudeFormat(config)
+        _helper = ClaudeHelper(config)
+        self._format = ClaudeFormat(_helper)
 
     # streams
 
     @override
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-        _params = ClaudeParamsBuilder(state, tools, self._format).build()
+        _params = self._format.build(state, tools)
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
@@ -55,7 +56,7 @@ class ClaudeClient(ApiClient):
 
     @override
     def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
-        _params = ClaudeParamsBuilder(state, tools, self._format).build()
+        _params = self._format.build(state, tools)
         return self._client.messages.count_tokens(
             model=model,
             tools=_params.tools if _params.tools is not None else NOT_GIVEN,

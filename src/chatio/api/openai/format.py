@@ -15,16 +15,21 @@ from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
+from chatio.core.format import ApiHelper
 from chatio.core.format import ApiFormat
 
+from chatio.core.models import ChatState
+from chatio.core.models import ChatTools
+
 from .config import OpenAIConfig
+from .params import OpenAIParams
 
 
 type _ChatCompletionContentPartParam = \
     ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam | File
 
 
-class OpenAIFormat(ApiFormat[
+class OpenAIHelper(ApiHelper[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
     ChatCompletionPredictionContentParam,
@@ -216,3 +221,23 @@ class OpenAIFormat(ApiFormat[
                 "name": tool_name,
             },
         }
+
+
+class OpenAIFormat(ApiFormat[
+    ChatCompletionMessageParam,
+    ChatCompletionMessageParam,
+    ChatCompletionPredictionContentParam,
+    ChatCompletionContentPartTextParam,
+    ChatCompletionContentPartImageParam,
+    File,
+    ChatCompletionToolParam,
+    list[ChatCompletionToolParam],
+    ChatCompletionToolChoiceOptionParam,
+]):
+    def spawn(self) -> OpenAIParams:
+        return OpenAIParams()
+
+    def build(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
+        params = OpenAIParams()
+        self.setup(params, state, tools)
+        return params

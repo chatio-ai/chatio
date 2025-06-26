@@ -13,12 +13,17 @@ from google.genai.types import FunctionDeclarationDict
 from google.genai.types import FunctionCallingConfigMode
 
 
+from chatio.core.format import ApiHelper
 from chatio.core.format import ApiFormat
 
+from chatio.core.models import ChatState
+from chatio.core.models import ChatTools
+
 from .config import GoogleConfig
+from .params import GoogleParams
 
 
-class GoogleFormat(ApiFormat[
+class GoogleHelper(ApiHelper[
     ContentDict,
     ContentUnionDict,
     None,
@@ -185,3 +190,24 @@ class GoogleFormat(ApiFormat[
                 "allowed_function_names": [tool_name],
             },
         }
+
+
+class GoogleFormat(ApiFormat[
+    ContentDict,
+    ContentUnionDict,
+    None,
+    PartDict,
+    PartDict,
+    PartDict,
+    FunctionDeclarationDict,
+    ToolListUnionDict,
+    ToolConfigDict,
+]):
+    def spawn(self) -> GoogleParams:
+        return GoogleParams()
+
+    @override
+    def build(self, state: ChatState, tools: ChatTools) -> GoogleParams:
+        params = GoogleParams()
+        self.setup(params, state, tools)
+        return params
