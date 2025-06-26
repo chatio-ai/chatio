@@ -1,26 +1,11 @@
 
-import mimetypes
-
 from collections.abc import Iterator
 
 from dataclasses import dataclass
 
-from os import PathLike
-from pathlib import Path
-
 from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
-
-from chatio.core.models import PredictMessage
-from chatio.core.models import SystemMessage
-from chatio.core.models import OutputMessage
-from chatio.core.models import InputMessage
-
-from chatio.core.models import ImageDocument
-from chatio.core.models import TextDocument
-from chatio.core.models import CallResponse
-from chatio.core.models import CallRequest
 
 from chatio.core.client import ApiClient
 
@@ -28,7 +13,10 @@ from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 from .state import build_state
+from .state import ChatState
+
 from .tools import build_tools
+from .tools import ChatTools
 
 from .usage import ChatUsage
 
@@ -62,6 +50,14 @@ class ChatBase:
 
         self._usage = ChatUsage()
 
+    @property
+    def state(self) -> ChatState:
+        return self._state
+
+    @property
+    def tools(self) -> ChatTools:
+        return self._tools
+
     # streams
 
     def _process_tool_call(self, tool_call_id: str, tool_name: str, tool_args: dict) -> Iterator[dict]:
@@ -84,11 +80,11 @@ class ChatBase:
                     "tool_data": chunk,
                 }
 
-        self._state.messages.append(CallResponse(tool_call_id, tool_name, content))
+        self._state.commit_call_response(tool_call_id, tool_name, content)
 
     def __call__(self, content: str | None = None) -> Iterator[dict]:
         if content:
-            self._state.messages.append(InputMessage(content))
+            self._state.commit_input_message(content)
 
         return self._iterate()
 
@@ -109,9 +105,9 @@ class ChatBase:
                         }
                     case DoneEvent(text):
                         if text:
-                            self._state.messages.append(OutputMessage(text))
+                            self._state.commit_output_message(text)
                     case CallEvent(call_id, name, args, args_raw):
-                        self._state.messages.append(CallRequest(call_id, name, args_raw))
+                        self._state.commit_call_request(call_id, name, args_raw)
                         yield {
                             "type": "tools_usage",
                             "tool_name": name,
@@ -126,7 +122,7 @@ class ChatBase:
 
     def count_tokens(self, content: str | None = None) -> int:
         if content:
-            self._state.messages.append(InputMessage(content))
+            self._state.commit_input_message(content)
 
         return self._client.count_message_tokens(self._model.model, self._state, self._tools)
 
@@ -138,51 +134,3 @@ class ChatBase:
             bool(self._state.system),
             len(self._state.messages),
         )
-
-    # history
-
-    def attach_image_document(self, *, file: str | PathLike, mimetype: str | None = None) -> None:
-        if mimetype is None:
-            mimetype, _ = mimetypes.guess_type(file)
-            if mimetype is None:
-                raise RuntimeError
-
-        self._state.messages.append(InputMessage(str(file)))
-
-        with Path(file).open("rb") as filep:
-            self._state.messages.append(ImageDocument(filep.read(), mimetype))
-
-    def attach_text_document(self, *, file: str | PathLike, mimetype: str | None = None) -> None:
-        if mimetype is None:
-            mimetype, _ = mimetypes.guess_type(file)
-            if mimetype is None:
-                raise RuntimeError
-
-        self._state.messages.append(InputMessage(str(file)))
-
-        with Path(file).open("r") as filep:
-            self._state.messages.append(TextDocument(filep.read(), mimetype))
-
-    def attach_document_auto(self, *, file: str | PathLike) -> None:
-        mimetype, _ = mimetypes.guess_type(file)
-        if mimetype is None:
-            raise RuntimeError
-
-        match mimetype:
-            case "text/plain":
-                return self.attach_text_document(file=file, mimetype=mimetype)
-            case _:
-                return self.attach_image_document(file=file, mimetype=mimetype)
-
-    def commit_input_message(self, message: str) -> None:
-        self._state.messages.append(InputMessage(message))
-
-    def commit_output_message(self, message: str) -> None:
-        self._state.messages.append(InputMessage(message))
-
-    def update_system_message(self, message: str | None) -> None:
-        self._state.system = SystemMessage(message) if message is not None else None
-
-    def use_prediction_content(self, message: str | None) -> None:
-        _predict = PredictMessage(message) if message is not None else None
-        self._state.extras.update({'prediction': _predict})

@@ -61,7 +61,7 @@ def main():
 
     filenames = sys.argv[1:]
     for filename in filenames:
-        chat.attach_document_auto(file=filename)
+        chat.state.attach_document_auto(file=filename)
 
     # chat.commit_chunk("duplicate my message as is")
 
@@ -73,7 +73,7 @@ def main():
         run_chat(chat(), "<<< ", "::: ")
 
     # chat.commit_chunk("what is the exact text on first image? duplicate my message as is")
-    chat.commit_input_message("what is the exact text on first image?")
+    chat.state.commit_input_message("what is the exact text on first image?")
 
     run_chat(chat(), "<<< ", "::: ")
 

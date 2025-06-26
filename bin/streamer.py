@@ -33,12 +33,12 @@ def main():
             continue
 
         for file in files:
-            chat.attach_document_auto(file=file)
+            chat.state.attach_document_auto(file=file)
 
         if content:
-            chat.commit_input_message(content)
+            chat.state.commit_input_message(content)
 
-        chat.use_prediction_content(results)
+        chat.state.use_prediction_content(results)
 
         print()
         results = run_chat(chat(),
