@@ -56,9 +56,9 @@ class ChatBase:
 
         self._model = model
 
-        self._state = ChatState(state)
+        self._state = ChatState.build(state)
 
-        self._tools = ChatTools(tools)
+        self._tools = ChatTools.build(tools)
 
         self._usage = ChatUsage()
 

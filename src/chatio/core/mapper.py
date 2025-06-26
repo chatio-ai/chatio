@@ -103,8 +103,8 @@ class ApiMapper[
         ChatPredictionT,
     ]:
         _predict = state.extras.get('prediction')
-        if _predict is not None or not isinstance(_predict, PredictMessage):
-            raise TypeError
+        if _predict is not None and not isinstance(_predict, PredictMessage):
+            raise TypeError(_predict)
 
         return ApiParamsBase(
             system=self._system(state.system),

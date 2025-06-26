@@ -3,6 +3,7 @@ from collections.abc import Callable
 
 from dataclasses import dataclass, field
 
+
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
@@ -83,23 +84,26 @@ class ChatState:
     messages: list[ContentEntry] = field(default_factory=list)
     extras: dict[str, ContentEntry | None] = field(default_factory=dict)
 
-    def __init__(self, state: StateConfig | None = None) -> None:
-        super().__init__()
+    @classmethod
+    def build(cls, state: StateConfig | None = None) -> 'ChatState':
+        _state = ChatState()
 
         if state is None:
             state = StateConfig()
 
         if state.system is not None:
-            self.system = SystemMessage(state.system)
+            _state.system = SystemMessage(state.system)
 
         if state.messages is None:
             state.messages = []
 
         for index, message in enumerate(state.messages):
             if not index % 2:
-                self.messages.append(InputMessage(message))
+                _state.messages.append(InputMessage(message))
             else:
-                self.messages.append(OutputMessage(message))
+                _state.messages.append(OutputMessage(message))
+
+        return _state
 
 
 @dataclass
@@ -108,16 +112,17 @@ class ChatTools:
     tools: list[ToolSchema] | None = None
     tool_choice: ToolChoice | None = None
 
-    def __init__(self, tools: ToolsConfig | None = None) -> None:
-        super().__init__()
+    @classmethod
+    def build(cls, tools: ToolsConfig | None = None) -> 'ChatTools':
+        _tools = ChatTools()
 
         if tools is None:
-            tools = ToolsConfig()
+            return _tools
 
         if tools.tools is None:
-            return
+            tools.tools = {}
 
-        self.tools = []
+        _tools.tools = []
         for name, tool in tools.tools.items():
             desc = tool.desc()
             schema = tool.schema()
@@ -125,9 +130,11 @@ class ChatTools:
             if not name or not desc or not schema:
                 raise RuntimeError
 
-            self.funcs[name] = tool
+            _tools.funcs[name] = tool
 
-            self.tools.append(ToolSchema(name, desc, schema))
+            _tools.tools.append(ToolSchema(name, desc, schema))
 
-        self.tool_choice = \
-            ToolChoice(tools.tool_choice_mode, tools.tool_choice_name, list(tools.tools))
+        _tools.tool_choice = ToolChoice(
+            tools.tool_choice_mode, tools.tool_choice_name, list(tools.tools))
+
+        return _tools
