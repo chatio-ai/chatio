@@ -10,7 +10,6 @@ from openai import OpenAI
 from openai import NOT_GIVEN
 
 
-from chatio.core.mapper import ApiMapper
 from chatio.core.client import ApiClient
 
 from chatio.core.models import ChatState
@@ -24,7 +23,7 @@ from chatio.api.helper.httpx import httpx_args
 
 from .config import OpenAIConfig
 from .format import OpenAIFormat
-# from .params import OpenAIParams
+from .params import OpenAIParamsBuilder
 from .events import _pump
 
 
@@ -36,13 +35,13 @@ class OpenAIClient(ApiClient):
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
-        self._mapper = ApiMapper(OpenAIFormat(config))
+        self._format = OpenAIFormat(config)
 
     # streams
 
     @override
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-        _params = self._mapper(state, tools)
+        _params = OpenAIParamsBuilder(state, tools, self._format).build()
         return _pump(self._client.beta.chat.completions.stream(
             model=model,
             max_completion_tokens=4096 if _params.predict is None else NOT_GIVEN,

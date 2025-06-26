@@ -8,7 +8,6 @@ from google.genai import Client
 from google.genai.types import HttpOptions
 
 
-from chatio.core.mapper import ApiMapper
 from chatio.core.client import ApiClient
 
 from chatio.core.models import ChatState
@@ -21,7 +20,7 @@ from chatio.api.helper.httpx import httpx_args
 
 from .config import GoogleConfig
 from .format import GoogleFormat
-# from .params import GoogleParams
+from .params import GoogleParamsBuilder
 from .events import _pump
 
 
@@ -33,13 +32,13 @@ class GoogleClient(ApiClient):
             api_key=config.api_key,
             http_options=HttpOptions(client_args=httpx_args()))
 
-        self._mapper = ApiMapper(GoogleFormat(config))
+        self._format = GoogleFormat(config)
 
     # streams
 
     @override
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-        _params = self._mapper(state, tools)
+        _params = GoogleParamsBuilder(state, tools, self._format).build()
         return _pump(lambda: self._client.models.generate_content_stream(
             model=model,
             config={

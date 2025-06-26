@@ -9,7 +9,6 @@ from httpx import Client as HttpxClient
 from anthropic import Anthropic
 from anthropic import NOT_GIVEN
 
-from chatio.core.mapper import ApiMapper
 from chatio.core.client import ApiClient
 
 from chatio.core.models import ChatState
@@ -23,7 +22,7 @@ from chatio.api.helper.httpx import httpx_args
 
 from .config import ClaudeConfig
 from .format import ClaudeFormat
-# from .params import ClaudeParams
+from .params import ClaudeParamsBuilder
 from .events import _pump
 
 
@@ -36,13 +35,13 @@ class ClaudeClient(ApiClient):
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
-        self._mapper = ApiMapper(ClaudeFormat(config))
+        self._format = ClaudeFormat(config)
 
     # streams
 
     @override
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-        _params = self._mapper(state, tools)
+        _params = ClaudeParamsBuilder(state, tools, self._format).build()
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
@@ -56,7 +55,7 @@ class ClaudeClient(ApiClient):
 
     @override
     def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
-        _params = self._mapper(state, tools)
+        _params = ClaudeParamsBuilder(state, tools, self._format).build()
         return self._client.messages.count_tokens(
             model=model,
             tools=_params.tools if _params.tools is not None else NOT_GIVEN,
