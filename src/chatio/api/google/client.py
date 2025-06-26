@@ -19,7 +19,6 @@ from chatio.api.helper.httpx import httpx_args
 
 
 from .config import GoogleConfig
-from .format import GoogleHelper
 from .format import GoogleFormat
 from .events import _pump
 
@@ -32,8 +31,7 @@ class GoogleClient(ApiClient):
             api_key=config.api_key,
             http_options=HttpOptions(client_args=httpx_args()))
 
-        _helper = GoogleHelper(config)
-        self._format = GoogleFormat(_helper)
+        self._format = GoogleFormat(config)
 
     # streams
 

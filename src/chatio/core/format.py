@@ -22,19 +22,14 @@ from .models import ChatTools
 from .params import ApiParams
 
 
-class ApiHelper[
+class ApiFormatState[
     SystemContentT,
     MessageContentT,
     ChatPredictionT,
     TextMessageT,
     ImageDocumentT,
     TextDocumentT,
-    ToolDefinitionT,
-    ToolDefinitionsT,
-    ToolSelectionT,
 ](ABC):
-
-    # messages
 
     @abstractmethod
     def chat_messages(self, messages: list[MessageContentT]) -> list[MessageContentT]:
@@ -88,7 +83,12 @@ class ApiHelper[
     def text_document(self, text: str, mimetype: str) -> MessageContentT:
         return self.input_content(self.text_document_chunk(text, mimetype))
 
-    # functions
+
+class ApiFormatTools[
+    ToolDefinitionT,
+    ToolDefinitionsT,
+    ToolSelectionT,
+]:
 
     @abstractmethod
     def tool_definition(self, name: str, desc: str, schema: dict) -> ToolDefinitionT:
@@ -110,9 +110,9 @@ class ApiHelper[
     def tool_selection_any(self) -> ToolSelectionT | None:
         ...
 
-    # @abstractmethod
-    # def tool_selection_name(self, tool_name: str) -> ToolSelectionT | None:
-    #     ...
+    @abstractmethod
+    def tool_selection_name(self, tool_name: str) -> ToolSelectionT | None:
+        ...
 
     def tool_selection(self, tool_choice_mode: str | None, tool_choice_name: str | None,
                        tools: list[str]) -> ToolSelectionT | None:
@@ -138,8 +138,7 @@ class ApiHelper[
 
             match tool_choice_mode:
                 case 'name':
-                    # return self.tool_selection_name(tool_choice_name)
-                    raise NotImplementedError
+                    return self.tool_selection_name(tool_choice_name)
                 case _:
                     raise ValueError
 
@@ -156,14 +155,11 @@ class ApiFormat[
     ToolSelectionT,
 ](ABC):
 
-    def __init__(self, helper: ApiHelper):
-        self._helper = helper
-
     def _system(self, message: SystemMessage | None) -> SystemContentT | None:
         if message is None:
             return None
 
-        return self._helper.system_content(self._helper.text_message(message.text))
+        return self._format_state.system_content(self._format_state.text_message(message.text))
 
     def _messages(self, messages: list[ContentEntry]) -> list[MessageContentT]:
         _messages = []
@@ -171,41 +167,41 @@ class ApiFormat[
         for message in messages:
             match message:
                 case InputMessage(text):
-                    _messages.append(self._helper.input_message(text))
+                    _messages.append(self._format_state.input_message(text))
                 case OutputMessage(text):
-                    _messages.append(self._helper.output_message(text))
+                    _messages.append(self._format_state.output_message(text))
                 case CallRequest(tool_call_id, tool_name, tool_input):
-                    _messages.append(self._helper.call_request(tool_call_id, tool_name, tool_input))
+                    _messages.append(self._format_state.call_request(tool_call_id, tool_name, tool_input))
                 case CallResponse(tool_call_id, tool_name, tool_output):
-                    _messages.append(self._helper.call_response(tool_call_id, tool_name, tool_output))
+                    _messages.append(self._format_state.call_response(tool_call_id, tool_name, tool_output))
                 case TextDocument(text, mimetype):
-                    _messages.append(self._helper.text_document(text, mimetype))
+                    _messages.append(self._format_state.text_document(text, mimetype))
                 case ImageDocument(blob, mimetype):
-                    _messages.append(self._helper.image_document(blob, mimetype))
+                    _messages.append(self._format_state.image_document(blob, mimetype))
                 case _:
                     raise RuntimeError(message)
 
-        return self._helper.chat_messages(_messages)
-
-    def _tool_specs(self, tools: list[ToolSchema] | None) -> ToolDefinitionsT | None:
-        if tools is None:
-            return None
-
-        _tools = [self._helper.tool_definition(tool.name, tool.desc, tool.schema) for tool in tools]
-
-        return self._helper.tool_definitions(_tools)
-
-    def _tool_choice(self, tool_choice: ToolChoice | None) -> ToolSelectionT | None:
-        if tool_choice is None:
-            return None
-
-        return self._helper.tool_selection(tool_choice.mode, tool_choice.name, tool_choice.tools)
+        return self._format_state.chat_messages(_messages)
 
     def _predict(self, message: PredictMessage | None) -> ChatPredictionT | None:
         if message is None:
             return None
 
-        return self._helper.prediction_content(self._helper.text_message(message.text))
+        return self._format_state.prediction_content(self._format_state.text_message(message.text))
+
+    def _tool_specs(self, tools: list[ToolSchema] | None) -> ToolDefinitionsT | None:
+        if tools is None:
+            return None
+
+        _tools = [self._format_tools.tool_definition(tool.name, tool.desc, tool.schema) for tool in tools]
+
+        return self._format_tools.tool_definitions(_tools)
+
+    def _tool_choice(self, tool_choice: ToolChoice | None) -> ToolSelectionT | None:
+        if tool_choice is None:
+            return None
+
+        return self._format_tools.tool_selection(tool_choice.mode, tool_choice.name, tool_choice.tools)
 
     def setup(self, params: ApiParams[
         SystemContentT,
@@ -224,15 +220,26 @@ class ApiFormat[
         params.tools = self._tool_specs(tools.tools)
         params.tool_choice = self._tool_choice(tools.tool_choice)
 
+    @property
     @abstractmethod
-    def spawn(self) -> ApiParams[
+    def _format_state(self) -> ApiFormatState[
         SystemContentT,
         MessageContentT,
         ChatPredictionT,
+        TextMessageT,
+        ImageDocumentT,
+        TextDocumentT,
+    ]:
+        ...
+
+    @property
+    @abstractmethod
+    def _format_tools(self) -> ApiFormatTools[
+        ToolDefinitionT,
         ToolDefinitionsT,
         ToolSelectionT,
     ]:
-        pass
+        ...
 
     @abstractmethod
     def build(self, state: ChatState, tools: ChatTools) -> ApiParams[

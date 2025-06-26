@@ -13,7 +13,8 @@ from google.genai.types import FunctionDeclarationDict
 from google.genai.types import FunctionCallingConfigMode
 
 
-from chatio.core.format import ApiHelper
+from chatio.core.format import ApiFormatState
+from chatio.core.format import ApiFormatTools
 from chatio.core.format import ApiFormat
 
 from chatio.core.models import ChatState
@@ -23,22 +24,17 @@ from .config import GoogleConfig
 from .params import GoogleParams
 
 
-class GoogleHelper(ApiHelper[
+class GoogleFormatState(ApiFormatState[
     ContentDict,
     ContentUnionDict,
     None,
     PartDict,
     PartDict,
     PartDict,
-    FunctionDeclarationDict,
-    ToolListUnionDict,
-    ToolConfigDict,
 ]):
 
     def __init__(self, config: GoogleConfig):
         self._config = config
-
-    # messages
 
     @override
     def chat_messages(self, messages: list[ContentUnionDict]) -> list[ContentUnionDict]:
@@ -123,7 +119,15 @@ class GoogleHelper(ApiHelper[
             }],
         }
 
-    # functions
+
+class GoogleFormatTools(ApiFormatTools[
+    FunctionDeclarationDict,
+    ToolListUnionDict,
+    ToolConfigDict,
+]):
+
+    def __init__(self, config: GoogleConfig):
+        self._config = config
 
     def _is_tool_schema(self, _schema: dict) -> TypeGuard[SchemaDict]:
         return True
@@ -182,7 +186,7 @@ class GoogleHelper(ApiHelper[
             },
         }
 
-    # @override
+    @override
     def tool_selection_name(self, tool_name: str) -> ToolConfigDict | None:
         return {
             "function_calling_config": {
@@ -203,8 +207,19 @@ class GoogleFormat(ApiFormat[
     ToolListUnionDict,
     ToolConfigDict,
 ]):
-    def spawn(self) -> GoogleParams:
-        return GoogleParams()
+
+    def __init__(self, config: GoogleConfig) -> None:
+        self._config = config
+
+    @property
+    @override
+    def _format_state(self) -> GoogleFormatState:
+        return GoogleFormatState(self._config)
+
+    @property
+    @override
+    def _format_tools(self) -> GoogleFormatTools:
+        return GoogleFormatTools(self._config)
 
     @override
     def build(self, state: ChatState, tools: ChatTools) -> GoogleParams:

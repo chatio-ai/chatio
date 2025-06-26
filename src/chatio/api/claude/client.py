@@ -21,7 +21,6 @@ from chatio.api.helper.httpx import httpx_args
 
 
 from .config import ClaudeConfig
-from .format import ClaudeHelper
 from .format import ClaudeFormat
 from .events import _pump
 
@@ -35,8 +34,7 @@ class ClaudeClient(ApiClient):
             api_key=config.api_key,
             http_client=HttpxClient(**httpx_args()))
 
-        _helper = ClaudeHelper(config)
-        self._format = ClaudeFormat(_helper)
+        self._format = ClaudeFormat(config)
 
     # streams
 

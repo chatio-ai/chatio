@@ -16,7 +16,8 @@ from anthropic.types import ToolParam
 from anthropic.types import ToolChoiceParam
 
 
-from chatio.core.format import ApiHelper
+from chatio.core.format import ApiFormatTools
+from chatio.core.format import ApiFormatState
 from chatio.core.format import ApiFormat
 
 from chatio.core.models import ChatState
@@ -31,32 +32,17 @@ type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
 type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
 
-class ClaudeHelper(ApiHelper[
+class ClaudeFormatState(ApiFormatState[
     TextBlockParam,
     MessageParam,
     None,
     TextBlockParam,
     ImageBlockParam,
     DocumentBlockParam,
-    ToolParam,
-    list[ToolParam],
-    ToolChoiceParam,
 ]):
 
     def __init__(self, config: ClaudeConfig) -> None:
         self._config = config
-
-    def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
-        if self._config.options.use_cache and entries:
-            entry = entries[-1]
-
-            entry.update({
-                "cache_control": {
-                    "type": "ephemeral",
-                },
-            })
-
-        return entries
 
     def _setup_messages_cache(self, messages: list[MessageParam]) -> list[MessageParam]:
         last_entry = None
@@ -86,8 +72,6 @@ class ClaudeHelper(ApiHelper[
             })
 
         return messages
-
-    # messages
 
     @override
     def chat_messages(self, messages: list[MessageParam]) -> list[MessageParam]:
@@ -188,7 +172,27 @@ class ClaudeHelper(ApiHelper[
             "content": tool_output,
         })
 
-    # functions
+
+class ClaudeFormatTools(ApiFormatTools[
+    ToolParam,
+    list[ToolParam],
+    ToolChoiceParam,
+]):
+
+    def __init__(self, config: ClaudeConfig) -> None:
+        self._config = config
+
+    def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
+        if self._config.options.use_cache and entries:
+            entry = entries[-1]
+
+            entry.update({
+                "cache_control": {
+                    "type": "ephemeral",
+                },
+            })
+
+        return entries
 
     @override
     def tool_definition(self, name: str, desc: str, schema: dict) -> ToolParam:
@@ -220,7 +224,7 @@ class ClaudeHelper(ApiHelper[
             "type": 'any',
         }
 
-    # @override
+    @override
     def tool_selection_name(self, tool_name: str) -> ToolChoiceParam | None:
         return {
             "type": 'tool',
@@ -239,8 +243,19 @@ class ClaudeFormat(ApiFormat[
     list[ToolParam],
     ToolChoiceParam,
 ]):
-    def spawn(self) -> ClaudeParams:
-        return ClaudeParams()
+
+    def __init__(self, config: ClaudeConfig) -> None:
+        self._config = config
+
+    @property
+    @override
+    def _format_state(self) -> ClaudeFormatState:
+        return ClaudeFormatState(self._config)
+
+    @property
+    @override
+    def _format_tools(self) -> ClaudeFormatTools:
+        return ClaudeFormatTools(self._config)
 
     def build(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
         params = ClaudeParams()

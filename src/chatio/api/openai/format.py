@@ -15,7 +15,8 @@ from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 
-from chatio.core.format import ApiHelper
+from chatio.core.format import ApiFormatState
+from chatio.core.format import ApiFormatTools
 from chatio.core.format import ApiFormat
 
 from chatio.core.models import ChatState
@@ -29,22 +30,17 @@ type _ChatCompletionContentPartParam = \
     ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam | File
 
 
-class OpenAIHelper(ApiHelper[
+class OpenAIFormatState(ApiFormatState[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
     ChatCompletionPredictionContentParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     File,
-    ChatCompletionToolParam,
-    list[ChatCompletionToolParam],
-    ChatCompletionToolChoiceOptionParam,
 ]):
 
     def __init__(self, config: OpenAIConfig):
         self._config = config
-
-    # messages
 
     @override
     def chat_messages(self, messages: list[ChatCompletionMessageParam]) -> list[ChatCompletionMessageParam]:
@@ -162,7 +158,15 @@ class OpenAIHelper(ApiHelper[
             "content": tool_output,
         }
 
-    # functions
+
+class OpenAIFormatTools(ApiFormatTools[
+    ChatCompletionToolParam,
+    list[ChatCompletionToolParam],
+    ChatCompletionToolChoiceOptionParam,
+]):
+
+    def __init__(self, config: OpenAIConfig):
+        self._config = config
 
     def _tool_schema(self, schema: dict) -> dict:
         result = schema.copy()
@@ -213,7 +217,7 @@ class OpenAIHelper(ApiHelper[
     def tool_selection_any(self) -> ChatCompletionToolChoiceOptionParam | None:
         return 'required'
 
-    # @override
+    @override
     def tool_selection_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam | None:
         return {
             "type": 'function',
@@ -234,8 +238,18 @@ class OpenAIFormat(ApiFormat[
     list[ChatCompletionToolParam],
     ChatCompletionToolChoiceOptionParam,
 ]):
-    def spawn(self) -> OpenAIParams:
-        return OpenAIParams()
+    def __init__(self, config: OpenAIConfig) -> None:
+        self._config = config
+
+    @property
+    @override
+    def _format_state(self) -> OpenAIFormatState:
+        return OpenAIFormatState(self._config)
+
+    @property
+    @override
+    def _format_tools(self) -> OpenAIFormatTools:
+        return OpenAIFormatTools(self._config)
 
     def build(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
         params = OpenAIParams()
