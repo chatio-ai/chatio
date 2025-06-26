@@ -1,6 +1,4 @@
 
-from collections.abc import Callable
-
 from dataclasses import dataclass, field
 
 
@@ -83,6 +81,5 @@ class ChatState:
 
 @dataclass
 class ChatTools:
-    funcs: dict[str, Callable] = field(default_factory=dict)
     tools: list[ToolSchema] | None = None
     tool_choice: ToolChoice | None = None

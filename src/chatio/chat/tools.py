@@ -1,10 +1,19 @@
 
+from dataclasses import dataclass, field
+
+from collections.abc import Callable
+
 from chatio.core.config import ToolsConfig
 
 from chatio.core.models import ToolSchema
 from chatio.core.models import ToolChoice
 
-from chatio.core.models import ChatTools
+from chatio.core.models import ChatTools as _ChatTools
+
+
+@dataclass
+class ChatTools(_ChatTools):
+    funcs: dict[str, Callable] = field(default_factory=dict, init=False)
 
 
 def build_tools(tools: ToolsConfig | None = None) -> ChatTools:
