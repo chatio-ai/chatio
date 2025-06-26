@@ -9,13 +9,15 @@ from chatio.core.models import TextDocument
 from chatio.core.models import CallResponse
 from chatio.core.models import CallRequest
 
-from chatio.core.models import ToolSchema
+from chatio.core.models import ToolConfig
 from chatio.core.models import ToolChoice
 
 from chatio.core.models import ContentEntry
 
+from chatio.core.models import ChatState
+from chatio.core.models import ChatTools
+
 from chatio.core.params import ApiParamsBase
-from chatio.core.params import ApiParams
 
 from chatio.core.format import ApiFormat
 
@@ -73,7 +75,7 @@ class ApiMapper[
 
         return self._format.chat_messages(_messages)
 
-    def _tools(self, tools: list[ToolSchema] | None) -> ToolDefinitionsT | None:
+    def _tools(self, tools: list[ToolConfig] | None) -> ToolDefinitionsT | None:
         if tools is None:
             return None
 
@@ -93,26 +95,30 @@ class ApiMapper[
 
         return self._format.prediction_content(self._format.text_message(message.text))
 
-    def map(self, params: ApiParams) -> ApiParamsBase[
+    def map(self, state: ChatState, tools: ChatTools) -> ApiParamsBase[
         SystemContentT,
         MessageContentT,
         ToolDefinitionsT,
         ToolSelectionT,
         ChatPredictionT,
     ]:
+        _predict = state.extras.get('prediction')
+        if _predict is not None or not isinstance(_predict, PredictMessage):
+            raise TypeError
+
         return ApiParamsBase(
-            system=self._system(params.system),
-            messages=self._messages(params.messages),
-            predict=self._predict(params.predict),
-            tools=self._tools(params.tools),
-            tool_choice=self._tool_choice(params.tool_choice),
+            system=self._system(state.system),
+            messages=self._messages(state.messages),
+            predict=self._predict(_predict),
+            tools=self._tools(tools.tools),
+            tool_choice=self._tool_choice(tools.tool_choice),
         )
 
-    def __call__(self, params: ApiParams) -> ApiParamsBase[
+    def __call__(self, state: ChatState, tools: ChatTools) -> ApiParamsBase[
         SystemContentT,
         MessageContentT,
         ToolDefinitionsT,
         ToolSelectionT,
         ChatPredictionT,
     ]:
-        return self.map(params)
+        return self.map(state, tools)

@@ -10,9 +10,11 @@ from openai import OpenAI
 from openai import NOT_GIVEN
 
 
-from chatio.core.params import ApiParams
 from chatio.core.mapper import ApiMapper
 from chatio.core.client import ApiClient
+
+from chatio.core.models import ChatState
+from chatio.core.models import ChatTools
 
 from chatio.core.events import ChatEvent
 
@@ -39,8 +41,8 @@ class OpenAIClient(ApiClient):
     # streams
 
     @override
-    def iterate_model_events(self, model: str, params: ApiParams) -> Iterator[ChatEvent]:
-        _params = self._mapper(params)
+    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
+        _params = self._mapper(state, tools)
         return _pump(self._client.beta.chat.completions.stream(
             model=model,
             max_completion_tokens=4096 if _params.predict is None else NOT_GIVEN,
@@ -54,5 +56,5 @@ class OpenAIClient(ApiClient):
     # helpers
 
     @override
-    def count_message_tokens(self, model: str, params: ApiParams) -> int:
+    def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         raise NotImplementedError
