@@ -10,6 +10,7 @@ from ._common import ApiFormatBase
 
 
 class ApiFormatOptions[
+    TextMessageT,
     ApiParamsOptionsT: ApiParamsOptions,
     ApiConfigT: ApiConfig,
 ](
@@ -18,7 +19,7 @@ class ApiFormatOptions[
 ):
 
     @abstractmethod
-    def index(self) -> list[str]:
+    def text_message(self, text: str) -> TextMessageT:
         ...
 
     @abstractmethod

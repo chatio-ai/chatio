@@ -77,7 +77,6 @@ type ChatOptions = dict[type[ContentEntry], ContentEntry]
 
 @dataclass
 class ChatState:
-    system: SystemContent | None = None
     messages: list[ContentEntry] = field(default_factory=list)
     options: ChatOptions = field(default_factory=dict)
 

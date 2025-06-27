@@ -23,7 +23,6 @@ type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
 
 class ClaudeFormatHistory(ApiFormatHistory[
-    TextBlockParam,
     MessageParam,
     TextBlockParam,
     ImageBlockParam,
@@ -106,17 +105,6 @@ class ClaudeFormatHistory(ApiFormatHistory[
                 "data": text,
             },
         }
-
-    @override
-    def system_content(self, content: TextBlockParam) -> TextBlockParam:
-        if self._config.options.use_cache:
-            content.update({
-                "cache_control": {
-                    "type": "ephemeral",
-                },
-            })
-
-        return content
 
     def _input_content(self, content: _InputContentBlockParam) -> MessageParam:
         return {

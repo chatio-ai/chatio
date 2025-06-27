@@ -1,6 +1,8 @@
 
 import mimetypes
 
+from collections.abc import Callable
+
 from dataclasses import dataclass
 
 from os import PathLike
@@ -8,11 +10,13 @@ from pathlib import Path
 
 from chatio.core.config import StateConfig
 
-from chatio.core.models import ImageDocument
-from chatio.core.models import TextDocument
+from chatio.core.models import ContentEntry
 
 from chatio.core.models import PredictContent
 from chatio.core.models import SystemContent
+
+from chatio.core.models import ImageDocument
+from chatio.core.models import TextDocument
 
 from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
@@ -71,14 +75,19 @@ class ChatState(_ChatState):
     def commit_call_request(self, call_id: str, name: str, args: object) -> None:
         self.messages.append(CallRequest(call_id, name, args))
 
+    def _update_option_content(self, option: type[ContentEntry],
+                               factory: Callable[[str], ContentEntry],
+                               message: str | None) -> None:
+        if message is None:
+            self.options.pop(option, None)
+        else:
+            self.options.update({option: factory(message)})
+
     def update_system_message(self, message: str | None) -> None:
-        self.system = SystemContent(message) if message is not None else None
+        return self._update_option_content(SystemContent, SystemContent, message)
 
     def update_prediction_state(self, message: str | None) -> None:
-        if message is None:
-            self.options.pop(PredictContent, None)
-        else:
-            self.options.update({PredictContent: PredictContent(message)})
+        return self._update_option_content(PredictContent, PredictContent, message)
 
 
 def build_state(state: StateConfig | None = None) -> ChatState:

@@ -1,7 +1,6 @@
 
 from abc import ABC, abstractmethod
 
-from chatio.core.models import SystemContent
 from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
 
@@ -18,7 +17,6 @@ from ._common import ApiFormatBase
 
 
 class ApiFormatHistory[
-    SystemContentT,
     MessageContentT,
     TextMessageT,
     ImageDocumentT,
@@ -43,10 +41,6 @@ class ApiFormatHistory[
 
     @abstractmethod
     def image_document_blob(self, blob: bytes, mimetype: str) -> ImageDocumentT:
-        ...
-
-    @abstractmethod
-    def system_content(self, content: TextMessageT) -> SystemContentT:
         ...
 
     @abstractmethod
@@ -76,12 +70,6 @@ class ApiFormatHistory[
 
     def text_document(self, text: str, mimetype: str) -> MessageContentT:
         return self.input_content(self.text_document_chunk(text, mimetype))
-
-    def system(self, message: SystemContent | None) -> SystemContentT | None:
-        if message is None:
-            return None
-
-        return self.system_content(self.text_message(message.text))
 
     def messages(self, messages: list[ContentEntry]) -> list[MessageContentT]:
         _messages = []

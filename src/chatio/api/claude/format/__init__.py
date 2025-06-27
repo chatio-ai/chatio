@@ -18,7 +18,7 @@ from chatio.core.format import ApiFormat
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.core.params import ApiParamsOptions
+from chatio.api.claude.params import ClaudeParamsOptions
 from chatio.api.claude.params import ClaudeParams
 from chatio.api.claude.config import ClaudeConfig
 
@@ -28,7 +28,6 @@ from .tooling import ClaudeFormatTooling
 
 
 class ClaudeFormat(ApiFormat[
-    TextBlockParam,
     MessageParam,
     TextBlockParam,
     ImageBlockParam,
@@ -36,7 +35,7 @@ class ClaudeFormat(ApiFormat[
     list[ToolParam],
     ToolParam,
     ToolChoiceParam,
-    ApiParamsOptions,
+    ClaudeParamsOptions,
     ClaudeConfig,
 ]):
 
@@ -59,7 +58,11 @@ class ClaudeFormat(ApiFormat[
     def build(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
         params = self.spawn(state, tools)
 
-        _system = NOT_GIVEN if params.system is None else [params.system]
+        if params.options is None:
+            params.options = {}
+
+        _system_raw = params.options.get("system")
+        _system = NOT_GIVEN if _system_raw is None else [_system_raw]
 
         _tools = NOT_GIVEN if params.tools is None else params.tools
         _tool_choice = NOT_GIVEN if params.tool_choice is None else params.tool_choice

@@ -11,7 +11,6 @@ from chatio.api.google.config import GoogleConfig
 
 
 class GoogleFormatHistory(ApiFormatHistory[
-    ContentDict,
     ContentUnionDict,
     PartDict,
     PartDict,
@@ -45,12 +44,6 @@ class GoogleFormatHistory(ApiFormatHistory[
                 "mime_type": mimetype,
                 "data": blob,
             },
-        }
-
-    @override
-    def system_content(self, content: PartDict) -> ContentDict:
-        return {
-            "parts": [content],
         }
 
     @override

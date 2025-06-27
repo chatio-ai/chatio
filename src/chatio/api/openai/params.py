@@ -15,6 +15,8 @@ from chatio.core.params import ApiParams
 
 
 class OpenAIParamsOptions(ApiParamsOptions, total=False):
+    system: ChatCompletionMessageParam | None
+
     prediction: ChatCompletionPredictionContentParam | None
 
 

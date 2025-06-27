@@ -21,7 +21,6 @@ type _ChatCompletionContentPartParam = \
 
 class OpenAIFormatHistory(ApiFormatHistory[
     ChatCompletionMessageParam,
-    ChatCompletionMessageParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     File,
@@ -66,22 +65,6 @@ class OpenAIFormatHistory(ApiFormatHistory[
                 "filename": "",
                 "file_data": f"data:{mimetype};base64,{data}",
             },
-        }
-
-    @override
-    def system_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
-        if content['type'] != 'text':
-            raise TypeError
-
-        if self._config.options.legacy:
-            return {
-                "role": "system",
-                "content": content['text'],
-            }
-
-        return {
-            "role": "developer",
-            "content": [content],
         }
 
     @override

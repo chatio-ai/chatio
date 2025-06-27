@@ -131,6 +131,6 @@ class Chat:
             self._model.vendor,
             self._model.model,
             len(self._tools.funcs),
-            bool(self._state.system),
+            len(self._state.options),
             len(self._state.messages),
         )

@@ -28,7 +28,6 @@ from .tooling import OpenAIFormatTooling
 
 class OpenAIFormat(ApiFormat[
     ChatCompletionMessageParam,
-    ChatCompletionMessageParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     File,
@@ -58,11 +57,13 @@ class OpenAIFormat(ApiFormat[
     def build(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
         params = self.spawn(state, tools)
 
-        _system = [] if params.system is None else [params.system]
-        _messages = _system + params.messages
-
         if params.options is None:
             params.options = {}
+
+        _messages = params.messages
+        _system = params.options.get('system')
+        if _system is not None:
+            _messages = [_system, *_messages]
 
         _prediction = params.options.get('prediction')
         if _prediction is not None:

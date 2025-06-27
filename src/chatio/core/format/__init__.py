@@ -17,7 +17,6 @@ from .tooling import ApiFormatTooling
 
 
 class ApiFormat[
-    SystemContentT,
     MessageContentT,
     TextMessageT,
     ImageDocumentT,
@@ -34,7 +33,6 @@ class ApiFormat[
     @property
     @abstractmethod
     def _format_history(self) -> ApiFormatHistory[
-        SystemContentT,
         MessageContentT,
         TextMessageT,
         ImageDocumentT,
@@ -46,6 +44,7 @@ class ApiFormat[
     @property
     @abstractmethod
     def _format_options(self) -> ApiFormatOptions[
+        TextMessageT,
         ApiParamsOptionsT,
         ApiConfigT,
     ]:
@@ -62,14 +61,12 @@ class ApiFormat[
         ...
 
     def spawn(self, state: ChatState, tools: ChatTools) -> ApiParamsGeneric[
-        SystemContentT,
         MessageContentT,
         ToolDefinitionsT,
         ToolChoiceT,
         ApiParamsOptionsT,
     ]:
         return ApiParamsGeneric(
-            system=self._format_history.system(state.system),
             messages=self._format_history.messages(state.messages),
             options=self._format_options.format(state.options),
             tools=self._format_tooling.tools(tools.tools),
