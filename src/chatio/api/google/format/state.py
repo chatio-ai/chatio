@@ -10,17 +10,14 @@ from chatio.core.models import ContentEntry
 from chatio.core.format.state import ApiFormatState
 from chatio.core.format.extra import ApiFormatExtra
 
-from chatio.api.google.config import GoogleConfig
-
 from chatio.core.params import ApiExtras
+from chatio.api.google.config import GoogleConfig
 
 
 class GoogleFormatExtra(ApiFormatExtra[
     ApiExtras,
+    GoogleConfig,
 ]):
-
-    def __init__(self, config: GoogleConfig):
-        self._config = config
 
     @override
     def index(self) -> list[str]:
@@ -37,10 +34,8 @@ class GoogleFormatState(ApiFormatState[
     PartDict,
     PartDict,
     PartDict,
+    GoogleConfig,
 ]):
-
-    def __init__(self, config: GoogleConfig):
-        self._config = config
 
     @override
     def chat_messages(self, messages: list[ContentUnionDict]) -> list[ContentUnionDict]:

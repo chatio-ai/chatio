@@ -12,6 +12,8 @@ from chatio.core.models import CallRequest
 
 from chatio.core.models import ContentEntry
 
+from chatio.core.config import ApiConfig
+
 
 class ApiFormatState[
     SystemContentT,
@@ -19,7 +21,11 @@ class ApiFormatState[
     TextMessageT,
     ImageDocumentT,
     TextDocumentT,
+    ApiConfigT: ApiConfig,
 ](ABC):
+
+    def __init__(self, config: ApiConfigT) -> None:
+        self._config = config
 
     @abstractmethod
     def chat_messages(self, messages: list[MessageContentT]) -> list[MessageContentT]:

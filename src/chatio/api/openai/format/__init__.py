@@ -36,9 +36,8 @@ class OpenAIFormat(ApiFormat[
     list[ChatCompletionToolParam],
     ChatCompletionToolChoiceOptionParam,
     OpenAIExtras,
+    OpenAIConfig,
 ]):
-    def __init__(self, config: OpenAIConfig) -> None:
-        self._config = config
 
     @property
     @override

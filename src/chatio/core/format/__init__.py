@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
+from chatio.core.config import ApiConfig
 from chatio.core.params import ApiExtras
 from chatio.core.params import ApiFields
 from chatio.core.params import ApiParams
@@ -23,7 +24,11 @@ class ApiFormat[
     ToolDefinitionsT,
     ToolSelectionT,
     ApiExtrasT: ApiExtras,
+    ApiConfigT: ApiConfig,
 ](ABC):
+
+    def __init__(self, config: ApiConfigT) -> None:
+        self._config = config
 
     def spawn(self, state: ChatState, tools: ChatTools) -> ApiFields[
         SystemContentT,
@@ -48,6 +53,7 @@ class ApiFormat[
         TextMessageT,
         ImageDocumentT,
         TextDocumentT,
+        ApiConfigT,
     ]:
         ...
 
@@ -55,6 +61,7 @@ class ApiFormat[
     @abstractmethod
     def _format_extra(self) -> ApiFormatExtra[
         ApiExtrasT,
+        ApiConfigT,
     ]:
         ...
 
@@ -64,6 +71,7 @@ class ApiFormat[
         ToolDefinitionT,
         ToolDefinitionsT,
         ToolSelectionT,
+        ApiConfigT,
     ]:
         ...
 

@@ -17,17 +17,14 @@ from chatio.core.models import ContentEntry
 from chatio.core.format.state import ApiFormatState
 from chatio.core.format.extra import ApiFormatExtra
 
-from chatio.api.claude.config import ClaudeConfig
-
 from chatio.core.params import ApiExtras
+from chatio.api.claude.config import ClaudeConfig
 
 
 class ClaudeFormatExtra(ApiFormatExtra[
     ApiExtras,
+    ClaudeConfig,
 ]):
-
-    def __init__(self, config: ClaudeConfig) -> None:
-        self._config = config
 
     @override
     def index(self) -> list[str]:
@@ -49,10 +46,8 @@ class ClaudeFormatState(ApiFormatState[
     TextBlockParam,
     ImageBlockParam,
     DocumentBlockParam,
+    ClaudeConfig,
 ]):
-
-    def __init__(self, config: ClaudeConfig) -> None:
-        self._config = config
 
     def _setup_messages_cache(self, messages: list[MessageParam]) -> list[MessageParam]:
         last_entry = None

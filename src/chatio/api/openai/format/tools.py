@@ -13,10 +13,8 @@ class OpenAIFormatTools(ApiFormatTools[
     ChatCompletionToolParam,
     list[ChatCompletionToolParam],
     ChatCompletionToolChoiceOptionParam,
+    OpenAIConfig,
 ]):
-
-    def __init__(self, config: OpenAIConfig):
-        self._config = config
 
     def _tool_schema(self, schema: dict) -> dict:
         result = schema.copy()

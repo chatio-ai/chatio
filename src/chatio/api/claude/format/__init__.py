@@ -37,10 +37,8 @@ class ClaudeFormat(ApiFormat[
     list[ToolParam],
     ToolChoiceParam,
     ApiExtras,
+    ClaudeConfig,
 ]):
-
-    def __init__(self, config: ClaudeConfig) -> None:
-        self._config = config
 
     @property
     @override

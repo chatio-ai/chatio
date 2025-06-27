@@ -13,10 +13,8 @@ class ClaudeFormatTools(ApiFormatTools[
     ToolParam,
     list[ToolParam],
     ToolChoiceParam,
+    ClaudeConfig,
 ]):
-
-    def __init__(self, config: ClaudeConfig) -> None:
-        self._config = config
 
     def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
         if self._config.options.use_cache and entries:

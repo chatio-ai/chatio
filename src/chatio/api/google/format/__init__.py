@@ -34,10 +34,8 @@ class GoogleFormat(ApiFormat[
     ToolListUnionDict,
     ToolConfigDict,
     ApiExtras,
+    GoogleConfig,
 ]):
-
-    def __init__(self, config: GoogleConfig) -> None:
-        self._config = config
 
     @property
     @override

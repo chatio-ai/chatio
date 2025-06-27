@@ -17,10 +17,8 @@ class GoogleFormatTools(ApiFormatTools[
     FunctionDeclarationDict,
     ToolListUnionDict,
     ToolConfigDict,
+    GoogleConfig,
 ]):
-
-    def __init__(self, config: GoogleConfig):
-        self._config = config
 
     def _is_tool_schema(self, _schema: dict) -> TypeGuard[SchemaDict]:
         return True

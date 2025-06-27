@@ -27,10 +27,8 @@ type _ChatCompletionContentPartParam = \
 
 class OpenAIFormatExtra(ApiFormatExtra[
     OpenAIExtras,
+    OpenAIConfig,
 ]):
-
-    def __init__(self, config: OpenAIConfig) -> None:
-        self._config = config
 
     def text_message(self, text: str) -> ChatCompletionContentPartTextParam:
         return {
@@ -72,10 +70,8 @@ class OpenAIFormatState(ApiFormatState[
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     File,
+    OpenAIConfig,
 ]):
-
-    def __init__(self, config: OpenAIConfig):
-        self._config = config
 
     @override
     def chat_messages(self, messages: list[ChatCompletionMessageParam]) -> list[ChatCompletionMessageParam]:
