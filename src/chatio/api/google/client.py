@@ -41,9 +41,9 @@ class GoogleClient(ApiClient):
         return _pump(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
-                'max_output_tokens': _params.max_tokens,
+                'max_output_tokens': _params.max_output_tokens,
                 'tools': _params.tools,
-                'system_instruction': _params.system,
+                'system_instruction': _params.system_instruction,
                 'tool_config': _params.tool_config,
             },
             contents=_params.messages,

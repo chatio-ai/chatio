@@ -12,11 +12,11 @@ from chatio.core.params import ApiParams
 
 @dataclass
 class GoogleParams(ApiParams):
-    max_tokens: int
+    max_output_tokens: int
 
     messages: list[ContentUnionDict]
 
-    system: ContentDict | None = None
+    system_instruction: ContentDict | None = None
 
     tools: ToolListUnionDict | None = None
 
