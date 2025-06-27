@@ -66,7 +66,7 @@ class ChatState(_ChatState):
         self.messages.append(CallResponse(call_id, name, args))
 
     def commit_output_message(self, message: str) -> None:
-        self.messages.append(InputMessage(message))
+        self.messages.append(OutputMessage(message))
 
     def commit_call_request(self, call_id: str, name: str, args: object) -> None:
         self.messages.append(CallRequest(call_id, name, args))
@@ -87,16 +87,15 @@ def build_state(state: StateConfig | None = None) -> ChatState:
     if state is None:
         state = StateConfig()
 
-    if state.system is not None:
-        _state.system = SystemContent(state.system)
+    _state.update_system_message(state.system)
 
     if state.messages is None:
         state.messages = []
 
     for index, message in enumerate(state.messages):
         if not index % 2:
-            _state.messages.append(InputMessage(message))
+            _state.commit_input_message(message)
         else:
-            _state.messages.append(OutputMessage(message))
+            _state.commit_output_message(message)
 
     return _state
