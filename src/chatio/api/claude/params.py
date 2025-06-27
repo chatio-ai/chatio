@@ -15,6 +15,7 @@ from chatio.core.params import ApiParams
 
 @dataclass
 class ClaudeParams(ApiParams):
+    max_tokens: int
 
     messages: list[MessageParam]
 

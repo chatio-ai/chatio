@@ -65,6 +65,7 @@ class ClaudeFormat(ApiFormat[
         _tool_choice = NOT_GIVEN if fields.tool_choice is None else fields.tool_choice
 
         return ClaudeParams(
+            max_tokens=4096,
             system=_system,
             messages=fields.messages,
             tools=_tools,

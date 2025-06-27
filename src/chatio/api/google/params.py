@@ -12,6 +12,7 @@ from chatio.core.params import ApiParams
 
 @dataclass
 class GoogleParams(ApiParams):
+    max_tokens: int
 
     messages: list[ContentUnionDict]
 

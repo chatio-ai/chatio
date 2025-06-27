@@ -41,8 +41,8 @@ class ClaudeClient(ApiClient):
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
         _params = self._format.build(state, tools)
         return _pump(self._client.messages.stream(
+            max_tokens=_params.max_tokens,
             model=model,
-            max_tokens=4096,
             tools=_params.tools,
             system=_params.system,
             messages=_params.messages,
