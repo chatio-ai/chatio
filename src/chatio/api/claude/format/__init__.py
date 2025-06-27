@@ -13,14 +13,14 @@ from anthropic.types import ToolChoiceParam
 from anthropic import NOT_GIVEN
 
 
-from chatio.core.params import ApiExtras
 from chatio.core.format import ApiFormat
 
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.api.claude.config import ClaudeConfig
+from chatio.core.params import ApiParamsOptions
 from chatio.api.claude.params import ClaudeParams
+from chatio.api.claude.config import ClaudeConfig
 
 from .history import ClaudeFormatHistory
 from .options import ClaudeFormatOptions
@@ -36,7 +36,7 @@ class ClaudeFormat(ApiFormat[
     ToolParam,
     list[ToolParam],
     ToolChoiceParam,
-    ApiExtras,
+    ApiParamsOptions,
     ClaudeConfig,
 ]):
 

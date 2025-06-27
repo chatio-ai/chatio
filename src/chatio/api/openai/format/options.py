@@ -9,12 +9,12 @@ from chatio.core.models import PredictMessage
 
 from chatio.core.format.options import ApiFormatOptions
 
-from chatio.api.openai.params import OpenAIExtras
+from chatio.api.openai.params import OpenAIParamsOptions
 from chatio.api.openai.config import OpenAIConfig
 
 
 class OpenAIFormatOptions(ApiFormatOptions[
-    OpenAIExtras,
+    OpenAIParamsOptions,
     OpenAIConfig,
 ]):
 
@@ -38,15 +38,15 @@ class OpenAIFormatOptions(ApiFormatOptions[
         return ['prediction']
 
     @override
-    def build(self, extras: dict[str, ContentEntry | None]) -> OpenAIExtras:
-        _extras: OpenAIExtras = {}
+    def format(self, options: dict[str, ContentEntry | None]) -> OpenAIParamsOptions:
+        _options: OpenAIParamsOptions = {}
 
-        for param_name, param in extras.items():
-            match param_name:
-                case 'prediction' if isinstance(param, PredictMessage):
+        for name, value in options.items():
+            match name:
+                case 'prediction' if isinstance(value, PredictMessage):
                     if self._config.options.prediction:
-                        _extras['prediction'] = self.prediction_content(self.text_message(param.text))
+                        _options['prediction'] = self.prediction_content(self.text_message(value.text))
                 case _:
                     pass
 
-        return _extras
+        return _options

@@ -10,11 +10,11 @@ from openai.types.chat import ChatCompletionToolChoiceOptionParam
 from openai import NotGiven, NOT_GIVEN
 
 
-from chatio.core.params import ApiExtras
+from chatio.core.params import ApiParamsOptions
 from chatio.core.params import ApiParams
 
 
-class OpenAIExtras(ApiExtras, total=False):
+class OpenAIParamsOptions(ApiParamsOptions, total=False):
     prediction: ChatCompletionPredictionContentParam | None
 
 

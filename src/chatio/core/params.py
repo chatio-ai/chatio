@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import TypedDict
 
 
-class ApiExtras(TypedDict):
+class ApiParamsOptions(TypedDict):
     pass
 
 
@@ -14,11 +14,11 @@ class ApiParamsGeneric[
     MessageContentT,
     ToolDefinitionsT,
     ToolSelectionT,
-    ApiExtrasT: ApiExtras,
+    ApiParamsOptionsT: ApiParamsOptions,
 ]:
     system: SystemContentT | None = None
     messages: list[MessageContentT] = field(default_factory=list)
-    extras: ApiExtrasT | None = None
+    options: ApiParamsOptionsT | None = None
     tools: ToolDefinitionsT | None = None
     tool_choice: ToolSelectionT | None = None
 

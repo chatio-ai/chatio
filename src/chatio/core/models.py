@@ -76,7 +76,7 @@ class ToolChoice:
 class ChatState:
     system: SystemMessage | None = None
     messages: list[ContentEntry] = field(default_factory=list)
-    extras: dict[str, ContentEntry | None] = field(default_factory=dict)
+    options: dict[str, ContentEntry | None] = field(default_factory=dict)
 
 
 @dataclass

@@ -17,9 +17,9 @@ from chatio.core.format import ApiFormat
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.api.openai.config import OpenAIConfig
-from chatio.api.openai.params import OpenAIExtras
+from chatio.api.openai.params import OpenAIParamsOptions
 from chatio.api.openai.params import OpenAIParams
+from chatio.api.openai.config import OpenAIConfig
 
 from .history import OpenAIFormatHistory
 from .options import OpenAIFormatOptions
@@ -35,7 +35,7 @@ class OpenAIFormat(ApiFormat[
     ChatCompletionToolParam,
     list[ChatCompletionToolParam],
     ChatCompletionToolChoiceOptionParam,
-    OpenAIExtras,
+    OpenAIParamsOptions,
     OpenAIConfig,
 ]):
 
@@ -61,10 +61,10 @@ class OpenAIFormat(ApiFormat[
         _system = [] if params.system is None else [params.system]
         _messages = _system + params.messages
 
-        if params.extras is None:
-            params.extras = {}
+        if params.options is None:
+            params.options = {}
 
-        _prediction = params.extras.get('prediction')
+        _prediction = params.options.get('prediction')
         if _prediction is not None:
             return OpenAIParams(
                 messages=_messages,

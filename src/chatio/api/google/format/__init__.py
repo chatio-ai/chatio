@@ -10,14 +10,14 @@ from google.genai.types import ToolListUnionDict
 from google.genai.types import ToolConfigDict
 
 
-from chatio.core.params import ApiExtras
 from chatio.core.format import ApiFormat
 
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.api.google.config import GoogleConfig
+from chatio.core.params import ApiParamsOptions
 from chatio.api.google.params import GoogleParams
+from chatio.api.google.config import GoogleConfig
 
 from .history import GoogleFormatHistory
 from .options import GoogleFormatOptions
@@ -33,7 +33,7 @@ class GoogleFormat(ApiFormat[
     FunctionDeclarationDict,
     ToolListUnionDict,
     ToolConfigDict,
-    ApiExtras,
+    ApiParamsOptions,
     GoogleConfig,
 ]):
 

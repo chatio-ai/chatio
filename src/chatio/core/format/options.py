@@ -3,14 +3,14 @@ from abc import ABC, abstractmethod
 
 from chatio.core.models import ContentEntry
 
-from chatio.core.params import ApiExtras
+from chatio.core.params import ApiParamsOptions
 from chatio.core.config import ApiConfig
 
 from ._common import ApiFormatBase
 
 
 class ApiFormatOptions[
-    ApiExtrasT: ApiExtras,
+    ApiParamsOptionsT: ApiParamsOptions,
     ApiConfigT: ApiConfig,
 ](
     ApiFormatBase[ApiConfigT],
@@ -22,5 +22,5 @@ class ApiFormatOptions[
         ...
 
     @abstractmethod
-    def build(self, extras: dict[str, ContentEntry | None]) -> ApiExtrasT:
+    def format(self, options: dict[str, ContentEntry | None]) -> ApiParamsOptionsT:
         ...
