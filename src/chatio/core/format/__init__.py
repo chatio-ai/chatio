@@ -7,6 +7,7 @@ from chatio.core.models import ChatTools
 from chatio.core.params import ApiExtras
 from chatio.core.params import ApiParams
 
+from .extra import ApiFormatExtra
 from .state import ApiFormatState
 from .tools import ApiFormatTools
 
@@ -32,7 +33,7 @@ class ApiFormat[
     ], state: ChatState, tools: ChatTools):
         params.system = self._format_state.system(state.system)
         params.messages = self._format_state.messages(state.messages)
-        params.extras = self._format_state.extras(state.extras)
+        params.extras = self._format_extra.build(state.extras)
 
         params.tools = self._format_tools.tools(tools.tools)
         params.tool_choice = self._format_tools.tool_choice(tools.tool_choice)
@@ -45,6 +46,12 @@ class ApiFormat[
         TextMessageT,
         ImageDocumentT,
         TextDocumentT,
+    ]:
+        ...
+
+    @property
+    @abstractmethod
+    def _format_extra(self) -> ApiFormatExtra[
         ApiExtrasT,
     ]:
         ...

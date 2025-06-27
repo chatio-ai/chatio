@@ -15,9 +15,27 @@ from anthropic.types import ToolResultBlockParam
 from chatio.core.models import ContentEntry
 
 from chatio.core.format.state import ApiFormatState
-from chatio.core.params import ApiExtras
+from chatio.core.format.extra import ApiFormatExtra
 
 from chatio.api.claude.config import ClaudeConfig
+
+from chatio.core.params import ApiExtras
+
+
+class ClaudeFormatExtra(ApiFormatExtra[
+    ApiExtras,
+]):
+
+    def __init__(self, config: ClaudeConfig) -> None:
+        self._config = config
+
+    @override
+    def index(self) -> list[str]:
+        return []
+
+    @override
+    def build(self, extras: dict[str, ContentEntry | None]) -> ApiExtras:
+        return ApiExtras()
 
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
@@ -31,7 +49,6 @@ class ClaudeFormatState(ApiFormatState[
     TextBlockParam,
     ImageBlockParam,
     DocumentBlockParam,
-    ApiExtras,
 ]):
 
     def __init__(self, config: ClaudeConfig) -> None:
@@ -123,10 +140,6 @@ class ClaudeFormatState(ApiFormatState[
             })
 
         return content
-
-    @override
-    def extras(self, extras: dict[str, ContentEntry | None]) -> ApiExtras:
-        return ApiExtras()
 
     def _input_content(self, content: _InputContentBlockParam) -> MessageParam:
         return {

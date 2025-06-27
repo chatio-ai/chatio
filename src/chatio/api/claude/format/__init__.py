@@ -21,6 +21,7 @@ from chatio.api.claude.config import ClaudeConfig
 from chatio.api.claude.params import ClaudeParams
 
 from .state import ClaudeFormatState
+from .state import ClaudeFormatExtra
 from .tools import ClaudeFormatTools
 
 
@@ -38,6 +39,11 @@ class ClaudeFormat(ApiFormat[
 
     def __init__(self, config: ClaudeConfig) -> None:
         self._config = config
+
+    @property
+    @override
+    def _format_extra(self) -> ClaudeFormatExtra:
+        return ClaudeFormatExtra(self._config)
 
     @property
     @override

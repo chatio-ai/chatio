@@ -19,7 +19,6 @@ class ApiFormatState[
     TextMessageT,
     ImageDocumentT,
     TextDocumentT,
-    ApiExtrasT,
 ](ABC):
 
     @abstractmethod
@@ -97,7 +96,3 @@ class ApiFormatState[
                     raise RuntimeError(message)
 
         return self.chat_messages(_messages)
-
-    @abstractmethod
-    def extras(self, extras: dict[str, ContentEntry | None]) -> ApiExtrasT:
-        ...

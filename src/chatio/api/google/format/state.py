@@ -8,9 +8,27 @@ from google.genai.types import PartDict
 from chatio.core.models import ContentEntry
 
 from chatio.core.format.state import ApiFormatState
-from chatio.core.params import ApiExtras
+from chatio.core.format.extra import ApiFormatExtra
 
 from chatio.api.google.config import GoogleConfig
+
+from chatio.core.params import ApiExtras
+
+
+class GoogleFormatExtra(ApiFormatExtra[
+    ApiExtras,
+]):
+
+    def __init__(self, config: GoogleConfig):
+        self._config = config
+
+    @override
+    def index(self) -> list[str]:
+        return []
+
+    @override
+    def build(self, extras: dict[str, ContentEntry | None]) -> ApiExtras:
+        return ApiExtras()
 
 
 class GoogleFormatState(ApiFormatState[
@@ -19,7 +37,6 @@ class GoogleFormatState(ApiFormatState[
     PartDict,
     PartDict,
     PartDict,
-    ApiExtras,
 ]):
 
     def __init__(self, config: GoogleConfig):
@@ -58,10 +75,6 @@ class GoogleFormatState(ApiFormatState[
         return {
             "parts": [content],
         }
-
-    @override
-    def extras(self, extras: dict[str, ContentEntry | None]) -> ApiExtras:
-        return ApiExtras()
 
     @override
     def input_content(self, content: PartDict) -> ContentDict:

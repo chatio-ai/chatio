@@ -20,6 +20,7 @@ from chatio.api.google.config import GoogleConfig
 from chatio.api.google.params import GoogleParams
 
 from .state import GoogleFormatState
+from .state import GoogleFormatExtra
 from .tools import GoogleFormatTools
 
 
@@ -37,6 +38,11 @@ class GoogleFormat(ApiFormat[
 
     def __init__(self, config: GoogleConfig) -> None:
         self._config = config
+
+    @property
+    @override
+    def _format_extra(self) -> GoogleFormatExtra:
+        return GoogleFormatExtra(self._config)
 
     @property
     @override

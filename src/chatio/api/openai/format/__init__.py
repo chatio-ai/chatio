@@ -20,6 +20,7 @@ from chatio.api.openai.params import OpenAIExtras
 from chatio.api.openai.params import OpenAIParams
 
 from .state import OpenAIFormatState
+from .state import OpenAIFormatExtra
 from .tools import OpenAIFormatTools
 
 
@@ -36,6 +37,11 @@ class OpenAIFormat(ApiFormat[
 ]):
     def __init__(self, config: OpenAIConfig) -> None:
         self._config = config
+
+    @property
+    @override
+    def _format_extra(self) -> OpenAIFormatExtra:
+        return OpenAIFormatExtra(self._config)
 
     @property
     @override
