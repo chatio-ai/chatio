@@ -12,9 +12,9 @@ from chatio.core.params import ApiParams
 
 from ._common import ApiFormatBase
 
-from .extra import ApiFormatExtra
-from .state import ApiFormatState
-from .tools import ApiFormatTools
+from .history import ApiFormatHistory
+from .options import ApiFormatOptions
+from .tooling import ApiFormatTooling
 
 
 class ApiFormat[
@@ -34,7 +34,7 @@ class ApiFormat[
 
     @property
     @abstractmethod
-    def _format_state(self) -> ApiFormatState[
+    def _format_history(self) -> ApiFormatHistory[
         SystemContentT,
         MessageContentT,
         TextMessageT,
@@ -46,7 +46,7 @@ class ApiFormat[
 
     @property
     @abstractmethod
-    def _format_extra(self) -> ApiFormatExtra[
+    def _format_options(self) -> ApiFormatOptions[
         ApiExtrasT,
         ApiConfigT,
     ]:
@@ -54,7 +54,7 @@ class ApiFormat[
 
     @property
     @abstractmethod
-    def _format_tools(self) -> ApiFormatTools[
+    def _format_tooling(self) -> ApiFormatTooling[
         ToolDefinitionT,
         ToolDefinitionsT,
         ToolSelectionT,
@@ -70,11 +70,11 @@ class ApiFormat[
         ApiExtrasT,
     ]:
         return ApiParamsGeneric(
-            system=self._format_state.system(state.system),
-            messages=self._format_state.messages(state.messages),
-            extras=self._format_extra.build(state.extras),
-            tools=self._format_tools.tools(tools.tools),
-            tool_choice=self._format_tools.tool_choice(tools.tool_choice),
+            system=self._format_history.system(state.system),
+            messages=self._format_history.messages(state.messages),
+            extras=self._format_options.build(state.extras),
+            tools=self._format_tooling.tools(tools.tools),
+            tool_choice=self._format_tooling.tool_choice(tools.tool_choice),
         )
 
     @abstractmethod

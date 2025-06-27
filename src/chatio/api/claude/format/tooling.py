@@ -4,12 +4,12 @@ from typing import override
 from anthropic.types import ToolParam
 from anthropic.types import ToolChoiceParam
 
-from chatio.core.format.tools import ApiFormatTools
+from chatio.core.format.tooling import ApiFormatTooling
 
 from chatio.api.claude.config import ClaudeConfig
 
 
-class ClaudeFormatTools(ApiFormatTools[
+class ClaudeFormatTooling(ApiFormatTooling[
     ToolParam,
     list[ToolParam],
     ToolChoiceParam,

@@ -21,9 +21,9 @@ from chatio.api.openai.config import OpenAIConfig
 from chatio.api.openai.params import OpenAIExtras
 from chatio.api.openai.params import OpenAIParams
 
-from .state import OpenAIFormatState
-from .state import OpenAIFormatExtra
-from .tools import OpenAIFormatTools
+from .history import OpenAIFormatHistory
+from .options import OpenAIFormatOptions
+from .tooling import OpenAIFormatTooling
 
 
 class OpenAIFormat(ApiFormat[
@@ -41,18 +41,18 @@ class OpenAIFormat(ApiFormat[
 
     @property
     @override
-    def _format_extra(self) -> OpenAIFormatExtra:
-        return OpenAIFormatExtra(self._config)
+    def _format_history(self) -> OpenAIFormatHistory:
+        return OpenAIFormatHistory(self._config)
 
     @property
     @override
-    def _format_state(self) -> OpenAIFormatState:
-        return OpenAIFormatState(self._config)
+    def _format_options(self) -> OpenAIFormatOptions:
+        return OpenAIFormatOptions(self._config)
 
     @property
     @override
-    def _format_tools(self) -> OpenAIFormatTools:
-        return OpenAIFormatTools(self._config)
+    def _format_tooling(self) -> OpenAIFormatTooling:
+        return OpenAIFormatTooling(self._config)
 
     @override
     def build(self, state: ChatState, tools: ChatTools) -> OpenAIParams:

@@ -5,30 +5,12 @@ from google.genai.types import ContentDict
 from google.genai.types import ContentUnionDict
 from google.genai.types import PartDict
 
-from chatio.core.models import ContentEntry
+from chatio.core.format.history import ApiFormatHistory
 
-from chatio.core.format.state import ApiFormatState
-from chatio.core.format.extra import ApiFormatExtra
-
-from chatio.core.params import ApiExtras
 from chatio.api.google.config import GoogleConfig
 
 
-class GoogleFormatExtra(ApiFormatExtra[
-    ApiExtras,
-    GoogleConfig,
-]):
-
-    @override
-    def index(self) -> list[str]:
-        return []
-
-    @override
-    def build(self, extras: dict[str, ContentEntry | None]) -> ApiExtras:
-        return ApiExtras()
-
-
-class GoogleFormatState(ApiFormatState[
+class GoogleFormatHistory(ApiFormatHistory[
     ContentDict,
     ContentUnionDict,
     PartDict,

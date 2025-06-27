@@ -22,9 +22,9 @@ from chatio.core.models import ChatTools
 from chatio.api.claude.config import ClaudeConfig
 from chatio.api.claude.params import ClaudeParams
 
-from .state import ClaudeFormatState
-from .state import ClaudeFormatExtra
-from .tools import ClaudeFormatTools
+from .history import ClaudeFormatHistory
+from .options import ClaudeFormatOptions
+from .tooling import ClaudeFormatTooling
 
 
 class ClaudeFormat(ApiFormat[
@@ -42,18 +42,18 @@ class ClaudeFormat(ApiFormat[
 
     @property
     @override
-    def _format_extra(self) -> ClaudeFormatExtra:
-        return ClaudeFormatExtra(self._config)
+    def _format_history(self) -> ClaudeFormatHistory:
+        return ClaudeFormatHistory(self._config)
 
     @property
     @override
-    def _format_state(self) -> ClaudeFormatState:
-        return ClaudeFormatState(self._config)
+    def _format_options(self) -> ClaudeFormatOptions:
+        return ClaudeFormatOptions(self._config)
 
     @property
     @override
-    def _format_tools(self) -> ClaudeFormatTools:
-        return ClaudeFormatTools(self._config)
+    def _format_tooling(self) -> ClaudeFormatTooling:
+        return ClaudeFormatTooling(self._config)
 
     @override
     def build(self, state: ChatState, tools: ChatTools) -> ClaudeParams:

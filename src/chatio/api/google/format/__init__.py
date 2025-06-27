@@ -19,9 +19,9 @@ from chatio.core.models import ChatTools
 from chatio.api.google.config import GoogleConfig
 from chatio.api.google.params import GoogleParams
 
-from .state import GoogleFormatState
-from .state import GoogleFormatExtra
-from .tools import GoogleFormatTools
+from .history import GoogleFormatHistory
+from .options import GoogleFormatOptions
+from .tooling import GoogleFormatTooling
 
 
 class GoogleFormat(ApiFormat[
@@ -39,18 +39,18 @@ class GoogleFormat(ApiFormat[
 
     @property
     @override
-    def _format_extra(self) -> GoogleFormatExtra:
-        return GoogleFormatExtra(self._config)
+    def _format_options(self) -> GoogleFormatOptions:
+        return GoogleFormatOptions(self._config)
 
     @property
     @override
-    def _format_state(self) -> GoogleFormatState:
-        return GoogleFormatState(self._config)
+    def _format_history(self) -> GoogleFormatHistory:
+        return GoogleFormatHistory(self._config)
 
     @property
     @override
-    def _format_tools(self) -> GoogleFormatTools:
-        return GoogleFormatTools(self._config)
+    def _format_tooling(self) -> GoogleFormatTooling:
+        return GoogleFormatTooling(self._config)
 
     @override
     def build(self, state: ChatState, tools: ChatTools) -> GoogleParams:

@@ -17,7 +17,7 @@ from chatio.core.config import ApiConfig
 from ._common import ApiFormatBase
 
 
-class ApiFormatState[
+class ApiFormatHistory[
     SystemContentT,
     MessageContentT,
     TextMessageT,

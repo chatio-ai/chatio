@@ -9,7 +9,7 @@ from chatio.core.config import ApiConfig
 from ._common import ApiFormatBase
 
 
-class ApiFormatExtra[
+class ApiFormatOptions[
     ApiExtrasT: ApiExtras,
     ApiConfigT: ApiConfig,
 ](

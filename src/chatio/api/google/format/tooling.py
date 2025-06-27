@@ -8,12 +8,12 @@ from google.genai.types import ToolListUnionDict
 from google.genai.types import FunctionCallingConfigMode
 from google.genai.types import FunctionDeclarationDict
 
-from chatio.core.format.tools import ApiFormatTools
+from chatio.core.format.tooling import ApiFormatTooling
 
 from chatio.api.google.config import GoogleConfig
 
 
-class GoogleFormatTools(ApiFormatTools[
+class GoogleFormatTooling(ApiFormatTooling[
     FunctionDeclarationDict,
     ToolListUnionDict,
     ToolConfigDict,

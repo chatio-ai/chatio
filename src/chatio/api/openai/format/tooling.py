@@ -4,12 +4,12 @@ from typing import override
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
-from chatio.core.format.tools import ApiFormatTools
+from chatio.core.format.tooling import ApiFormatTooling
 
 from chatio.api.openai.config import OpenAIConfig
 
 
-class OpenAIFormatTools(ApiFormatTools[
+class OpenAIFormatTooling(ApiFormatTooling[
     ChatCompletionToolParam,
     list[ChatCompletionToolParam],
     ChatCompletionToolChoiceOptionParam,
