@@ -6,14 +6,16 @@ from chatio.core.models import ContentEntry
 from chatio.core.params import ApiExtras
 from chatio.core.config import ApiConfig
 
+from ._common import ApiFormatBase
+
 
 class ApiFormatExtra[
     ApiExtrasT: ApiExtras,
     ApiConfigT: ApiConfig,
-](ABC):
-
-    def __init__(self, config: ApiConfigT) -> None:
-        self._config = config
+](
+    ApiFormatBase[ApiConfigT],
+    ABC,
+):
 
     @abstractmethod
     def index(self) -> list[str]:

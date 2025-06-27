@@ -1,5 +1,5 @@
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
@@ -8,6 +8,8 @@ from chatio.core.config import ApiConfig
 from chatio.core.params import ApiExtras
 from chatio.core.params import ApiFields
 from chatio.core.params import ApiParams
+
+from ._common import ApiFormatBase
 
 from .extra import ApiFormatExtra
 from .state import ApiFormatState
@@ -25,10 +27,9 @@ class ApiFormat[
     ToolSelectionT,
     ApiExtrasT: ApiExtras,
     ApiConfigT: ApiConfig,
-](ABC):
-
-    def __init__(self, config: ApiConfigT) -> None:
-        self._config = config
+](
+    ApiFormatBase[ApiConfigT],
+):
 
     def spawn(self, state: ChatState, tools: ChatTools) -> ApiFields[
         SystemContentT,

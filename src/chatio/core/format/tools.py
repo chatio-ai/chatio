@@ -6,16 +6,18 @@ from chatio.core.models import ToolChoice
 
 from chatio.core.config import ApiConfig
 
+from ._common import ApiFormatBase
+
 
 class ApiFormatTools[
     ToolDefinitionT,
     ToolDefinitionsT,
     ToolSelectionT,
     ApiConfigT: ApiConfig,
-](ABC):
-
-    def __init__(self, config: ApiConfigT) -> None:
-        self._config = config
+](
+    ApiFormatBase[ApiConfigT],
+    ABC,
+):
 
     @abstractmethod
     def tool_definition(self, name: str, desc: str, schema: dict) -> ToolDefinitionT:
