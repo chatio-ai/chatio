@@ -44,7 +44,7 @@ class GoogleClient(ApiClient):
                 'max_output_tokens': 4096,
                 'tools': _params.tools,
                 'system_instruction': _params.system,
-                'tool_config': _params.tool_choice,
+                'tool_config': _params.tool_config,
             },
             contents=_params.messages,
         ))

@@ -10,6 +10,8 @@ from anthropic.types import DocumentBlockParam
 from anthropic.types import ToolParam
 from anthropic.types import ToolChoiceParam
 
+from anthropic import NOT_GIVEN
+
 
 from chatio.core.params import ApiExtras
 from chatio.core.format import ApiFormat
@@ -55,7 +57,18 @@ class ClaudeFormat(ApiFormat[
     def _format_tools(self) -> ClaudeFormatTools:
         return ClaudeFormatTools(self._config)
 
+    @override
     def build(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
-        params = ClaudeParams()
-        self.setup(params, state, tools)
-        return params
+        fields = self.spawn(state, tools)
+
+        _system = NOT_GIVEN if fields.system is None else [fields.system]
+
+        _tools = NOT_GIVEN if fields.tools is None else fields.tools
+        _tool_choice = NOT_GIVEN if fields.tool_choice is None else fields.tool_choice
+
+        return ClaudeParams(
+            system=_system,
+            messages=fields.messages,
+            tools=_tools,
+            tool_choice=_tool_choice,
+        )

@@ -9,6 +9,8 @@ from openai.types.chat.chat_completion_content_part_param import File
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
+from openai import NOT_GIVEN
+
 
 from chatio.core.format import ApiFormat
 
@@ -53,7 +55,29 @@ class OpenAIFormat(ApiFormat[
     def _format_tools(self) -> OpenAIFormatTools:
         return OpenAIFormatTools(self._config)
 
+    @override
     def build(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
-        params = OpenAIParams()
-        self.setup(params, state, tools)
-        return params
+        fields = self.spawn(state, tools)
+
+        _system = [] if fields.system is None else [fields.system]
+        _messages = _system + fields.messages
+
+        if fields.extras is None:
+            fields.extras = {}
+
+        _prediction = fields.extras.get('prediction')
+        if _prediction is not None:
+            return OpenAIParams(
+                messages=_messages,
+                prediction=_prediction,
+            )
+
+        _tools = NOT_GIVEN if fields.tools is None else fields.tools
+        _tool_choice = NOT_GIVEN if fields.tool_choice is None else fields.tool_choice
+
+        return OpenAIParams(
+            max_completion_tokens=4096,
+            messages=_messages,
+            tools=_tools,
+            tool_choice=_tool_choice,
+        )

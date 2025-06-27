@@ -7,20 +7,25 @@ from openai.types.chat import ChatCompletionPredictionContentParam
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
+from openai import NotGiven, NOT_GIVEN
+
+
 from chatio.core.params import ApiExtras
 from chatio.core.params import ApiParams
 
 
 class OpenAIExtras(ApiExtras, total=False):
-    prediction: ChatCompletionPredictionContentParam
+    prediction: ChatCompletionPredictionContentParam | None
 
 
 @dataclass
-class OpenAIParams(ApiParams[
-    ChatCompletionMessageParam,
-    ChatCompletionMessageParam,
-    list[ChatCompletionToolParam],
-    ChatCompletionToolChoiceOptionParam,
-    OpenAIExtras,
-]):
-    pass
+class OpenAIParams(ApiParams):
+    messages: list[ChatCompletionMessageParam]
+
+    max_completion_tokens: int | NotGiven = NOT_GIVEN
+
+    prediction: ChatCompletionPredictionContentParam | NotGiven = NOT_GIVEN
+
+    tools: list[ChatCompletionToolParam] | NotGiven = NOT_GIVEN
+
+    tool_choice: ChatCompletionToolChoiceOptionParam | NotGiven = NOT_GIVEN

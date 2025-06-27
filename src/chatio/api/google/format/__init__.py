@@ -56,6 +56,10 @@ class GoogleFormat(ApiFormat[
 
     @override
     def build(self, state: ChatState, tools: ChatTools) -> GoogleParams:
-        params = GoogleParams()
-        self.setup(params, state, tools)
-        return params
+        fields = self.spawn(state, tools)
+        return GoogleParams(
+            system=fields.system,
+            messages=fields.messages,
+            tools=fields.tools,
+            tool_config=fields.tool_choice,
+        )

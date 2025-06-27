@@ -7,7 +7,6 @@ from typing import override
 from httpx import Client as HttpxClient
 
 from anthropic import Anthropic
-from anthropic import NOT_GIVEN
 
 from chatio.core.client import ApiClient
 
@@ -44,10 +43,10 @@ class ClaudeClient(ApiClient):
         return _pump(self._client.messages.stream(
             model=model,
             max_tokens=4096,
-            tools=_params.tools if _params.tools is not None else NOT_GIVEN,
-            system=[_params.system] if _params.system is not None else NOT_GIVEN,
+            tools=_params.tools,
+            system=_params.system,
             messages=_params.messages,
-            tool_choice=_params.tool_choice if _params.tool_choice is not None else NOT_GIVEN,
+            tool_choice=_params.tool_choice,
         ))
 
     # helpers
@@ -57,8 +56,8 @@ class ClaudeClient(ApiClient):
         _params = self._format.build(state, tools)
         return self._client.messages.count_tokens(
             model=model,
-            tools=_params.tools if _params.tools is not None else NOT_GIVEN,
-            system=[_params.system] if _params.system is not None else NOT_GIVEN,
+            tools=_params.tools,
+            system=_params.system,
             messages=_params.messages,
-            tool_choice=_params.tool_choice if _params.tool_choice is not None else NOT_GIVEN,
+            tool_choice=_params.tool_choice,
         ).input_tokens

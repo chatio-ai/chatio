@@ -5,6 +5,7 @@ from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
 from chatio.core.params import ApiExtras
+from chatio.core.params import ApiFields
 from chatio.core.params import ApiParams
 
 from .extra import ApiFormatExtra
@@ -24,19 +25,20 @@ class ApiFormat[
     ApiExtrasT: ApiExtras,
 ](ABC):
 
-    def setup(self, params: ApiParams[
+    def spawn(self, state: ChatState, tools: ChatTools) -> ApiFields[
         SystemContentT,
         MessageContentT,
         ToolDefinitionsT,
         ToolSelectionT,
         ApiExtrasT,
-    ], state: ChatState, tools: ChatTools):
-        params.system = self._format_state.system(state.system)
-        params.messages = self._format_state.messages(state.messages)
-        params.extras = self._format_extra.build(state.extras)
-
-        params.tools = self._format_tools.tools(tools.tools)
-        params.tool_choice = self._format_tools.tool_choice(tools.tool_choice)
+    ]:
+        return ApiFields(
+            system=self._format_state.system(state.system),
+            messages=self._format_state.messages(state.messages),
+            extras=self._format_extra.build(state.extras),
+            tools=self._format_tools.tools(tools.tools),
+            tool_choice=self._format_tools.tool_choice(tools.tool_choice),
+        )
 
     @property
     @abstractmethod
@@ -66,11 +68,5 @@ class ApiFormat[
         ...
 
     @abstractmethod
-    def build(self, state: ChatState, tools: ChatTools) -> ApiParams[
-        SystemContentT,
-        MessageContentT,
-        ToolDefinitionsT,
-        ToolSelectionT,
-        ApiExtrasT,
-    ]:
+    def build(self, state: ChatState, tools: ChatTools) -> ApiParams:
         ...

@@ -9,7 +9,7 @@ class ApiExtras(TypedDict):
 
 
 @dataclass
-class ApiParams[
+class ApiFields[
     SystemContentT,
     MessageContentT,
     ToolDefinitionsT,
@@ -21,3 +21,8 @@ class ApiParams[
     extras: ApiExtrasT | None = None
     tools: ToolDefinitionsT | None = None
     tool_choice: ToolSelectionT | None = None
+
+
+@dataclass
+class ApiParams:
+    pass

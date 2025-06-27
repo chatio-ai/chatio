@@ -7,7 +7,6 @@ from typing import override
 from httpx import Client as HttpxClient
 
 from openai import OpenAI
-from openai import NOT_GIVEN
 
 
 from chatio.core.client import ApiClient
@@ -41,18 +40,15 @@ class OpenAIClient(ApiClient):
     @override
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
         _params = self._format.build(state, tools)
-        if _params.extras is None:
-            _params.extras = {}
-        _prediction = _params.extras.get('prediction', NOT_GIVEN)
 
         return _pump(self._client.beta.chat.completions.stream(
-            model=model,
-            max_completion_tokens=4096 if _prediction is None else NOT_GIVEN,
+            max_completion_tokens=_params.max_completion_tokens,
             stream_options={'include_usage': True},
-            tools=_params.tools if _params.tools is not None and _prediction is NOT_GIVEN else NOT_GIVEN,
-            messages=[_params.system, *_params.messages] if _params.system is not None else _params.messages,
-            tool_choice=_params.tool_choice if _params.tool_choice is not None else NOT_GIVEN,
-            prediction=_prediction,
+            model=model,
+            messages=_params.messages,
+            prediction=_params.prediction,
+            tools=_params.tools,
+            tool_choice=_params.tool_choice,
         ))
 
     # helpers
