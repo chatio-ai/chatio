@@ -13,14 +13,14 @@ class ApiParamsGeneric[
     SystemContentT,
     MessageContentT,
     ToolDefinitionsT,
-    ToolSelectionT,
+    ToolChoiceT,
     ApiParamsOptionsT: ApiParamsOptions,
 ]:
     system: SystemContentT | None = None
     messages: list[MessageContentT] = field(default_factory=list)
     options: ApiParamsOptionsT | None = None
     tools: ToolDefinitionsT | None = None
-    tool_choice: ToolSelectionT | None = None
+    tool_choice: ToolChoiceT | None = None
 
 
 @dataclass

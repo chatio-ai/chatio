@@ -10,8 +10,8 @@ from chatio.api.claude.config import ClaudeConfig
 
 
 class ClaudeFormatTooling(ApiFormatTooling[
-    ToolParam,
     list[ToolParam],
+    ToolParam,
     ToolChoiceParam,
     ClaudeConfig,
 ]):
@@ -29,11 +29,11 @@ class ClaudeFormatTooling(ApiFormatTooling[
         return entries
 
     @override
-    def tool_definition(self, name: str, desc: str, schema: dict) -> ToolParam:
+    def tool_schema(self, name: str, desc: str, params: dict) -> ToolParam:
         return {
             "name": name,
             "description": desc,
-            "input_schema": schema,
+            "input_schema": params,
         }
 
     @override
@@ -41,25 +41,25 @@ class ClaudeFormatTooling(ApiFormatTooling[
         return self._setup_tools_cache(tools)
 
     @override
-    def tool_selection_none(self) -> ToolChoiceParam | None:
+    def tool_choice_none(self) -> ToolChoiceParam | None:
         return {
             "type": 'none',
         }
 
     @override
-    def tool_selection_auto(self) -> ToolChoiceParam | None:
+    def tool_choice_auto(self) -> ToolChoiceParam | None:
         return {
             "type": 'auto',
         }
 
     @override
-    def tool_selection_any(self) -> ToolChoiceParam | None:
+    def tool_choice_any(self) -> ToolChoiceParam | None:
         return {
             "type": 'any',
         }
 
     @override
-    def tool_selection_name(self, tool_name: str) -> ToolChoiceParam | None:
+    def tool_choice_name(self, tool_name: str) -> ToolChoiceParam | None:
         return {
             "type": 'tool',
             "name": tool_name,

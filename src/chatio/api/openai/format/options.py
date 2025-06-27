@@ -5,7 +5,7 @@ from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionPredictionContentParam
 
 from chatio.core.models import ChatOptions
-from chatio.core.models import PredictMessage
+from chatio.core.models import PredictContent
 
 from chatio.core.format.options import ApiFormatOptions
 
@@ -43,7 +43,7 @@ class OpenAIFormatOptions(ApiFormatOptions[
 
         for option in options.values():
             match option:
-                case PredictMessage(text):
+                case PredictContent(text):
                     if self._config.options.prediction:
                         _options.update({'prediction': self.prediction_content(self.text_message(text))})
                 case _:

@@ -27,7 +27,7 @@ class TextMessage(ContentEntry):
 
 
 @dataclass
-class SystemMessage(TextMessage):
+class SystemContent(TextMessage):
     pass
 
 
@@ -42,7 +42,7 @@ class OutputMessage(TextMessage):
 
 
 @dataclass
-class PredictMessage(TextMessage):
+class PredictContent(TextMessage):
     pass
 
 
@@ -77,7 +77,7 @@ type ChatOptions = dict[type[ContentEntry], ContentEntry]
 
 @dataclass
 class ChatState:
-    system: SystemMessage | None = None
+    system: SystemContent | None = None
     messages: list[ContentEntry] = field(default_factory=list)
     options: ChatOptions = field(default_factory=dict)
 

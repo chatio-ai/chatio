@@ -22,9 +22,9 @@ class ApiFormat[
     TextMessageT,
     ImageDocumentT,
     TextDocumentT,
-    ToolDefinitionT,
     ToolDefinitionsT,
-    ToolSelectionT,
+    ToolSchemaT,
+    ToolChoiceT,
     ApiParamsOptionsT: ApiParamsOptions,
     ApiConfigT: ApiConfig,
 ](
@@ -54,9 +54,9 @@ class ApiFormat[
     @property
     @abstractmethod
     def _format_tooling(self) -> ApiFormatTooling[
-        ToolDefinitionT,
         ToolDefinitionsT,
-        ToolSelectionT,
+        ToolSchemaT,
+        ToolChoiceT,
         ApiConfigT,
     ]:
         ...
@@ -65,7 +65,7 @@ class ApiFormat[
         SystemContentT,
         MessageContentT,
         ToolDefinitionsT,
-        ToolSelectionT,
+        ToolChoiceT,
         ApiParamsOptionsT,
     ]:
         return ApiParamsGeneric(

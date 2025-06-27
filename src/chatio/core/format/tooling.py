@@ -10,9 +10,9 @@ from ._common import ApiFormatBase
 
 
 class ApiFormatTooling[
-    ToolDefinitionT,
     ToolDefinitionsT,
-    ToolSelectionT,
+    ToolSchemaT,
+    ToolChoiceT,
     ApiConfigT: ApiConfig,
 ](
     ApiFormatBase[ApiConfigT],
@@ -20,31 +20,33 @@ class ApiFormatTooling[
 ):
 
     @abstractmethod
-    def tool_definition(self, name: str, desc: str, schema: dict) -> ToolDefinitionT:
+    def tool_schema(self, name: str, desc: str, params: dict) -> ToolSchemaT:
         ...
 
     @abstractmethod
-    def tool_definitions(self, tools: list[ToolDefinitionT]) -> ToolDefinitionsT | None:
+    def tool_definitions(self, tools: list[ToolSchemaT]) -> ToolDefinitionsT | None:
         ...
 
     @abstractmethod
-    def tool_selection_none(self) -> ToolSelectionT | None:
+    def tool_choice_none(self) -> ToolChoiceT | None:
         ...
 
     @abstractmethod
-    def tool_selection_auto(self) -> ToolSelectionT | None:
+    def tool_choice_auto(self) -> ToolChoiceT | None:
         ...
 
     @abstractmethod
-    def tool_selection_any(self) -> ToolSelectionT | None:
+    def tool_choice_any(self) -> ToolChoiceT | None:
         ...
 
     @abstractmethod
-    def tool_selection_name(self, tool_name: str) -> ToolSelectionT | None:
+    def tool_choice_name(self, tool_name: str) -> ToolChoiceT | None:
         ...
 
-    def tool_selection(self, tool_choice_mode: str | None, tool_choice_name: str | None,
-                       tools: list[str]) -> ToolSelectionT | None:
+    def _tool_choice(
+        self, tool_choice_mode: str | None, tool_choice_name: str | None, tools: list[str],
+    ) -> ToolChoiceT | None:
+
         if not tool_choice_mode and not tool_choice_name:
             return None
 
@@ -54,11 +56,11 @@ class ApiFormatTooling[
         if not tool_choice_name:
             match tool_choice_mode:
                 case 'none':
-                    return self.tool_selection_none()
+                    return self.tool_choice_none()
                 case 'auto':
-                    return self.tool_selection_auto()
+                    return self.tool_choice_auto()
                 case 'any':
-                    return self.tool_selection_any()
+                    return self.tool_choice_any()
                 case _:
                     raise ValueError
         else:
@@ -67,7 +69,7 @@ class ApiFormatTooling[
 
             match tool_choice_mode:
                 case 'name':
-                    return self.tool_selection_name(tool_choice_name)
+                    return self.tool_choice_name(tool_choice_name)
                 case _:
                     raise ValueError
 
@@ -75,12 +77,12 @@ class ApiFormatTooling[
         if tools is None:
             return None
 
-        _tools = [self.tool_definition(tool.name, tool.desc, tool.schema) for tool in tools]
+        _tools = [self.tool_schema(tool.name, tool.desc, tool.schema) for tool in tools]
 
         return self.tool_definitions(_tools)
 
-    def tool_choice(self, tool_choice: ToolChoice | None) -> ToolSelectionT | None:
+    def tool_choice(self, tool_choice: ToolChoice | None) -> ToolChoiceT | None:
         if tool_choice is None:
             return None
 
-        return self.tool_selection(tool_choice.mode, tool_choice.name, tool_choice.tools)
+        return self._tool_choice(tool_choice.mode, tool_choice.name, tool_choice.tools)

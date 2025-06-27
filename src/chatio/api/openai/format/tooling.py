@@ -10,41 +10,41 @@ from chatio.api.openai.config import OpenAIConfig
 
 
 class OpenAIFormatTooling(ApiFormatTooling[
-    ChatCompletionToolParam,
     list[ChatCompletionToolParam],
+    ChatCompletionToolParam,
     ChatCompletionToolChoiceOptionParam,
     OpenAIConfig,
 ]):
 
-    def _tool_schema(self, schema: dict) -> dict:
-        result = schema.copy()
+    def _tool_params_schema(self, params: dict) -> dict:
+        _params = params.copy()
 
         props = None
-        if result.get("type") == "object":
-            props = result.setdefault("properties", {})
+        if _params.get("type") == "object":
+            props = _params.setdefault("properties", {})
 
         if props is not None:
-            result.update({
+            _params.update({
                 "additionalProperties": False,
                 "required": list(props),
             })
 
             for key in props:
                 value = props.get(key, {})
-                value = self._tool_schema(value)
+                value = self._tool_params_schema(value)
                 props[key] = value
 
-        return result
+        return _params
 
     @override
-    def tool_definition(self, name: str, desc: str, schema: dict) -> ChatCompletionToolParam:
-        schema = self._tool_schema(schema)
+    def tool_schema(self, name: str, desc: str, params: dict) -> ChatCompletionToolParam:
+        _params = self._tool_params_schema(params)
         return {
             "type": "function",
             "function": {
                 "name": name,
                 "description": desc,
-                "parameters": schema,
+                "parameters": _params,
                 "strict": True,
             },
         }
@@ -54,19 +54,19 @@ class OpenAIFormatTooling(ApiFormatTooling[
         return tools
 
     @override
-    def tool_selection_none(self) -> ChatCompletionToolChoiceOptionParam | None:
+    def tool_choice_none(self) -> ChatCompletionToolChoiceOptionParam | None:
         return 'none'
 
     @override
-    def tool_selection_auto(self) -> ChatCompletionToolChoiceOptionParam | None:
+    def tool_choice_auto(self) -> ChatCompletionToolChoiceOptionParam | None:
         return 'auto'
 
     @override
-    def tool_selection_any(self) -> ChatCompletionToolChoiceOptionParam | None:
+    def tool_choice_any(self) -> ChatCompletionToolChoiceOptionParam | None:
         return 'required'
 
     @override
-    def tool_selection_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam | None:
+    def tool_choice_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam | None:
         return {
             "type": 'function',
             "function": {

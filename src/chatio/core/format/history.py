@@ -1,7 +1,7 @@
 
 from abc import ABC, abstractmethod
 
-from chatio.core.models import SystemMessage
+from chatio.core.models import SystemContent
 from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
 
@@ -77,7 +77,7 @@ class ApiFormatHistory[
     def text_document(self, text: str, mimetype: str) -> MessageContentT:
         return self.input_content(self.text_document_chunk(text, mimetype))
 
-    def system(self, message: SystemMessage | None) -> SystemContentT | None:
+    def system(self, message: SystemContent | None) -> SystemContentT | None:
         if message is None:
             return None
 

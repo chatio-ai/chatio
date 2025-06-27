@@ -11,8 +11,9 @@ from chatio.core.config import StateConfig
 from chatio.core.models import ImageDocument
 from chatio.core.models import TextDocument
 
-from chatio.core.models import PredictMessage
-from chatio.core.models import SystemMessage
+from chatio.core.models import PredictContent
+from chatio.core.models import SystemContent
+
 from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
 
@@ -71,13 +72,13 @@ class ChatState(_ChatState):
         self.messages.append(CallRequest(call_id, name, args))
 
     def update_system_message(self, message: str | None) -> None:
-        self.system = SystemMessage(message) if message is not None else None
+        self.system = SystemContent(message) if message is not None else None
 
     def update_prediction_state(self, message: str | None) -> None:
         if message is None:
-            self.options.pop(PredictMessage, None)
+            self.options.pop(PredictContent, None)
         else:
-            self.options.update({PredictMessage: PredictMessage(message)})
+            self.options.update({PredictContent: PredictContent(message)})
 
 
 def build_state(state: StateConfig | None = None) -> ChatState:
@@ -87,7 +88,7 @@ def build_state(state: StateConfig | None = None) -> ChatState:
         state = StateConfig()
 
     if state.system is not None:
-        _state.system = SystemMessage(state.system)
+        _state.system = SystemContent(state.system)
 
     if state.messages is None:
         state.messages = []
