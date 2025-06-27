@@ -38,7 +38,7 @@ def main():
         if content:
             chat.state.commit_input_message(content)
 
-        chat.state.use_prediction_content(results)
+        chat.state.update_prediction_state(results)
 
         print()
         results = run_chat(chat(),

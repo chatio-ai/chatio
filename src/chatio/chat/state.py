@@ -73,7 +73,7 @@ class ChatState(_ChatState):
     def update_system_message(self, message: str | None) -> None:
         self.system = SystemMessage(message) if message is not None else None
 
-    def use_prediction_content(self, message: str | None) -> None:
+    def update_prediction_state(self, message: str | None) -> None:
         _predict = PredictMessage(message) if message is not None else None
         self.extras.update({'prediction': _predict})
 
