@@ -54,11 +54,11 @@ class GoogleFormat(ApiFormat[
 
     @override
     def build(self, state: ChatState, tools: ChatTools) -> GoogleParams:
-        fields = self.spawn(state, tools)
+        params = self.spawn(state, tools)
         return GoogleParams(
             max_output_tokens=4096,
-            system_instruction=fields.system,
-            messages=fields.messages,
-            tools=fields.tools,
-            tool_config=fields.tool_choice,
+            system_instruction=params.system,
+            messages=params.messages,
+            tools=params.tools,
+            tool_config=params.tool_choice,
         )

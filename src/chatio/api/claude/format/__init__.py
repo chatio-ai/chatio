@@ -57,17 +57,17 @@ class ClaudeFormat(ApiFormat[
 
     @override
     def build(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
-        fields = self.spawn(state, tools)
+        params = self.spawn(state, tools)
 
-        _system = NOT_GIVEN if fields.system is None else [fields.system]
+        _system = NOT_GIVEN if params.system is None else [params.system]
 
-        _tools = NOT_GIVEN if fields.tools is None else fields.tools
-        _tool_choice = NOT_GIVEN if fields.tool_choice is None else fields.tool_choice
+        _tools = NOT_GIVEN if params.tools is None else params.tools
+        _tool_choice = NOT_GIVEN if params.tool_choice is None else params.tool_choice
 
         return ClaudeParams(
             max_tokens=4096,
             system=_system,
-            messages=fields.messages,
+            messages=params.messages,
             tools=_tools,
             tool_choice=_tool_choice,
         )

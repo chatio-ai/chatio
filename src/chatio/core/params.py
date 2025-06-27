@@ -9,7 +9,7 @@ class ApiExtras(TypedDict):
 
 
 @dataclass
-class ApiFields[
+class ApiParamsGeneric[
     SystemContentT,
     MessageContentT,
     ToolDefinitionsT,
