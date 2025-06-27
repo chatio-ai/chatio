@@ -5,7 +5,10 @@ from google.genai.types import ContentDict
 from google.genai.types import ContentUnionDict
 from google.genai.types import PartDict
 
+from chatio.core.models import ContentEntry
+
 from chatio.core.format.state import ApiFormatState
+from chatio.core.params import ApiExtras
 
 from chatio.api.google.config import GoogleConfig
 
@@ -13,10 +16,10 @@ from chatio.api.google.config import GoogleConfig
 class GoogleFormatState(ApiFormatState[
     ContentDict,
     ContentUnionDict,
-    None,
     PartDict,
     PartDict,
     PartDict,
+    ApiExtras,
 ]):
 
     def __init__(self, config: GoogleConfig):
@@ -57,8 +60,8 @@ class GoogleFormatState(ApiFormatState[
         }
 
     @override
-    def prediction_content(self, content: PartDict) -> None:
-        pass
+    def extras(self, extras: dict[str, ContentEntry | None]) -> ApiExtras:
+        return ApiExtras()
 
     @override
     def input_content(self, content: PartDict) -> ContentDict:

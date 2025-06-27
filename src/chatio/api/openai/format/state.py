@@ -11,8 +11,12 @@ from openai.types.chat import ChatCompletionContentPartImageParam
 from openai.types.chat import ChatCompletionPredictionContentParam
 from openai.types.chat.chat_completion_content_part_param import File
 
+from chatio.core.models import ContentEntry
+from chatio.core.models import PredictMessage
+
 from chatio.core.format.state import ApiFormatState
 
+from chatio.api.openai.params import OpenAIExtras
 from chatio.api.openai.config import OpenAIConfig
 
 
@@ -23,10 +27,10 @@ type _ChatCompletionContentPartParam = \
 class OpenAIFormatState(ApiFormatState[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
-    ChatCompletionPredictionContentParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     File,
+    OpenAIExtras,
 ]):
 
     def __init__(self, config: OpenAIConfig):
@@ -88,16 +92,28 @@ class OpenAIFormatState(ApiFormatState[
             "content": [content],
         }
 
-    @override
-    def prediction_content(self,
-                           content: ChatCompletionContentPartTextParam) -> ChatCompletionPredictionContentParam | None:
-        if not self._config.options.prediction:
-            return None
+    def prediction_content(
+        self, content: ChatCompletionContentPartTextParam,
+    ) -> ChatCompletionPredictionContentParam:
 
         return {
             "type": "content",
             "content": [content],
         }
+
+    @override
+    def extras(self, extras: dict[str, ContentEntry | None]) -> OpenAIExtras:
+        _extras: OpenAIExtras = {}
+
+        for param_name, param in extras.items():
+            match param_name:
+                case 'prediction' if isinstance(param, PredictMessage):
+                    if self._config.options.prediction:
+                        _extras['prediction'] = self.prediction_content(self.text_message(param.text))
+                case _:
+                    pass
+
+        return _extras
 
     @override
     def input_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:

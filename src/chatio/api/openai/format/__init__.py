@@ -4,7 +4,6 @@ from typing import override
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
-from openai.types.chat import ChatCompletionPredictionContentParam
 from openai.types.chat.chat_completion_content_part_param import File
 
 from openai.types.chat import ChatCompletionToolParam
@@ -17,6 +16,7 @@ from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
 from chatio.api.openai.config import OpenAIConfig
+from chatio.api.openai.params import OpenAIExtras
 from chatio.api.openai.params import OpenAIParams
 
 from .state import OpenAIFormatState
@@ -26,13 +26,13 @@ from .tools import OpenAIFormatTools
 class OpenAIFormat(ApiFormat[
     ChatCompletionMessageParam,
     ChatCompletionMessageParam,
-    ChatCompletionPredictionContentParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     File,
     ChatCompletionToolParam,
     list[ChatCompletionToolParam],
     ChatCompletionToolChoiceOptionParam,
+    OpenAIExtras,
 ]):
     def __init__(self, config: OpenAIConfig) -> None:
         self._config = config

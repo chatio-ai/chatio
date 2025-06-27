@@ -11,6 +11,7 @@ from anthropic.types import ToolParam
 from anthropic.types import ToolChoiceParam
 
 
+from chatio.core.params import ApiExtras
 from chatio.core.format import ApiFormat
 
 from chatio.core.models import ChatState
@@ -26,13 +27,13 @@ from .tools import ClaudeFormatTools
 class ClaudeFormat(ApiFormat[
     TextBlockParam,
     MessageParam,
-    None,
     TextBlockParam,
     ImageBlockParam,
     DocumentBlockParam,
     ToolParam,
     list[ToolParam],
     ToolChoiceParam,
+    ApiExtras,
 ]):
 
     def __init__(self, config: ClaudeConfig) -> None:

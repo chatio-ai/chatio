@@ -1,7 +1,6 @@
 
 from abc import ABC, abstractmethod
 
-from chatio.core.models import PredictMessage
 from chatio.core.models import SystemMessage
 from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
@@ -17,10 +16,10 @@ from chatio.core.models import ContentEntry
 class ApiFormatState[
     SystemContentT,
     MessageContentT,
-    ChatPredictionT,
     TextMessageT,
     ImageDocumentT,
     TextDocumentT,
+    ApiExtrasT,
 ](ABC):
 
     @abstractmethod
@@ -41,10 +40,6 @@ class ApiFormatState[
 
     @abstractmethod
     def system_content(self, content: TextMessageT) -> SystemContentT:
-        ...
-
-    @abstractmethod
-    def prediction_content(self, content: TextMessageT) -> ChatPredictionT | None:
         ...
 
     @abstractmethod
@@ -103,8 +98,6 @@ class ApiFormatState[
 
         return self.chat_messages(_messages)
 
-    def predict(self, message: PredictMessage | None) -> ChatPredictionT | None:
-        if message is None:
-            return None
-
-        return self.prediction_content(self.text_message(message.text))
+    @abstractmethod
+    def extras(self, extras: dict[str, ContentEntry | None]) -> ApiExtrasT:
+        ...

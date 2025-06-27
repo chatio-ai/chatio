@@ -7,6 +7,7 @@ from google.genai.types import ContentUnionDict
 from google.genai.types import ToolConfigDict
 from google.genai.types import ToolListUnionDict
 
+from chatio.core.params import ApiExtras
 from chatio.core.params import ApiParams
 
 
@@ -14,8 +15,8 @@ from chatio.core.params import ApiParams
 class GoogleParams(ApiParams[
     ContentDict,
     ContentUnionDict,
-    None,
     ToolListUnionDict,
     ToolConfigDict,
+    ApiExtras,
 ]):
     pass

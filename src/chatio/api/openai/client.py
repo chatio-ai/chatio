@@ -41,14 +41,18 @@ class OpenAIClient(ApiClient):
     @override
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
         _params = self._format.build(state, tools)
+        if _params.extras is None:
+            _params.extras = {}
+        _prediction = _params.extras.get('prediction', NOT_GIVEN)
+
         return _pump(self._client.beta.chat.completions.stream(
             model=model,
-            max_completion_tokens=4096 if _params.predict is None else NOT_GIVEN,
+            max_completion_tokens=4096 if _prediction is None else NOT_GIVEN,
             stream_options={'include_usage': True},
-            tools=_params.tools if _params.tools is not None and _params.predict is None else NOT_GIVEN,
+            tools=_params.tools if _params.tools is not None and _prediction is NOT_GIVEN else NOT_GIVEN,
             messages=[_params.system, *_params.messages] if _params.system is not None else _params.messages,
             tool_choice=_params.tool_choice if _params.tool_choice is not None else NOT_GIVEN,
-            prediction=_params.predict if _params.predict is not None else NOT_GIVEN,
+            prediction=_prediction,
         ))
 
     # helpers
