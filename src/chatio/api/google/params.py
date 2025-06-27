@@ -11,8 +11,9 @@ from chatio.core.params import ApiParamsOptions
 from chatio.core.params import ApiParams
 
 
-class GoogleParamsOptions(ApiParamsOptions, total=False):
-    system: ContentUnionDict | None
+@dataclass
+class GoogleParamsOptions(ApiParamsOptions):
+    system: ContentDict | None = None
 
 
 @dataclass

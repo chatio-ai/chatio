@@ -57,19 +57,14 @@ class OpenAIFormat(ApiFormat[
     def build(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
         params = self.spawn(state, tools)
 
-        if params.options is None:
-            params.options = {}
-
         _messages = params.messages
-        _system = params.options.get('system')
-        if _system is not None:
-            _messages = [_system, *_messages]
+        if params.options.system is not None:
+            _messages = [params.options.system, *_messages]
 
-        _prediction = params.options.get('prediction')
-        if _prediction is not None:
+        if params.options.prediction is not None:
             return OpenAIParams(
                 messages=_messages,
-                prediction=_prediction,
+                prediction=params.options.prediction,
             )
 
         _tools = NOT_GIVEN if params.tools is None else params.tools

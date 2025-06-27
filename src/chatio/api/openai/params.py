@@ -14,10 +14,11 @@ from chatio.core.params import ApiParamsOptions
 from chatio.core.params import ApiParams
 
 
-class OpenAIParamsOptions(ApiParamsOptions, total=False):
-    system: ChatCompletionMessageParam | None
+@dataclass
+class OpenAIParamsOptions(ApiParamsOptions):
+    system: ChatCompletionMessageParam | None = None
 
-    prediction: ChatCompletionPredictionContentParam | None
+    prediction: ChatCompletionPredictionContentParam | None = None
 
 
 @dataclass

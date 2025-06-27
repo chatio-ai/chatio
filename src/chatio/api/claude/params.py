@@ -14,8 +14,9 @@ from chatio.core.params import ApiParamsOptions
 from chatio.core.params import ApiParams
 
 
-class ClaudeParamsOptions(ApiParamsOptions, total=False):
-    system: TextBlockParam | None
+@dataclass
+class ClaudeParamsOptions(ApiParamsOptions):
+    system: TextBlockParam | None = None
 
 
 @dataclass

@@ -58,11 +58,7 @@ class ClaudeFormat(ApiFormat[
     def build(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
         params = self.spawn(state, tools)
 
-        if params.options is None:
-            params.options = {}
-
-        _system_raw = params.options.get("system")
-        _system = NOT_GIVEN if _system_raw is None else [_system_raw]
+        _system = NOT_GIVEN if params.options.system is None else [params.options.system]
 
         _tools = NOT_GIVEN if params.tools is None else params.tools
         _tool_choice = NOT_GIVEN if params.tool_choice is None else params.tool_choice

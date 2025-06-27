@@ -32,12 +32,12 @@ class GoogleFormatOptions(ApiFormatOptions[
 
     @override
     def format(self, options: ChatOptions) -> GoogleParamsOptions:
-        _options: GoogleParamsOptions = {}
+        _options = GoogleParamsOptions()
 
         for option in options.values():
             match option:
                 case SystemContent(text):
-                    _options.update({'system': self.system_content(self.text_message(text))})
+                    _options.system = self.system_content(self.text_message(text))
                 case _:
                     pass
 

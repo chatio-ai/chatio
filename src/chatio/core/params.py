@@ -1,10 +1,9 @@
 
-from dataclasses import dataclass, field
-
-from typing import TypedDict
+from dataclasses import dataclass
 
 
-class ApiParamsOptions(TypedDict):
+@dataclass
+class ApiParamsOptions:
     pass
 
 
@@ -15,8 +14,8 @@ class ApiParamsGeneric[
     ToolChoiceT,
     ApiParamsOptionsT: ApiParamsOptions,
 ]:
-    messages: list[MessageContentT] = field(default_factory=list)
-    options: ApiParamsOptionsT | None = None
+    options: ApiParamsOptionsT
+    messages: list[MessageContentT]
     tools: ToolDefinitionsT | None = None
     tool_choice: ToolChoiceT | None = None
 

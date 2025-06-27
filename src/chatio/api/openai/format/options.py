@@ -53,15 +53,15 @@ class OpenAIFormatOptions(ApiFormatOptions[
 
     @override
     def format(self, options: ChatOptions) -> OpenAIParamsOptions:
-        _options: OpenAIParamsOptions = {}
+        _options = OpenAIParamsOptions()
 
         for option in options.values():
             match option:
                 case SystemContent(text):
-                    _options.update({'system': self.system_content(self.text_message(text))})
+                    _options.system = self.system_content(self.text_message(text))
                 case PredictContent(text):
                     if self._config.options.prediction:
-                        _options.update({'prediction': self.prediction_content(self.text_message(text))})
+                        _options.prediction = self.prediction_content(self.text_message(text))
                 case _:
                     pass
 
