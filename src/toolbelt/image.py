@@ -8,13 +8,10 @@ class ImageDumpTool(ToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Dump summary of image analysis. Summary should include key colors (r,g,b) and image description."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "image_dump",
+            "description": "Dump image analysis result. Summary includes key colors (r,g,b) and description.",
             "type": "object",
             "properties": {
                 "info": {

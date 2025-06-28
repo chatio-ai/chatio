@@ -10,13 +10,10 @@ class LlmDialogTool(ToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Peform dialog to another LLM. Another LLM preserves history across session."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "llm_dialog",
+            "description": "Peform dialog to another LLM. Another LLM preserves history across session.",
             "type": "object",
             "properties": {
                 "message": {

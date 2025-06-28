@@ -10,6 +10,7 @@ from subprocess import Popen, PIPE, STDOUT
 from . import ToolBase
 
 
+# pylint: disable=too-few-public-methods
 class ShellToolBase(ToolBase):
 
     def _iterate(self, command: str, iterate: Iterable[str]):
@@ -38,13 +39,10 @@ class ShellCalcTool(ShellToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Run bc command using system shell to evaluate the expression. Returns output of the command."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "shell_calc",
+            "description": "Run bc command via shell to evaluate expression. Returns output of the command.",
             "type": "object",
             "properties": {
                 "expr": {
@@ -63,13 +61,10 @@ class ShellExecTool(ShellToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Run custom user command using system shell. Returns output collected from stdout and stderr."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "shell_exec",
+            "description": "Run custom user command via shell. Returns merged output from stdout and stderr.",
             "type": "object",
             "properties": {
                 "command": {

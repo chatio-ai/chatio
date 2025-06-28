@@ -7,7 +7,7 @@ from chatio.chat import Chat
 
 from toolbelt.shell import ShellCalcTool
 from toolbelt.shell import ShellExecTool
-from toolbelt.dummy import DummyTool
+from toolbelt.dummy import DoNothingTool
 
 from toolbelt.wiki import WikiToolFactory
 from toolbelt.web import WebSearchTool
@@ -35,33 +35,33 @@ def build_tools(tools_name: str | None = None, env_ns: str | None = None) -> Cha
     tools_name, _, tool_choice = tools_name.partition(':')
     tool_choice_mode, _, tool_choice_name = tool_choice.partition(':')
 
-    tools: dict | None = None
+    tools: list | None = None
     match tools_name:
         case 'default':
             wiki = WikiToolFactory()
 
-            tools = {
-                "run_command": ShellExecTool(),
-                "run_bc_calc": ShellCalcTool(),
-                "wiki_content": wiki.wiki_content(),
-                "wiki_summary": wiki.wiki_summary(),
-                "wiki_section": wiki.wiki_section(),
-                "wiki_search": wiki.wiki_search(),
-                "web_search": WebSearchTool(),
-                "web_browse": WebBrowseTool(),
-                "run_nothing": DummyTool(),
-            }
+            tools = [
+                ShellExecTool(),
+                ShellCalcTool(),
+                wiki.wiki_content(),
+                wiki.wiki_summary(),
+                wiki.wiki_section(),
+                wiki.wiki_search(),
+                WebSearchTool(),
+                WebBrowseTool(),
+                DoNothingTool(),
+            ]
         case 'llmtool':
             llm = build_llm_tool()
-            tools = {
-                "llm_message": LlmDialogTool(llm),
-            }
+            tools = [
+                LlmDialogTool(llm),
+            ]
         case 'imgtool':
-            tools = {
-                "run_imgdump": ImageDumpTool(),
-            }
+            tools = [
+                ImageDumpTool(),
+            ]
 
-    return ChatTools(tools, tool_choice_mode=tool_choice_mode, tool_choice_name=tool_choice_name)
+    return ChatTools(tools, tool_choice_mode, tool_choice_name)
 
 
 def build_llm_tool():

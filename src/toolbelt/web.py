@@ -12,13 +12,10 @@ class WebSearchTool(ToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Peform web search for given search string. Returns up to 10 urls each on separate line."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "web_search",
+            "description": "Peform web search for given text. Returns up to 10 urls each on separate line.",
             "type": "object",
             "properties": {
                 "text": {
@@ -40,13 +37,10 @@ class WebBrowseTool(ToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Perform web browse for given url. Returns content of the given url in markdown format."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "web_browse",
+            "description": "Perform web browse for given url. Returns content of the given url in md format.",
             "type": "object",
             "properties": {
                 "url": {

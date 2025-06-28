@@ -13,17 +13,18 @@ from chatio.core.models import ChatTools as _ChatTools
 class ChatTools(_ChatTools):
     funcs: dict[str, Callable] = field(default_factory=dict)
 
-    def __init__(self, tools: dict | None = None,
+    def __init__(self, tools: list | None = None,
                  tool_choice_mode: str | None = None, tool_choice_name: str | None = None) -> None:
 
         if tools is None:
-            tools = {}
+            tools = []
 
         _tools = []
         _funcs = {}
-        for name, tool in tools.items():
-            desc = tool.desc()
+        for tool in tools:
             schema = tool.schema()
+            name = schema.pop("name")
+            desc = schema.pop("description")
 
             if not name or not desc or not schema:
                 raise RuntimeError

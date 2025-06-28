@@ -26,6 +26,7 @@ class WikiToolFactory:
         return WikiSectionTool(self.wiki, self.page_cache)
 
 
+# pylint: disable=too-few-public-methods
 class WikiPageToolBase(ToolBase):
     def __init__(self, wiki, page_cache):
         self.wiki = wiki
@@ -61,18 +62,15 @@ class WikiSearchTool(ToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Get list of titles based on string search. Returns up to 10 titles each on separate line."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "wiki_search",
+            "description": "Search wiki pages for given text. Returns up to 10 titles each on separate line.",
             "type": "object",
             "properties": {
                 "text": {
                     "type": "string",
-                    "description": "The text to search for across pages titles and content.",
+                    "description": "The term to search for across pages titles and content.",
                 },
             },
             "required": ["text"],
@@ -89,13 +87,10 @@ class WikiContentTool(WikiPageToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Get list of sections for wikipedia article. Returns list of sections each on separate line."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "wiki_content",
+            "description": "Get list of wiki page sections. Returns list of sections each on separate line.",
             "type": "object",
             "properties": {
                 "title": {
@@ -114,13 +109,10 @@ class WikiSummaryTool(WikiPageToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Get content of summary for wikipedia article. Returns text of summary (header) section."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "wiki_summary",
+            "description": "Get content of wiki page summary. Returns text of summary (header) section.",
             "type": "object",
             "properties": {
                 "title": {
@@ -139,13 +131,10 @@ class WikiSectionTool(WikiPageToolBase):
 
     @staticmethod
     @override
-    def desc() -> str:
-        return "Get content of specific section for wikipedia article. Returns text of the given section."
-
-    @staticmethod
-    @override
     def schema() -> dict[str, object]:
         return {
+            "name": "wiki_section",
+            "description": "Get content of wiki page section. Returns text of the given section.",
             "type": "object",
             "properties": {
                 "title": {

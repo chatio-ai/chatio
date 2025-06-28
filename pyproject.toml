@@ -35,9 +35,6 @@ disable = [
 	"missing-docstring",
 ]
 
-[tool.pylint.similarities]
-min-similarity-lines = 5
-
 [tool.pyright]
 analyzeUnannotatedFunctions = true
 
