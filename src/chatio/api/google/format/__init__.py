@@ -2,12 +2,9 @@
 from typing import override
 
 from google.genai.types import ContentUnionDict
-from google.genai.types import PartDict
 
-from google.genai.types import FunctionDeclarationDict
 from google.genai.types import ToolListUnionDict
 from google.genai.types import ToolConfigDict
-
 
 from chatio.core.format import ApiFormat
 
@@ -25,13 +22,9 @@ from .tooling import GoogleFormatTooling
 
 class GoogleFormat(ApiFormat[
     ContentUnionDict,
-    PartDict,
-    PartDict,
-    PartDict,
-    ToolListUnionDict,
-    FunctionDeclarationDict,
-    ToolConfigDict,
     GoogleStateOptions,
+    ToolListUnionDict,
+    ToolConfigDict,
     GoogleConfig,
 ]):
 
@@ -58,6 +51,6 @@ class GoogleFormat(ApiFormat[
             max_output_tokens=4096,
             system_instruction=params.options.system,
             messages=params.messages,
-            tools=params.tools,
-            tool_config=params.tool_choice,
+            tools=params.tools.tools,
+            tool_config=params.tools.tool_choice,
         )

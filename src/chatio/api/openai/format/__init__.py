@@ -2,9 +2,6 @@
 from typing import override
 
 from openai.types.chat import ChatCompletionMessageParam
-from openai.types.chat import ChatCompletionContentPartTextParam
-from openai.types.chat import ChatCompletionContentPartImageParam
-from openai.types.chat.chat_completion_content_part_param import File
 
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
@@ -28,13 +25,9 @@ from .tooling import OpenAIFormatTooling
 
 class OpenAIFormat(ApiFormat[
     ChatCompletionMessageParam,
-    ChatCompletionContentPartTextParam,
-    ChatCompletionContentPartImageParam,
-    File,
-    list[ChatCompletionToolParam],
-    ChatCompletionToolParam,
-    ChatCompletionToolChoiceOptionParam,
     OpenAIStateOptions,
+    list[ChatCompletionToolParam],
+    ChatCompletionToolChoiceOptionParam,
     OpenAIConfig,
 ]):
 
@@ -67,8 +60,8 @@ class OpenAIFormat(ApiFormat[
                 prediction=params.options.prediction,
             )
 
-        _tools = NOT_GIVEN if params.tools is None else params.tools
-        _tool_choice = NOT_GIVEN if params.tool_choice is None else params.tool_choice
+        _tools = NOT_GIVEN if params.tools.tools is None else params.tools.tools
+        _tool_choice = NOT_GIVEN if params.tools.tool_choice is None else params.tools.tool_choice
 
         return OpenAIParams(
             max_completion_tokens=4096,

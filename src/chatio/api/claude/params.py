@@ -9,7 +9,6 @@ from anthropic.types import ToolChoiceParam
 
 from anthropic import NotGiven, NOT_GIVEN
 
-
 from chatio.core.params import ApiStateOptions
 from chatio.core.params import ApiParams
 

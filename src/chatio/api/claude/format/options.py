@@ -17,7 +17,6 @@ class ClaudeFormatOptions(ApiFormatOptions[
     ClaudeConfig,
 ]):
 
-    @override
     def text_message(self, text: str) -> TextBlockParam:
         return {
             "type": "text",

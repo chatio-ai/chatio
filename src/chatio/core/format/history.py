@@ -1,6 +1,8 @@
 
 from abc import ABC, abstractmethod
 
+from typing import Protocol
+
 from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
 
@@ -71,7 +73,7 @@ class ApiFormatHistory[
     def text_document(self, text: str, mimetype: str) -> MessageContentT:
         return self.input_content(self.text_document_chunk(text, mimetype))
 
-    def messages(self, messages: list[ContentEntry]) -> list[MessageContentT]:
+    def format(self, messages: list[ContentEntry]) -> list[MessageContentT]:
         _messages = []
 
         for message in messages:
@@ -92,3 +94,11 @@ class ApiFormatHistory[
                     raise RuntimeError(message)
 
         return self.chat_messages(_messages)
+
+
+# pylint: disable=too-few-public-methods
+class ApiFormatHistoryProto[MessageContentT](Protocol):
+
+    @abstractmethod
+    def format(self, messages: list[ContentEntry]) -> list[MessageContentT]:
+        ...

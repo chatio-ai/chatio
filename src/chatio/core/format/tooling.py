@@ -1,9 +1,11 @@
 
 from abc import ABC, abstractmethod
 
-from chatio.core.models import ToolSchema
-from chatio.core.models import ToolChoice
+from typing import Protocol
 
+from chatio.core.models import ChatTools
+
+from chatio.core.params import ApiToolsOptions
 from chatio.core.config import ApiConfig
 
 from ._common import ApiFormatBase
@@ -73,16 +75,32 @@ class ApiFormatTooling[
                 case _:
                     raise ValueError
 
-    def tools(self, tools: list[ToolSchema] | None) -> ToolDefinitionsT | None:
-        if tools is None:
-            return None
+    def format(self, tools: ChatTools) -> ApiToolsOptions[
+        ToolDefinitionsT,
+        ToolChoiceT,
+    ]:
+        _tools = None
+        if tools.tools is not None:
+            _tool_defs = [self.tool_schema(tool.name, tool.desc, tool.schema) for tool in tools.tools]
+            _tools = self.tool_definitions(_tool_defs)
 
-        _tools = [self.tool_schema(tool.name, tool.desc, tool.schema) for tool in tools]
+        _tool_choice = None
+        if tools.tool_choice is not None:
+            _tool_choice = self._tool_choice(
+                tools.tool_choice.mode, tools.tool_choice.name, tools.tool_choice.tools)
 
-        return self.tool_definitions(_tools)
+        return ApiToolsOptions(_tools, _tool_choice)
 
-    def tool_choice(self, tool_choice: ToolChoice | None) -> ToolChoiceT | None:
-        if tool_choice is None:
-            return None
 
-        return self._tool_choice(tool_choice.mode, tool_choice.name, tool_choice.tools)
+# pylint: disable=too-few-public-methods
+class ApiFormatToolingProto[
+    ToolDefinitionsT,
+    ToolChoiceT,
+](Protocol):
+
+    @abstractmethod
+    def format(self, tools: ChatTools) -> ApiToolsOptions[
+        ToolDefinitionsT,
+        ToolChoiceT,
+    ]:
+        ...

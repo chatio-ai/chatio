@@ -3,10 +3,6 @@ from typing import override
 
 from anthropic.types import MessageParam
 
-from anthropic.types import TextBlockParam
-from anthropic.types import ImageBlockParam
-from anthropic.types import DocumentBlockParam
-
 from anthropic.types import ToolParam
 from anthropic.types import ToolChoiceParam
 
@@ -29,13 +25,9 @@ from .tooling import ClaudeFormatTooling
 
 class ClaudeFormat(ApiFormat[
     MessageParam,
-    TextBlockParam,
-    ImageBlockParam,
-    DocumentBlockParam,
-    list[ToolParam],
-    ToolParam,
-    ToolChoiceParam,
     ClaudeStateOptions,
+    list[ToolParam],
+    ToolChoiceParam,
     ClaudeConfig,
 ]):
 
@@ -60,8 +52,8 @@ class ClaudeFormat(ApiFormat[
 
         _system = NOT_GIVEN if params.options.system is None else [params.options.system]
 
-        _tools = NOT_GIVEN if params.tools is None else params.tools
-        _tool_choice = NOT_GIVEN if params.tool_choice is None else params.tool_choice
+        _tools = NOT_GIVEN if params.tools.tools is None else params.tools.tools
+        _tool_choice = NOT_GIVEN if params.tools.tool_choice is None else params.tools.tool_choice
 
         return ClaudeParams(
             max_tokens=4096,

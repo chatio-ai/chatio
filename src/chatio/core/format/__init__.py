@@ -5,26 +5,23 @@ from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
 from chatio.core.params import ApiStateOptions
+from chatio.core.params import ApiToolsOptions
 from chatio.core.params import ApiParamValues
 from chatio.core.params import ApiParams
 from chatio.core.config import ApiConfig
 
 from ._common import ApiFormatBase
 
-from .history import ApiFormatHistory
-from .options import ApiFormatOptions
-from .tooling import ApiFormatTooling
+from .history import ApiFormatHistoryProto
+from .options import ApiFormatOptionsProto
+from .tooling import ApiFormatToolingProto
 
 
 class ApiFormat[
     MessageContentT,
-    TextMessageT,
-    ImageDocumentT,
-    TextDocumentT,
-    ToolDefinitionsT,
-    ToolSchemaT,
-    ToolChoiceT,
     ApiStateOptionsT: ApiStateOptions,
+    ToolDefinitionsT,
+    ToolChoiceT,
     ApiConfigT: ApiConfig,
 ](
     ApiFormatBase[ApiConfigT],
@@ -32,45 +29,28 @@ class ApiFormat[
 
     @property
     @abstractmethod
-    def _format_history(self) -> ApiFormatHistory[
-        MessageContentT,
-        TextMessageT,
-        ImageDocumentT,
-        TextDocumentT,
-        ApiConfigT,
-    ]:
+    def _format_history(self) -> ApiFormatHistoryProto[MessageContentT]:
         ...
 
     @property
     @abstractmethod
-    def _format_options(self) -> ApiFormatOptions[
-        TextMessageT,
-        ApiStateOptionsT,
-        ApiConfigT,
-    ]:
+    def _format_options(self) -> ApiFormatOptionsProto[ApiStateOptionsT]:
         ...
 
     @property
     @abstractmethod
-    def _format_tooling(self) -> ApiFormatTooling[
-        ToolDefinitionsT,
-        ToolSchemaT,
-        ToolChoiceT,
-        ApiConfigT,
-    ]:
+    def _format_tooling(self) -> ApiFormatToolingProto[ToolDefinitionsT, ToolChoiceT]:
         ...
 
     def spawn(self, state: ChatState, tools: ChatTools) -> ApiParamValues[
         MessageContentT,
-        ToolDefinitionsT,
-        ToolChoiceT,
         ApiStateOptionsT,
+        ApiToolsOptions[ToolDefinitionsT, ToolChoiceT],
     ]:
         return ApiParamValues(
-            messages=self._format_history.messages(state.messages),
+            messages=self._format_history.format(state.messages),
             options=self._format_options.format(state.options),
-            tools=self._format_tooling.tools(tools.tools),
-            tool_choice=self._format_tooling.tool_choice(tools.tool_choice),
+            tools=self._format_tooling.format(tools),
         )
 
     @abstractmethod

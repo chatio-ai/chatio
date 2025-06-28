@@ -18,7 +18,6 @@ class GoogleFormatOptions(ApiFormatOptions[
     GoogleConfig,
 ]):
 
-    @override
     def text_message(self, text: str) -> PartDict:
         return {
             "text": text,

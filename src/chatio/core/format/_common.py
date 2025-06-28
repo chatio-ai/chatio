@@ -13,5 +13,5 @@ class ApiFormatBase[
     def config(self) -> ApiConfigT:
         return self._config
 
-    def __call__(self) -> ApiConfigT:
-        return self._config
+    def __call__(self) -> None:
+        return None
