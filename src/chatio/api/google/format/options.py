@@ -4,17 +4,17 @@ from typing import override
 from google.genai.types import ContentDict
 from google.genai.types import PartDict
 
-from chatio.core.models import ChatOptions
+from chatio.core.models import StateOptions
 
 from chatio.core.format.options import ApiFormatOptions
 
-from chatio.api.google.params import GoogleParamsOptions
+from chatio.api.google.params import GoogleStateOptions
 from chatio.api.google.config import GoogleConfig
 
 
 class GoogleFormatOptions(ApiFormatOptions[
     PartDict,
-    GoogleParamsOptions,
+    GoogleStateOptions,
     GoogleConfig,
 ]):
 
@@ -30,10 +30,10 @@ class GoogleFormatOptions(ApiFormatOptions[
         }
 
     @override
-    def format(self, options: ChatOptions) -> GoogleParamsOptions:
+    def format(self, options: StateOptions) -> GoogleStateOptions:
         system = None if options.system is None \
             else self.system_content(self.text_message(options.system.text))
 
-        return GoogleParamsOptions(
+        return GoogleStateOptions(
             system=system,
         )

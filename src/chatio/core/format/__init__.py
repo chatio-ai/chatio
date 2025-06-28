@@ -4,8 +4,8 @@ from abc import abstractmethod
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.core.params import ApiParamsOptions
-from chatio.core.params import ApiParamsGeneric
+from chatio.core.params import ApiStateOptions
+from chatio.core.params import ApiParamValues
 from chatio.core.params import ApiParams
 from chatio.core.config import ApiConfig
 
@@ -24,7 +24,7 @@ class ApiFormat[
     ToolDefinitionsT,
     ToolSchemaT,
     ToolChoiceT,
-    ApiParamsOptionsT: ApiParamsOptions,
+    ApiStateOptionsT: ApiStateOptions,
     ApiConfigT: ApiConfig,
 ](
     ApiFormatBase[ApiConfigT],
@@ -45,7 +45,7 @@ class ApiFormat[
     @abstractmethod
     def _format_options(self) -> ApiFormatOptions[
         TextMessageT,
-        ApiParamsOptionsT,
+        ApiStateOptionsT,
         ApiConfigT,
     ]:
         ...
@@ -60,13 +60,13 @@ class ApiFormat[
     ]:
         ...
 
-    def spawn(self, state: ChatState, tools: ChatTools) -> ApiParamsGeneric[
+    def spawn(self, state: ChatState, tools: ChatTools) -> ApiParamValues[
         MessageContentT,
         ToolDefinitionsT,
         ToolChoiceT,
-        ApiParamsOptionsT,
+        ApiStateOptionsT,
     ]:
-        return ApiParamsGeneric(
+        return ApiParamValues(
             messages=self._format_history.messages(state.messages),
             options=self._format_options.format(state.options),
             tools=self._format_tooling.tools(tools.tools),

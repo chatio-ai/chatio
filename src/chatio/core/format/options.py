@@ -1,9 +1,9 @@
 
 from abc import ABC, abstractmethod
 
-from chatio.core.models import ChatOptions
+from chatio.core.models import StateOptions
 
-from chatio.core.params import ApiParamsOptions
+from chatio.core.params import ApiStateOptions
 from chatio.core.config import ApiConfig
 
 from ._common import ApiFormatBase
@@ -11,7 +11,7 @@ from ._common import ApiFormatBase
 
 class ApiFormatOptions[
     TextMessageT,
-    ApiParamsOptionsT: ApiParamsOptions,
+    ApiStateOptionsT: ApiStateOptions,
     ApiConfigT: ApiConfig,
 ](
     ApiFormatBase[ApiConfigT],
@@ -23,5 +23,5 @@ class ApiFormatOptions[
         ...
 
     @abstractmethod
-    def format(self, options: ChatOptions) -> ApiParamsOptionsT:
+    def format(self, options: StateOptions) -> ApiStateOptionsT:
         ...

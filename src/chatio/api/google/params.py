@@ -7,12 +7,12 @@ from google.genai.types import ContentUnionDict
 from google.genai.types import ToolConfigDict
 from google.genai.types import ToolListUnionDict
 
-from chatio.core.params import ApiParamsOptions
+from chatio.core.params import ApiStateOptions
 from chatio.core.params import ApiParams
 
 
 @dataclass
-class GoogleParamsOptions(ApiParamsOptions):
+class GoogleStateOptions(ApiStateOptions):
     system: ContentDict | None = None
 
 

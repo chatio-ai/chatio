@@ -3,18 +3,18 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ApiParamsOptions:
+class ApiStateOptions:
     pass
 
 
 @dataclass
-class ApiParamsGeneric[
+class ApiParamValues[
     MessageContentT,
     ToolDefinitionsT,
     ToolChoiceT,
-    ApiParamsOptionsT: ApiParamsOptions,
+    ApiStateOptionsT: ApiStateOptions,
 ]:
-    options: ApiParamsOptionsT
+    options: ApiStateOptionsT
     messages: list[MessageContentT]
     tools: ToolDefinitionsT | None = None
     tool_choice: ToolChoiceT | None = None

@@ -3,17 +3,17 @@ from typing import override
 
 from anthropic.types import TextBlockParam
 
-from chatio.core.models import ChatOptions
+from chatio.core.models import StateOptions
 
 from chatio.core.format.options import ApiFormatOptions
 
-from chatio.api.claude.params import ClaudeParamsOptions
+from chatio.api.claude.params import ClaudeStateOptions
 from chatio.api.claude.config import ClaudeConfig
 
 
 class ClaudeFormatOptions(ApiFormatOptions[
     TextBlockParam,
-    ClaudeParamsOptions,
+    ClaudeStateOptions,
     ClaudeConfig,
 ]):
 
@@ -35,10 +35,10 @@ class ClaudeFormatOptions(ApiFormatOptions[
         return content
 
     @override
-    def format(self, options: ChatOptions) -> ClaudeParamsOptions:
+    def format(self, options: StateOptions) -> ClaudeStateOptions:
         system = None if options.system is None \
             else self.system_content(self.text_message(options.system.text))
 
-        return ClaudeParamsOptions(
+        return ClaudeStateOptions(
             system=system,
         )

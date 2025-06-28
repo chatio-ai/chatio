@@ -73,7 +73,7 @@ class ToolChoice:
 
 
 @dataclass
-class ChatOptions:
+class StateOptions:
     system: SystemContent | None = None
     prediction: PredictContent | None = None
 
@@ -81,7 +81,7 @@ class ChatOptions:
 @dataclass
 class ChatState:
     messages: list[ContentEntry] = field(default_factory=list)
-    options: ChatOptions = field(default_factory=ChatOptions)
+    options: StateOptions = field(default_factory=StateOptions)
 
 
 @dataclass

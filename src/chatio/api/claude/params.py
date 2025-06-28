@@ -10,12 +10,12 @@ from anthropic.types import ToolChoiceParam
 from anthropic import NotGiven, NOT_GIVEN
 
 
-from chatio.core.params import ApiParamsOptions
+from chatio.core.params import ApiStateOptions
 from chatio.core.params import ApiParams
 
 
 @dataclass
-class ClaudeParamsOptions(ApiParamsOptions):
+class ClaudeStateOptions(ApiStateOptions):
     system: TextBlockParam | None = None
 
 

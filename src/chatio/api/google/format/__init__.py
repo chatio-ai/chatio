@@ -14,7 +14,7 @@ from chatio.core.format import ApiFormat
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.api.google.params import GoogleParamsOptions
+from chatio.api.google.params import GoogleStateOptions
 from chatio.api.google.params import GoogleParams
 from chatio.api.google.config import GoogleConfig
 
@@ -31,7 +31,7 @@ class GoogleFormat(ApiFormat[
     ToolListUnionDict,
     FunctionDeclarationDict,
     ToolConfigDict,
-    GoogleParamsOptions,
+    GoogleStateOptions,
     GoogleConfig,
 ]):
 

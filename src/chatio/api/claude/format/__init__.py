@@ -18,7 +18,7 @@ from chatio.core.format import ApiFormat
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.api.claude.params import ClaudeParamsOptions
+from chatio.api.claude.params import ClaudeStateOptions
 from chatio.api.claude.params import ClaudeParams
 from chatio.api.claude.config import ClaudeConfig
 
@@ -35,7 +35,7 @@ class ClaudeFormat(ApiFormat[
     list[ToolParam],
     ToolParam,
     ToolChoiceParam,
-    ClaudeParamsOptions,
+    ClaudeStateOptions,
     ClaudeConfig,
 ]):
 

@@ -10,12 +10,12 @@ from openai.types.chat import ChatCompletionToolChoiceOptionParam
 from openai import NotGiven, NOT_GIVEN
 
 
-from chatio.core.params import ApiParamsOptions
+from chatio.core.params import ApiStateOptions
 from chatio.core.params import ApiParams
 
 
 @dataclass
-class OpenAIParamsOptions(ApiParamsOptions):
+class OpenAIStateOptions(ApiStateOptions):
     system: ChatCompletionMessageParam | None = None
 
     prediction: ChatCompletionPredictionContentParam | None = None
