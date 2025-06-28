@@ -14,6 +14,8 @@ from chatio.core.format.history import ApiFormatHistory
 
 from chatio.api.openai.config import OpenAIConfig
 
+from .options import text_message
+
 
 type _ChatCompletionContentPartParam = \
     ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam | File
@@ -33,10 +35,7 @@ class OpenAIFormatHistory(ApiFormatHistory[
 
     @override
     def text_message(self, text: str) -> ChatCompletionContentPartTextParam:
-        return {
-            "type": "text",
-            "text": text,
-        }
+        return text_message(text)
 
     @override
     def image_document_blob(self, blob: bytes, mimetype: str) -> ChatCompletionContentPartImageParam:

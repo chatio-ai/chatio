@@ -13,17 +13,18 @@ from chatio.api.openai.params import OpenAIStateOptions
 from chatio.api.openai.config import OpenAIConfig
 
 
+def text_message(text: str) -> ChatCompletionContentPartTextParam:
+    return {
+        "type": "text",
+        "text": text,
+    }
+
+
 class OpenAIFormatOptions(ApiFormatOptions[
     ChatCompletionContentPartTextParam,
     OpenAIStateOptions,
     OpenAIConfig,
 ]):
-
-    def text_message(self, text: str) -> ChatCompletionContentPartTextParam:
-        return {
-            "type": "text",
-            "text": text,
-        }
 
     def prediction_content(
         self, content: ChatCompletionContentPartTextParam,
@@ -52,10 +53,10 @@ class OpenAIFormatOptions(ApiFormatOptions[
     @override
     def format(self, options: StateOptions) -> OpenAIStateOptions:
         system = None if options.system is None \
-            else self.system_content(self.text_message(options.system.text))
+            else self.system_content(text_message(options.system.text))
 
         prediction = None if options.prediction is None \
-            else self.prediction_content(self.text_message(options.prediction.text))
+            else self.prediction_content(text_message(options.prediction.text))
 
         return OpenAIStateOptions(
             system=system,

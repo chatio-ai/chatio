@@ -16,6 +16,8 @@ from chatio.core.format.history import ApiFormatHistory
 
 from chatio.api.claude.config import ClaudeConfig
 
+from .options import text_message
+
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
 type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
@@ -65,10 +67,7 @@ class ClaudeFormatHistory(ApiFormatHistory[
 
     @override
     def text_message(self, text: str) -> TextBlockParam:
-        return {
-            "type": "text",
-            "text": text,
-        }
+        return text_message(text)
 
     @override
     def image_document_blob(self, blob: bytes, mimetype: str) -> ImageBlockParam:

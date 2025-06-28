@@ -9,6 +9,8 @@ from chatio.core.format.history import ApiFormatHistory
 
 from chatio.api.google.config import GoogleConfig
 
+from .options import text_message
+
 
 class GoogleFormatHistory(ApiFormatHistory[
     ContentUnionDict,
@@ -24,9 +26,7 @@ class GoogleFormatHistory(ApiFormatHistory[
 
     @override
     def text_message(self, text: str) -> PartDict:
-        return {
-            "text": text,
-        }
+        return text_message(text)
 
     @override
     def text_document_chunk(self, text: str, mimetype: str) -> PartDict:

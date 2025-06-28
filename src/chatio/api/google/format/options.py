@@ -12,16 +12,17 @@ from chatio.api.google.params import GoogleStateOptions
 from chatio.api.google.config import GoogleConfig
 
 
+def text_message(text: str) -> PartDict:
+    return {
+        "text": text,
+    }
+
+
 class GoogleFormatOptions(ApiFormatOptions[
     PartDict,
     GoogleStateOptions,
     GoogleConfig,
 ]):
-
-    def text_message(self, text: str) -> PartDict:
-        return {
-            "text": text,
-        }
 
     def system_content(self, content: PartDict) -> ContentDict:
         return {
@@ -31,7 +32,7 @@ class GoogleFormatOptions(ApiFormatOptions[
     @override
     def format(self, options: StateOptions) -> GoogleStateOptions:
         system = None if options.system is None \
-            else self.system_content(self.text_message(options.system.text))
+            else self.system_content(text_message(options.system.text))
 
         return GoogleStateOptions(
             system=system,
