@@ -31,13 +31,13 @@ class WikiPageToolBase(ToolBase):
         self.wiki = wiki
         self.page_cache = page_cache
 
-    def _get_page(self, title: str | None) -> tuple[MediaWikiPage | None, bool | None]:
+    def _get_page(self, title: str | None) -> tuple[MediaWikiPage, bool] | None:
         cached = title in self.page_cache
         if not cached:
             title = self.wiki.suggest(title)
 
         if title is None:
-            return None, None
+            return None
 
         cached = cached or title in self.page_cache
         if not cached:
@@ -46,11 +46,15 @@ class WikiPageToolBase(ToolBase):
         return self.page_cache[title], cached
 
     def _page_do(self, title: str | None, func: Callable[[MediaWikiPage], object]):
-        page, cached = self._get_page(title)
+        page_entry = self._get_page(title)
+        if page_entry is None:
+            yield {"title": title, "cache": None}
+            return
+
+        page, cached = page_entry
         yield {"title": title, "cache": cached}
 
-        if page is not None:
-            yield func(page)
+        yield func(page)
 
 
 class WikiSearchTool(ToolBase):
