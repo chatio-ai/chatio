@@ -5,7 +5,6 @@ from google.genai.types import ContentDict
 from google.genai.types import PartDict
 
 from chatio.core.models import ChatOptions
-from chatio.core.models import SystemContent
 
 from chatio.core.format.options import ApiFormatOptions
 
@@ -32,13 +31,9 @@ class GoogleFormatOptions(ApiFormatOptions[
 
     @override
     def format(self, options: ChatOptions) -> GoogleParamsOptions:
-        _options = GoogleParamsOptions()
+        system = None if options.system is None \
+            else self.system_content(self.text_message(options.system.text))
 
-        for option in options.values():
-            match option:
-                case SystemContent(text):
-                    _options.system = self.system_content(self.text_message(text))
-                case _:
-                    pass
-
-        return _options
+        return GoogleParamsOptions(
+            system=system,
+        )

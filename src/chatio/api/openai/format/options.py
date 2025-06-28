@@ -6,8 +6,6 @@ from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionPredictionContentParam
 
 from chatio.core.models import ChatOptions
-from chatio.core.models import PredictContent
-from chatio.core.models import SystemContent
 
 from chatio.core.format.options import ApiFormatOptions
 
@@ -53,16 +51,13 @@ class OpenAIFormatOptions(ApiFormatOptions[
 
     @override
     def format(self, options: ChatOptions) -> OpenAIParamsOptions:
-        _options = OpenAIParamsOptions()
+        system = None if options.system is None \
+            else self.system_content(self.text_message(options.system.text))
 
-        for option in options.values():
-            match option:
-                case SystemContent(text):
-                    _options.system = self.system_content(self.text_message(text))
-                case PredictContent(text):
-                    if self._config.options.prediction:
-                        _options.prediction = self.prediction_content(self.text_message(text))
-                case _:
-                    pass
+        prediction = None if options.prediction is None \
+            else self.prediction_content(self.text_message(options.prediction.text))
 
-        return _options
+        return OpenAIParamsOptions(
+            system=system,
+            prediction=prediction,
+        )

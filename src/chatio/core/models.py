@@ -72,13 +72,16 @@ class ToolChoice:
     tools: list[str]
 
 
-type ChatOptions = dict[type[ContentEntry], ContentEntry]
+@dataclass
+class ChatOptions:
+    system: SystemContent | None = None
+    prediction: PredictContent | None = None
 
 
 @dataclass
 class ChatState:
     messages: list[ContentEntry] = field(default_factory=list)
-    options: ChatOptions = field(default_factory=dict)
+    options: ChatOptions = field(default_factory=ChatOptions)
 
 
 @dataclass
