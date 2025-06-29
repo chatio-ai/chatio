@@ -3,8 +3,6 @@ import os
 import json
 import logging
 
-from pathlib import Path
-
 from chatio.core.config import ModelConfig
 from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
@@ -37,6 +35,9 @@ from toolbelt.image import ImageDumpTool
 from toolbelt.llm import LlmDialogTool
 
 
+from .files import vendor_config
+
+
 def setup_logging() -> None:
     logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
                         format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -59,15 +60,6 @@ def init_model(model_name: str | None = None, env_name: str | None = None) -> Mo
     vendor_name, _, model_name = model_name.partition('/')
 
     return ModelConfig(vendor_name, model_name)
-
-
-def vendor_json(vendor_name: str) -> dict:
-    vendor_file = Path("./vendors").joinpath(vendor_name + ".json")
-
-    with vendor_file.open() as vendorfp:
-        vendor_data = json.load(vendorfp)
-
-    return {k: v for k, v in vendor_data.items() if not k.startswith('_')}
 
 
 def parse_opts(api_options: str | None = None, env_name: str | None = None) -> dict:
@@ -98,29 +90,29 @@ def build_chat(
         err_msg = "no model specified!"
         raise RuntimeError(err_msg)
 
-    config_data = vendor_json(model.vendor)
-    options_data = config_data.pop('options', {}) | parse_opts()
-
-    api_class = config_data.get('api_cls')
+    config_data = vendor_config(model.vendor)
+    config_vendor = config_data.pop('vendor')
+    config_options = config_data.pop('options', {}) | parse_opts()
 
     options: ApiConfigOptions
     config: ApiConfig
 
-    match api_class:
+    api = config_vendor.get('api')
+    match api:
         case 'claude':
-            options = ClaudeConfigOptions(**options_data)
-            config = ClaudeConfig(**config_data, options=options)
+            options = ClaudeConfigOptions(**config_options)
+            config = ClaudeConfig(**config_vendor, options=options)
             return Chat(ClaudeClient(config), model, state, tools)
         case 'google':
-            options = GoogleConfigOptions(**options_data)
-            config = GoogleConfig(**config_data, options=options)
+            options = GoogleConfigOptions(**config_options)
+            config = GoogleConfig(**config_vendor, options=options)
             return Chat(GoogleClient(config), model, state, tools)
         case 'openai':
-            options = OpenAIConfigOptions(**options_data)
-            config = OpenAIConfig(**config_data, options=options)
+            options = OpenAIConfigOptions(**config_options)
+            config = OpenAIConfig(**config_vendor, options=options)
             return Chat(OpenAIClient(config), model, state, tools)
         case _:
-            err_msg = f"api class not supported: {api_class}"
+            err_msg = f"api is not supported: {api}"
             raise RuntimeError(err_msg)
 
 
