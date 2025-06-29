@@ -93,7 +93,7 @@ def build_chat(
 
     if model is None:
         err_msg = "no model specified!"
-        raise RuntimeError
+        raise RuntimeError(err_msg)
     if model.model is None:
         err_msg = "no model specified!"
         raise RuntimeError(err_msg)
