@@ -30,8 +30,8 @@ class ClaudeClient(ApiClient):
     @override
     def __init__(self, config: ClaudeConfig) -> None:
         self._client = Anthropic(
-            base_url=config.api_url,
             api_key=config.api_key,
+            base_url=config.base_url,
             http_client=HttpxClient(**httpx_args()))
 
         self._format = ClaudeFormat(config)

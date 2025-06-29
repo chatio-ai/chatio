@@ -27,9 +27,11 @@ class GoogleClient(ApiClient):
 
     def __init__(self, config: GoogleConfig):
         self._client = Client(
-            # base_url=config.api_url,
             api_key=config.api_key,
-            http_options=HttpOptions(client_args=httpx_args()))
+            http_options=HttpOptions(
+                base_url=config.base_url,
+                client_args=httpx_args(),
+            ))
 
         self._format = GoogleFormat(config)
 

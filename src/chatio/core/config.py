@@ -11,9 +11,9 @@ class ApiConfigOptions:
 class ApiConfig[ApiConfigOptionsT: ApiConfigOptions]:
     options: ApiConfigOptionsT
 
-    api_cls: str | None
-    api_url: str | None = None
+    api: str | None
     api_key: str | None = None
+    base_url: str | None = None
 
 
 @dataclass

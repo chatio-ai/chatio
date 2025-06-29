@@ -29,8 +29,8 @@ class OpenAIClient(ApiClient):
 
     def __init__(self, config: OpenAIConfig):
         self._client = OpenAI(
-            base_url=config.api_url,
             api_key=config.api_key,
+            base_url=config.base_url,
             http_client=HttpxClient(**httpx_args()))
 
         self._format = OpenAIFormat(config)
