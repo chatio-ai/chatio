@@ -6,13 +6,10 @@ from google.genai.types import ContentUnionDict
 from google.genai.types import ToolListUnionDict
 from google.genai.types import ToolConfigDict
 
+
 from chatio.core.format import ApiFormat
 
-from chatio.core.models import ChatState
-from chatio.core.models import ChatTools
-
 from chatio.api.google.params import GoogleStateOptions
-from chatio.api.google.params import GoogleParams
 from chatio.api.google.config import GoogleConfig
 
 from .history import GoogleFormatHistory
@@ -23,8 +20,8 @@ from .tooling import GoogleFormatTooling
 class GoogleFormat(ApiFormat[
     ContentUnionDict,
     GoogleStateOptions,
-    ToolListUnionDict,
-    ToolConfigDict,
+    ToolListUnionDict | None,
+    ToolConfigDict | None,
     GoogleConfig,
 ]):
 
@@ -42,15 +39,3 @@ class GoogleFormat(ApiFormat[
     @override
     def _format_tooling(self) -> GoogleFormatTooling:
         return GoogleFormatTooling(self._config)
-
-    @override
-    def build(self, state: ChatState, tools: ChatTools) -> GoogleParams:
-        params = self.spawn(state, tools)
-
-        return GoogleParams(
-            max_output_tokens=4096,
-            system_instruction=params.options.system,
-            messages=params.messages,
-            tools=params.tools.tools,
-            tool_config=params.tools.tool_choice,
-        )

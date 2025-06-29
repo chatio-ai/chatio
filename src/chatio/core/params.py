@@ -12,21 +12,20 @@ class ApiToolsOptions[
     ToolDefinitionsT,
     ToolChoiceT,
 ]:
-    tools: ToolDefinitionsT | None = None
-    tool_choice: ToolChoiceT | None = None
+    tools: ToolDefinitionsT
+    tool_choice: ToolChoiceT
 
 
 @dataclass
-class ApiParamValues[
+class ApiParams[
     MessageContentT,
     ApiStateOptionsT: ApiStateOptions,
-    ApiToolsOptionsT: ApiToolsOptions,
+    ToolDefinitionsT,
+    ToolChoiceT,
 ]:
     options: ApiStateOptionsT
     messages: list[MessageContentT]
-    tools: ApiToolsOptionsT
-
-
-@dataclass
-class ApiParams:
-    pass
+    tools: ApiToolsOptions[
+        ToolDefinitionsT,
+        ToolChoiceT,
+    ]

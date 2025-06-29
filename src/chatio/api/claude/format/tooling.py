@@ -4,15 +4,18 @@ from typing import override
 from anthropic.types import ToolParam
 from anthropic.types import ToolChoiceParam
 
+from anthropic import NotGiven, NOT_GIVEN
+
+
 from chatio.core.format.tooling import ApiFormatTooling
 
 from chatio.api.claude.config import ClaudeConfig
 
 
 class ClaudeFormatTooling(ApiFormatTooling[
-    list[ToolParam],
+    list[ToolParam] | NotGiven,
     ToolParam,
-    ToolChoiceParam,
+    ToolChoiceParam | NotGiven,
     ClaudeConfig,
 ]):
 
@@ -37,29 +40,34 @@ class ClaudeFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_definitions(self, tools: list[ToolParam]) -> list[ToolParam]:
+    def tool_definitions(self, tools: list[ToolParam] | None) -> list[ToolParam] | NotGiven:
+        if tools is None:
+            return NOT_GIVEN
         return self._setup_tools_cache(tools)
 
+    def tool_choice_null(self) -> NotGiven:
+        return NOT_GIVEN
+
     @override
-    def tool_choice_none(self) -> ToolChoiceParam | None:
+    def tool_choice_none(self) -> ToolChoiceParam:
         return {
             "type": 'none',
         }
 
     @override
-    def tool_choice_auto(self) -> ToolChoiceParam | None:
+    def tool_choice_auto(self) -> ToolChoiceParam:
         return {
             "type": 'auto',
         }
 
     @override
-    def tool_choice_any(self) -> ToolChoiceParam | None:
+    def tool_choice_any(self) -> ToolChoiceParam:
         return {
             "type": 'any',
         }
 
     @override
-    def tool_choice_name(self, tool_name: str) -> ToolChoiceParam | None:
+    def tool_choice_name(self, tool_name: str) -> ToolChoiceParam:
         return {
             "type": 'tool',
             "name": tool_name,

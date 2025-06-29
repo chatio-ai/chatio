@@ -13,7 +13,6 @@ from ._common import ApiFormatBase
 
 # pylint: disable=too-few-public-methods
 class ApiFormatOptions[
-    TextMessageT,
     ApiStateOptionsT: ApiStateOptions,
     ApiConfigT: ApiConfig,
 ](

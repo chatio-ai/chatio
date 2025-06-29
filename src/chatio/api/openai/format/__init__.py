@@ -6,16 +6,12 @@ from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
-from openai import NOT_GIVEN
+from openai import NotGiven
 
 
 from chatio.core.format import ApiFormat
 
-from chatio.core.models import ChatState
-from chatio.core.models import ChatTools
-
 from chatio.api.openai.params import OpenAIStateOptions
-from chatio.api.openai.params import OpenAIParams
 from chatio.api.openai.config import OpenAIConfig
 
 from .history import OpenAIFormatHistory
@@ -26,8 +22,8 @@ from .tooling import OpenAIFormatTooling
 class OpenAIFormat(ApiFormat[
     ChatCompletionMessageParam,
     OpenAIStateOptions,
-    list[ChatCompletionToolParam],
-    ChatCompletionToolChoiceOptionParam,
+    list[ChatCompletionToolParam] | NotGiven,
+    ChatCompletionToolChoiceOptionParam | NotGiven,
     OpenAIConfig,
 ]):
 
@@ -45,27 +41,3 @@ class OpenAIFormat(ApiFormat[
     @override
     def _format_tooling(self) -> OpenAIFormatTooling:
         return OpenAIFormatTooling(self._config)
-
-    @override
-    def build(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
-        params = self.spawn(state, tools)
-
-        _messages = params.messages
-        if params.options.system is not None:
-            _messages = [params.options.system, *_messages]
-
-        if params.options.prediction is not None:
-            return OpenAIParams(
-                messages=_messages,
-                prediction=params.options.prediction,
-            )
-
-        _tools = NOT_GIVEN if params.tools.tools is None else params.tools.tools
-        _tool_choice = NOT_GIVEN if params.tools.tool_choice is None else params.tools.tool_choice
-
-        return OpenAIParams(
-            max_completion_tokens=4096,
-            messages=_messages,
-            tools=_tools,
-            tool_choice=_tool_choice,
-        )

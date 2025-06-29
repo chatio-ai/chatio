@@ -37,16 +37,17 @@ class GoogleClient(ApiClient):
 
     @override
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-        _params = self._format.build(state, tools)
+        params = self._format.format(state, tools)
+
         return _pump(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
-                'max_output_tokens': _params.max_output_tokens,
-                'tools': _params.tools,
-                'system_instruction': _params.system_instruction,
-                'tool_config': _params.tool_config,
+                'max_output_tokens': 4096,
+                'tools': params.tools.tools,
+                'tool_config': params.tools.tool_choice,
+                'system_instruction': params.options.system,
             },
-            contents=_params.messages,
+            contents=params.messages,
         ))
 
     # helpers

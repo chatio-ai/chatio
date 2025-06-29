@@ -5,6 +5,9 @@ from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionPredictionContentParam
 
+from openai import NotGiven, NOT_GIVEN
+
+
 from chatio.core.models import StateOptions
 
 from chatio.core.format.options import ApiFormatOptions
@@ -21,44 +24,56 @@ def text_message(text: str) -> ChatCompletionContentPartTextParam:
 
 
 class OpenAIFormatOptions(ApiFormatOptions[
-    ChatCompletionContentPartTextParam,
     OpenAIStateOptions,
     OpenAIConfig,
 ]):
 
     def prediction_content(
-        self, content: ChatCompletionContentPartTextParam,
-    ) -> ChatCompletionPredictionContentParam:
+        self, content: ChatCompletionContentPartTextParam | None,
+    ) -> ChatCompletionPredictionContentParam | NotGiven:
+
+        if not self.config.options.prediction:
+            return NOT_GIVEN
+
+        if content is None:
+            return NOT_GIVEN
 
         return {
             "type": "content",
             "content": [content],
         }
 
-    def system_content(self, content: ChatCompletionContentPartTextParam) -> ChatCompletionMessageParam:
+    def system_content(
+        self, content: ChatCompletionContentPartTextParam | None,
+    ) -> list[ChatCompletionMessageParam]:
+
+        if content is None:
+            return []
+
         if content['type'] != 'text':
             raise TypeError
 
         if self._config.options.legacy:
-            return {
+            return [{
                 "role": "system",
                 "content": content['text'],
-            }
+            }]
 
-        return {
+        return [{
             "role": "developer",
             "content": [content],
-        }
+        }]
 
     @override
     def format(self, options: StateOptions) -> OpenAIStateOptions:
-        system = None if options.system is None \
-            else self.system_content(text_message(options.system.text))
 
-        prediction = None if options.prediction is None \
-            else self.prediction_content(text_message(options.prediction.text))
+        text = None if options.system is None else text_message(options.system.text)
+        _system = self.system_content(text)
+
+        text = None if options.prediction is None else text_message(options.prediction.text)
+        _prediction = self.prediction_content(text)
 
         return OpenAIStateOptions(
-            system=system,
-            prediction=prediction,
+            system=_system,
+            prediction=_prediction,
         )

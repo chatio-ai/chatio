@@ -8,6 +8,7 @@ from httpx import Client as HttpxClient
 
 from anthropic import Anthropic
 
+
 from chatio.core.client import ApiClient
 
 from chatio.core.models import ChatState
@@ -39,25 +40,27 @@ class ClaudeClient(ApiClient):
 
     @override
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-        _params = self._format.build(state, tools)
+        params = self._format.format(state, tools)
+
         return _pump(self._client.messages.stream(
-            max_tokens=_params.max_tokens,
+            max_tokens=4096,
             model=model,
-            tools=_params.tools,
-            system=_params.system,
-            messages=_params.messages,
-            tool_choice=_params.tool_choice,
+            system=params.options.system,
+            messages=params.messages,
+            tools=params.tools.tools,
+            tool_choice=params.tools.tool_choice,
         ))
 
     # helpers
 
     @override
     def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
-        _params = self._format.build(state, tools)
+        params = self._format.format(state, tools)
+
         return self._client.messages.count_tokens(
             model=model,
-            tools=_params.tools,
-            system=_params.system,
-            messages=_params.messages,
-            tool_choice=_params.tool_choice,
+            system=params.options.system,
+            messages=params.messages,
+            tools=params.tools.tools,
+            tool_choice=params.tools.tool_choice,
         ).input_tokens

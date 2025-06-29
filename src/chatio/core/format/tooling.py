@@ -26,31 +26,35 @@ class ApiFormatTooling[
         ...
 
     @abstractmethod
-    def tool_definitions(self, tools: list[ToolSchemaT]) -> ToolDefinitionsT | None:
+    def tool_definitions(self, tools: list[ToolSchemaT] | None) -> ToolDefinitionsT:
         ...
 
     @abstractmethod
-    def tool_choice_none(self) -> ToolChoiceT | None:
+    def tool_choice_null(self) -> ToolChoiceT:
         ...
 
     @abstractmethod
-    def tool_choice_auto(self) -> ToolChoiceT | None:
+    def tool_choice_none(self) -> ToolChoiceT:
         ...
 
     @abstractmethod
-    def tool_choice_any(self) -> ToolChoiceT | None:
+    def tool_choice_auto(self) -> ToolChoiceT:
         ...
 
     @abstractmethod
-    def tool_choice_name(self, tool_name: str) -> ToolChoiceT | None:
+    def tool_choice_any(self) -> ToolChoiceT:
+        ...
+
+    @abstractmethod
+    def tool_choice_name(self, tool_name: str) -> ToolChoiceT:
         ...
 
     def _tool_choice(
-        self, tool_choice_mode: str | None, tool_choice_name: str | None, tools: list[str],
-    ) -> ToolChoiceT | None:
+        self, tool_choice_mode: str | None = None, tool_choice_name: str | None = None, tools: list[str] | None = None,
+    ) -> ToolChoiceT:
 
         if not tool_choice_mode and not tool_choice_name:
-            return None
+            return self.tool_choice_null()
 
         if not tools:
             raise ValueError
@@ -79,13 +83,15 @@ class ApiFormatTooling[
         ToolDefinitionsT,
         ToolChoiceT,
     ]:
-        _tools = None
+        _tool_defs = None
         if tools.tools is not None:
             _tool_defs = [self.tool_schema(tool.name, tool.desc, tool.schema) for tool in tools.tools]
-            _tools = self.tool_definitions(_tool_defs)
 
-        _tool_choice = None
-        if tools.tool_choice is not None:
+        _tools = self.tool_definitions(_tool_defs)
+
+        if tools.tool_choice is None:
+            _tool_choice = self._tool_choice(None, None, None)
+        else:
             _tool_choice = self._tool_choice(
                 tools.tool_choice.mode, tools.tool_choice.name, tools.tool_choice.tools)
 

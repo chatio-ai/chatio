@@ -5,8 +5,6 @@ from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
 from chatio.core.params import ApiStateOptions
-from chatio.core.params import ApiToolsOptions
-from chatio.core.params import ApiParamValues
 from chatio.core.params import ApiParams
 from chatio.core.config import ApiConfig
 
@@ -42,17 +40,14 @@ class ApiFormat[
     def _format_tooling(self) -> ApiFormatToolingProto[ToolDefinitionsT, ToolChoiceT]:
         ...
 
-    def spawn(self, state: ChatState, tools: ChatTools) -> ApiParamValues[
+    def format(self, state: ChatState, tools: ChatTools) -> ApiParams[
         MessageContentT,
         ApiStateOptionsT,
-        ApiToolsOptions[ToolDefinitionsT, ToolChoiceT],
+        ToolDefinitionsT,
+        ToolChoiceT,
     ]:
-        return ApiParamValues(
+        return ApiParams(
             messages=self._format_history.format(state.messages),
             options=self._format_options.format(state.options),
             tools=self._format_tooling.format(tools),
         )
-
-    @abstractmethod
-    def build(self, state: ChatState, tools: ChatTools) -> ApiParams:
-        ...

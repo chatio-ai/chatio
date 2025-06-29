@@ -19,21 +19,24 @@ def text_message(text: str) -> PartDict:
 
 
 class GoogleFormatOptions(ApiFormatOptions[
-    PartDict,
     GoogleStateOptions,
     GoogleConfig,
 ]):
 
-    def system_content(self, content: PartDict) -> ContentDict:
+    def system_content(self, content: PartDict | None) -> ContentDict | None:
+        if content is None:
+            return None
+
         return {
             "parts": [content],
         }
 
     @override
     def format(self, options: StateOptions) -> GoogleStateOptions:
-        system = None if options.system is None \
-            else self.system_content(text_message(options.system.text))
+
+        text = None if options.system is None else text_message(options.system.text)
+        _system = self.system_content(text)
 
         return GoogleStateOptions(
-            system=system,
+            system=_system,
         )

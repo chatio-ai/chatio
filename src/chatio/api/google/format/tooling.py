@@ -14,9 +14,9 @@ from chatio.api.google.config import GoogleConfig
 
 
 class GoogleFormatTooling(ApiFormatTooling[
-    ToolListUnionDict,
+    ToolListUnionDict | None,
     FunctionDeclarationDict,
-    ToolConfigDict,
+    ToolConfigDict | None,
     GoogleConfig,
 ]):
 
@@ -35,7 +35,10 @@ class GoogleFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_definitions(self, tools: list[FunctionDeclarationDict]) -> ToolListUnionDict | None:
+    def tool_definitions(
+        self, tools: list[FunctionDeclarationDict] | None,
+    ) -> ToolListUnionDict | None:
+
         tools_config: ToolListUnionDict = []
 
         if tools:
@@ -54,7 +57,11 @@ class GoogleFormatTooling(ApiFormatTooling[
         return tools_config
 
     @override
-    def tool_choice_none(self) -> ToolConfigDict | None:
+    def tool_choice_null(self) -> None:
+        return None
+
+    @override
+    def tool_choice_none(self) -> ToolConfigDict:
         return {
             "function_calling_config": {
                 "mode": FunctionCallingConfigMode.NONE,
@@ -62,7 +69,7 @@ class GoogleFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_choice_auto(self) -> ToolConfigDict | None:
+    def tool_choice_auto(self) -> ToolConfigDict:
         return {
             "function_calling_config": {
                 "mode": FunctionCallingConfigMode.AUTO,
@@ -70,7 +77,7 @@ class GoogleFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_choice_any(self) -> ToolConfigDict | None:
+    def tool_choice_any(self) -> ToolConfigDict:
         return {
             "function_calling_config": {
                 "mode": FunctionCallingConfigMode.ANY,
@@ -78,7 +85,7 @@ class GoogleFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_choice_name(self, tool_name: str) -> ToolConfigDict | None:
+    def tool_choice_name(self, tool_name: str) -> ToolConfigDict:
         return {
             "function_calling_config": {
                 "mode": FunctionCallingConfigMode.ANY,

@@ -6,16 +6,12 @@ from anthropic.types import MessageParam
 from anthropic.types import ToolParam
 from anthropic.types import ToolChoiceParam
 
-from anthropic import NOT_GIVEN
+from anthropic import NotGiven
 
 
 from chatio.core.format import ApiFormat
 
-from chatio.core.models import ChatState
-from chatio.core.models import ChatTools
-
 from chatio.api.claude.params import ClaudeStateOptions
-from chatio.api.claude.params import ClaudeParams
 from chatio.api.claude.config import ClaudeConfig
 
 from .history import ClaudeFormatHistory
@@ -26,8 +22,8 @@ from .tooling import ClaudeFormatTooling
 class ClaudeFormat(ApiFormat[
     MessageParam,
     ClaudeStateOptions,
-    list[ToolParam],
-    ToolChoiceParam,
+    list[ToolParam] | NotGiven,
+    ToolChoiceParam | NotGiven,
     ClaudeConfig,
 ]):
 
@@ -45,20 +41,3 @@ class ClaudeFormat(ApiFormat[
     @override
     def _format_tooling(self) -> ClaudeFormatTooling:
         return ClaudeFormatTooling(self._config)
-
-    @override
-    def build(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
-        params = self.spawn(state, tools)
-
-        _system = NOT_GIVEN if params.options.system is None else [params.options.system]
-
-        _tools = NOT_GIVEN if params.tools.tools is None else params.tools.tools
-        _tool_choice = NOT_GIVEN if params.tools.tool_choice is None else params.tools.tool_choice
-
-        return ClaudeParams(
-            max_tokens=4096,
-            system=_system,
-            messages=params.messages,
-            tools=_tools,
-            tool_choice=_tool_choice,
-        )
