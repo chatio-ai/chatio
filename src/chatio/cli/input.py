@@ -26,7 +26,7 @@ class ChatCompleter:
 
         path_glob = path_dir.glob(f"{path_name}*")
 
-        matches = [f"{p}/" if p.is_dir() else f"{p} " for p in path_glob]
+        matches = [f"{p}/" if p.resolve().is_dir() else f"{p} " for p in path_glob]
 
         if state < len(matches):
             return matches[state]

@@ -12,6 +12,7 @@ class ApiConfig[ApiConfigOptionsT: ApiConfigOptions]:
     options: ApiConfigOptionsT
 
     api: str | None
+    env_ns: str | None = None
     api_key: str | None = None
     base_url: str | None = None
 

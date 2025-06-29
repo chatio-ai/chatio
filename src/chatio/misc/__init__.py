@@ -90,7 +90,7 @@ def build_chat(
         err_msg = "no model specified!"
         raise RuntimeError(err_msg)
 
-    config_data = vendor_config(model.vendor)
+    model.vendor, config_data = vendor_config(model.vendor)
     config_vendor = config_data.pop('vendor')
     config_options = config_data.pop('options', {}) | parse_opts()
 
