@@ -1,5 +1,6 @@
 
 import os
+import json
 
 import pathlib
 import tomllib
@@ -48,3 +49,21 @@ def vendor_config(vendor_path: str, config_options: dict | None = None) -> Model
     _config_options.update(config_options)
 
     return ModelConfig(str(_vendor_path), str(_model_name), config_data)
+
+
+def build_model(model_name: str | None = None, env_ns: str | None = None) -> ModelConfig:
+    if env_ns is None:
+        env_ns = ""
+
+    if model_name is None:
+        env_name = f"{env_ns}CHATIO_MODEL_NAME"
+        model_name = os.environ.get(env_name)
+        if model_name is None:
+            err_msg = f"Configure {env_name}!"
+            raise RuntimeError(err_msg)
+
+    env_name = "f{env_ns}CHATIO_API_OPTIONS"
+    config_options = os.environ.get(env_name)
+    _config_options = json.loads(config_options) if config_options is not None else None
+
+    return vendor_config(model_name, _config_options)

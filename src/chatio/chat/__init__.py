@@ -5,11 +5,10 @@ from dataclasses import dataclass
 
 from chatio.core.config import ModelConfig
 
-from chatio.core.client import ApiClient
-
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
+from .model import init_client
 from .state import ChatState
 from .tools import ChatTools
 from .usage import ChatUsage
@@ -28,15 +27,14 @@ class Chat:
 
     def __init__(
         self,
-        client: ApiClient,
         model: ModelConfig,
         state: ChatState | None = None,
         tools: ChatTools | None = None,
     ) -> None:
 
-        self._client = client
-
         self._model = model
+
+        self._client = init_client(model)
 
         if state is None:
             state = ChatState()
