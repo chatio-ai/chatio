@@ -35,34 +35,22 @@ def setup_logging() -> None:
     logging.getLogger('chatio.api').setLevel(logging.INFO)
 
 
-def build_model(model_name: str | None = None, env_name: str | None = None) -> ModelConfig:
-    if model_name is not None and env_name is not None:
-        raise ValueError
+def build_model(model_name: str | None = None, env_ns: str | None = None) -> ModelConfig:
+    if env_ns is None:
+        env_ns = ""
 
     if model_name is None:
-        if env_name is None:
-            env_name = 'CHATIO_MODEL_NAME'
+        env_name = f"{env_ns}CHATIO_MODEL_NAME"
         model_name = os.environ.get(env_name)
         if model_name is None:
             err_msg = f"Configure {env_name}!"
             raise RuntimeError(err_msg)
 
-    return vendor_config(model_name)
+    env_name = "f{env_ns}CHATIO_API_OPTIONS"
+    config_options = os.environ.get(env_name)
+    _config_options = json.loads(config_options) if config_options is not None else None
 
-
-def parse_opts(api_options: str | None = None, env_name: str | None = None) -> dict:
-    if api_options is not None and env_name is not None:
-        raise ValueError
-
-    if api_options is None:
-        if env_name is None:
-            env_name = 'CHATIO_API_OPTIONS'
-
-        api_options = os.environ.get(env_name)
-        if not api_options:
-            return {}
-
-    return json.loads(api_options)
+    return vendor_config(model_name, _config_options)
 
 
 def build_chat(
@@ -77,7 +65,7 @@ def build_chat(
     _model = build_model(model)
 
     config_vendor = _model.config.pop('vendor')
-    config_options = _model.config.pop('options', {}) | parse_opts()
+    config_options = _model.config.pop('options', {})
 
     options: ApiConfigOptions
     config: ApiConfig

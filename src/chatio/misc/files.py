@@ -27,19 +27,24 @@ def _vendor_config_parse(vendor_path: str) -> tuple[pathlib.Path, pathlib.Path, 
     raise FileNotFoundError
 
 
-def vendor_config(vendor_path: str) -> ModelConfig:
+def vendor_config(vendor_path: str, config_options: dict | None = None) -> ModelConfig:
     config = _vendor_config_parse(vendor_path)
 
     _vendor_path, _model_name, config_data = config
 
-    config_vendor = config_data.setdefault('vendor', {})
+    _config_vendor = config_data.setdefault('vendor', {})
 
-    vendor_env_ns = config_vendor.get('env_ns')
+    vendor_env_ns = _config_vendor.get('env_ns')
     if vendor_env_ns is None:
         vendor_env_ns = _vendor_path.stem
     vendor_env_ns = vendor_env_ns.upper()
 
-    config_vendor.setdefault('api_key', os.getenv(f"{vendor_env_ns}_API_KEY"))
-    config_vendor.setdefault('base_url', os.getenv(f"{vendor_env_ns}_BASE_URL"))
+    _config_vendor.setdefault('api_key', os.getenv(f"{vendor_env_ns}_API_KEY"))
+    _config_vendor.setdefault('base_url', os.getenv(f"{vendor_env_ns}_BASE_URL"))
+
+    if config_options is None:
+        config_options = {}
+    _config_options = config_data.setdefault('options', {})
+    _config_options.update(config_options)
 
     return ModelConfig(str(_vendor_path), str(_model_name), config_data)
