@@ -23,10 +23,3 @@ class ModelConfig:
     model: str
 
     config: dict
-
-
-@dataclass
-class ToolsConfig:
-    tools: dict | None = None
-    tool_choice_mode: str | None = None
-    tool_choice_name: str | None = None

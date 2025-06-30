@@ -4,7 +4,6 @@ import json
 import logging
 
 from chatio.core.config import ModelConfig
-from chatio.core.config import ToolsConfig
 
 from chatio.core.config import ApiConfigOptions
 from chatio.core.config import ApiConfig
@@ -22,6 +21,8 @@ from chatio.api.openai.config import OpenAIConfig
 from chatio.api.openai.client import OpenAIClient
 
 from chatio.chat import Chat
+
+from chatio.chat.tools import ChatTools
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
 from toolbelt.dummy import DummyTool
@@ -75,7 +76,6 @@ def parse_opts(api_options: str | None = None, env_name: str | None = None) -> d
 
 def build_chat(
     model: ModelConfig,
-    tools: ToolsConfig | None = None,
 ) -> Chat:
 
     if model is None:
@@ -96,21 +96,21 @@ def build_chat(
         case 'claude':
             options = ClaudeConfigOptions(**config_options)
             config = ClaudeConfig(**config_vendor, options=options)
-            return Chat(ClaudeClient(config), model, tools=tools)
+            return Chat(ClaudeClient(config), model)
         case 'google':
             options = GoogleConfigOptions(**config_options)
             config = GoogleConfig(**config_vendor, options=options)
-            return Chat(GoogleClient(config), model, tools=tools)
+            return Chat(GoogleClient(config), model)
         case 'openai':
             options = OpenAIConfigOptions(**config_options)
             config = OpenAIConfig(**config_vendor, options=options)
-            return Chat(OpenAIClient(config), model, tools=tools)
+            return Chat(OpenAIClient(config), model)
         case _:
             err_msg = f"api is not supported: {api}"
             raise RuntimeError(err_msg)
 
 
-def init_tools(tools_name: str | None = None, env_name: str | None = None) -> ToolsConfig:
+def init_tools(tools_name: str | None = None, env_name: str | None = None) -> ChatTools:
     if tools_name is not None and env_name is not None:
         raise ValueError
 
@@ -143,8 +143,10 @@ def init_tools(tools_name: str | None = None, env_name: str | None = None) -> To
             }
         case 'llmtool':
             llm = build_chat(
-                model=init_model(env_name='CHATIO_NESTED_MODEL_NAME'),
-                tools=init_tools(env_name='CHATIO_NESTED_TOOLS_NAME'))
+                model=init_model(env_name='CHATIO_NESTED_MODEL_NAME'))
+
+            #     model=init_model(env_name='CHATIO_NESTED_MODEL_NAME'),
+            #     tools=init_tools(env_name='CHATIO_NESTED_TOOLS_NAME'))
 
             tools = {
                 "llm_message": LlmDialogTool(llm),
@@ -154,4 +156,4 @@ def init_tools(tools_name: str | None = None, env_name: str | None = None) -> To
                 "run_imgdump": ImageDumpTool(),
             }
 
-    return ToolsConfig(tools, tool_choice_mode=tool_choice_mode, tool_choice_name=tool_choice_name)
+    return ChatTools(tools, tool_choice_mode=tool_choice_mode, tool_choice_name=tool_choice_name)

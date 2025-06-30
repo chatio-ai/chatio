@@ -4,7 +4,6 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 
 from chatio.core.config import ModelConfig
-from chatio.core.config import ToolsConfig
 
 from chatio.core.client import ApiClient
 
@@ -12,10 +11,7 @@ from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
 from .state import ChatState
-
-from .tools import build_tools
 from .tools import ChatTools
-
 from .usage import ChatUsage
 
 
@@ -35,7 +31,7 @@ class Chat:
         client: ApiClient,
         model: ModelConfig,
         state: ChatState | None = None,
-        tools: ToolsConfig | None = None,
+        tools: ChatTools | None = None,
     ) -> None:
 
         self._client = client
@@ -46,7 +42,9 @@ class Chat:
             state = ChatState()
         self._state = state
 
-        self._tools = build_tools(tools)
+        if tools is None:
+            tools = ChatTools()
+        self._tools = tools
 
         self._usage = ChatUsage()
 

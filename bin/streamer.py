@@ -8,7 +8,6 @@ from chatio.cli.style import Style
 
 from chatio.misc import setup_logging
 from chatio.misc import init_model
-from chatio.misc import init_tools
 from chatio.misc import build_chat
 
 
@@ -18,7 +17,7 @@ setup_logging()
 def main():
     prompt = " ".join(sys.argv[1:])
 
-    chat = build_chat(model=init_model(), tools=init_tools())
+    chat = build_chat(model=init_model())
     chat.state.update_system_message(prompt)
 
     run_info(chat, Style("::: ", color=Style.BRIGHT_GREEN))
