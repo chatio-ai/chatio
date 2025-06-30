@@ -7,7 +7,6 @@ from chatio.cli.stdio import run_info, run_chat, run_text
 from chatio.cli.style import Style
 
 from chatio.misc import setup_logging
-from chatio.misc import init_model
 from chatio.misc import build_chat
 
 
@@ -31,7 +30,6 @@ def file_from(filepath):
 
 
 def main():
-    model = init_model()
 
     model_styles = [
         Style(">>> ", color=Style.BRIGHT_GREEN),
@@ -63,16 +61,9 @@ def main():
     if response_prompt:
         run_text(response_prompt, prompt_styles[True])
 
-    def _build_chat(model, prompt: str | None = None, messages: list[str] | None = None):
-        chat = build_chat(model=model)
-        chat.state.update_system_message(prompt)
-        if messages is not None:
-            chat.state.append_chat_messages(messages)
-        return chat
-
     chats = [
-        _build_chat(model, request_prompt, ["."]),
-        _build_chat(model, response_prompt),
+        build_chat(request_prompt, ["."]),
+        build_chat(response_prompt),
     ]
 
     index = False

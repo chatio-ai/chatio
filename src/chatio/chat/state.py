@@ -24,6 +24,14 @@ from chatio.core.models import ChatState as _ChatState
 @dataclass
 class ChatState(_ChatState):
 
+    def __init__(self, prompt: str | None = None, messages: list[str] | None = None) -> None:
+        super().__init__()
+
+        if messages is not None:
+            self.append_chat_messages(messages)
+
+        self.update_system_message(prompt)
+
     def attach_image_document(self, *, file: str | PathLike, mimetype: str | None = None) -> None:
         if mimetype is None:
             mimetype, _ = mimetypes.guess_type(file)

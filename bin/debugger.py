@@ -5,7 +5,6 @@ import sys
 from chatio.cli.stdio import run_info, run_chat
 
 from chatio.misc import setup_logging
-from chatio.misc import init_model
 from chatio.misc import build_chat
 
 
@@ -50,10 +49,7 @@ def makechat():
         messages.append("content.jpeg [Image depicting holy grail of Roman Empire]")
         messages.append("content.jpeg [Image depicting holy grail of Roman Empire]")
 
-    chat = build_chat(model=init_model())
-    chat.state.update_system_message(prompt)
-    chat.state.append_chat_messages(messages)
-    return chat
+    return build_chat(prompt, messages)
 
 
 def main():

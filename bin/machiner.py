@@ -5,7 +5,6 @@ import sys
 from chatio.cli.stdio import run_text, run_user, run_chat
 
 from chatio.misc import setup_logging
-from chatio.misc import init_model
 from chatio.misc import build_chat
 
 
@@ -15,8 +14,7 @@ setup_logging()
 def main():
     prompt = " ".join(sys.argv[1:])
 
-    chat = build_chat(model=init_model())
-    chat.state.update_system_message(prompt)
+    chat = build_chat(prompt)
 
     while True:
         content_raw = run_user()

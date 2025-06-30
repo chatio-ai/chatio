@@ -22,6 +22,7 @@ from chatio.api.openai.client import OpenAIClient
 
 from chatio.chat import Chat
 
+from chatio.chat.state import ChatState
 from chatio.chat.tools import ChatTools
 
 from toolbelt.shell import ShellCalcTool, ShellExecTool
@@ -44,7 +45,7 @@ def setup_logging() -> None:
     logging.getLogger('chatio.api').setLevel(logging.INFO)
 
 
-def init_model(model_name: str | None = None, env_name: str | None = None) -> ModelConfig:
+def build_model(model_name: str | None = None, env_name: str | None = None) -> ModelConfig:
     if model_name is not None and env_name is not None:
         raise ValueError
 
@@ -75,18 +76,18 @@ def parse_opts(api_options: str | None = None, env_name: str | None = None) -> d
 
 
 def build_chat(
-    model: ModelConfig,
+    prompt: str | None = None,
+    messages: list[str] | None = None,
+    tools: str | None = None,
+    model: str | None = None,
 ) -> Chat:
 
-    if model is None:
-        err_msg = "no model specified!"
-        raise RuntimeError(err_msg)
-    if model.model is None:
-        err_msg = "no model specified!"
-        raise RuntimeError(err_msg)
+    _tools = build_tools(tools)
+    _state = build_state(prompt, messages)
+    _model = build_model(model)
 
-    config_vendor = model.config.pop('vendor')
-    config_options = model.config.pop('options', {}) | parse_opts()
+    config_vendor = _model.config.pop('vendor')
+    config_options = _model.config.pop('options', {}) | parse_opts()
 
     options: ApiConfigOptions
     config: ApiConfig
@@ -96,21 +97,25 @@ def build_chat(
         case 'claude':
             options = ClaudeConfigOptions(**config_options)
             config = ClaudeConfig(**config_vendor, options=options)
-            return Chat(ClaudeClient(config), model)
+            return Chat(ClaudeClient(config), _model, _state, _tools)
         case 'google':
             options = GoogleConfigOptions(**config_options)
             config = GoogleConfig(**config_vendor, options=options)
-            return Chat(GoogleClient(config), model)
+            return Chat(GoogleClient(config), _model, _state, _tools)
         case 'openai':
             options = OpenAIConfigOptions(**config_options)
             config = OpenAIConfig(**config_vendor, options=options)
-            return Chat(OpenAIClient(config), model)
+            return Chat(OpenAIClient(config), _model, _state, _tools)
         case _:
             err_msg = f"api is not supported: {api}"
             raise RuntimeError(err_msg)
 
 
-def init_tools(tools_name: str | None = None, env_name: str | None = None) -> ChatTools:
+def build_state(prompt: str | None = None, messages: list[str] | None = None) -> ChatState:
+    return ChatState(prompt, messages)
+
+
+def build_tools(tools_name: str | None = None, env_name: str | None = None) -> ChatTools:
     if tools_name is not None and env_name is not None:
         raise ValueError
 
@@ -142,9 +147,9 @@ def init_tools(tools_name: str | None = None, env_name: str | None = None) -> Ch
                 "run_nothing": DummyTool(),
             }
         case 'llmtool':
-            llm = build_chat(
-                model=init_model(env_name='CHATIO_NESTED_MODEL_NAME'))
+            llm = build_chat()
 
+            # llm = build_chat(
             #     model=init_model(env_name='CHATIO_NESTED_MODEL_NAME'),
             #     tools=init_tools(env_name='CHATIO_NESTED_TOOLS_NAME'))
 
