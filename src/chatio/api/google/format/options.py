@@ -9,7 +9,7 @@ from chatio.core.models import StateOptions
 from chatio.core.format.options import ApiFormatOptions
 
 from chatio.api.google.params import GoogleStateOptions
-from chatio.api.google.config import GoogleConfig
+from chatio.api.google.config import GoogleConfigFormat
 
 
 def text_message(text: str) -> PartDict:
@@ -20,7 +20,7 @@ def text_message(text: str) -> PartDict:
 
 class GoogleFormatOptions(ApiFormatOptions[
     GoogleStateOptions,
-    GoogleConfig,
+    GoogleConfigFormat,
 ]):
 
     def system_content(self, content: PartDict | None) -> ContentDict | None:

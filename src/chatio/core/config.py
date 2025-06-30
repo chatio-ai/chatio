@@ -3,15 +3,13 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ApiConfigOptions:
+class ApiConfigFormat:
     pass
 
 
 @dataclass
-class ApiConfig[ApiConfigOptionsT: ApiConfigOptions]:
-    options: ApiConfigOptionsT
-
-    api: str | None
+class ApiConfigVendor:
+    api: str | None = None
     env_ns: str | None = None
     api_key: str | None = None
     base_url: str | None = None

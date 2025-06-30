@@ -13,7 +13,7 @@ from chatio.core.models import StateOptions
 from chatio.core.format.options import ApiFormatOptions
 
 from chatio.api.openai.params import OpenAIStateOptions
-from chatio.api.openai.config import OpenAIConfig
+from chatio.api.openai.config import OpenAIConfigFormat
 
 
 def text_message(text: str) -> ChatCompletionContentPartTextParam:
@@ -25,14 +25,14 @@ def text_message(text: str) -> ChatCompletionContentPartTextParam:
 
 class OpenAIFormatOptions(ApiFormatOptions[
     OpenAIStateOptions,
-    OpenAIConfig,
+    OpenAIConfigFormat,
 ]):
 
     def prediction_content(
         self, content: ChatCompletionContentPartTextParam | None,
     ) -> ChatCompletionPredictionContentParam | NotGiven:
 
-        if not self.config.options.prediction:
+        if not self._config.prediction:
             return NOT_GIVEN
 
         if content is None:
@@ -53,7 +53,7 @@ class OpenAIFormatOptions(ApiFormatOptions[
         if content['type'] != 'text':
             raise TypeError
 
-        if self._config.options.legacy:
+        if self._config.legacy:
             return [{
                 "role": "system",
                 "content": content['text'],

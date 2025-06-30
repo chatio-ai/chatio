@@ -6,7 +6,7 @@ from typing import Protocol
 from chatio.core.models import ChatTools
 
 from chatio.core.params import ApiToolsOptions
-from chatio.core.config import ApiConfig
+from chatio.core.config import ApiConfigFormat
 
 from ._common import ApiFormatBase
 
@@ -15,9 +15,9 @@ class ApiFormatTooling[
     ToolDefinitionsT,
     ToolSchemaT,
     ToolChoiceT,
-    ApiConfigT: ApiConfig,
+    ApiConfigFormatT: ApiConfigFormat,
 ](
-    ApiFormatBase[ApiConfigT],
+    ApiFormatBase[ApiConfigFormatT],
     ABC,
 ):
 

@@ -7,7 +7,7 @@ from google.genai.types import PartDict
 
 from chatio.core.format.history import ApiFormatHistory
 
-from chatio.api.google.config import GoogleConfig
+from chatio.api.google.config import GoogleConfigFormat
 
 from .options import text_message
 
@@ -17,7 +17,7 @@ class GoogleFormatHistory(ApiFormatHistory[
     PartDict,
     PartDict,
     PartDict,
-    GoogleConfig,
+    GoogleConfigFormat,
 ]):
 
     @override

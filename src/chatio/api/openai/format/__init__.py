@@ -12,7 +12,7 @@ from openai import NotGiven
 from chatio.core.format import ApiFormat
 
 from chatio.api.openai.params import OpenAIStateOptions
-from chatio.api.openai.config import OpenAIConfig
+from chatio.api.openai.config import OpenAIConfigFormat
 
 from .history import OpenAIFormatHistory
 from .options import OpenAIFormatOptions
@@ -24,7 +24,7 @@ class OpenAIFormat(ApiFormat[
     OpenAIStateOptions,
     list[ChatCompletionToolParam] | NotGiven,
     ChatCompletionToolChoiceOptionParam | NotGiven,
-    OpenAIConfig,
+    OpenAIConfigFormat,
 ]):
 
     @property

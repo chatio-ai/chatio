@@ -1,15 +1,15 @@
 
 from dataclasses import dataclass
 
-from chatio.core.config import ApiConfigOptions
-from chatio.core.config import ApiConfig
+from chatio.core.config import ApiConfigFormat
+from chatio.core.config import ApiConfigVendor
 
 
 @dataclass
-class ClaudeConfigOptions(ApiConfigOptions):
+class ClaudeConfigFormat(ApiConfigFormat):
     use_cache: bool = True
 
 
 @dataclass
-class ClaudeConfig(ApiConfig[ClaudeConfigOptions]):
+class ClaudeConfigVendor(ApiConfigVendor):
     pass

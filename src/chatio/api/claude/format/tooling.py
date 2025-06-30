@@ -9,18 +9,18 @@ from anthropic import NotGiven, NOT_GIVEN
 
 from chatio.core.format.tooling import ApiFormatTooling
 
-from chatio.api.claude.config import ClaudeConfig
+from chatio.api.claude.config import ClaudeConfigFormat
 
 
 class ClaudeFormatTooling(ApiFormatTooling[
     list[ToolParam] | NotGiven,
     ToolParam,
     ToolChoiceParam | NotGiven,
-    ClaudeConfig,
+    ClaudeConfigFormat,
 ]):
 
     def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
-        if self._config.options.use_cache and entries:
+        if self._config.use_cache and entries:
             entry = entries[-1]
 
             entry.update({

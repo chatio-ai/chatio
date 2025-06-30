@@ -12,7 +12,7 @@ from anthropic import NotGiven
 from chatio.core.format import ApiFormat
 
 from chatio.api.claude.params import ClaudeStateOptions
-from chatio.api.claude.config import ClaudeConfig
+from chatio.api.claude.config import ClaudeConfigFormat
 
 from .history import ClaudeFormatHistory
 from .options import ClaudeFormatOptions
@@ -24,7 +24,7 @@ class ClaudeFormat(ApiFormat[
     ClaudeStateOptions,
     list[ToolParam] | NotGiven,
     ToolChoiceParam | NotGiven,
-    ClaudeConfig,
+    ClaudeConfigFormat,
 ]):
 
     @property

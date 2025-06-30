@@ -11,7 +11,7 @@ from chatio.core.models import StateOptions
 from chatio.core.format.options import ApiFormatOptions
 
 from chatio.api.claude.params import ClaudeStateOptions
-from chatio.api.claude.config import ClaudeConfig
+from chatio.api.claude.config import ClaudeConfigFormat
 
 
 def text_message(text: str) -> TextBlockParam:
@@ -23,14 +23,14 @@ def text_message(text: str) -> TextBlockParam:
 
 class ClaudeFormatOptions(ApiFormatOptions[
     ClaudeStateOptions,
-    ClaudeConfig,
+    ClaudeConfigFormat,
 ]):
 
     def system_content(self, content: TextBlockParam | None) -> list[TextBlockParam] | NotGiven:
         if content is None:
             return NOT_GIVEN
 
-        if self._config.options.use_cache:
+        if self._config.use_cache:
             content.update({
                 "cache_control": {
                     "type": "ephemeral",

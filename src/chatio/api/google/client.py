@@ -18,22 +18,27 @@ from chatio.core.events import ChatEvent
 from chatio.api.helper.httpx import httpx_args
 
 
-from .config import GoogleConfig
+from .config import GoogleConfigFormat
+from .config import GoogleConfigVendor
 from .format import GoogleFormat
 from .events import _pump
 
 
 class GoogleClient(ApiClient):
 
-    def __init__(self, config: GoogleConfig):
+    def __init__(self, config: dict[str, dict]) -> None:
+
+        _config_vendor = GoogleConfigVendor(**config.get('vendor', {}))
+        _config_format = GoogleConfigFormat(**config.get('options', {}))
+
+        self._format = GoogleFormat(_config_format)
+
         self._client = Client(
-            api_key=config.api_key,
+            api_key=_config_vendor.api_key,
             http_options=HttpOptions(
-                base_url=config.base_url,
+                base_url=_config_vendor.base_url,
                 client_args=httpx_args(),
             ))
-
-        self._format = GoogleFormat(config)
 
     # streams
 

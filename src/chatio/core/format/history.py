@@ -13,7 +13,7 @@ from chatio.core.models import CallRequest
 
 from chatio.core.models import ContentEntry
 
-from chatio.core.config import ApiConfig
+from chatio.core.config import ApiConfigFormat
 
 from ._common import ApiFormatBase
 
@@ -23,9 +23,9 @@ class ApiFormatHistory[
     TextMessageT,
     ImageDocumentT,
     TextDocumentT,
-    ApiConfigT: ApiConfig,
+    ApiConfigFormatT: ApiConfigFormat,
 ](
-    ApiFormatBase[ApiConfigT],
+    ApiFormatBase[ApiConfigFormatT],
     ABC,
 ):
 

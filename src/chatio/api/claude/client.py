@@ -19,8 +19,8 @@ from chatio.core.events import ChatEvent
 
 from chatio.api.helper.httpx import httpx_args
 
-
-from .config import ClaudeConfig
+from .config import ClaudeConfigFormat
+from .config import ClaudeConfigVendor
 from .format import ClaudeFormat
 from .events import _pump
 
@@ -28,13 +28,17 @@ from .events import _pump
 class ClaudeClient(ApiClient):
 
     @override
-    def __init__(self, config: ClaudeConfig) -> None:
-        self._client = Anthropic(
-            api_key=config.api_key,
-            base_url=config.base_url,
-            http_client=HttpxClient(**httpx_args()))
+    def __init__(self, config: dict[str, dict]) -> None:
 
-        self._format = ClaudeFormat(config)
+        _config_format = ClaudeConfigFormat(**config.get('options', {}))
+        _config_vendor = ClaudeConfigVendor(**config.get('vendor', {}))
+
+        self._format = ClaudeFormat(_config_format)
+
+        self._client = Anthropic(
+            api_key=_config_vendor.api_key,
+            base_url=_config_vendor.base_url,
+            http_client=HttpxClient(**httpx_args()))
 
     # streams
 

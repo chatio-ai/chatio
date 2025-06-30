@@ -10,14 +10,14 @@ from google.genai.types import FunctionDeclarationDict
 
 from chatio.core.format.tooling import ApiFormatTooling
 
-from chatio.api.google.config import GoogleConfig
+from chatio.api.google.config import GoogleConfigFormat
 
 
 class GoogleFormatTooling(ApiFormatTooling[
     ToolListUnionDict | None,
     FunctionDeclarationDict,
     ToolConfigDict | None,
-    GoogleConfig,
+    GoogleConfigFormat,
 ]):
 
     def _is_tool_params_schema(self, _params: dict) -> TypeGuard[SchemaDict]:
@@ -46,7 +46,7 @@ class GoogleFormatTooling(ApiFormatTooling[
                 "function_declarations": tools,
             })
 
-        if self._config.options.grounding:
+        if self._config.grounding:
             tools_config.append({
                 "google_search": {},
             })

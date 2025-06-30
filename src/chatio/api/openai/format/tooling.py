@@ -9,14 +9,14 @@ from openai import NotGiven, NOT_GIVEN
 
 from chatio.core.format.tooling import ApiFormatTooling
 
-from chatio.api.openai.config import OpenAIConfig
+from chatio.api.openai.config import OpenAIConfigFormat
 
 
 class OpenAIFormatTooling(ApiFormatTooling[
     list[ChatCompletionToolParam] | NotGiven,
     ChatCompletionToolParam,
     ChatCompletionToolChoiceOptionParam | NotGiven,
-    OpenAIConfig,
+    OpenAIConfigFormat,
 ]):
 
     def _tool_params_schema(self, params: dict) -> dict:

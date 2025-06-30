@@ -14,7 +14,7 @@ from anthropic.types import ToolResultBlockParam
 
 from chatio.core.format.history import ApiFormatHistory
 
-from chatio.api.claude.config import ClaudeConfig
+from chatio.api.claude.config import ClaudeConfigFormat
 
 from .options import text_message
 
@@ -29,7 +29,7 @@ class ClaudeFormatHistory(ApiFormatHistory[
     TextBlockParam,
     ImageBlockParam,
     DocumentBlockParam,
-    ClaudeConfig,
+    ClaudeConfigFormat,
 ]):
 
     def _setup_messages_cache(self, messages: list[MessageParam]) -> list[MessageParam]:
@@ -52,7 +52,7 @@ class ClaudeFormatHistory(ApiFormatHistory[
                     case _:
                         raise TypeError
 
-        if self._config.options.use_cache and last_entry is not None:
+        if self._config.use_cache and last_entry is not None:
             last_entry.update({
                 'cache_control': {
                     "type": "ephemeral",

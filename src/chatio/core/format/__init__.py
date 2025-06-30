@@ -6,7 +6,7 @@ from chatio.core.models import ChatTools
 
 from chatio.core.params import ApiStateOptions
 from chatio.core.params import ApiParams
-from chatio.core.config import ApiConfig
+from chatio.core.config import ApiConfigFormat
 
 from ._common import ApiFormatBase
 
@@ -20,9 +20,9 @@ class ApiFormat[
     ApiStateOptionsT: ApiStateOptions,
     ToolDefinitionsT,
     ToolChoiceT,
-    ApiConfigT: ApiConfig,
+    ApiConfigFormatT: ApiConfigFormat,
 ](
-    ApiFormatBase[ApiConfigT],
+    ApiFormatBase[ApiConfigFormatT],
 ):
 
     @property

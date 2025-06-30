@@ -12,7 +12,7 @@ from openai.types.chat.chat_completion_content_part_param import File
 
 from chatio.core.format.history import ApiFormatHistory
 
-from chatio.api.openai.config import OpenAIConfig
+from chatio.api.openai.config import OpenAIConfigFormat
 
 from .options import text_message
 
@@ -26,7 +26,7 @@ class OpenAIFormatHistory(ApiFormatHistory[
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     File,
-    OpenAIConfig,
+    OpenAIConfigFormat,
 ]):
 
     @override
@@ -76,7 +76,7 @@ class OpenAIFormatHistory(ApiFormatHistory[
 
         return {
             "role": "user",
-            "content": content['text'] if self._config.options.legacy else [content],
+            "content": content['text'] if self._config.legacy else [content],
         }
 
     @override

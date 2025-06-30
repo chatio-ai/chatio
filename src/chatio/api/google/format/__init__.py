@@ -10,7 +10,7 @@ from google.genai.types import ToolConfigDict
 from chatio.core.format import ApiFormat
 
 from chatio.api.google.params import GoogleStateOptions
-from chatio.api.google.config import GoogleConfig
+from chatio.api.google.config import GoogleConfigFormat
 
 from .history import GoogleFormatHistory
 from .options import GoogleFormatOptions
@@ -22,7 +22,7 @@ class GoogleFormat(ApiFormat[
     GoogleStateOptions,
     ToolListUnionDict | None,
     ToolConfigDict | None,
-    GoogleConfig,
+    GoogleConfigFormat,
 ]):
 
     @property

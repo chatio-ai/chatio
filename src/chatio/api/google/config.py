@@ -1,15 +1,15 @@
 
 from dataclasses import dataclass
 
-from chatio.core.config import ApiConfigOptions
-from chatio.core.config import ApiConfig
+from chatio.core.config import ApiConfigFormat
+from chatio.core.config import ApiConfigVendor
 
 
 @dataclass
-class GoogleConfigOptions(ApiConfigOptions):
+class GoogleConfigFormat(ApiConfigFormat):
     grounding: bool = False
 
 
 @dataclass
-class GoogleConfig(ApiConfig[GoogleConfigOptions]):
+class GoogleConfigVendor(ApiConfigVendor):
     pass

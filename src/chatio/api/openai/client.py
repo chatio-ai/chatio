@@ -20,20 +20,25 @@ from chatio.core.events import ChatEvent
 from chatio.api.helper.httpx import httpx_args
 
 
-from .config import OpenAIConfig
+from .config import OpenAIConfigFormat
+from .config import OpenAIConfigVendor
 from .format import OpenAIFormat
 from .events import _pump
 
 
 class OpenAIClient(ApiClient):
 
-    def __init__(self, config: OpenAIConfig):
-        self._client = OpenAI(
-            api_key=config.api_key,
-            base_url=config.base_url,
-            http_client=HttpxClient(**httpx_args()))
+    def __init__(self, config: dict[str, dict]) -> None:
 
-        self._format = OpenAIFormat(config)
+        _config_format = OpenAIConfigFormat(**config.get('options', {}))
+        _config_vendor = OpenAIConfigVendor(**config.get('vendor', {}))
+
+        self._format = OpenAIFormat(_config_format)
+
+        self._client = OpenAI(
+            api_key=_config_vendor.api_key,
+            base_url=_config_vendor.base_url,
+            http_client=HttpxClient(**httpx_args()))
 
     # streams
 

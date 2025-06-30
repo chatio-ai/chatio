@@ -6,7 +6,7 @@ from typing import Protocol
 from chatio.core.models import StateOptions
 
 from chatio.core.params import ApiStateOptions
-from chatio.core.config import ApiConfig
+from chatio.core.config import ApiConfigFormat
 
 from ._common import ApiFormatBase
 
@@ -14,9 +14,9 @@ from ._common import ApiFormatBase
 # pylint: disable=too-few-public-methods
 class ApiFormatOptions[
     ApiStateOptionsT: ApiStateOptions,
-    ApiConfigT: ApiConfig,
+    ApiConfigFormatT: ApiConfigFormat,
 ](
-    ApiFormatBase[ApiConfigT],
+    ApiFormatBase[ApiConfigFormatT],
     ABC,
 ):
 
