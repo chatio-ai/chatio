@@ -22,6 +22,8 @@ class ModelConfig:
     vendor: str
     model: str
 
+    config: dict
+
 
 @dataclass
 class StateConfig:

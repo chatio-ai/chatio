@@ -51,15 +51,12 @@ def init_model(model_name: str | None = None, env_name: str | None = None) -> Mo
     if model_name is None:
         if env_name is None:
             env_name = 'CHATIO_MODEL_NAME'
-
         model_name = os.environ.get(env_name)
-        if not model_name or '/' not in model_name:
+        if model_name is None:
             err_msg = f"Configure {env_name}!"
             raise RuntimeError(err_msg)
 
-    vendor_name, _, model_name = model_name.partition('/')
-
-    return ModelConfig(vendor_name, model_name)
+    return vendor_config(model_name)
 
 
 def parse_opts(api_options: str | None = None, env_name: str | None = None) -> dict:
@@ -90,9 +87,8 @@ def build_chat(
         err_msg = "no model specified!"
         raise RuntimeError(err_msg)
 
-    model.vendor, config_data = vendor_config(model.vendor)
-    config_vendor = config_data.pop('vendor')
-    config_options = config_data.pop('options', {}) | parse_opts()
+    config_vendor = model.config.pop('vendor')
+    config_options = model.config.pop('options', {}) | parse_opts()
 
     options: ApiConfigOptions
     config: ApiConfig
