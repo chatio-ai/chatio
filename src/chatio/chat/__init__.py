@@ -4,7 +4,6 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 
 from chatio.core.config import ModelConfig
-from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
 from chatio.core.client import ApiClient
@@ -12,7 +11,6 @@ from chatio.core.client import ApiClient
 from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
 
 
-from .state import build_state
 from .state import ChatState
 
 from .tools import build_tools
@@ -36,7 +34,7 @@ class Chat:
         self,
         client: ApiClient,
         model: ModelConfig,
-        state: StateConfig | None = None,
+        state: ChatState | None = None,
         tools: ToolsConfig | None = None,
     ) -> None:
 
@@ -44,7 +42,9 @@ class Chat:
 
         self._model = model
 
-        self._state = build_state(state)
+        if state is None:
+            state = ChatState()
+        self._state = state
 
         self._tools = build_tools(tools)
 
@@ -80,11 +80,11 @@ class Chat:
                     "tool_data": chunk,
                 }
 
-        self._state.commit_call_response(tool_call_id, tool_name, content)
+        self._state.append_call_response(tool_call_id, tool_name, content)
 
     def __call__(self, content: str | None = None) -> Iterator[dict]:
         if content:
-            self._state.commit_input_message(content)
+            self._state.append_input_message(content)
 
         return self._iterate()
 
@@ -105,9 +105,9 @@ class Chat:
                         }
                     case DoneEvent(text):
                         if text:
-                            self._state.commit_output_message(text)
+                            self._state.append_output_message(text)
                     case CallEvent(call_id, name, args, args_raw):
-                        self._state.commit_call_request(call_id, name, args_raw)
+                        self._state.append_call_request(call_id, name, args_raw)
                         yield {
                             "type": "tools_usage",
                             "tool_name": name,
@@ -122,7 +122,7 @@ class Chat:
 
     def count_tokens(self, content: str | None = None) -> int:
         if content:
-            self._state.commit_input_message(content)
+            self._state.append_input_message(content)
 
         return self._client.count_message_tokens(self._model.model, self._state, self._tools)
 

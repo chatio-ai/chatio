@@ -8,7 +8,6 @@ from chatio.cli.style import Style
 
 from chatio.misc import setup_logging
 from chatio.misc import init_model
-from chatio.misc import init_state
 from chatio.misc import build_chat
 
 
@@ -64,9 +63,16 @@ def main():
     if response_prompt:
         run_text(response_prompt, prompt_styles[True])
 
+    def _build_chat(model, prompt: str | None = None, messages: list[str] | None = None):
+        chat = build_chat(model=model)
+        chat.state.update_system_message(prompt)
+        if messages is not None:
+            chat.state.append_chat_messages(messages)
+        return chat
+
     chats = [
-        build_chat(state=init_state(request_prompt, ["."]), model=model),
-        build_chat(state=init_state(response_prompt, None), model=model),
+        _build_chat(model, request_prompt, ["."]),
+        _build_chat(model, response_prompt),
     ]
 
     index = False
@@ -78,8 +84,8 @@ def main():
             if not content:
                 continue
 
-            chats[index].state.commit_output_message(content)
-            chats[not index].state.commit_input_message(content)
+            chats[index].state.append_output_message(content)
+            chats[not index].state.append_input_message(content)
 
             run_text(content, model_styles[index])
             print()
@@ -98,7 +104,7 @@ def main():
                                model_style=model_styles[index],
                                event_style=event_styles[index])
 
-            chats[not index].state.commit_input_message(content)
+            chats[not index].state.append_input_message(content)
             print()
 
             index = not index

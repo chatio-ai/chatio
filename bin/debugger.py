@@ -6,7 +6,6 @@ from chatio.cli.stdio import run_info, run_chat
 
 from chatio.misc import setup_logging
 from chatio.misc import init_model
-from chatio.misc import init_state
 from chatio.misc import build_chat
 
 
@@ -51,7 +50,10 @@ def makechat():
         messages.append("content.jpeg [Image depicting holy grail of Roman Empire]")
         messages.append("content.jpeg [Image depicting holy grail of Roman Empire]")
 
-    return build_chat(model=init_model(), state=init_state(prompt, messages))
+    chat = build_chat(model=init_model())
+    chat.state.update_system_message(prompt)
+    chat.state.append_chat_messages(messages)
+    return chat
 
 
 def main():
@@ -63,7 +65,7 @@ def main():
     for filename in filenames:
         chat.state.attach_document_auto(file=filename)
 
-    # chat.commit_chunk("duplicate my message as is")
+    # chat.append_input_message("duplicate my message as is")
 
     run_info(chat, "::: ")
 
@@ -72,8 +74,8 @@ def main():
     if filenames:
         run_chat(chat(), "<<< ", "::: ")
 
-    # chat.commit_chunk("what is the exact text on first image? duplicate my message as is")
-    chat.state.commit_input_message("what is the exact text on first image?")
+    # chat.append_input_message("what is the exact text on first image? duplicate my message as is")
+    chat.state.append_input_message("what is the exact text on first image?")
 
     run_chat(chat(), "<<< ", "::: ")
 

@@ -8,7 +8,6 @@ from chatio.cli.style import Style
 
 from chatio.misc import setup_logging
 from chatio.misc import init_model
-from chatio.misc import init_state
 from chatio.misc import init_tools
 from chatio.misc import build_chat
 
@@ -19,7 +18,8 @@ setup_logging()
 def main():
     prompt = " ".join(sys.argv[1:])
 
-    chat = build_chat(model=init_model(), state=init_state(prompt), tools=init_tools())
+    chat = build_chat(model=init_model(), tools=init_tools())
+    chat.state.update_system_message(prompt)
 
     run_info(chat, Style("::: ", color=Style.BRIGHT_GREEN))
 
@@ -36,7 +36,7 @@ def main():
             chat.state.attach_document_auto(file=file)
 
         if content:
-            chat.state.commit_input_message(content)
+            chat.state.append_input_message(content)
 
         chat.state.update_prediction_state(results)
 

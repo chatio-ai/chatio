@@ -6,8 +6,6 @@ from dataclasses import dataclass
 from os import PathLike
 from pathlib import Path
 
-from chatio.core.config import StateConfig
-
 from chatio.core.models import PredictContent
 from chatio.core.models import SystemContent
 
@@ -59,16 +57,23 @@ class ChatState(_ChatState):
             case _:
                 return self.attach_image_document(file=file, mimetype=mimetype)
 
-    def commit_input_message(self, message: str) -> None:
+    def append_input_message(self, message: str) -> None:
         self.messages.append(InputMessage(message))
 
-    def commit_call_response(self, call_id: str, name: str, args: str) -> None:
-        self.messages.append(CallResponse(call_id, name, args))
-
-    def commit_output_message(self, message: str) -> None:
+    def append_output_message(self, message: str) -> None:
         self.messages.append(OutputMessage(message))
 
-    def commit_call_request(self, call_id: str, name: str, args: object) -> None:
+    def append_chat_messages(self, messages: list[str]) -> None:
+        for index, message in enumerate(messages):
+            if not index % 2:
+                self.append_input_message(message)
+            else:
+                self.append_output_message(message)
+
+    def append_call_response(self, call_id: str, name: str, args: str) -> None:
+        self.messages.append(CallResponse(call_id, name, args))
+
+    def append_call_request(self, call_id: str, name: str, args: object) -> None:
         self.messages.append(CallRequest(call_id, name, args))
 
     def update_system_message(self, message: str | None) -> None:
@@ -76,23 +81,3 @@ class ChatState(_ChatState):
 
     def update_prediction_state(self, message: str | None) -> None:
         self.options.prediction = None if message is None else PredictContent(message)
-
-
-def build_state(state: StateConfig | None = None) -> ChatState:
-    _state = ChatState()
-
-    if state is None:
-        state = StateConfig()
-
-    _state.update_system_message(state.system)
-
-    if state.messages is None:
-        state.messages = []
-
-    for index, message in enumerate(state.messages):
-        if not index % 2:
-            _state.commit_input_message(message)
-        else:
-            _state.commit_output_message(message)
-
-    return _state

@@ -4,7 +4,6 @@ import json
 import logging
 
 from chatio.core.config import ModelConfig
-from chatio.core.config import StateConfig
 from chatio.core.config import ToolsConfig
 
 from chatio.core.config import ApiConfigOptions
@@ -76,7 +75,6 @@ def parse_opts(api_options: str | None = None, env_name: str | None = None) -> d
 
 def build_chat(
     model: ModelConfig,
-    state: StateConfig | None = None,
     tools: ToolsConfig | None = None,
 ) -> Chat:
 
@@ -98,22 +96,18 @@ def build_chat(
         case 'claude':
             options = ClaudeConfigOptions(**config_options)
             config = ClaudeConfig(**config_vendor, options=options)
-            return Chat(ClaudeClient(config), model, state, tools)
+            return Chat(ClaudeClient(config), model, tools=tools)
         case 'google':
             options = GoogleConfigOptions(**config_options)
             config = GoogleConfig(**config_vendor, options=options)
-            return Chat(GoogleClient(config), model, state, tools)
+            return Chat(GoogleClient(config), model, tools=tools)
         case 'openai':
             options = OpenAIConfigOptions(**config_options)
             config = OpenAIConfig(**config_vendor, options=options)
-            return Chat(OpenAIClient(config), model, state, tools)
+            return Chat(OpenAIClient(config), model, tools=tools)
         case _:
             err_msg = f"api is not supported: {api}"
             raise RuntimeError(err_msg)
-
-
-def init_state(system: str | None = None, messages: list[str] | None = None) -> StateConfig:
-    return StateConfig(system, messages)
 
 
 def init_tools(tools_name: str | None = None, env_name: str | None = None) -> ToolsConfig:

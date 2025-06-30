@@ -26,12 +26,6 @@ class ModelConfig:
 
 
 @dataclass
-class StateConfig:
-    system: str | None = None
-    messages: list[str] | None = None
-
-
-@dataclass
 class ToolsConfig:
     tools: dict | None = None
     tool_choice_mode: str | None = None
