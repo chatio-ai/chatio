@@ -16,12 +16,17 @@ from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.claude.config import ClaudeConfigFormat
 
-from .state_options import message_text
-
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
 type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
 type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
+
+
+def message_text(text: str) -> TextBlockParam:
+    return {
+        "type": "text",
+        "text": text,
+    }
 
 
 # pylint: disable=too-few-public-methods

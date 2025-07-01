@@ -15,12 +15,7 @@ from chatio.core.format.state_options import ApiOptionsFormatterBase
 from chatio.api.openai.params import OpenAIStateOptions
 from chatio.api.openai.config import OpenAIConfigFormat
 
-
-def message_text(text: str) -> ChatCompletionContentPartTextParam:
-    return {
-        "type": "text",
-        "text": text,
-    }
+from .state_messages import message_text
 
 
 # pylint: disable=too-few-public-methods

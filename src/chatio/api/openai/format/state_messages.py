@@ -14,11 +14,16 @@ from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.openai.config import OpenAIConfigFormat
 
-from .state_options import message_text
-
 
 type _ChatCompletionContentPartParam = \
     ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam | File
+
+
+def message_text(text: str) -> ChatCompletionContentPartTextParam:
+    return {
+        "type": "text",
+        "text": text,
+    }
 
 
 # pylint: disable=too-few-public-methods

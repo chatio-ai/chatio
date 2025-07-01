@@ -11,11 +11,7 @@ from chatio.core.format.state_options import ApiOptionsFormatterBase
 from chatio.api.google.params import GoogleStateOptions
 from chatio.api.google.config import GoogleConfigFormat
 
-
-def message_text(text: str) -> PartDict:
-    return {
-        "text": text,
-    }
+from .state_messages import message_text
 
 
 # pylint: disable=too-few-public-methods

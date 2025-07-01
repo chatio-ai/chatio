@@ -13,12 +13,7 @@ from chatio.core.format.state_options import ApiOptionsFormatterBase
 from chatio.api.claude.params import ClaudeStateOptions
 from chatio.api.claude.config import ClaudeConfigFormat
 
-
-def message_text(text: str) -> TextBlockParam:
-    return {
-        "type": "text",
-        "text": text,
-    }
+from .state_messages import message_text
 
 
 # pylint: disable=too-few-public-methods
