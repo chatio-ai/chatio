@@ -19,6 +19,7 @@ from .options import ClaudeFormatOptions
 from .tooling import ClaudeFormatTooling
 
 
+# pylint: disable=too-few-public-methods
 class ClaudeFormat(ApiFormat[
     MessageParam,
     ClaudeStateOptions,

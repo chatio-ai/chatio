@@ -17,6 +17,7 @@ from .options import GoogleFormatOptions
 from .tooling import GoogleFormatTooling
 
 
+# pylint: disable=too-few-public-methods
 class GoogleFormat(ApiFormat[
     ContentUnionDict,
     GoogleStateOptions,

@@ -19,6 +19,7 @@ from .options import OpenAIFormatOptions
 from .tooling import OpenAIFormatTooling
 
 
+# pylint: disable=too-few-public-methods
 class OpenAIFormat(ApiFormat[
     ChatCompletionMessageParam,
     OpenAIStateOptions,

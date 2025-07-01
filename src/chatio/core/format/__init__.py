@@ -15,6 +15,7 @@ from .options import ApiFormatOptionsProto
 from .tooling import ApiFormatToolingProto
 
 
+# pylint: disable=too-few-public-methods
 class ApiFormat[
     MessageContentT,
     ApiStateOptionsT: ApiStateOptions,
