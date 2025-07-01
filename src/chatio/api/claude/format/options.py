@@ -8,7 +8,7 @@ from anthropic import NotGiven, NOT_GIVEN
 
 from chatio.core.models import StateOptions
 
-from chatio.core.format.options import ApiFormatOptions
+from chatio.core.format.options import ApiOptionsFormatterBase
 
 from chatio.api.claude.params import ClaudeStateOptions
 from chatio.api.claude.config import ClaudeConfigFormat
@@ -22,7 +22,7 @@ def text_message(text: str) -> TextBlockParam:
 
 
 # pylint: disable=too-few-public-methods
-class ClaudeFormatOptions(ApiFormatOptions[
+class ClaudeOptionsFormatter(ApiOptionsFormatterBase[
     ClaudeStateOptions,
     ClaudeConfigFormat,
 ]):

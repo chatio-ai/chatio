@@ -10,9 +10,9 @@ from chatio.core.config import ApiConfigFormat
 
 from ._common import ApiFormatBase
 
-from .history import ApiFormatHistoryProto
-from .options import ApiFormatOptionsProto
-from .tooling import ApiFormatToolingProto
+from .history import ApiHistoryFormatter
+from .options import ApiOptionsFormatter
+from .tooling import ApiToolingFormatter
 
 
 # pylint: disable=too-few-public-methods
@@ -28,17 +28,17 @@ class ApiFormat[
 
     @property
     @abstractmethod
-    def _format_history(self) -> ApiFormatHistoryProto[MessageContentT]:
+    def _history_formatter(self) -> ApiHistoryFormatter[MessageContentT]:
         ...
 
     @property
     @abstractmethod
-    def _format_options(self) -> ApiFormatOptionsProto[ApiStateOptionsT]:
+    def _options_formatter(self) -> ApiOptionsFormatter[ApiStateOptionsT]:
         ...
 
     @property
     @abstractmethod
-    def _format_tooling(self) -> ApiFormatToolingProto[ToolDefinitionsT, ToolChoiceT]:
+    def _tooling_formatter(self) -> ApiToolingFormatter[ToolDefinitionsT, ToolChoiceT]:
         ...
 
     def format(self, state: ChatState, tools: ChatTools) -> ApiParams[
@@ -48,7 +48,7 @@ class ApiFormat[
         ToolChoiceT,
     ]:
         return ApiParams(
-            messages=self._format_history.format(state.messages),
-            options=self._format_options.format(state.options),
-            tools=self._format_tooling.format(tools),
+            messages=self._history_formatter.format(state.messages),
+            options=self._options_formatter.format(state.options),
+            tools=self._tooling_formatter.format(tools),
         )

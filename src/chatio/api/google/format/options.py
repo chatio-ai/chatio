@@ -6,7 +6,7 @@ from google.genai.types import PartDict
 
 from chatio.core.models import StateOptions
 
-from chatio.core.format.options import ApiFormatOptions
+from chatio.core.format.options import ApiOptionsFormatterBase
 
 from chatio.api.google.params import GoogleStateOptions
 from chatio.api.google.config import GoogleConfigFormat
@@ -19,7 +19,7 @@ def text_message(text: str) -> PartDict:
 
 
 # pylint: disable=too-few-public-methods
-class GoogleFormatOptions(ApiFormatOptions[
+class GoogleOptionsFormatter(ApiOptionsFormatterBase[
     GoogleStateOptions,
     GoogleConfigFormat,
 ]):

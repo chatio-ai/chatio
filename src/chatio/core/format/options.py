@@ -12,7 +12,7 @@ from ._common import ApiFormatBase
 
 
 # pylint: disable=too-few-public-methods
-class ApiFormatOptions[
+class ApiOptionsFormatterBase[
     ApiStateOptionsT: ApiStateOptions,
     ApiConfigFormatT: ApiConfigFormat,
 ](
@@ -26,7 +26,7 @@ class ApiFormatOptions[
 
 
 # pylint: disable=too-few-public-methods
-class ApiFormatOptionsProto[ApiStateOptionsT: ApiStateOptions](Protocol):
+class ApiOptionsFormatter[ApiStateOptionsT: ApiStateOptions](Protocol):
 
     @abstractmethod
     def format(self, options: StateOptions) -> ApiStateOptionsT:

@@ -10,7 +10,7 @@ from openai import NotGiven, NOT_GIVEN
 
 from chatio.core.models import StateOptions
 
-from chatio.core.format.options import ApiFormatOptions
+from chatio.core.format.options import ApiOptionsFormatterBase
 
 from chatio.api.openai.params import OpenAIStateOptions
 from chatio.api.openai.config import OpenAIConfigFormat
@@ -24,7 +24,7 @@ def text_message(text: str) -> ChatCompletionContentPartTextParam:
 
 
 # pylint: disable=too-few-public-methods
-class OpenAIFormatOptions(ApiFormatOptions[
+class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
     OpenAIStateOptions,
     OpenAIConfigFormat,
 ]):

@@ -5,7 +5,7 @@ from google.genai.types import ContentDict
 from google.genai.types import ContentUnionDict
 from google.genai.types import PartDict
 
-from chatio.core.format.history import ApiFormatHistory
+from chatio.core.format.history import ApiHistoryFormatterBase
 
 from chatio.api.google.config import GoogleConfigFormat
 
@@ -13,7 +13,7 @@ from .options import text_message
 
 
 # pylint: disable=too-few-public-methods
-class GoogleFormatHistory(ApiFormatHistory[
+class GoogleHistoryFormatter(ApiHistoryFormatterBase[
     ContentUnionDict,
     PartDict,
     PartDict,

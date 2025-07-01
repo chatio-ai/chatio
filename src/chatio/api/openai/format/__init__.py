@@ -14,9 +14,9 @@ from chatio.core.format import ApiFormat
 from chatio.api.openai.params import OpenAIStateOptions
 from chatio.api.openai.config import OpenAIConfigFormat
 
-from .history import OpenAIFormatHistory
-from .options import OpenAIFormatOptions
-from .tooling import OpenAIFormatTooling
+from .history import OpenAIHistoryFormatter
+from .options import OpenAIOptionsFormatter
+from .tooling import OpenAIToolingFormatter
 
 
 # pylint: disable=too-few-public-methods
@@ -30,15 +30,15 @@ class OpenAIFormat(ApiFormat[
 
     @property
     @override
-    def _format_history(self) -> OpenAIFormatHistory:
-        return OpenAIFormatHistory(self._config)
+    def _history_formatter(self) -> OpenAIHistoryFormatter:
+        return OpenAIHistoryFormatter(self._config)
 
     @property
     @override
-    def _format_options(self) -> OpenAIFormatOptions:
-        return OpenAIFormatOptions(self._config)
+    def _options_formatter(self) -> OpenAIOptionsFormatter:
+        return OpenAIOptionsFormatter(self._config)
 
     @property
     @override
-    def _format_tooling(self) -> OpenAIFormatTooling:
-        return OpenAIFormatTooling(self._config)
+    def _tooling_formatter(self) -> OpenAIToolingFormatter:
+        return OpenAIToolingFormatter(self._config)

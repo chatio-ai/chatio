@@ -14,7 +14,7 @@ from ._common import ApiFormatBase
 
 
 # pylint: disable=too-few-public-methods
-class ApiFormatTooling[
+class ApiToolingFormatterBase[
     ToolDefinitionsT,
     ToolSchemaT,
     ToolChoiceT,
@@ -93,7 +93,7 @@ class ApiFormatTooling[
 
 
 # pylint: disable=too-few-public-methods
-class ApiFormatToolingProto[
+class ApiToolingFormatter[
     ToolDefinitionsT,
     ToolChoiceT,
 ](Protocol):

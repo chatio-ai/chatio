@@ -19,7 +19,7 @@ from ._common import ApiFormatBase
 
 
 # pylint: disable=too-few-public-methods
-class ApiFormatHistory[
+class ApiHistoryFormatterBase[
     MessageContentT,
     TextMessageT,
     ImageDocumentT,
@@ -98,7 +98,7 @@ class ApiFormatHistory[
 
 
 # pylint: disable=too-few-public-methods
-class ApiFormatHistoryProto[MessageContentT](Protocol):
+class ApiHistoryFormatter[MessageContentT](Protocol):
 
     @abstractmethod
     def format(self, messages: list[ContentEntry]) -> list[MessageContentT]:
