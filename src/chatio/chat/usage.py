@@ -28,8 +28,9 @@ class ChatUsageData:
     input: ChatUsageInputData
     output: ChatUsageOutputData
     cache: ChatUsageCacheData
+    label: str
 
-    def __init__(self, label):
+    def __init__(self, label: str):
         self.input = ChatUsageInputData()
         self.output = ChatUsageOutputData()
         self.cache = ChatUsageCacheData()
