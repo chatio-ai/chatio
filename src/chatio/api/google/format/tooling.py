@@ -13,6 +13,7 @@ from chatio.core.format.tooling import ApiFormatTooling
 from chatio.api.google.config import GoogleConfigFormat
 
 
+# pylint: disable=too-few-public-methods
 class GoogleFormatTooling(ApiFormatTooling[
     ToolListUnionDict | None,
     FunctionDeclarationDict,
@@ -24,7 +25,7 @@ class GoogleFormatTooling(ApiFormatTooling[
         return True
 
     @override
-    def tool_schema(self, name: str, desc: str, params: dict) -> FunctionDeclarationDict:
+    def _tool_schema(self, name: str, desc: str, params: dict) -> FunctionDeclarationDict:
         if not self._is_tool_params_schema(params):
             raise TypeError
 
@@ -35,7 +36,7 @@ class GoogleFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_definitions(
+    def _tool_definitions(
         self, tools: list[FunctionDeclarationDict] | None,
     ) -> ToolListUnionDict | None:
 
@@ -57,11 +58,11 @@ class GoogleFormatTooling(ApiFormatTooling[
         return tools_config
 
     @override
-    def tool_choice_null(self) -> None:
+    def _tool_choice_null(self) -> None:
         return None
 
     @override
-    def tool_choice_none(self) -> ToolConfigDict:
+    def _tool_choice_none(self) -> ToolConfigDict:
         return {
             "function_calling_config": {
                 "mode": FunctionCallingConfigMode.NONE,
@@ -69,7 +70,7 @@ class GoogleFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_choice_auto(self) -> ToolConfigDict:
+    def _tool_choice_auto(self) -> ToolConfigDict:
         return {
             "function_calling_config": {
                 "mode": FunctionCallingConfigMode.AUTO,
@@ -77,7 +78,7 @@ class GoogleFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_choice_any(self) -> ToolConfigDict:
+    def _tool_choice_any(self) -> ToolConfigDict:
         return {
             "function_calling_config": {
                 "mode": FunctionCallingConfigMode.ANY,
@@ -85,7 +86,7 @@ class GoogleFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_choice_name(self, tool_name: str) -> ToolConfigDict:
+    def _tool_choice_name(self, tool_name: str) -> ToolConfigDict:
         return {
             "function_calling_config": {
                 "mode": FunctionCallingConfigMode.ANY,

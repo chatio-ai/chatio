@@ -12,6 +12,7 @@ from chatio.core.format.tooling import ApiFormatTooling
 from chatio.api.claude.config import ClaudeConfigFormat
 
 
+# pylint: disable=too-few-public-methods
 class ClaudeFormatTooling(ApiFormatTooling[
     list[ToolParam] | NotGiven,
     ToolParam,
@@ -32,7 +33,7 @@ class ClaudeFormatTooling(ApiFormatTooling[
         return entries
 
     @override
-    def tool_schema(self, name: str, desc: str, params: dict) -> ToolParam:
+    def _tool_schema(self, name: str, desc: str, params: dict) -> ToolParam:
         return {
             "name": name,
             "description": desc,
@@ -40,34 +41,34 @@ class ClaudeFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_definitions(self, tools: list[ToolParam] | None) -> list[ToolParam] | NotGiven:
+    def _tool_definitions(self, tools: list[ToolParam] | None) -> list[ToolParam] | NotGiven:
         if tools is None:
             return NOT_GIVEN
         return self._setup_tools_cache(tools)
 
-    def tool_choice_null(self) -> NotGiven:
+    def _tool_choice_null(self) -> NotGiven:
         return NOT_GIVEN
 
     @override
-    def tool_choice_none(self) -> ToolChoiceParam:
+    def _tool_choice_none(self) -> ToolChoiceParam:
         return {
             "type": 'none',
         }
 
     @override
-    def tool_choice_auto(self) -> ToolChoiceParam:
+    def _tool_choice_auto(self) -> ToolChoiceParam:
         return {
             "type": 'auto',
         }
 
     @override
-    def tool_choice_any(self) -> ToolChoiceParam:
+    def _tool_choice_any(self) -> ToolChoiceParam:
         return {
             "type": 'any',
         }
 
     @override
-    def tool_choice_name(self, tool_name: str) -> ToolChoiceParam:
+    def _tool_choice_name(self, tool_name: str) -> ToolChoiceParam:
         return {
             "type": 'tool',
             "name": tool_name,

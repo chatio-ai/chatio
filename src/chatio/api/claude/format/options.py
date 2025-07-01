@@ -21,12 +21,13 @@ def text_message(text: str) -> TextBlockParam:
     }
 
 
+# pylint: disable=too-few-public-methods
 class ClaudeFormatOptions(ApiFormatOptions[
     ClaudeStateOptions,
     ClaudeConfigFormat,
 ]):
 
-    def system_content(self, content: TextBlockParam | None) -> list[TextBlockParam] | NotGiven:
+    def _system_content(self, content: TextBlockParam | None) -> list[TextBlockParam] | NotGiven:
         if content is None:
             return NOT_GIVEN
 
@@ -43,7 +44,7 @@ class ClaudeFormatOptions(ApiFormatOptions[
     def format(self, options: StateOptions) -> ClaudeStateOptions:
 
         text = None if options.system is None else text_message(options.system.text)
-        _system = self.system_content(text)
+        _system = self._system_content(text)
 
         return ClaudeStateOptions(
             system=_system,

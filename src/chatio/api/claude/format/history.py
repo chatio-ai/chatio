@@ -24,6 +24,7 @@ type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
 type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
 
+# pylint: disable=too-few-public-methods
 class ClaudeFormatHistory(ApiFormatHistory[
     MessageParam,
     TextBlockParam,
@@ -62,15 +63,15 @@ class ClaudeFormatHistory(ApiFormatHistory[
         return messages
 
     @override
-    def chat_messages(self, messages: list[MessageParam]) -> list[MessageParam]:
+    def _chat_messages(self, messages: list[MessageParam]) -> list[MessageParam]:
         return self._setup_messages_cache(messages)
 
     @override
-    def text_message(self, text: str) -> TextBlockParam:
+    def _text_message(self, text: str) -> TextBlockParam:
         return text_message(text)
 
     @override
-    def image_document_blob(self, blob: bytes, mimetype: str) -> ImageBlockParam:
+    def _image_document_blob(self, blob: bytes, mimetype: str) -> ImageBlockParam:
         match mimetype:
             case 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp':
                 pass
@@ -89,7 +90,7 @@ class ClaudeFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def text_document_chunk(self, text: str, mimetype: str) -> DocumentBlockParam:
+    def _text_document_chunk(self, text: str, mimetype: str) -> DocumentBlockParam:
         match mimetype:
             case 'text/plain':
                 pass
@@ -106,22 +107,22 @@ class ClaudeFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def input_content(self, content: _InputContentBlockParam) -> MessageParam:
+    def _input_content(self, content: _InputContentBlockParam) -> MessageParam:
         return {
             "role": "user",
             "content": [content],
         }
 
     @override
-    def output_content(self, content: _OutputContentBlockParam) -> MessageParam:
+    def _output_content(self, content: _OutputContentBlockParam) -> MessageParam:
         return {
             "role": "assistant",
             "content": [content],
         }
 
     @override
-    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> MessageParam:
-        return self.output_content({
+    def _call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> MessageParam:
+        return self._output_content({
             "type": "tool_use",
             "id": tool_call_id,
             "name": tool_name,
@@ -129,8 +130,8 @@ class ClaudeFormatHistory(ApiFormatHistory[
         })
 
     @override
-    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> MessageParam:
-        return self.input_content({
+    def _call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> MessageParam:
+        return self._input_content({
             "type": "tool_result",
             "tool_use_id": tool_call_id,
             "content": tool_output,

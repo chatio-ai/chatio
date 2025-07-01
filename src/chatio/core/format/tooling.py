@@ -11,6 +11,7 @@ from chatio.core.config import ApiConfigFormat
 from ._common import ApiFormatBase
 
 
+# pylint: disable=too-few-public-methods
 class ApiFormatTooling[
     ToolDefinitionsT,
     ToolSchemaT,
@@ -22,31 +23,31 @@ class ApiFormatTooling[
 ):
 
     @abstractmethod
-    def tool_schema(self, name: str, desc: str, params: dict) -> ToolSchemaT:
+    def _tool_schema(self, name: str, desc: str, params: dict) -> ToolSchemaT:
         ...
 
     @abstractmethod
-    def tool_definitions(self, tools: list[ToolSchemaT] | None) -> ToolDefinitionsT:
+    def _tool_definitions(self, tools: list[ToolSchemaT] | None) -> ToolDefinitionsT:
         ...
 
     @abstractmethod
-    def tool_choice_null(self) -> ToolChoiceT:
+    def _tool_choice_null(self) -> ToolChoiceT:
         ...
 
     @abstractmethod
-    def tool_choice_none(self) -> ToolChoiceT:
+    def _tool_choice_none(self) -> ToolChoiceT:
         ...
 
     @abstractmethod
-    def tool_choice_auto(self) -> ToolChoiceT:
+    def _tool_choice_auto(self) -> ToolChoiceT:
         ...
 
     @abstractmethod
-    def tool_choice_any(self) -> ToolChoiceT:
+    def _tool_choice_any(self) -> ToolChoiceT:
         ...
 
     @abstractmethod
-    def tool_choice_name(self, tool_name: str) -> ToolChoiceT:
+    def _tool_choice_name(self, tool_name: str) -> ToolChoiceT:
         ...
 
     def _tool_choice(
@@ -54,7 +55,7 @@ class ApiFormatTooling[
     ) -> ToolChoiceT:
 
         if not tool_choice_mode and not tool_choice_name:
-            return self.tool_choice_null()
+            return self._tool_choice_null()
 
         if not tools:
             raise ValueError
@@ -62,11 +63,11 @@ class ApiFormatTooling[
         if not tool_choice_name:
             match tool_choice_mode:
                 case 'none':
-                    return self.tool_choice_none()
+                    return self._tool_choice_none()
                 case 'auto':
-                    return self.tool_choice_auto()
+                    return self._tool_choice_auto()
                 case 'any':
-                    return self.tool_choice_any()
+                    return self._tool_choice_any()
                 case _:
                     raise ValueError
         else:
@@ -75,7 +76,7 @@ class ApiFormatTooling[
 
             match tool_choice_mode:
                 case 'name':
-                    return self.tool_choice_name(tool_choice_name)
+                    return self._tool_choice_name(tool_choice_name)
                 case _:
                     raise ValueError
 
@@ -85,9 +86,9 @@ class ApiFormatTooling[
     ]:
         _tool_defs = None
         if tools.tools is not None:
-            _tool_defs = [self.tool_schema(tool.name, tool.desc, tool.schema) for tool in tools.tools]
+            _tool_defs = [self._tool_schema(tool.name, tool.desc, tool.schema) for tool in tools.tools]
 
-        _tools = self.tool_definitions(_tool_defs)
+        _tools = self._tool_definitions(_tool_defs)
 
         if tools.tool_choice is None:
             _tool_choice = self._tool_choice(None, None, None)

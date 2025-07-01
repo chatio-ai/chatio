@@ -12,6 +12,7 @@ from chatio.core.format.tooling import ApiFormatTooling
 from chatio.api.openai.config import OpenAIConfigFormat
 
 
+# pylint: disable=too-few-public-methods
 class OpenAIFormatTooling(ApiFormatTooling[
     list[ChatCompletionToolParam] | NotGiven,
     ChatCompletionToolParam,
@@ -40,7 +41,7 @@ class OpenAIFormatTooling(ApiFormatTooling[
         return _params
 
     @override
-    def tool_schema(self, name: str, desc: str, params: dict) -> ChatCompletionToolParam:
+    def _tool_schema(self, name: str, desc: str, params: dict) -> ChatCompletionToolParam:
         _params = self._tool_params_schema(params)
         return {
             "type": "function",
@@ -53,7 +54,7 @@ class OpenAIFormatTooling(ApiFormatTooling[
         }
 
     @override
-    def tool_definitions(
+    def _tool_definitions(
         self, tools: list[ChatCompletionToolParam] | None,
     ) -> list[ChatCompletionToolParam] | NotGiven:
 
@@ -62,23 +63,23 @@ class OpenAIFormatTooling(ApiFormatTooling[
         return tools
 
     @override
-    def tool_choice_null(self) -> NotGiven:
+    def _tool_choice_null(self) -> NotGiven:
         return NOT_GIVEN
 
     @override
-    def tool_choice_none(self) -> ChatCompletionToolChoiceOptionParam:
+    def _tool_choice_none(self) -> ChatCompletionToolChoiceOptionParam:
         return 'none'
 
     @override
-    def tool_choice_auto(self) -> ChatCompletionToolChoiceOptionParam:
+    def _tool_choice_auto(self) -> ChatCompletionToolChoiceOptionParam:
         return 'auto'
 
     @override
-    def tool_choice_any(self) -> ChatCompletionToolChoiceOptionParam:
+    def _tool_choice_any(self) -> ChatCompletionToolChoiceOptionParam:
         return 'required'
 
     @override
-    def tool_choice_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam:
+    def _tool_choice_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam:
         return {
             "type": 'function',
             "function": {

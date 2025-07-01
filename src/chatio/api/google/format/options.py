@@ -18,12 +18,13 @@ def text_message(text: str) -> PartDict:
     }
 
 
+# pylint: disable=too-few-public-methods
 class GoogleFormatOptions(ApiFormatOptions[
     GoogleStateOptions,
     GoogleConfigFormat,
 ]):
 
-    def system_content(self, content: PartDict | None) -> ContentDict | None:
+    def _system_content(self, content: PartDict | None) -> ContentDict | None:
         if content is None:
             return None
 
@@ -35,7 +36,7 @@ class GoogleFormatOptions(ApiFormatOptions[
     def format(self, options: StateOptions) -> GoogleStateOptions:
 
         text = None if options.system is None else text_message(options.system.text)
-        _system = self.system_content(text)
+        _system = self._system_content(text)
 
         return GoogleStateOptions(
             system=_system,

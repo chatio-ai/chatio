@@ -23,12 +23,13 @@ def text_message(text: str) -> ChatCompletionContentPartTextParam:
     }
 
 
+# pylint: disable=too-few-public-methods
 class OpenAIFormatOptions(ApiFormatOptions[
     OpenAIStateOptions,
     OpenAIConfigFormat,
 ]):
 
-    def prediction_content(
+    def _prediction_content(
         self, content: ChatCompletionContentPartTextParam | None,
     ) -> ChatCompletionPredictionContentParam | NotGiven:
 
@@ -43,7 +44,7 @@ class OpenAIFormatOptions(ApiFormatOptions[
             "content": [content],
         }
 
-    def system_content(
+    def _system_content(
         self, content: ChatCompletionContentPartTextParam | None,
     ) -> list[ChatCompletionMessageParam]:
 
@@ -68,10 +69,10 @@ class OpenAIFormatOptions(ApiFormatOptions[
     def format(self, options: StateOptions) -> OpenAIStateOptions:
 
         text = None if options.system is None else text_message(options.system.text)
-        _system = self.system_content(text)
+        _system = self._system_content(text)
 
         text = None if options.prediction is None else text_message(options.prediction.text)
-        _prediction = self.prediction_content(text)
+        _prediction = self._prediction_content(text)
 
         return OpenAIStateOptions(
             system=_system,

@@ -21,6 +21,7 @@ type _ChatCompletionContentPartParam = \
     ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam | File
 
 
+# pylint: disable=too-few-public-methods
 class OpenAIFormatHistory(ApiFormatHistory[
     ChatCompletionMessageParam,
     ChatCompletionContentPartTextParam,
@@ -30,15 +31,15 @@ class OpenAIFormatHistory(ApiFormatHistory[
 ]):
 
     @override
-    def chat_messages(self, messages: list[ChatCompletionMessageParam]) -> list[ChatCompletionMessageParam]:
+    def _chat_messages(self, messages: list[ChatCompletionMessageParam]) -> list[ChatCompletionMessageParam]:
         return messages
 
     @override
-    def text_message(self, text: str) -> ChatCompletionContentPartTextParam:
+    def _text_message(self, text: str) -> ChatCompletionContentPartTextParam:
         return text_message(text)
 
     @override
-    def image_document_blob(self, blob: bytes, mimetype: str) -> ChatCompletionContentPartImageParam:
+    def _image_document_blob(self, blob: bytes, mimetype: str) -> ChatCompletionContentPartImageParam:
         data = base64.b64encode(blob).decode('ascii')
 
         return {
@@ -49,7 +50,7 @@ class OpenAIFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def text_document_chunk(self, text: str, mimetype: str) -> File:
+    def _text_document_chunk(self, text: str, mimetype: str) -> File:
         blob = weasyprint.HTML(string=f"<html><body><pre>{text}</pre></body></html>").write_pdf()
         if blob is None:
             raise RuntimeError
@@ -67,7 +68,7 @@ class OpenAIFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def input_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
+    def _input_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
         if content['type'] != 'text':
             return {
                 "role": "user",
@@ -80,7 +81,7 @@ class OpenAIFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def output_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
+    def _output_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
         if content['type'] != 'text':
             raise TypeError
 
@@ -90,7 +91,7 @@ class OpenAIFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> ChatCompletionMessageParam:
+    def _call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> ChatCompletionMessageParam:
         if not isinstance(tool_input, str):
             raise TypeError
 
@@ -108,7 +109,7 @@ class OpenAIFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> ChatCompletionMessageParam:
+    def _call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> ChatCompletionMessageParam:
         return {
             "role": "tool",
             "tool_call_id": tool_call_id,

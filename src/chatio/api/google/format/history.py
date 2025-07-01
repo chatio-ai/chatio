@@ -12,6 +12,7 @@ from chatio.api.google.config import GoogleConfigFormat
 from .options import text_message
 
 
+# pylint: disable=too-few-public-methods
 class GoogleFormatHistory(ApiFormatHistory[
     ContentUnionDict,
     PartDict,
@@ -21,15 +22,15 @@ class GoogleFormatHistory(ApiFormatHistory[
 ]):
 
     @override
-    def chat_messages(self, messages: list[ContentUnionDict]) -> list[ContentUnionDict]:
+    def _chat_messages(self, messages: list[ContentUnionDict]) -> list[ContentUnionDict]:
         return messages
 
     @override
-    def text_message(self, text: str) -> PartDict:
+    def _text_message(self, text: str) -> PartDict:
         return text_message(text)
 
     @override
-    def text_document_chunk(self, text: str, mimetype: str) -> PartDict:
+    def _text_document_chunk(self, text: str, mimetype: str) -> PartDict:
         return {
             "inline_data": {
                 "mime_type": mimetype,
@@ -38,7 +39,7 @@ class GoogleFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def image_document_blob(self, blob: bytes, mimetype: str) -> PartDict:
+    def _image_document_blob(self, blob: bytes, mimetype: str) -> PartDict:
         return {
             "inline_data": {
                 "mime_type": mimetype,
@@ -47,21 +48,21 @@ class GoogleFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def input_content(self, content: PartDict) -> ContentDict:
+    def _input_content(self, content: PartDict) -> ContentDict:
         return {
             "role": "user",
             "parts": [content],
         }
 
     @override
-    def output_content(self, content: PartDict) -> ContentDict:
+    def _output_content(self, content: PartDict) -> ContentDict:
         return {
             "role": "model",
             "parts": [content],
         }
 
     @override
-    def call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> ContentDict:
+    def _call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> ContentDict:
         if not isinstance(tool_input, dict):
             raise TypeError
 
@@ -77,7 +78,7 @@ class GoogleFormatHistory(ApiFormatHistory[
         }
 
     @override
-    def call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> ContentDict:
+    def _call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> ContentDict:
         return {
             "role": "user",
             "parts": [{
