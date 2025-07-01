@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 
 from chatio.core.config import ApiConfigFormat
-from chatio.core.config import ApiConfigVendor
+from chatio.core.config import ApiConfigClient
 
 
 @dataclass
@@ -11,5 +11,5 @@ class GoogleConfigFormat(ApiConfigFormat):
 
 
 @dataclass
-class GoogleConfigVendor(ApiConfigVendor):
+class GoogleConfigClient(ApiConfigClient):
     pass

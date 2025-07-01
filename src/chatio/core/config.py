@@ -8,11 +8,18 @@ class ApiConfigFormat:
 
 
 @dataclass
-class ApiConfigVendor:
-    api: str | None = None
-    env_ns: str | None = None
+class ApiConfigClient:
     api_key: str | None = None
     base_url: str | None = None
+
+
+@dataclass
+class ApiConfig:
+    api: str | None = None
+    env_ns: str | None = None
+
+    client: ApiConfigClient | None = None
+    format: ApiConfigFormat | None = None
 
 
 @dataclass

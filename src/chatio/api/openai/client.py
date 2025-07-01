@@ -21,7 +21,7 @@ from chatio.api.helper.httpx import httpx_args
 
 
 from .config import OpenAIConfigFormat
-from .config import OpenAIConfigVendor
+from .config import OpenAIConfigClient
 from .format import OpenAIFormat
 from .events import _pump
 
@@ -30,14 +30,14 @@ class OpenAIClient(ApiClient):
 
     def __init__(self, config: dict[str, dict]) -> None:
 
-        _config_format = OpenAIConfigFormat(**config.get('options', {}))
-        _config_vendor = OpenAIConfigVendor(**config.get('vendor', {}))
+        _config_format = OpenAIConfigFormat(**config.get('format', {}))
+        _config_client = OpenAIConfigClient(**config.get('client', {}))
 
         self._format = OpenAIFormat(_config_format)
 
         self._client = OpenAI(
-            api_key=_config_vendor.api_key,
-            base_url=_config_vendor.base_url,
+            api_key=_config_client.api_key,
+            base_url=_config_client.base_url,
             http_client=HttpxClient(**httpx_args()))
 
     # streams

@@ -8,7 +8,7 @@ from chatio.api.openai.client import OpenAIClient
 
 def init_client(config: dict) -> ApiClient:
 
-    api = config.get('vendor', {}).get('api')
+    api = config.get('api')
     match api:
         case 'claude':
             return ClaudeClient(config)
@@ -16,6 +16,9 @@ def init_client(config: dict) -> ApiClient:
             return GoogleClient(config)
         case 'openai':
             return OpenAIClient(config)
-        case _:
+        case str():
             err_msg = f"api is not supported: {api}"
+            raise RuntimeError(err_msg)
+        case _:
+            err_msg = f"api is not specified"
             raise RuntimeError(err_msg)

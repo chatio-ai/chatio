@@ -47,7 +47,7 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
 
         content = message_text(msg)
 
-        if self._config.legacy:
+        if self._config.compat:
             return [{
                 "role": "system",
                 "content": content['text'],

@@ -28,27 +28,32 @@ def _vendor_config_parse(vendor_path: str) -> tuple[pathlib.Path, pathlib.Path, 
     raise FileNotFoundError
 
 
-def vendor_config(vendor_path: str, config_options: dict | None = None) -> ModelConfig:
+def vendor_config(vendor_path: str, config_override: dict | None = None) -> ModelConfig:
+    if config_override is None:
+        config_override = {}
+
+    config_client_override = config_override.pop('client', {})
+    config_format_override = config_override.pop('format', {})
+
     config = _vendor_config_parse(vendor_path)
 
-    _vendor_path, _model_name, config_data = config
+    _vendor_path, _model_name, _config = config
+    _config.update(config_override)
 
-    _config_vendor = config_data.setdefault('vendor', {})
-
-    vendor_env_ns = _config_vendor.get('env_ns')
+    vendor_env_ns = _config.get('env_ns')
     if vendor_env_ns is None:
         vendor_env_ns = _vendor_path.stem
     vendor_env_ns = vendor_env_ns.upper()
 
-    _config_vendor.setdefault('api_key', os.getenv(f"{vendor_env_ns}_API_KEY"))
-    _config_vendor.setdefault('base_url', os.getenv(f"{vendor_env_ns}_BASE_URL"))
+    _config_client = _config.setdefault('client', {})
+    _config_client.setdefault('api_key', os.getenv(f"{vendor_env_ns}_API_KEY"))
+    _config_client.setdefault('base_url', os.getenv(f"{vendor_env_ns}_BASE_URL"))
+    _config_client.update(config_client_override)
 
-    if config_options is None:
-        config_options = {}
-    _config_options = config_data.setdefault('options', {})
-    _config_options.update(config_options)
+    _config_format = _config.setdefault('format', {})
+    _config_format.update(config_format_override)
 
-    return ModelConfig(str(_vendor_path), str(_model_name), config_data)
+    return ModelConfig(str(_vendor_path), str(_model_name), _config)
 
 
 def build_model(model_name: str | None = None, env_ns: str | None = None) -> ModelConfig:
@@ -63,8 +68,8 @@ def build_model(model_name: str | None = None, env_ns: str | None = None) -> Mod
             err_msg = f"Configure {env_name}!"
             raise RuntimeError(err_msg)
 
-    env_name = f"{_env_ns}_API_OPTIONS"
-    config_options = os.environ.get(env_name)
-    _config_options = json.loads(config_options) if config_options is not None else None
+    env_name = f"{_env_ns}_VENDOR_CONFIG"
+    config_override = os.environ.get(env_name)
+    _config_override = json.loads(config_override) if config_override is not None else None
 
-    return vendor_config(model_name, _config_options)
+    return vendor_config(model_name, _config_override)

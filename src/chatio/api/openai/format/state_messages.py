@@ -60,7 +60,7 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
 
         return {
             "role": "user",
-            "content": content['text'] if self._config.legacy else [content],
+            "content": content['text'] if self._config.compat else [content],
         }
 
     @override
