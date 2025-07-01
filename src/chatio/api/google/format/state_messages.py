@@ -5,15 +5,15 @@ from google.genai.types import ContentDict
 from google.genai.types import ContentUnionDict
 from google.genai.types import PartDict
 
-from chatio.core.format.history import ApiHistoryFormatterBase
+from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.google.config import GoogleConfigFormat
 
-from .options import text_message
+from .state_options import text_message
 
 
 # pylint: disable=too-few-public-methods
-class GoogleHistoryFormatter(ApiHistoryFormatterBase[
+class GoogleMessagesFormatter(ApiMessagesFormatterBase[
     ContentUnionDict,
     PartDict,
     PartDict,

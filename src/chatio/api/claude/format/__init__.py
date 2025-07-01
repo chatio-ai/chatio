@@ -14,9 +14,9 @@ from chatio.core.format import ApiFormat
 from chatio.api.claude.params import ClaudeStateOptions
 from chatio.api.claude.config import ClaudeConfigFormat
 
-from .history import ClaudeHistoryFormatter
-from .options import ClaudeOptionsFormatter
-from .tooling import ClaudeToolingFormatter
+from .state_messages import ClaudeMessagesFormatter
+from .state_options import ClaudeOptionsFormatter
+from .tools import ClaudeToolsFormatter
 
 
 # pylint: disable=too-few-public-methods
@@ -30,8 +30,8 @@ class ClaudeFormat(ApiFormat[
 
     @property
     @override
-    def _history_formatter(self) -> ClaudeHistoryFormatter:
-        return ClaudeHistoryFormatter(self._config)
+    def _messages_formatter(self) -> ClaudeMessagesFormatter:
+        return ClaudeMessagesFormatter(self._config)
 
     @property
     @override
@@ -40,5 +40,5 @@ class ClaudeFormat(ApiFormat[
 
     @property
     @override
-    def _tooling_formatter(self) -> ClaudeToolingFormatter:
-        return ClaudeToolingFormatter(self._config)
+    def _tools_formatter(self) -> ClaudeToolsFormatter:
+        return ClaudeToolsFormatter(self._config)

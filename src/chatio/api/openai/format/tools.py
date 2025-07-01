@@ -7,13 +7,13 @@ from openai.types.chat import ChatCompletionToolChoiceOptionParam
 from openai import NotGiven, NOT_GIVEN
 
 
-from chatio.core.format.tooling import ApiToolingFormatterBase
+from chatio.core.format.tools import ApiToolsFormatterBase
 
 from chatio.api.openai.config import OpenAIConfigFormat
 
 
 # pylint: disable=too-few-public-methods
-class OpenAIToolingFormatter(ApiToolingFormatterBase[
+class OpenAIToolsFormatter(ApiToolsFormatterBase[
     list[ChatCompletionToolParam] | NotGiven,
     ChatCompletionToolParam,
     ChatCompletionToolChoiceOptionParam | NotGiven,

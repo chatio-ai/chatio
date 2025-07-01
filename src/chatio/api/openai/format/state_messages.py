@@ -10,11 +10,11 @@ from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
 from openai.types.chat.chat_completion_content_part_param import File
 
-from chatio.core.format.history import ApiHistoryFormatterBase
+from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.openai.config import OpenAIConfigFormat
 
-from .options import text_message
+from .state_options import text_message
 
 
 type _ChatCompletionContentPartParam = \
@@ -22,7 +22,7 @@ type _ChatCompletionContentPartParam = \
 
 
 # pylint: disable=too-few-public-methods
-class OpenAIHistoryFormatter(ApiHistoryFormatterBase[
+class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
     ChatCompletionMessageParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,

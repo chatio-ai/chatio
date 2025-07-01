@@ -7,13 +7,13 @@ from anthropic.types import ToolChoiceParam
 from anthropic import NotGiven, NOT_GIVEN
 
 
-from chatio.core.format.tooling import ApiToolingFormatterBase
+from chatio.core.format.tools import ApiToolsFormatterBase
 
 from chatio.api.claude.config import ClaudeConfigFormat
 
 
 # pylint: disable=too-few-public-methods
-class ClaudeToolingFormatter(ApiToolingFormatterBase[
+class ClaudeToolsFormatter(ApiToolsFormatterBase[
     list[ToolParam] | NotGiven,
     ToolParam,
     ToolChoiceParam | NotGiven,

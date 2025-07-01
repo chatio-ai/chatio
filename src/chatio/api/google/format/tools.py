@@ -8,13 +8,13 @@ from google.genai.types import ToolListUnionDict
 from google.genai.types import FunctionCallingConfigMode
 from google.genai.types import FunctionDeclarationDict
 
-from chatio.core.format.tooling import ApiToolingFormatterBase
+from chatio.core.format.tools import ApiToolsFormatterBase
 
 from chatio.api.google.config import GoogleConfigFormat
 
 
 # pylint: disable=too-few-public-methods
-class GoogleToolingFormatter(ApiToolingFormatterBase[
+class GoogleToolsFormatter(ApiToolsFormatterBase[
     ToolListUnionDict | None,
     FunctionDeclarationDict,
     ToolConfigDict | None,

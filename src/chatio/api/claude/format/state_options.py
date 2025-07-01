@@ -8,7 +8,7 @@ from anthropic import NotGiven, NOT_GIVEN
 
 from chatio.core.models import StateOptions
 
-from chatio.core.format.options import ApiOptionsFormatterBase
+from chatio.core.format.state_options import ApiOptionsFormatterBase
 
 from chatio.api.claude.params import ClaudeStateOptions
 from chatio.api.claude.config import ClaudeConfigFormat

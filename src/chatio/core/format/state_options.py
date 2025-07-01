@@ -8,7 +8,7 @@ from chatio.core.models import StateOptions
 from chatio.core.params import ApiStateOptions
 from chatio.core.config import ApiConfigFormat
 
-from ._common import ApiFormatBase
+from ._base import ApiFormatBase
 
 
 # pylint: disable=too-few-public-methods

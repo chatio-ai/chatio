@@ -15,11 +15,11 @@ from chatio.core.models import ContentEntry
 
 from chatio.core.config import ApiConfigFormat
 
-from ._common import ApiFormatBase
+from ._base import ApiFormatBase
 
 
 # pylint: disable=too-few-public-methods
-class ApiHistoryFormatterBase[
+class ApiMessagesFormatterBase[
     MessageContentT,
     TextMessageT,
     ImageDocumentT,
@@ -98,7 +98,7 @@ class ApiHistoryFormatterBase[
 
 
 # pylint: disable=too-few-public-methods
-class ApiHistoryFormatter[MessageContentT](Protocol):
+class ApiMessagesFormatter[MessageContentT](Protocol):
 
     @abstractmethod
     def format(self, messages: list[ContentEntry]) -> list[MessageContentT]:

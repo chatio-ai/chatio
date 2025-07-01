@@ -10,11 +10,11 @@ from chatio.core.models import ChatTools
 from chatio.core.params import ApiToolsOptions
 from chatio.core.config import ApiConfigFormat
 
-from ._common import ApiFormatBase
+from ._base import ApiFormatBase
 
 
 # pylint: disable=too-few-public-methods
-class ApiToolingFormatterBase[
+class ApiToolsFormatterBase[
     ToolDefinitionsT,
     ToolSchemaT,
     ToolChoiceT,
@@ -93,7 +93,7 @@ class ApiToolingFormatterBase[
 
 
 # pylint: disable=too-few-public-methods
-class ApiToolingFormatter[
+class ApiToolsFormatter[
     ToolDefinitionsT,
     ToolChoiceT,
 ](Protocol):

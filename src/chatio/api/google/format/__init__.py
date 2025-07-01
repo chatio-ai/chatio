@@ -12,9 +12,9 @@ from chatio.core.format import ApiFormat
 from chatio.api.google.params import GoogleStateOptions
 from chatio.api.google.config import GoogleConfigFormat
 
-from .history import GoogleHistoryFormatter
-from .options import GoogleOptionsFormatter
-from .tooling import GoogleToolingFormatter
+from .state_messages import GoogleMessagesFormatter
+from .state_options import GoogleOptionsFormatter
+from .tools import GoogleToolsFormatter
 
 
 # pylint: disable=too-few-public-methods
@@ -28,8 +28,8 @@ class GoogleFormat(ApiFormat[
 
     @property
     @override
-    def _history_formatter(self) -> GoogleHistoryFormatter:
-        return GoogleHistoryFormatter(self._config)
+    def _messages_formatter(self) -> GoogleMessagesFormatter:
+        return GoogleMessagesFormatter(self._config)
 
     @property
     @override
@@ -38,5 +38,5 @@ class GoogleFormat(ApiFormat[
 
     @property
     @override
-    def _tooling_formatter(self) -> GoogleToolingFormatter:
-        return GoogleToolingFormatter(self._config)
+    def _tools_formatter(self) -> GoogleToolsFormatter:
+        return GoogleToolsFormatter(self._config)

@@ -8,11 +8,11 @@ from chatio.core.params import ApiStateOptions
 from chatio.core.params import ApiParams
 from chatio.core.config import ApiConfigFormat
 
-from ._common import ApiFormatBase
+from ._base import ApiFormatBase
 
-from .history import ApiHistoryFormatter
-from .options import ApiOptionsFormatter
-from .tooling import ApiToolingFormatter
+from .state_messages import ApiMessagesFormatter
+from .state_options import ApiOptionsFormatter
+from .tools import ApiToolsFormatter
 
 
 # pylint: disable=too-few-public-methods
@@ -28,7 +28,7 @@ class ApiFormat[
 
     @property
     @abstractmethod
-    def _history_formatter(self) -> ApiHistoryFormatter[MessageContentT]:
+    def _messages_formatter(self) -> ApiMessagesFormatter[MessageContentT]:
         ...
 
     @property
@@ -38,7 +38,7 @@ class ApiFormat[
 
     @property
     @abstractmethod
-    def _tooling_formatter(self) -> ApiToolingFormatter[ToolDefinitionsT, ToolChoiceT]:
+    def _tools_formatter(self) -> ApiToolsFormatter[ToolDefinitionsT, ToolChoiceT]:
         ...
 
     def format(self, state: ChatState, tools: ChatTools) -> ApiParams[
@@ -48,7 +48,7 @@ class ApiFormat[
         ToolChoiceT,
     ]:
         return ApiParams(
-            messages=self._history_formatter.format(state.messages),
+            messages=self._messages_formatter.format(state.messages),
             options=self._options_formatter.format(state.options),
-            tools=self._tooling_formatter.format(tools),
+            tools=self._tools_formatter.format(tools),
         )

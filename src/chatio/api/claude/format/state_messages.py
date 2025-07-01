@@ -12,11 +12,11 @@ from anthropic.types import DocumentBlockParam
 from anthropic.types import ToolUseBlockParam
 from anthropic.types import ToolResultBlockParam
 
-from chatio.core.format.history import ApiHistoryFormatterBase
+from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.claude.config import ClaudeConfigFormat
 
-from .options import text_message
+from .state_options import text_message
 
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
@@ -25,7 +25,7 @@ type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
 
 # pylint: disable=too-few-public-methods
-class ClaudeHistoryFormatter(ApiHistoryFormatterBase[
+class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
     MessageParam,
     TextBlockParam,
     ImageBlockParam,
