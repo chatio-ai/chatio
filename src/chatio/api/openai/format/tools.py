@@ -6,6 +6,7 @@ from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 from openai import NotGiven, NOT_GIVEN
 
+from chatio.core.models import ToolSchema
 
 from chatio.core.format.tools import ApiToolsFormatterBase
 
@@ -41,13 +42,13 @@ class OpenAIToolsFormatter(ApiToolsFormatterBase[
         return _params
 
     @override
-    def _tool_schema(self, name: str, desc: str, params: dict) -> ChatCompletionToolParam:
-        _params = self._tool_params_schema(params)
+    def _tool_schema(self, tool: ToolSchema) -> ChatCompletionToolParam:
+        _params = self._tool_params_schema(tool.params)
         return {
             "type": "function",
             "function": {
-                "name": name,
-                "description": desc,
+                "name": tool.name,
+                "description": tool.desc,
                 "parameters": _params,
                 "strict": True,
             },

@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 
 from typing import Protocol
 
+from chatio.core.models import ToolSchema
 from chatio.core.models import ToolChoice
 
 from chatio.core.models import ChatTools
@@ -25,7 +26,7 @@ class ApiToolsFormatterBase[
 ):
 
     @abstractmethod
-    def _tool_schema(self, name: str, desc: str, params: dict) -> ToolSchemaT:
+    def _tool_schema(self, tool: ToolSchema) -> ToolSchemaT:
         ...
 
     @abstractmethod
@@ -83,7 +84,7 @@ class ApiToolsFormatterBase[
     ]:
         _tool_defs = None
         if tools.tools is not None:
-            _tool_defs = [self._tool_schema(tool.name, tool.desc, tool.schema) for tool in tools.tools]
+            _tool_defs = [self._tool_schema(tool) for tool in tools.tools]
 
         _tools = self._tool_definitions(_tool_defs)
 

@@ -12,6 +12,13 @@ from anthropic.types import DocumentBlockParam
 from anthropic.types import ToolUseBlockParam
 from anthropic.types import ToolResultBlockParam
 
+
+from chatio.core.models import TextMessage
+from chatio.core.models import CallRequest
+from chatio.core.models import CallResponse
+from chatio.core.models import ImageDocument
+from chatio.core.models import TextDocument
+
 from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.claude.config import ClaudeConfigFormat
@@ -22,10 +29,10 @@ type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
 type _OutputContentBlockParam = _ContentBlockParamBase | ToolUseBlockParam
 
 
-def message_text(text: str) -> TextBlockParam:
+def message_text(msg: TextMessage) -> TextBlockParam:
     return {
         "type": "text",
-        "text": text,
+        "text": msg.text,
     }
 
 
@@ -72,8 +79,8 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
         return self._setup_messages_cache(messages)
 
     @override
-    def _message_text(self, text: str) -> TextBlockParam:
-        return message_text(text)
+    def _message_text(self, msg: TextMessage) -> TextBlockParam:
+        return message_text(msg)
 
     @override
     def _input_content(self, content: _InputContentBlockParam) -> MessageParam:
@@ -90,44 +97,44 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
         }
 
     @override
-    def _call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> MessageParam:
+    def _call_request(self, req: CallRequest) -> MessageParam:
         return self._output_content({
             "type": "tool_use",
-            "id": tool_call_id,
-            "name": tool_name,
-            "input": tool_input,
+            "id": req.tool_call_id,
+            "name": req.tool_name,
+            "input": req.tool_input,
         })
 
     @override
-    def _call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> MessageParam:
+    def _call_response(self, resp: CallResponse) -> MessageParam:
         return self._input_content({
             "type": "tool_result",
-            "tool_use_id": tool_call_id,
-            "content": tool_output,
+            "tool_use_id": resp.tool_call_id,
+            "content": resp.tool_output,
         })
 
     @override
-    def _image_document_blob(self, blob: bytes, mimetype: str) -> ImageBlockParam:
-        match mimetype:
+    def _image_document_blob(self, doc: ImageDocument) -> ImageBlockParam:
+        match doc.mimetype:
             case 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp':
                 pass
             case _:
                 raise ValueError
 
-        data = base64.b64encode(blob).decode('ascii')
+        data = base64.b64encode(doc.blob).decode('ascii')
 
         return {
             "type": "image",
             "source": {
                 "type": "base64",
-                "media_type": mimetype,
+                "media_type": doc.mimetype,
                 "data": data,
             },
         }
 
     @override
-    def _text_document_text(self, text: str, mimetype: str) -> DocumentBlockParam:
-        match mimetype:
+    def _text_document_text(self, doc: TextDocument) -> DocumentBlockParam:
+        match doc.mimetype:
             case 'text/plain':
                 pass
             case _:
@@ -138,6 +145,6 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
             "source": {
                 "type": "text",
                 "media_type": "text/plain",
-                "data": text,
+                "data": doc.text,
             },
         }

@@ -2,12 +2,13 @@
 from typing import override
 
 from openai.types.chat import ChatCompletionMessageParam
-from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionPredictionContentParam
 
 from openai import NotGiven, NOT_GIVEN
 
 
+from chatio.core.models import SystemMessage
+from chatio.core.models import PredictionMessage
 from chatio.core.models import ChatStateOptions
 
 from chatio.core.format.state_options import ApiOptionsFormatterBase
@@ -24,30 +25,27 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
     OpenAIConfigFormat,
 ]):
 
-    def _prediction_message(
-        self, content: ChatCompletionContentPartTextParam | None,
-    ) -> ChatCompletionPredictionContentParam | NotGiven:
+    def _prediction_message(self, msg: PredictionMessage | None) -> ChatCompletionPredictionContentParam | NotGiven:
 
         if not self._config.prediction:
             return NOT_GIVEN
 
-        if content is None:
+        if msg is None:
             return NOT_GIVEN
+
+        content = message_text(msg)
 
         return {
             "type": "content",
             "content": [content],
         }
 
-    def _system_message(
-        self, content: ChatCompletionContentPartTextParam | None,
-    ) -> list[ChatCompletionMessageParam]:
+    def _system_message(self, msg: SystemMessage | None) -> list[ChatCompletionMessageParam]:
 
-        if content is None:
+        if msg is None:
             return []
 
-        if content['type'] != 'text':
-            raise TypeError
+        content = message_text(msg)
 
         if self._config.legacy:
             return [{
@@ -62,14 +60,7 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
 
     @override
     def format(self, options: ChatStateOptions) -> OpenAIStateOptions:
-
-        text = None if options.system is None else message_text(options.system.text)
-        _system = self._system_message(text)
-
-        text = None if options.prediction is None else message_text(options.prediction.text)
-        _prediction = self._prediction_message(text)
-
         return OpenAIStateOptions(
-            system=_system,
-            prediction=_prediction,
+            system=self._system_message(options.system),
+            prediction=self._prediction_message(options.prediction),
         )

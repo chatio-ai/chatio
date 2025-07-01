@@ -62,7 +62,7 @@ class TextDocument(MessageContent):
 class ToolSchema:
     name: str
     desc: str
-    schema: dict
+    params: dict
 
 
 @dataclass

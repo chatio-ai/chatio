@@ -6,6 +6,7 @@ from anthropic.types import ToolChoiceParam
 
 from anthropic import NotGiven, NOT_GIVEN
 
+from chatio.core.models import ToolSchema
 
 from chatio.core.format.tools import ApiToolsFormatterBase
 
@@ -33,11 +34,11 @@ class ClaudeToolsFormatter(ApiToolsFormatterBase[
         return entries
 
     @override
-    def _tool_schema(self, name: str, desc: str, params: dict) -> ToolParam:
+    def _tool_schema(self, tool: ToolSchema) -> ToolParam:
         return {
-            "name": name,
-            "description": desc,
-            "input_schema": params,
+            "name": tool.name,
+            "description": tool.desc,
+            "input_schema": tool.params,
         }
 
     @override

@@ -6,6 +6,7 @@ from anthropic.types import TextBlockParam
 from anthropic import NotGiven, NOT_GIVEN
 
 
+from chatio.core.models import SystemMessage
 from chatio.core.models import ChatStateOptions
 
 from chatio.core.format.state_options import ApiOptionsFormatterBase
@@ -22,9 +23,11 @@ class ClaudeOptionsFormatter(ApiOptionsFormatterBase[
     ClaudeConfigFormat,
 ]):
 
-    def _system_message(self, content: TextBlockParam | None) -> list[TextBlockParam] | NotGiven:
-        if content is None:
+    def _system_message(self, msg: SystemMessage | None) -> list[TextBlockParam] | NotGiven:
+        if msg is None:
             return NOT_GIVEN
+
+        content = message_text(msg)
 
         if self._config.use_cache:
             content.update({
@@ -37,10 +40,6 @@ class ClaudeOptionsFormatter(ApiOptionsFormatterBase[
 
     @override
     def format(self, options: ChatStateOptions) -> ClaudeStateOptions:
-
-        text = None if options.system is None else message_text(options.system.text)
-        _system = self._system_message(text)
-
         return ClaudeStateOptions(
-            system=_system,
+            system=self._system_message(options.system),
         )

@@ -5,14 +5,21 @@ from google.genai.types import ContentDict
 from google.genai.types import ContentUnionDict
 from google.genai.types import PartDict
 
+
+from chatio.core.models import TextMessage
+from chatio.core.models import CallRequest
+from chatio.core.models import CallResponse
+from chatio.core.models import ImageDocument
+from chatio.core.models import TextDocument
+
 from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.google.config import GoogleConfigFormat
 
 
-def message_text(text: str) -> PartDict:
+def message_text(msg: TextMessage) -> PartDict:
     return {
-        "text": text,
+        "text": msg.text,
     }
 
 
@@ -30,8 +37,8 @@ class GoogleMessagesFormatter(ApiMessagesFormatterBase[
         return messages
 
     @override
-    def _message_text(self, text: str) -> PartDict:
-        return message_text(text)
+    def _message_text(self, msg: TextMessage) -> PartDict:
+        return message_text(msg)
 
     @override
     def _input_content(self, content: PartDict) -> ContentDict:
@@ -48,50 +55,50 @@ class GoogleMessagesFormatter(ApiMessagesFormatterBase[
         }
 
     @override
-    def _call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> ContentDict:
-        if not isinstance(tool_input, dict):
+    def _call_request(self, req: CallRequest) -> ContentDict:
+        if not isinstance(req.tool_input, dict):
             raise TypeError
 
         return {
             "role": "model",
             "parts": [{
                 "function_call": {
-                    "id": tool_call_id,
-                    "name": tool_name,
-                    "args": tool_input,
+                    "id": req.tool_call_id,
+                    "name": req.tool_name,
+                    "args": req.tool_input,
                 },
             }],
         }
 
     @override
-    def _call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> ContentDict:
+    def _call_response(self, resp: CallResponse) -> ContentDict:
         return {
             "role": "user",
             "parts": [{
                 "function_response": {
-                    "id": tool_call_id,
-                    "name": tool_name,
+                    "id": resp.tool_call_id,
+                    "name": resp.tool_name,
                     "response": {
-                        "output": tool_output,
+                        "output": resp.tool_output,
                     },
                 },
             }],
         }
 
     @override
-    def _image_document_blob(self, blob: bytes, mimetype: str) -> PartDict:
+    def _image_document_blob(self, doc: ImageDocument) -> PartDict:
         return {
             "inline_data": {
-                "mime_type": mimetype,
-                "data": blob,
+                "mime_type": doc.mimetype,
+                "data": doc.blob,
             },
         }
 
     @override
-    def _text_document_text(self, text: str, mimetype: str) -> PartDict:
+    def _text_document_text(self, doc: TextDocument) -> PartDict:
         return {
             "inline_data": {
-                "mime_type": mimetype,
-                "data": text.encode(),
+                "mime_type": doc.mimetype,
+                "data": doc.text.encode(),
             },
         }

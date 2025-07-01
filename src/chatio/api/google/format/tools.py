@@ -8,6 +8,8 @@ from google.genai.types import ToolListUnionDict
 from google.genai.types import FunctionCallingConfigMode
 from google.genai.types import FunctionDeclarationDict
 
+from chatio.core.models import ToolSchema
+
 from chatio.core.format.tools import ApiToolsFormatterBase
 
 from chatio.api.google.config import GoogleConfigFormat
@@ -25,14 +27,14 @@ class GoogleToolsFormatter(ApiToolsFormatterBase[
         return True
 
     @override
-    def _tool_schema(self, name: str, desc: str, params: dict) -> FunctionDeclarationDict:
-        if not self._is_tool_params_schema(params):
+    def _tool_schema(self, tool: ToolSchema) -> FunctionDeclarationDict:
+        if not self._is_tool_params_schema(tool.params):
             raise TypeError
 
         return {
-            "name": name,
-            "description": desc,
-            "parameters": params,
+            "name": tool.name,
+            "description": tool.desc,
+            "parameters": tool.params,
         }
 
     @override

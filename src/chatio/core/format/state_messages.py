@@ -5,6 +5,7 @@ from typing import Protocol
 
 from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
+from chatio.core.models import TextMessage
 
 from chatio.core.models import ImageDocument
 from chatio.core.models import TextDocument
@@ -35,62 +36,62 @@ class ApiMessagesFormatterBase[
         ...
 
     @abstractmethod
-    def _message_text(self, text: str) -> MessageTextT:
+    def _message_text(self, msg: TextMessage) -> MessageTextT:
         ...
 
     @abstractmethod
     def _input_content(self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
         ...
 
-    def _input_message(self, message: str) -> MessageContentT:
-        return self._input_content(self._message_text(message))
+    def _input_message(self, msg: InputMessage) -> MessageContentT:
+        return self._input_content(self._message_text(msg))
 
     @abstractmethod
     def _output_content(self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
         ...
 
-    def _output_message(self, message: str) -> MessageContentT:
-        return self._output_content(self._message_text(message))
+    def _output_message(self, msg: OutputMessage) -> MessageContentT:
+        return self._output_content(self._message_text(msg))
 
     @abstractmethod
-    def _call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> MessageContentT:
+    def _call_request(self, req: CallRequest) -> MessageContentT:
         ...
 
     @abstractmethod
-    def _call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> MessageContentT:
+    def _call_response(self, resp: CallResponse) -> MessageContentT:
         ...
 
     @abstractmethod
-    def _image_document_blob(self, blob: bytes, mimetype: str) -> ImageDocumentT:
+    def _image_document_blob(self, doc: ImageDocument) -> ImageDocumentT:
         ...
 
-    def _image_document(self, blob: bytes, mimetype: str) -> MessageContentT:
-        return self._input_content(self._image_document_blob(blob, mimetype))
+    def _image_document(self, doc: ImageDocument) -> MessageContentT:
+        return self._input_content(self._image_document_blob(doc))
 
     @abstractmethod
-    def _text_document_text(self, text: str, mimetype: str) -> TextDocumentT:
+    def _text_document_text(self, doc: TextDocument) -> TextDocumentT:
         ...
 
-    def _text_document(self, text: str, mimetype: str) -> MessageContentT:
-        return self._input_content(self._text_document_text(text, mimetype))
+    def _text_document(self, doc: TextDocument) -> MessageContentT:
+        return self._input_content(self._text_document_text(doc))
 
     def format(self, messages: list[MessageContent]) -> list[MessageContentT]:
         _messages = []
 
         for message in messages:
             match message:
-                case InputMessage(text):
-                    _messages.append(self._input_message(text))
-                case OutputMessage(text):
-                    _messages.append(self._output_message(text))
-                case CallRequest(tool_call_id, tool_name, tool_input):
-                    _messages.append(self._call_request(tool_call_id, tool_name, tool_input))
-                case CallResponse(tool_call_id, tool_name, tool_output):
-                    _messages.append(self._call_response(tool_call_id, tool_name, tool_output))
-                case TextDocument(text, mimetype):
-                    _messages.append(self._text_document(text, mimetype))
-                case ImageDocument(blob, mimetype):
-                    _messages.append(self._image_document(blob, mimetype))
+                case InputMessage():
+                    _messages.append(self._input_message(message))
+                case OutputMessage():
+                    _messages.append(self._output_message(message))
+                case CallRequest():
+                    _messages.append(self._call_request(message))
+                case CallResponse():
+                    _messages.append(self._call_response(message))
+                case ImageDocument():
+                    _messages.append(self._image_document(message))
+                case TextDocument():
+                    _messages.append(self._text_document(message))
                 case _:
                     raise RuntimeError(message)
 

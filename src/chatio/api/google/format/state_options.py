@@ -2,8 +2,8 @@
 from typing import override
 
 from google.genai.types import ContentDict
-from google.genai.types import PartDict
 
+from chatio.core.models import SystemMessage
 from chatio.core.models import ChatStateOptions
 
 from chatio.core.format.state_options import ApiOptionsFormatterBase
@@ -20,20 +20,17 @@ class GoogleOptionsFormatter(ApiOptionsFormatterBase[
     GoogleConfigFormat,
 ]):
 
-    def _system_message(self, content: PartDict | None) -> ContentDict | None:
-        if content is None:
+    def _system_message(self, msg: SystemMessage | None) -> ContentDict | None:
+        if msg is None:
             return None
 
+        content = message_text(msg)
         return {
             "parts": [content],
         }
 
     @override
     def format(self, options: ChatStateOptions) -> GoogleStateOptions:
-
-        text = None if options.system is None else message_text(options.system.text)
-        _system = self._system_message(text)
-
         return GoogleStateOptions(
-            system=_system,
+            system=self._system_message(options.system),
         )

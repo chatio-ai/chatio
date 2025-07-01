@@ -10,6 +10,13 @@ from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
 from openai.types.chat.chat_completion_content_part_param import File
 
+
+from chatio.core.models import TextMessage
+from chatio.core.models import CallRequest
+from chatio.core.models import CallResponse
+from chatio.core.models import ImageDocument
+from chatio.core.models import TextDocument
+
 from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.openai.config import OpenAIConfigFormat
@@ -19,10 +26,10 @@ type _ChatCompletionContentPartParam = \
     ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam | File
 
 
-def message_text(text: str) -> ChatCompletionContentPartTextParam:
+def message_text(msg: TextMessage) -> ChatCompletionContentPartTextParam:
     return {
         "type": "text",
-        "text": text,
+        "text": msg.text,
     }
 
 
@@ -40,8 +47,8 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
         return messages
 
     @override
-    def _message_text(self, text: str) -> ChatCompletionContentPartTextParam:
-        return message_text(text)
+    def _message_text(self, msg: TextMessage) -> ChatCompletionContentPartTextParam:
+        return message_text(msg)
 
     @override
     def _input_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
@@ -67,48 +74,47 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
         }
 
     @override
-    def _call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> ChatCompletionMessageParam:
-        if not isinstance(tool_input, str):
+    def _call_request(self, req: CallRequest) -> ChatCompletionMessageParam:
+        if not isinstance(req.tool_input, str):
             raise TypeError
 
         return {
             "role": "assistant",
             "content": None,
             "tool_calls": [{
-                "id": tool_call_id,
+                "id": req.tool_call_id,
                 "type": "function",
                 "function": {
-                    "name": tool_name,
-                    "arguments": tool_input,
+                    "name": req.tool_name,
+                    "arguments": req.tool_input,
                 },
             }],
         }
 
     @override
-    def _call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> ChatCompletionMessageParam:
+    def _call_response(self, resp: CallResponse) -> ChatCompletionMessageParam:
         return {
             "role": "tool",
-            "tool_call_id": tool_call_id,
-            "content": tool_output,
+            "tool_call_id": resp.tool_call_id,
+            "content": resp.tool_output,
         }
 
     @override
-    def _image_document_blob(self, blob: bytes, mimetype: str) -> ChatCompletionContentPartImageParam:
-        data = base64.b64encode(blob).decode('ascii')
+    def _image_document_blob(self, doc: ImageDocument) -> ChatCompletionContentPartImageParam:
+        data = base64.b64encode(doc.blob).decode('ascii')
 
         return {
             "type": "image_url",
             "image_url": {
-                "url": f"data:{mimetype};base64,{data}",
+                "url": f"data:{doc.mimetype};base64,{data}",
             },
         }
 
     @override
-    def _text_document_text(self, text: str, mimetype: str) -> File:
-        blob = weasyprint.HTML(string=f"<html><body><pre>{text}</pre></body></html>").write_pdf()
+    def _text_document_text(self, doc: TextDocument) -> File:
+        blob = weasyprint.HTML(string=f"<html><body><pre>{doc.text}</pre></body></html>").write_pdf()
         if blob is None:
             raise RuntimeError
-
         data = base64.b64encode(blob).decode('ascii')
 
         mimetype = 'application/pdf'
