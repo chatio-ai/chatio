@@ -69,7 +69,6 @@ class ToolSchema:
 class ToolChoice:
     mode: str | None
     name: str | None
-    tools: list[str]
 
 
 @dataclass

@@ -31,7 +31,9 @@ class ChatTools(_ChatTools):
             _funcs[name] = tool
             _tools.append(ToolSchema(name, desc, schema))
 
-        _tool_choice = ToolChoice(tool_choice_mode, tool_choice_name, list(tools))
+        if tool_choice_name and tool_choice_name not in tools:
+            raise ValueError
+        _tool_choice = ToolChoice(tool_choice_mode, tool_choice_name)
 
         super().__init__(_tools, _tool_choice)
         self.funcs = _funcs

@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 
 from typing import Protocol
 
+from chatio.core.models import ToolChoice
+
 from chatio.core.models import ChatTools
 
 from chatio.core.params import ApiToolsOptions
@@ -50,18 +52,16 @@ class ApiFormatTooling[
     def _tool_choice_name(self, tool_name: str) -> ToolChoiceT:
         ...
 
-    def _tool_choice(
-        self, tool_choice_mode: str | None = None, tool_choice_name: str | None = None, tools: list[str] | None = None,
-    ) -> ToolChoiceT:
+    def _tool_choice(self, tool_choice: ToolChoice | None) -> ToolChoiceT:
 
-        if not tool_choice_mode and not tool_choice_name:
+        if tool_choice is None:
             return self._tool_choice_null()
 
-        if not tools:
-            raise ValueError
+        if not tool_choice.mode and not tool_choice.name:
+            return self._tool_choice_null()
 
-        if not tool_choice_name:
-            match tool_choice_mode:
+        if not tool_choice.name:
+            match tool_choice.mode:
                 case 'none':
                     return self._tool_choice_none()
                 case 'auto':
@@ -71,12 +71,9 @@ class ApiFormatTooling[
                 case _:
                     raise ValueError
         else:
-            if tool_choice_name not in tools:
-                raise ValueError
-
-            match tool_choice_mode:
+            match tool_choice.mode:
                 case 'name':
-                    return self._tool_choice_name(tool_choice_name)
+                    return self._tool_choice_name(tool_choice.name)
                 case _:
                     raise ValueError
 
@@ -90,11 +87,7 @@ class ApiFormatTooling[
 
         _tools = self._tool_definitions(_tool_defs)
 
-        if tools.tool_choice is None:
-            _tool_choice = self._tool_choice(None, None, None)
-        else:
-            _tool_choice = self._tool_choice(
-                tools.tool_choice.mode, tools.tool_choice.name, tools.tool_choice.tools)
+        _tool_choice = self._tool_choice(tools.tool_choice)
 
         return ApiToolsOptions(_tools, _tool_choice)
 
