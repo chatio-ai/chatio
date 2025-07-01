@@ -1,5 +1,4 @@
 
-from chatio.core.config import ModelConfig
 from chatio.core.client import ApiClient
 
 from chatio.api.claude.client import ClaudeClient
@@ -7,16 +6,16 @@ from chatio.api.google.client import GoogleClient
 from chatio.api.openai.client import OpenAIClient
 
 
-def init_client(model: ModelConfig) -> ApiClient:
+def init_client(config: dict) -> ApiClient:
 
-    api = model.config.get('vendor', {}).get('api')
+    api = config.get('vendor', {}).get('api')
     match api:
         case 'claude':
-            return ClaudeClient(model.config)
+            return ClaudeClient(config)
         case 'google':
-            return GoogleClient(model.config)
+            return GoogleClient(config)
         case 'openai':
-            return OpenAIClient(model.config)
+            return OpenAIClient(config)
         case _:
             err_msg = f"api is not supported: {api}"
             raise RuntimeError(err_msg)

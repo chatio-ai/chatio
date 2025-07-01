@@ -3,6 +3,7 @@ import os
 
 
 from chatio.chat.tools import ChatTools
+from chatio.chat import Chat
 
 from toolbelt.shell import ShellCalcTool
 from toolbelt.shell import ShellExecTool
@@ -17,14 +18,16 @@ from toolbelt.image import ImageDumpTool
 from toolbelt.llm import LlmDialogTool
 
 
-def build_tools(tools_name: str | None = None, env_name: str | None = None) -> ChatTools:
-    if tools_name is not None and env_name is not None:
-        raise ValueError
+from .model import build_model
+
+
+def build_tools(tools_name: str | None = None, env_ns: str | None = None) -> ChatTools:
+    _env_ns = "CHATIO"
+    if env_ns is not None:
+        _env_ns = _env_ns + "_" + env_ns
 
     if tools_name is None:
-        if env_name is None:
-            env_name = 'CHATIO_TOOLS_NAME'
-
+        env_name = f"{_env_ns}_TOOLS_NAME"
         tools_name = os.environ.get(env_name)
         if not tools_name:
             tools_name = 'empty'
@@ -50,7 +53,6 @@ def build_tools(tools_name: str | None = None, env_name: str | None = None) -> C
             }
         case 'llmtool':
             llm = build_llm_tool()
-
             tools = {
                 "llm_message": LlmDialogTool(llm),
             }
@@ -63,4 +65,9 @@ def build_tools(tools_name: str | None = None, env_name: str | None = None) -> C
 
 
 def build_llm_tool():
-    raise NotImplementedError
+    _env_ns = "NESTED"
+
+    _model = build_model(env_ns=_env_ns)
+    _tools = build_tools(env_ns=_env_ns)
+
+    return Chat(model=_model, tools=_tools)

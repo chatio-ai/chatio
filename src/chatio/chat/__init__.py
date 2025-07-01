@@ -34,7 +34,7 @@ class Chat:
 
         self._model = model
 
-        self._client = init_client(model)
+        self._client = init_client(model.config)
 
         if state is None:
             state = ChatState()
