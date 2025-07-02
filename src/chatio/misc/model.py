@@ -44,9 +44,8 @@ def _vendor_config_merge(config_defaults: dict, config_override: dict) -> dict:
     return config
 
 
-def vendor_config(model_name: str, config_override: dict) -> ModelConfig:
-    _config_defaults = _vendor_config_parse(model_name)
-    vendor_path, model_name, config_defaults = _config_defaults
+def _vendor_config_setup(
+        vendor_path: str, config_defaults: dict, config_override: dict) -> dict:
 
     config = _vendor_config_merge(config_defaults, config_override)
 
@@ -55,10 +54,14 @@ def vendor_config(model_name: str, config_override: dict) -> ModelConfig:
         vendor_env_ns = vendor_path.rpartition('/')[-1]
     vendor_env_ns = vendor_env_ns.upper()
 
+    config['client'] = config.get('client')
+    if config['client'] is None:
+        config['client'] = {}
+
     config['client'].setdefault('api_key', os.getenv(f"{vendor_env_ns}_API_KEY"))
     config['client'].setdefault('base_url', os.getenv(f"{vendor_env_ns}_BASE_URL"))
 
-    return ModelConfig(vendor_path, model_name, config)
+    return config
 
 
 def build_model(model_name: str | None = None, env_ns: str | None = None) -> ModelConfig:
@@ -74,9 +77,14 @@ def build_model(model_name: str | None = None, env_ns: str | None = None) -> Mod
             raise RuntimeError(err_msg)
 
     env_name = f"{_env_ns}_VENDOR_CONFIG"
-    config_override = os.environ.get(env_name)
-    _config_override = {}
-    if config_override is not None:
-        _config_override = json.loads(config_override)
+    _config_override = os.environ.get(env_name)
+    config_override = {}
+    if _config_override is not None:
+        config_override = json.loads(_config_override)
 
-    return vendor_config(model_name, _config_override)
+    _config_defaults = _vendor_config_parse(model_name)
+    vendor_path, model_name, config_defaults = _config_defaults
+
+    config = _vendor_config_setup(vendor_path, config_defaults, config_override)
+
+    return ModelConfig(vendor_path, model_name, config)
