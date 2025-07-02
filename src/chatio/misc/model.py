@@ -35,13 +35,20 @@ def _vendor_config_parse(model_name: str) -> tuple[str, str, dict]:
     return config
 
 
-def vendor_config(model_name: str, config_override: dict) -> ModelConfig:
-    _config_defaults = _vendor_config_parse(model_name)
-    vendor_path, model_name, config_defaults = _config_defaults
+def _vendor_config_merge(config_defaults: dict, config_override: dict) -> dict:
 
     config = config_defaults | config_override
     config['format'] = config_defaults.get('format', {}) | config_override.get('format', {})
     config['client'] = config_defaults.get('client', {}) | config_override.get('client', {})
+
+    return config
+
+
+def vendor_config(model_name: str, config_override: dict) -> ModelConfig:
+    _config_defaults = _vendor_config_parse(model_name)
+    vendor_path, model_name, config_defaults = _config_defaults
+
+    config = _vendor_config_merge(config_defaults, config_override)
 
     vendor_env_ns = config.get('env_ns')
     if vendor_env_ns is None:
