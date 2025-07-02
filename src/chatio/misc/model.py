@@ -35,32 +35,23 @@ def _vendor_config_parse(model_name: str) -> tuple[str, str, dict]:
     return config
 
 
-def vendor_config(model_name: str, config_override: dict | None = None) -> ModelConfig:
-    if config_override is None:
-        config_override = {}
+def vendor_config(model_name: str, config_override: dict) -> ModelConfig:
+    _config_defaults = _vendor_config_parse(model_name)
+    vendor_path, model_name, config_defaults = _config_defaults
 
-    config_client_override = config_override.pop('client', {})
-    config_format_override = config_override.pop('format', {})
+    config = config_defaults | config_override
+    config['format'] = config_defaults.get('format', {}) | config_override.get('format', {})
+    config['client'] = config_defaults.get('client', {}) | config_override.get('client', {})
 
-    config = _vendor_config_parse(model_name)
-
-    _vendor_path, _model_name, _config = config
-    _config.update(config_override)
-
-    vendor_env_ns = _config.get('env_ns')
+    vendor_env_ns = config.get('env_ns')
     if vendor_env_ns is None:
-        vendor_env_ns = _vendor_path.rpartition('/')[-1]
+        vendor_env_ns = vendor_path.rpartition('/')[-1]
     vendor_env_ns = vendor_env_ns.upper()
 
-    _config_client = _config.setdefault('client', {})
-    _config_client.setdefault('api_key', os.getenv(f"{vendor_env_ns}_API_KEY"))
-    _config_client.setdefault('base_url', os.getenv(f"{vendor_env_ns}_BASE_URL"))
-    _config_client.update(config_client_override)
+    config['client'].setdefault('api_key', os.getenv(f"{vendor_env_ns}_API_KEY"))
+    config['client'].setdefault('base_url', os.getenv(f"{vendor_env_ns}_BASE_URL"))
 
-    _config_format = _config.setdefault('format', {})
-    _config_format.update(config_format_override)
-
-    return ModelConfig(_vendor_path, _model_name, _config)
+    return ModelConfig(vendor_path, model_name, config)
 
 
 def build_model(model_name: str | None = None, env_ns: str | None = None) -> ModelConfig:
@@ -77,6 +68,8 @@ def build_model(model_name: str | None = None, env_ns: str | None = None) -> Mod
 
     env_name = f"{_env_ns}_VENDOR_CONFIG"
     config_override = os.environ.get(env_name)
-    _config_override = json.loads(config_override) if config_override is not None else None
+    _config_override = {}
+    if config_override is not None:
+        _config_override = json.loads(config_override)
 
     return vendor_config(model_name, _config_override)
