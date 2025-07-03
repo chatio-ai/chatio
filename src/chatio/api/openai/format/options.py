@@ -4,7 +4,7 @@ from typing import override
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionPredictionContentParam
 
-from chatio.core.models import ContentEntry
+from chatio.core.models import ChatOptions
 from chatio.core.models import PredictMessage
 
 from chatio.core.format.options import ApiFormatOptions
@@ -38,14 +38,14 @@ class OpenAIFormatOptions(ApiFormatOptions[
         return ['prediction']
 
     @override
-    def format(self, options: dict[str, ContentEntry | None]) -> OpenAIParamsOptions:
+    def format(self, options: ChatOptions) -> OpenAIParamsOptions:
         _options: OpenAIParamsOptions = {}
 
-        for name, value in options.items():
-            match name:
-                case 'prediction' if isinstance(value, PredictMessage):
+        for option in options.values():
+            match option:
+                case PredictMessage(text):
                     if self._config.options.prediction:
-                        _options['prediction'] = self.prediction_content(self.text_message(value.text))
+                        _options.update({'prediction': self.prediction_content(self.text_message(text))})
                 case _:
                     pass
 

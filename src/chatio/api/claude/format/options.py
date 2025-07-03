@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.core.models import ContentEntry
+from chatio.core.models import ChatOptions
 
 from chatio.core.format.options import ApiFormatOptions
 
@@ -19,5 +19,5 @@ class ClaudeFormatOptions(ApiFormatOptions[
         return []
 
     @override
-    def format(self, options: dict[str, ContentEntry | None]) -> ApiParamsOptions:
+    def format(self, options: ChatOptions) -> ApiParamsOptions:
         return ApiParamsOptions()

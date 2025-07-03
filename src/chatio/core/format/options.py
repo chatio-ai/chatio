@@ -1,7 +1,7 @@
 
 from abc import ABC, abstractmethod
 
-from chatio.core.models import ContentEntry
+from chatio.core.models import ChatOptions
 
 from chatio.core.params import ApiParamsOptions
 from chatio.core.config import ApiConfig
@@ -22,5 +22,5 @@ class ApiFormatOptions[
         ...
 
     @abstractmethod
-    def format(self, options: dict[str, ContentEntry | None]) -> ApiParamsOptionsT:
+    def format(self, options: ChatOptions) -> ApiParamsOptionsT:
         ...

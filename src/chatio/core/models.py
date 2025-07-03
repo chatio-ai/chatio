@@ -72,11 +72,14 @@ class ToolChoice:
     tools: list[str]
 
 
+type ChatOptions = dict[type[ContentEntry], ContentEntry]
+
+
 @dataclass
 class ChatState:
     system: SystemMessage | None = None
     messages: list[ContentEntry] = field(default_factory=list)
-    options: dict[str, ContentEntry | None] = field(default_factory=dict)
+    options: ChatOptions = field(default_factory=dict)
 
 
 @dataclass
