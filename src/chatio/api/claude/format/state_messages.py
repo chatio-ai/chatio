@@ -16,7 +16,7 @@ from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.claude.config import ClaudeConfigFormat
 
-from .state_options import text_message
+from .state_options import message_text
 
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
@@ -67,44 +67,8 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
         return self._setup_messages_cache(messages)
 
     @override
-    def _text_message(self, text: str) -> TextBlockParam:
-        return text_message(text)
-
-    @override
-    def _image_document_blob(self, blob: bytes, mimetype: str) -> ImageBlockParam:
-        match mimetype:
-            case 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp':
-                pass
-            case _:
-                raise ValueError
-
-        data = base64.b64encode(blob).decode('ascii')
-
-        return {
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": mimetype,
-                "data": data,
-            },
-        }
-
-    @override
-    def _text_document_chunk(self, text: str, mimetype: str) -> DocumentBlockParam:
-        match mimetype:
-            case 'text/plain':
-                pass
-            case _:
-                raise ValueError
-
-        return {
-            "type": "document",
-            "source": {
-                "type": "text",
-                "media_type": "text/plain",
-                "data": text,
-            },
-        }
+    def _message_text(self, text: str) -> TextBlockParam:
+        return message_text(text)
 
     @override
     def _input_content(self, content: _InputContentBlockParam) -> MessageParam:
@@ -136,3 +100,39 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
             "tool_use_id": tool_call_id,
             "content": tool_output,
         })
+
+    @override
+    def _image_document_blob(self, blob: bytes, mimetype: str) -> ImageBlockParam:
+        match mimetype:
+            case 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp':
+                pass
+            case _:
+                raise ValueError
+
+        data = base64.b64encode(blob).decode('ascii')
+
+        return {
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": mimetype,
+                "data": data,
+            },
+        }
+
+    @override
+    def _text_document_text(self, text: str, mimetype: str) -> DocumentBlockParam:
+        match mimetype:
+            case 'text/plain':
+                pass
+            case _:
+                raise ValueError
+
+        return {
+            "type": "document",
+            "source": {
+                "type": "text",
+                "media_type": "text/plain",
+                "data": text,
+            },
+        }

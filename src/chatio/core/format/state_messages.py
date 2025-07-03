@@ -11,7 +11,7 @@ from chatio.core.models import TextDocument
 from chatio.core.models import CallResponse
 from chatio.core.models import CallRequest
 
-from chatio.core.models import ContentEntry
+from chatio.core.models import MessageContent
 
 from chatio.core.config import ApiConfigFormat
 
@@ -21,7 +21,7 @@ from ._base import ApiFormatBase
 # pylint: disable=too-few-public-methods
 class ApiMessagesFormatterBase[
     MessageContentT,
-    TextMessageT,
+    MessageTextT,
     ImageDocumentT,
     TextDocumentT,
     ApiConfigFormatT: ApiConfigFormat,
@@ -35,30 +35,22 @@ class ApiMessagesFormatterBase[
         ...
 
     @abstractmethod
-    def _text_message(self, text: str) -> TextMessageT:
+    def _message_text(self, text: str) -> MessageTextT:
         ...
 
     @abstractmethod
-    def _text_document_chunk(self, text: str, mimetype: str) -> TextDocumentT:
-        ...
-
-    @abstractmethod
-    def _image_document_blob(self, blob: bytes, mimetype: str) -> ImageDocumentT:
-        ...
-
-    @abstractmethod
-    def _input_content(self, content: TextMessageT | ImageDocumentT | TextDocumentT) -> MessageContentT:
+    def _input_content(self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
         ...
 
     def _input_message(self, message: str) -> MessageContentT:
-        return self._input_content(self._text_message(message))
+        return self._input_content(self._message_text(message))
 
     @abstractmethod
-    def _output_content(self, content: TextMessageT | ImageDocumentT | TextDocumentT) -> MessageContentT:
+    def _output_content(self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
         ...
 
     def _output_message(self, message: str) -> MessageContentT:
-        return self._output_content(self._text_message(message))
+        return self._output_content(self._message_text(message))
 
     @abstractmethod
     def _call_request(self, tool_call_id: str, tool_name: str, tool_input: object) -> MessageContentT:
@@ -68,13 +60,21 @@ class ApiMessagesFormatterBase[
     def _call_response(self, tool_call_id: str, tool_name: str, tool_output: str) -> MessageContentT:
         ...
 
+    @abstractmethod
+    def _image_document_blob(self, blob: bytes, mimetype: str) -> ImageDocumentT:
+        ...
+
     def _image_document(self, blob: bytes, mimetype: str) -> MessageContentT:
         return self._input_content(self._image_document_blob(blob, mimetype))
 
-    def _text_document(self, text: str, mimetype: str) -> MessageContentT:
-        return self._input_content(self._text_document_chunk(text, mimetype))
+    @abstractmethod
+    def _text_document_text(self, text: str, mimetype: str) -> TextDocumentT:
+        ...
 
-    def format(self, messages: list[ContentEntry]) -> list[MessageContentT]:
+    def _text_document(self, text: str, mimetype: str) -> MessageContentT:
+        return self._input_content(self._text_document_text(text, mimetype))
+
+    def format(self, messages: list[MessageContent]) -> list[MessageContentT]:
         _messages = []
 
         for message in messages:
@@ -101,5 +101,5 @@ class ApiMessagesFormatterBase[
 class ApiMessagesFormatter[MessageContentT](Protocol):
 
     @abstractmethod
-    def format(self, messages: list[ContentEntry]) -> list[MessageContentT]:
+    def format(self, messages: list[MessageContent]) -> list[MessageContentT]:
         ...

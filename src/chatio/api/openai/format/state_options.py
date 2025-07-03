@@ -8,7 +8,7 @@ from openai.types.chat import ChatCompletionPredictionContentParam
 from openai import NotGiven, NOT_GIVEN
 
 
-from chatio.core.models import StateOptions
+from chatio.core.models import ChatStateOptions
 
 from chatio.core.format.state_options import ApiOptionsFormatterBase
 
@@ -16,7 +16,7 @@ from chatio.api.openai.params import OpenAIStateOptions
 from chatio.api.openai.config import OpenAIConfigFormat
 
 
-def text_message(text: str) -> ChatCompletionContentPartTextParam:
+def message_text(text: str) -> ChatCompletionContentPartTextParam:
     return {
         "type": "text",
         "text": text,
@@ -29,7 +29,7 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
     OpenAIConfigFormat,
 ]):
 
-    def _prediction_content(
+    def _prediction_message(
         self, content: ChatCompletionContentPartTextParam | None,
     ) -> ChatCompletionPredictionContentParam | NotGiven:
 
@@ -44,7 +44,7 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
             "content": [content],
         }
 
-    def _system_content(
+    def _system_message(
         self, content: ChatCompletionContentPartTextParam | None,
     ) -> list[ChatCompletionMessageParam]:
 
@@ -66,13 +66,13 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
         }]
 
     @override
-    def format(self, options: StateOptions) -> OpenAIStateOptions:
+    def format(self, options: ChatStateOptions) -> OpenAIStateOptions:
 
-        text = None if options.system is None else text_message(options.system.text)
-        _system = self._system_content(text)
+        text = None if options.system is None else message_text(options.system.text)
+        _system = self._system_message(text)
 
-        text = None if options.prediction is None else text_message(options.prediction.text)
-        _prediction = self._prediction_content(text)
+        text = None if options.prediction is None else message_text(options.prediction.text)
+        _prediction = self._prediction_message(text)
 
         return OpenAIStateOptions(
             system=_system,

@@ -3,31 +3,31 @@ from dataclasses import dataclass, field
 
 
 @dataclass
-class ContentEntry:
+class MessageContent:
     pass
 
 
 @dataclass
-class CallRequest(ContentEntry):
+class CallRequest(MessageContent):
     tool_call_id: str
     tool_name: str
     tool_input: object
 
 
 @dataclass
-class CallResponse(ContentEntry):
+class CallResponse(MessageContent):
     tool_call_id: str
     tool_name: str
     tool_output: str
 
 
 @dataclass
-class TextMessage(ContentEntry):
+class TextMessage(MessageContent):
     text: str
 
 
 @dataclass
-class SystemContent(TextMessage):
+class SystemMessage(TextMessage):
     pass
 
 
@@ -42,18 +42,18 @@ class OutputMessage(TextMessage):
 
 
 @dataclass
-class PredictContent(TextMessage):
+class PredictionMessage(TextMessage):
     pass
 
 
 @dataclass
-class ImageDocument(ContentEntry):
+class ImageDocument(MessageContent):
     blob: bytes
     mimetype: str
 
 
 @dataclass
-class TextDocument(ContentEntry):
+class TextDocument(MessageContent):
     text: str
     mimetype: str
 
@@ -72,15 +72,15 @@ class ToolChoice:
 
 
 @dataclass
-class StateOptions:
-    system: SystemContent | None = None
-    prediction: PredictContent | None = None
+class ChatStateOptions:
+    system: SystemMessage | None = None
+    prediction: PredictionMessage | None = None
 
 
 @dataclass
 class ChatState:
-    messages: list[ContentEntry] = field(default_factory=list)
-    options: StateOptions = field(default_factory=StateOptions)
+    messages: list[MessageContent] = field(default_factory=list)
+    options: ChatStateOptions = field(default_factory=ChatStateOptions)
 
 
 @dataclass

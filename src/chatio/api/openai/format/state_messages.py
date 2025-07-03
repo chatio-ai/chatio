@@ -14,7 +14,7 @@ from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.openai.config import OpenAIConfigFormat
 
-from .state_options import text_message
+from .state_options import message_text
 
 
 type _ChatCompletionContentPartParam = \
@@ -35,37 +35,8 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
         return messages
 
     @override
-    def _text_message(self, text: str) -> ChatCompletionContentPartTextParam:
-        return text_message(text)
-
-    @override
-    def _image_document_blob(self, blob: bytes, mimetype: str) -> ChatCompletionContentPartImageParam:
-        data = base64.b64encode(blob).decode('ascii')
-
-        return {
-            "type": "image_url",
-            "image_url": {
-                "url": f"data:{mimetype};base64,{data}",
-            },
-        }
-
-    @override
-    def _text_document_chunk(self, text: str, mimetype: str) -> File:
-        blob = weasyprint.HTML(string=f"<html><body><pre>{text}</pre></body></html>").write_pdf()
-        if blob is None:
-            raise RuntimeError
-
-        data = base64.b64encode(blob).decode('ascii')
-
-        mimetype = 'application/pdf'
-
-        return {
-            "type": "file",
-            "file": {
-                "filename": "",
-                "file_data": f"data:{mimetype};base64,{data}",
-            },
-        }
+    def _message_text(self, text: str) -> ChatCompletionContentPartTextParam:
+        return message_text(text)
 
     @override
     def _input_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
@@ -114,4 +85,33 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
             "role": "tool",
             "tool_call_id": tool_call_id,
             "content": tool_output,
+        }
+
+    @override
+    def _image_document_blob(self, blob: bytes, mimetype: str) -> ChatCompletionContentPartImageParam:
+        data = base64.b64encode(blob).decode('ascii')
+
+        return {
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:{mimetype};base64,{data}",
+            },
+        }
+
+    @override
+    def _text_document_text(self, text: str, mimetype: str) -> File:
+        blob = weasyprint.HTML(string=f"<html><body><pre>{text}</pre></body></html>").write_pdf()
+        if blob is None:
+            raise RuntimeError
+
+        data = base64.b64encode(blob).decode('ascii')
+
+        mimetype = 'application/pdf'
+
+        return {
+            "type": "file",
+            "file": {
+                "filename": "",
+                "file_data": f"data:{mimetype};base64,{data}",
+            },
         }

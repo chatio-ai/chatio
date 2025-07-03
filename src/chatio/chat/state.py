@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from os import PathLike
 from pathlib import Path
 
-from chatio.core.models import PredictContent
-from chatio.core.models import SystemContent
+from chatio.core.models import PredictionMessage
+from chatio.core.models import SystemMessage
 
 from chatio.core.models import ImageDocument
 from chatio.core.models import TextDocument
@@ -85,7 +85,7 @@ class ChatState(_ChatState):
         self.messages.append(CallRequest(call_id, name, args))
 
     def update_system_message(self, message: str | None) -> None:
-        self.options.system = None if message is None else SystemContent(message)
+        self.options.system = None if message is None else SystemMessage(message)
 
-    def update_prediction_state(self, message: str | None) -> None:
-        self.options.prediction = None if message is None else PredictContent(message)
+    def update_prediction_message(self, message: str | None) -> None:
+        self.options.prediction = None if message is None else PredictionMessage(message)

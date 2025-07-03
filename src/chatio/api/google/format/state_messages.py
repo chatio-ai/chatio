@@ -9,7 +9,7 @@ from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
 from chatio.api.google.config import GoogleConfigFormat
 
-from .state_options import text_message
+from .state_options import message_text
 
 
 # pylint: disable=too-few-public-methods
@@ -26,26 +26,8 @@ class GoogleMessagesFormatter(ApiMessagesFormatterBase[
         return messages
 
     @override
-    def _text_message(self, text: str) -> PartDict:
-        return text_message(text)
-
-    @override
-    def _text_document_chunk(self, text: str, mimetype: str) -> PartDict:
-        return {
-            "inline_data": {
-                "mime_type": mimetype,
-                "data": text.encode(),
-            },
-        }
-
-    @override
-    def _image_document_blob(self, blob: bytes, mimetype: str) -> PartDict:
-        return {
-            "inline_data": {
-                "mime_type": mimetype,
-                "data": blob,
-            },
-        }
+    def _message_text(self, text: str) -> PartDict:
+        return message_text(text)
 
     @override
     def _input_content(self, content: PartDict) -> ContentDict:
@@ -90,4 +72,22 @@ class GoogleMessagesFormatter(ApiMessagesFormatterBase[
                     },
                 },
             }],
+        }
+
+    @override
+    def _image_document_blob(self, blob: bytes, mimetype: str) -> PartDict:
+        return {
+            "inline_data": {
+                "mime_type": mimetype,
+                "data": blob,
+            },
+        }
+
+    @override
+    def _text_document_text(self, text: str, mimetype: str) -> PartDict:
+        return {
+            "inline_data": {
+                "mime_type": mimetype,
+                "data": text.encode(),
+            },
         }

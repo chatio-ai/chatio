@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 from typing import Protocol
 
-from chatio.core.models import StateOptions
+from chatio.core.models import ChatStateOptions
 
 from chatio.core.params import ApiStateOptions
 from chatio.core.config import ApiConfigFormat
@@ -21,7 +21,7 @@ class ApiOptionsFormatterBase[
 ):
 
     @abstractmethod
-    def format(self, options: StateOptions) -> ApiStateOptionsT:
+    def format(self, options: ChatStateOptions) -> ApiStateOptionsT:
         ...
 
 
@@ -29,5 +29,5 @@ class ApiOptionsFormatterBase[
 class ApiOptionsFormatter[ApiStateOptionsT: ApiStateOptions](Protocol):
 
     @abstractmethod
-    def format(self, options: StateOptions) -> ApiStateOptionsT:
+    def format(self, options: ChatStateOptions) -> ApiStateOptionsT:
         ...
