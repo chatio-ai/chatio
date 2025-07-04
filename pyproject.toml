@@ -47,3 +47,7 @@ check_untyped_defs = true
 [[tool.mypy.overrides]]
 module = "googlesearch"
 follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = "weasyprint"
+follow_untyped_imports = true

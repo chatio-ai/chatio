@@ -3,6 +3,8 @@ import base64
 
 from typing import override
 
+import weasyprint
+
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
@@ -63,12 +65,19 @@ class OpenAIFormat(ApiFormat[
 
     @override
     def text_document_chunk(self, text: str, mimetype: str) -> File:
-        data = base64.b64encode(text.encode()).decode('ascii')
+        blob = weasyprint.HTML(string=f"<html><body><pre>{text}</pre></body></html>").write_pdf()
+        if blob is None:
+            raise RuntimeError
+
+        data = base64.b64encode(blob).decode('ascii')
+
+        mimetype = 'application/pdf'
 
         return {
             "type": "file",
             "file": {
-                "file_data": f"{data}",
+                "filename": "",
+                "file_data": f"data:{mimetype};base64,{data}",
             },
         }
 

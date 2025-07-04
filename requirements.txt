@@ -4,3 +4,4 @@ openai
 pymediawiki
 googlesearch-python
 html2text
+weasyprint
