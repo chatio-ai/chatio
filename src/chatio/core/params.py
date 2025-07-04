@@ -34,4 +34,5 @@ class ApiParams(ApiParamsBase[
     ToolChoice,
     PredictMessage,
 ]):
+    extras: dict[str, ContentEntry | None] = field(default_factory=dict)
     funcs: dict[str, Callable] = field(default_factory=dict)
