@@ -20,6 +20,10 @@ def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:
 
             if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
                 yield TextEvent(chunk.delta.text)
+            if chunk.type == 'content_block_stop' and chunk.content_block.type == 'text' \
+                    and chunk.content_block.citations is not None:
+                for citation in chunk.content_block.citations:
+                    yield TextEvent(citation.cited_text, label="claude.citation")
 
         final = stream.get_final_message()
 

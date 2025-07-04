@@ -147,4 +147,7 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
                 "media_type": "text/plain",
                 "data": doc.text,
             },
+            "citations": {
+                "enabled": True,
+            },
         }
