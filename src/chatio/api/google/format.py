@@ -3,6 +3,7 @@ from typing import override
 from typing import TypeGuard
 
 from google.genai.types import ContentDict
+from google.genai.types import ContentUnionDict
 from google.genai.types import PartDict
 
 from google.genai.types import SchemaDict
@@ -19,7 +20,7 @@ from .config import GoogleConfig
 
 class GoogleFormat(ApiFormat[
     ContentDict,
-    ContentDict,
+    ContentUnionDict,
     None,
     PartDict,
     PartDict,
@@ -35,7 +36,7 @@ class GoogleFormat(ApiFormat[
     # messages
 
     @override
-    def chat_messages(self, messages: list[ContentDict]) -> list[ContentDict]:
+    def chat_messages(self, messages: list[ContentUnionDict]) -> list[ContentUnionDict]:
         return messages
 
     @override
