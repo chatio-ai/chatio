@@ -30,12 +30,12 @@ def _mk_style(style=None) -> Style:
     return style
 
 
-def run_text(text, style=None, file=None):
+def run_text(text, style=None, *, file=None):
     with _mk_style(style).wrap_print(file=file):
         print(text, end="", flush=True, file=file)
 
 
-def run_info(chat, style=None, file=None):
+def run_info(chat, style=None, *, file=None):
     info = chat.info()
 
     run_text(
@@ -44,7 +44,7 @@ def run_info(chat, style=None, file=None):
         style=style, file=file)
 
 
-def run_user(style=None, file=None) -> str | None:
+def run_user(style=None, *, file=None) -> str | None:
     setup_readline()
 
     user_input = None
@@ -63,8 +63,8 @@ def run_user(style=None, file=None) -> str | None:
     return user_input
 
 
-def run_user_extra(style=None, file=None) -> tuple[str | None, list[Path]]:
-    user_input = run_user(style, file)
+def run_user_extra(style=None, *, file=None) -> tuple[str | None, list[Path]]:
+    user_input = run_user(style, file=file)
     if user_input is None:
         return None, []
 
@@ -91,7 +91,7 @@ def run_user_extra(style=None, file=None) -> tuple[str | None, list[Path]]:
     return user_input, paths
 
 
-def _run_chat_event(event: ChatEvent, style: Style, file=None):
+def _run_chat_event(event: ChatEvent, style: Style, *, file=None):
 
     match event:
 
@@ -130,7 +130,7 @@ def _run_text_chunk(chunk: str, style: Style, file=None, *, hascr: bool = False)
     return hascr
 
 
-def _run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, tools_style=None, file=None):
+def _run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, tools_style=None, *, file=None):
     _model_style: Style = _mk_style(model_style)
     _tools_style: Style = _mk_style(tools_style)
     _event_style: Style = _mk_style(event_style)
@@ -165,5 +165,5 @@ def _run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, t
                 defer = None
 
 
-def run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, tools_style=None, file=None):
-    return "".join(_run_chat(events, model_style, event_style, tools_style, file))
+def run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, tools_style=None, *, file=None):
+    return "".join(_run_chat(events, model_style, event_style, tools_style, file=file))

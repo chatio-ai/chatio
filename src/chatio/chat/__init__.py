@@ -77,13 +77,7 @@ class Chat:
 
         self._state.append_call_response(tool_call_id, tool_name, content)
 
-    def __call__(self, content: str | None = None) -> Iterator[ChatEvent]:
-        if content:
-            self._state.append_input_message(content)
-
-        return self._iterate()
-
-    def _iterate(self) -> Iterator[ChatEvent]:
+    def stream_content(self) -> Iterator[ChatEvent]:
         calls: list[CallEvent] = []
         stats: list[StatEvent] = []
 
@@ -115,10 +109,7 @@ class Chat:
 
     # helpers
 
-    def count_tokens(self, content: str | None = None) -> int:
-        if content:
-            self._state.append_input_message(content)
-
+    def count_tokens(self) -> int:
         return self._client.count_message_tokens(self._model.model, self._state, self._tools)
 
     def info(self) -> ChatInfo:

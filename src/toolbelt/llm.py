@@ -29,8 +29,9 @@ class LlmDialogTool(ToolBase):
     def __init__(self, agent: Chat):
         self._agent = agent
 
-    def __call__(self, message=None):
-        for event in self._agent(message):
+    def __call__(self, message: str):
+        self._agent.state.append_input_message(message)
+        for event in self._agent.stream_content():
             match event:
                 case ModelTextChunk(text, _):
                     yield text

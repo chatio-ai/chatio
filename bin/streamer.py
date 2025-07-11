@@ -38,7 +38,7 @@ def main():
         chat.state.update_prediction_message(results)
 
         print()
-        results = run_chat(chat(),
+        results = run_chat(chat.stream_content(),
                            model_style=Style("<<< ", color=Style.BRIGHT_CYAN),
                            event_style=Style("::: ", color=Style.RESET),
                            tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))

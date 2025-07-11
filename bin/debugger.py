@@ -68,12 +68,12 @@ def main():
     print()
 
     if filenames:
-        run_chat(chat(), "<<< ", "::: ")
+        run_chat(chat.stream_content(), "<<< ", "::: ")
 
     # chat.append_input_message("what is the exact text on first image? duplicate my message as is")
     chat.state.append_input_message("what is the exact text on first image?")
 
-    run_chat(chat(), "<<< ", "::: ")
+    run_chat(chat.stream_content(), "<<< ", "::: ")
 
     print()
 
