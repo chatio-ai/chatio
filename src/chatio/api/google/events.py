@@ -5,6 +5,7 @@ from collections.abc import Iterator
 from collections.abc import Callable
 
 
+from google.genai.types import GenerateContentResponseUsageMetadata
 from google.genai.types import GenerateContentResponse
 from google.genai.types import GroundingMetadata
 
@@ -39,6 +40,23 @@ def _pump_grounding(search: GroundingMetadata | None) -> Iterator[ChatEvent]:
         yield TextEvent(entry, label="search.suggest")
 
 
+def _pump_usage(usage: GenerateContentResponseUsageMetadata | None) -> Iterator[StatEvent]:
+    if usage is None:
+        return
+
+    if usage.prompt_token_count is None:
+        usage.prompt_token_count = 0
+    yield StatEvent('input', usage.prompt_token_count)
+
+    if usage.candidates_token_count is None:
+        usage.candidates_token_count = 0
+    yield StatEvent('output', usage.candidates_token_count)
+
+    if usage.cached_content_token_count is None:
+        usage.cached_content_token_count = 0
+    yield StatEvent('cache_read', usage.cached_content_token_count)
+
+
 def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterator[ChatEvent]:
     stream = streamfun()
 
@@ -71,11 +89,7 @@ def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterato
 
         yield DoneEvent(final_text)
 
-        yield StatEvent(
-            (usage and usage.prompt_token_count) or 0,
-            (usage and usage.candidates_token_count) or 0,
-            0, (usage and usage.cached_content_token_count) or 0,
-            0, 0)
+        yield from _pump_usage(usage)
 
         for call in calls:
             if call.name is None or call.args is None:

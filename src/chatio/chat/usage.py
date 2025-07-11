@@ -1,92 +1,29 @@
 
-from dataclasses import dataclass
+from collections.abc import Iterator
+
+from chatio.core.events import StatEvent
 
 
-@dataclass
-class ChatUsageInputData:
-    input_tokens: int = 0
-    input_history_tokens: int = 0
-    input_current_tokens: int = 0
-
-
-@dataclass
-class ChatUsageOutputData:
-    output_tokens: int = 0
-    predict_accepted: int = 0
-    predict_rejected: int = 0
-
-
-@dataclass
-class ChatUsageCacheData:
-    cache_missed: int = 0
-    cache_written: int = 0
-    cache_read: int = 0
-
-
-@dataclass
-class ChatUsageData:
-    input: ChatUsageInputData
-    output: ChatUsageOutputData
-    cache: ChatUsageCacheData
-    label: str
-
-    def __init__(self, label: str):
-        self.input = ChatUsageInputData()
-        self.output = ChatUsageOutputData()
-        self.cache = ChatUsageCacheData()
-        self.label = label
-
-
-@dataclass
 class ChatUsage:
 
     def __init__(self):
-        self._delta = ChatUsageData("delta")
-        self._total = ChatUsageData("total")
+        self._stats: dict[str, int] = {}
 
-    def __call__(self, usage):
-        return self._process(usage)
+    def __call__(self, usage) -> Iterator[dict]:
+        return self.generate(usage)
 
-    def _mkevent(self, usage):
-        return {
-            "type": "token_usage",
-            "scope": usage.label,
-            "input_tokens": usage.input.input_tokens,
-            "input_history_tokens": usage.input.input_history_tokens,
-            "input_current_tokens": usage.input.input_current_tokens,
-            "output_tokens": usage.output.output_tokens,
-            "cache_missed": usage.cache.cache_missed,
-            "cache_written": usage.cache.cache_written,
-            "cache_read": usage.cache.cache_read,
-            "predict_accepted": usage.output.predict_accepted,
-            "predict_rejected": usage.output.predict_rejected,
+    def generate(self, event: StatEvent) -> Iterator[dict]:
+        total = self._stats.setdefault(event.label, 0) + event.delta
+        self._stats[event.label] = total
+
+        yield {
+            'type': 'token_usage',
+            'label': event.label,
+            'delta': event.delta,
+            'total': total,
         }
 
-    def _process(self, usage):
-        self._delta.input.input_history_tokens = self._delta.input.input_tokens
-        self._delta.input.input_current_tokens = usage.input_tokens - self._delta.input.input_history_tokens
-        self._delta.input.input_tokens = usage.input_tokens
-        self._delta.output.output_tokens = usage.output_tokens
+        # self._delta.input.input_history_tokens = self._delta.input.input_tokens
+        # self._delta.input.input_current_tokens = usage.input_tokens - self._delta.input.input_history_tokens
 
-        self._delta.cache.cache_missed = usage.input_tokens - usage.cache_written - usage.cache_read
-        self._delta.cache.cache_written = usage.cache_written
-        self._delta.cache.cache_read = usage.cache_read
-
-        self._delta.output.predict_accepted = usage.predict_accepted
-        self._delta.output.predict_rejected = usage.predict_rejected
-
-        yield self._mkevent(self._delta)
-
-        self._total.input.input_history_tokens += self._delta.input.input_history_tokens
-        self._total.input.input_current_tokens += self._delta.input.input_current_tokens
-        self._total.input.input_tokens += self._delta.input.input_tokens
-        self._total.output.output_tokens += self._delta.output.output_tokens
-
-        self._total.cache.cache_missed += self._delta.cache.cache_missed
-        self._total.cache.cache_written += self._delta.cache.cache_written
-        self._total.cache.cache_read += self._delta.cache.cache_read
-
-        self._total.output.predict_accepted += self._delta.output.predict_accepted
-        self._total.output.predict_rejected += self._delta.output.predict_rejected
-
-        yield self._mkevent(self._total)
+        # self._delta.cache.cache_missed = usage.input_tokens - usage.cache_written - usage.cache_read

@@ -4,6 +4,7 @@ import logging
 from collections.abc import Iterator
 
 
+from openai.types.completion_usage import CompletionUsage
 from openai.lib.streaming.chat._completions import ChatCompletionStreamManager
 
 
@@ -11,6 +12,27 @@ from chatio.core.events import ChatEvent, TextEvent, DoneEvent, StatEvent, CallE
 
 
 log = logging.getLogger(__name__)
+
+
+def _pump_usage(usage: CompletionUsage | None) -> Iterator[StatEvent]:
+    if usage is None:
+        return
+
+    yield StatEvent('input', usage.prompt_tokens)
+    yield StatEvent('output', usage.completion_tokens)
+
+    input_details = usage.prompt_tokens_details
+    if input_details is not None:
+        if input_details.cached_tokens is None:
+            input_details.cached_tokens = 0
+        yield StatEvent('cache_read', input_details.cached_tokens)
+
+    output_details = usage.completion_tokens_details
+    if output_details is not None:
+        if output_details.accepted_prediction_tokens is not None:
+            yield StatEvent('prediction_accept', output_details.accepted_prediction_tokens)
+        if output_details.rejected_prediction_tokens is not None:
+            yield StatEvent('prediction_reject', output_details.rejected_prediction_tokens)
 
 
 def _pump(streamctx: ChatCompletionStreamManager) -> Iterator[ChatEvent]:
@@ -25,19 +47,7 @@ def _pump(streamctx: ChatCompletionStreamManager) -> Iterator[ChatEvent]:
         final_message = final.choices[0].message
         yield DoneEvent(final_message.content or "")
 
-        usage = final.usage
-
-        input_details = usage and usage.prompt_tokens_details
-        output_details = usage and usage.completion_tokens_details
-
-        yield StatEvent(
-            (usage and usage.prompt_tokens) or 0,
-            (usage and usage.completion_tokens) or 0,
-            0,
-            (input_details and input_details.cached_tokens) or 0,
-            (output_details and output_details.accepted_prediction_tokens) or 0,
-            (output_details and output_details.rejected_prediction_tokens) or 0,
-        )
+        yield from _pump_usage(final.usage)
 
         for call in final_message.tool_calls or ():
             if not isinstance(call.function.parsed_arguments, dict):

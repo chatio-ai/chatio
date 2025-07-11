@@ -4,6 +4,7 @@ import logging
 from collections.abc import Iterator
 
 
+from anthropic.types.usage import Usage
 from anthropic.lib.streaming import MessageStreamManager
 
 
@@ -11,6 +12,23 @@ from chatio.core.events import ChatEvent, CallEvent, DoneEvent, StatEvent, TextE
 
 
 log = logging.getLogger(__name__)
+
+
+def _pump_usage(usage: Usage | None) -> Iterator[StatEvent]:
+    if usage is None:
+        return
+
+    if usage.cache_creation_input_tokens is None:
+        usage.cache_creation_input_tokens = 0
+    if usage.cache_read_input_tokens is None:
+        usage.cache_read_input_tokens = 0
+
+    usage.input_tokens += usage.cache_creation_input_tokens
+    usage.input_tokens += usage.cache_read_input_tokens
+    yield StatEvent('input', usage.input_tokens)
+    yield StatEvent('output', usage.output_tokens)
+    yield StatEvent('cache_written', usage.cache_creation_input_tokens)
+    yield StatEvent('cache_read', usage.cache_read_input_tokens)
 
 
 def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:
@@ -30,15 +48,7 @@ def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:
         final_content = "".join(block.text for block in final.content if block.type == 'text')
         yield DoneEvent(final_content)
 
-        usage = final.usage
-        usage.input_tokens += usage.cache_creation_input_tokens or 0
-        usage.input_tokens += usage.cache_read_input_tokens or 0
-        yield StatEvent(
-            usage.input_tokens,
-            usage.output_tokens,
-            usage.cache_creation_input_tokens or 0,
-            usage.cache_read_input_tokens or 0,
-            0, 0)
+        yield from _pump_usage(final.usage)
 
         for message in final.content:
             if message.type == 'tool_use':

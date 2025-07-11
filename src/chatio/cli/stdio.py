@@ -84,24 +84,13 @@ def run_user_extra(style=None, file=None) -> tuple[str | None, list[Path]]:
 
 def _run_chat_event(event: dict, style: Style, file=None):
 
-    etype = event['type']
+    etype = event.pop('type')
     etext = ""
 
     match etype:
 
         case 'token_usage':
-            etext = f"token_usage: {event['scope']}:"
-            etext += f" in: {event['input_tokens']}"
-            etext += f" (hist: {event['input_history_tokens']}"
-            etext += f" curr: {event['input_current_tokens']})"
-            etext += f" out: {event['output_tokens']}"
-            etext += "  "
-            etext += f" nc: {event['cache_missed']}"
-            etext += f" cw: {event['cache_written']}"
-            etext += f" cr: {event['cache_read']}"
-            etext += "  "
-            etext += f" pa: {event['predict_accepted']}"
-            etext += f" pr: {event['predict_rejected']}"
+            etext = f"token_usage: {event}"
 
         case 'tools_usage':
             etext = f"tools_usage: {event['tool_name']}: {event['tool_args']}"
