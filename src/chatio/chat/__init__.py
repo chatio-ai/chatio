@@ -5,7 +5,13 @@ from dataclasses import dataclass
 
 from chatio.core.config import ModelConfig
 
-from chatio.core.events import CallEvent, DoneEvent, StatEvent, TextEvent
+from chatio.core.events import ChatEvent
+from chatio.core.events import CallEvent
+from chatio.core.events import ToolEvent
+from chatio.core.events import StopEvent
+from chatio.core.events import StatEvent
+from chatio.core.events import ModelTextChunk
+from chatio.core.events import ToolsTextChunk
 
 
 from .model import init_client
@@ -56,35 +62,28 @@ class Chat:
 
     # streams
 
-    def _process_tool_call(self, tool_call_id: str, tool_name: str, tool_args: dict) -> Iterator[dict]:
+    def _process_tool_call(self, tool_call_id: str, tool_name: str, tool_args: dict) -> Iterator[ChatEvent]:
         tool_func = self._tools.funcs.get(tool_name)
         if not tool_func:
             return
 
         content = ""
-        for chunk in tool_func(**tool_args):
-            if isinstance(chunk, str):
-                content += chunk
-                yield {
-                    "type": "tools_chunk",
-                    "text": chunk,
-                }
-            elif chunk is not None:
-                yield {
-                    "type": "tools_event",
-                    "tool_name": tool_name,
-                    "tool_data": chunk,
-                }
+        for event in tool_func(**tool_args):
+            if isinstance(event, str):
+                content += event
+                yield ToolsTextChunk(event)
+            elif event is not None:
+                yield ToolEvent(tool_call_id, tool_name, event)
 
         self._state.append_call_response(tool_call_id, tool_name, content)
 
-    def __call__(self, content: str | None = None) -> Iterator[dict]:
+    def __call__(self, content: str | None = None) -> Iterator[ChatEvent]:
         if content:
             self._state.append_input_message(content)
 
         return self._iterate()
 
-    def _iterate(self) -> Iterator[dict]:
+    def _iterate(self) -> Iterator[ChatEvent]:
         calls: list[CallEvent] = []
         stats: list[StatEvent] = []
 
@@ -97,13 +96,9 @@ class Chat:
 
             for event in events:
                 match event:
-                    case TextEvent(text, label):
-                        yield {
-                            "type": "model_chunk",
-                            "label": label,
-                            "text": text,
-                        }
-                    case DoneEvent(text):
+                    case ModelTextChunk():
+                        yield event
+                    case StopEvent(text):
                         if text:
                             self._state.append_output_message(text)
                     case CallEvent():
@@ -115,11 +110,7 @@ class Chat:
 
             for call in calls:
                 self._state.append_call_request(call.call_id, call.name, call.args_raw)
-                yield {
-                    "type": "tools_usage",
-                    "tool_name": call.name,
-                    "tool_args": call.args,
-                }
+                yield call
                 yield from self._process_tool_call(call.call_id, call.name, call.args)
 
     # helpers

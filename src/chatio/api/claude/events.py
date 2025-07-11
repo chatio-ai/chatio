@@ -8,7 +8,11 @@ from anthropic.types.usage import Usage
 from anthropic.lib.streaming import MessageStreamManager
 
 
-from chatio.core.events import ChatEvent, CallEvent, DoneEvent, StatEvent, TextEvent
+from chatio.core.events import ChatEvent
+from chatio.core.events import CallEvent
+from chatio.core.events import StopEvent
+from chatio.core.events import StatEvent
+from chatio.core.events import ModelTextChunk
 
 
 log = logging.getLogger(__name__)
@@ -37,16 +41,16 @@ def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:
             log.info("%s", chunk.model_dump_json(indent=2))
 
             if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
-                yield TextEvent(chunk.delta.text)
+                yield ModelTextChunk(chunk.delta.text)
             if chunk.type == 'content_block_stop' and chunk.content_block.type == 'text' \
                     and chunk.content_block.citations is not None:
                 for citation in chunk.content_block.citations:
-                    yield TextEvent(citation.cited_text, label="claude.citation")
+                    yield ModelTextChunk(citation.cited_text, label="claude.citation")
 
         final = stream.get_final_message()
 
         final_content = "".join(block.text for block in final.content if block.type == 'text')
-        yield DoneEvent(final_content)
+        yield StopEvent(final_content)
 
         yield from _pump_usage(final.usage)
 

@@ -8,7 +8,11 @@ from openai.types.completion_usage import CompletionUsage
 from openai.lib.streaming.chat._completions import ChatCompletionStreamManager
 
 
-from chatio.core.events import ChatEvent, TextEvent, DoneEvent, StatEvent, CallEvent
+from chatio.core.events import ChatEvent
+from chatio.core.events import CallEvent
+from chatio.core.events import StopEvent
+from chatio.core.events import StatEvent
+from chatio.core.events import ModelTextChunk
 
 
 log = logging.getLogger(__name__)
@@ -42,11 +46,11 @@ def _pump(streamctx: ChatCompletionStreamManager) -> Iterator[ChatEvent]:
             log.info("%s", chunk.model_dump_json(indent=2))
 
             if chunk.type == 'content.delta':
-                yield TextEvent(chunk.delta)
+                yield ModelTextChunk(chunk.delta)
 
         final = stream.get_final_completion()
         final_message = final.choices[0].message
-        yield DoneEvent(final_message.content or "")
+        yield StopEvent(final_message.content or "")
 
         yield from _pump_usage(final.usage)
 

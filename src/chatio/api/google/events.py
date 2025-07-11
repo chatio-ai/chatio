@@ -12,7 +12,11 @@ from google.genai.types import GroundingMetadata
 from html2text import HTML2Text
 
 
-from chatio.core.events import ChatEvent, CallEvent, DoneEvent, StatEvent, TextEvent
+from chatio.core.events import ChatEvent
+from chatio.core.events import CallEvent
+from chatio.core.events import StopEvent
+from chatio.core.events import StatEvent
+from chatio.core.events import ModelTextChunk
 
 
 log = logging.getLogger(__name__)
@@ -30,14 +34,14 @@ def _pump_grounding(search: GroundingMetadata | None) -> Iterator[ChatEvent]:
             if chunk.web is not None and chunk.web.title is not None:
                 title = chunk.web.title
             entry = f"   [{index}]: <{uri}> {title}\n"
-            yield TextEvent(entry, label="search.sources")
+            yield ModelTextChunk(entry, label="search.sources")
 
     if search.search_entry_point is not None:
         parser = HTML2Text(bodywidth=0)
         parser.inline_links = False
         parser.protect_links = True
         entry = parser.handle(search.search_entry_point.rendered_content or "")
-        yield TextEvent(entry, label="search.suggest")
+        yield ModelTextChunk(entry, label="search.suggest")
 
 
 def _pump_usage(usage: GenerateContentResponseUsageMetadata | None) -> Iterator[StatEvent]:
@@ -77,7 +81,7 @@ def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterato
                 for part in chunk.candidates[0].content.parts:
                     if part.text:
                         final_text += part.text
-                        yield TextEvent(part.text)
+                        yield ModelTextChunk(part.text)
 
                     if part.function_call:
                         calls.append(part.function_call)
@@ -87,7 +91,7 @@ def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterato
 
         yield from _pump_grounding(search)
 
-        yield DoneEvent(final_text)
+        yield StopEvent(final_text)
 
         yield from _pump_usage(usage)
 

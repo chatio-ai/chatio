@@ -23,11 +23,28 @@ class CallEvent(ChatEvent):
 
 
 @dataclass
-class TextEvent(ChatEvent):
+class ToolEvent(ChatEvent):
+    call_id: str
+    name: str
+    data: dict
+
+
+@dataclass
+class TextChunk(ChatEvent):
     text: str
     label: str | None = None
 
 
 @dataclass
-class DoneEvent(ChatEvent):
+class ModelTextChunk(TextChunk):
+    pass
+
+
+@dataclass
+class ToolsTextChunk(TextChunk):
+    pass
+
+
+@dataclass
+class StopEvent(ChatEvent):
     text: str

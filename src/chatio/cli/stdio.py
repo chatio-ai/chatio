@@ -7,6 +7,15 @@ from contextlib import suppress
 
 from pathlib import Path
 
+
+from chatio.core.events import ChatEvent
+from chatio.core.events import CallEvent
+from chatio.core.events import ToolEvent
+from chatio.core.events import StatEvent
+from chatio.core.events import ModelTextChunk
+from chatio.core.events import ToolsTextChunk
+
+
 from .style import Style, Empty
 from .input import setup_readline
 
@@ -82,30 +91,27 @@ def run_user_extra(style=None, file=None) -> tuple[str | None, list[Path]]:
     return user_input, paths
 
 
-def _run_chat_event(event: dict, style: Style, file=None):
+def _run_chat_event(event: ChatEvent, style: Style, file=None):
 
-    etype = event.pop('type')
-    etext = ""
+    match event:
 
-    match etype:
+        case StatEvent(label, delta, total):
+            text = f"stat: {label}: {delta} of {total}"
 
-        case 'token_usage':
-            etext = f"token_usage: {event}"
+        case CallEvent(_, name, args, _):
+            text = f"call: {name}: {args}"
 
-        case 'tools_usage':
-            etext = f"tools_usage: {event['tool_name']}: {event['tool_args']}"
-
-        case 'tools_event':
-            etext = f"tools_event: {event['tool_name']}: {event['tool_data']}"
+        case ToolEvent(_, name, data):
+            text = f"tool: {name}: {data}"
 
         case _:
             raise RuntimeError
 
     with style.wrap_print(file=file):
-        print(etext, end="", flush=True, file=file)
+        print(text, end="", flush=True, file=file)
 
 
-def _run_chat_chunk(chunk: str, style: Style, file=None, *, hascr: bool = False):
+def _run_text_chunk(chunk: str, style: Style, file=None, *, hascr: bool = False):
     for chunk_line in chunk.splitlines(keepends=True):
         result = ""
         if hascr:
@@ -124,42 +130,40 @@ def _run_chat_chunk(chunk: str, style: Style, file=None, *, hascr: bool = False)
     return hascr
 
 
-def _run_chat(events: Iterable[dict], model_style=None, event_style=None, tools_style=None, file=None):
+def _run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, tools_style=None, file=None):
     _model_style: Style = _mk_style(model_style)
     _tools_style: Style = _mk_style(tools_style)
     _event_style: Style = _mk_style(event_style)
 
     defer = None
     for event in events:
-        etype = event.get("type")
-        label = event.get("label")
-
         style = _event_style
-        match etype, label:
-            case "model_chunk", None:
+        match event:
+            case ModelTextChunk(_, label) if label is None:
                 style = _model_style
-            case "model_chunk", _:
+            case ModelTextChunk():
                 style = _tools_style
-            case "tools_chunk", _:
+            case ToolsTextChunk():
                 style = _tools_style
+            # case _:
+            #     style = _event_style
 
         if defer != style and defer:
-            _run_chat_chunk('\n', style, file=file, hascr=not defer)
+            _run_text_chunk('\n', style, file=file, hascr=not defer)
             defer = None
 
-        chunk = event.get("text") or ""
-        match etype:
-            case "model_chunk":
-                hascr = _run_chat_chunk(chunk, style, hascr=not defer, file=file)
+        match event:
+            case ModelTextChunk(chunk, _):
+                hascr = _run_text_chunk(chunk, style, hascr=not defer, file=file)
                 defer = None if hascr else style
                 yield chunk
-            case "tools_chunk":
-                hascr = _run_chat_chunk(chunk, style, hascr=not defer, file=file)
+            case ToolsTextChunk(chunk, _):
+                hascr = _run_text_chunk(chunk, style, hascr=not defer, file=file)
                 defer = None if hascr else style
             case _:
                 _run_chat_event(event, style, file=file)
                 defer = None
 
 
-def run_chat(events: Iterable[dict], model_style=None, event_style=None, tools_style=None, file=None):
+def run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, tools_style=None, file=None):
     return "".join(_run_chat(events, model_style, event_style, tools_style, file))

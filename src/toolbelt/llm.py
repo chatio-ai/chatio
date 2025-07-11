@@ -3,6 +3,8 @@ from typing import override
 
 from chatio.chat import Chat
 
+from chatio.core.events import ModelTextChunk
+
 from . import ToolBase
 
 
@@ -29,5 +31,6 @@ class LlmDialogTool(ToolBase):
 
     def __call__(self, message=None):
         for event in self._agent(message):
-            if event["type"] == 'model_chunk':
-                yield event["text"]
+            match event:
+                case ModelTextChunk(text, _):
+                    yield text

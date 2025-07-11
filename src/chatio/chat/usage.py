@@ -10,21 +10,16 @@ class ChatUsage:
         self._stats: dict[str, int] = {}
         self._input = 0
 
-    def __call__(self, usage) -> Iterator[dict]:
+    def __call__(self, usage) -> Iterator[StatEvent]:
         return self.generate(usage)
 
-    def _emit_event(self, label: str, delta: int) -> dict:
+    def _emit_event(self, label: str, delta: int) -> StatEvent:
         total = self._stats.setdefault(label, 0) + delta
         self._stats[label] = total
 
-        return {
-            'type': 'token_usage',
-            'label': label,
-            'delta': delta,
-            'total': total,
-        }
+        return StatEvent(label, delta, total)
 
-    def generate(self, events: list[StatEvent]) -> Iterator[dict]:
+    def generate(self, events: list[StatEvent]) -> Iterator[StatEvent]:
         _values = {}
         for event in events:
             _values[event.label] = event.delta
