@@ -5,6 +5,8 @@ from collections.abc import Iterator
 
 
 from openai.types.completion_usage import CompletionUsage
+from openai.types.chat.parsed_function_tool_call import ParsedFunctionToolCall
+from openai.lib.streaming.chat._events import ChatCompletionStreamEvent
 from openai.lib.streaming.chat._completions import ChatCompletionStreamManager
 
 
@@ -40,13 +42,28 @@ def _pump_usage(usage: CompletionUsage | None) -> Iterator[StatEvent]:
             yield StatEvent('prediction_reject', output_details.rejected_prediction_tokens)
 
 
+def _pump_chunk(chunk: ChatCompletionStreamEvent) -> Iterator[ChatEvent]:
+    log.info("%s", chunk.model_dump_json(indent=2))
+
+    if chunk.type == 'content.delta':
+        yield ModelTextChunk(chunk.delta)
+
+
+def _pump_calls(calls: list[ParsedFunctionToolCall] | None) -> Iterator[CallEvent]:
+    if calls is None:
+        return
+
+    for call in calls:
+        if not isinstance(call.function.parsed_arguments, dict):
+            raise TypeError(call.function.parsed_arguments)
+        yield CallEvent(call.id, call.function.name,
+                        call.function.parsed_arguments, call.function.arguments)
+
+
 def _pump(streamctx: ChatCompletionStreamManager) -> Iterator[ChatEvent]:
     with streamctx as stream:
         for chunk in stream:
-            log.info("%s", chunk.model_dump_json(indent=2))
-
-            if chunk.type == 'content.delta':
-                yield ModelTextChunk(chunk.delta)
+            yield from _pump_chunk(chunk)
 
         final = stream.get_final_completion()
         final_message = final.choices[0].message
@@ -54,8 +71,4 @@ def _pump(streamctx: ChatCompletionStreamManager) -> Iterator[ChatEvent]:
 
         yield from _pump_usage(final.usage)
 
-        for call in final_message.tool_calls or ():
-            if not isinstance(call.function.parsed_arguments, dict):
-                raise TypeError(call.function.parsed_arguments)
-            yield CallEvent(call.id, call.function.name,
-                            call.function.parsed_arguments, call.function.arguments)
+        yield from _pump_calls(final_message.tool_calls)

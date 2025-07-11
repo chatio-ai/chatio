@@ -4,10 +4,13 @@ import logging
 from collections.abc import Iterator
 from collections.abc import Callable
 
+from dataclasses import dataclass, field
 
-from google.genai.types import GenerateContentResponseUsageMetadata
-from google.genai.types import GenerateContentResponse
+
+from google.genai.types import FunctionCall
 from google.genai.types import GroundingMetadata
+from google.genai.types import GenerateContentResponse
+from google.genai.types import GenerateContentResponseUsageMetadata
 
 from html2text import HTML2Text
 
@@ -61,41 +64,54 @@ def _pump_usage(usage: GenerateContentResponseUsageMetadata | None) -> Iterator[
     yield StatEvent('output', usage.candidates_token_count)
 
 
+@dataclass
+class _PumpFinal:
+    usage: GenerateContentResponseUsageMetadata | None = None
+    calls: list[FunctionCall] = field(default_factory=list)
+    text: str = ""
+    search: GroundingMetadata | None = None
+
+
+def _pump_chunk(chunk: GenerateContentResponse, final: _PumpFinal) -> Iterator[ChatEvent]:
+    log.info("%s", chunk.model_dump_json(indent=2))
+
+    if chunk.candidates \
+            and chunk.candidates[0].content \
+            and chunk.candidates[0].content.parts:
+
+        for part in chunk.candidates[0].content.parts:
+            if part.text:
+                final.text += part.text
+                yield ModelTextChunk(part.text)
+
+            if part.function_call:
+                final.calls.append(part.function_call)
+
+        final.usage = chunk.usage_metadata
+        final.search = chunk.candidates[0].grounding_metadata
+
+
+def _pump_calls(calls: list[FunctionCall]) -> Iterator[CallEvent]:
+    for call in calls:
+        if call.name is None or call.args is None:
+            raise ValueError(call.id, call.name, call.args)
+        yield CallEvent(call.id or "", call.name, call.args, call.args)
+
+
 def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterator[ChatEvent]:
     stream = streamfun()
 
     if stream is not None:
 
-        usage = None
-        calls = []
-        final_text = ""
-        search = None
+        final = _PumpFinal()
 
         for chunk in stream:
-            log.info("%s", chunk.model_dump_json(indent=2))
+            yield from _pump_chunk(chunk, final)
 
-            if chunk.candidates \
-                    and chunk.candidates[0].content \
-                    and chunk.candidates[0].content.parts:
+        yield from _pump_grounding(final.search)
 
-                for part in chunk.candidates[0].content.parts:
-                    if part.text:
-                        final_text += part.text
-                        yield ModelTextChunk(part.text)
+        yield StopEvent(final.text)
 
-                    if part.function_call:
-                        calls.append(part.function_call)
+        yield from _pump_usage(final.usage)
 
-                usage = chunk.usage_metadata
-                search = chunk.candidates[0].grounding_metadata
-
-        yield from _pump_grounding(search)
-
-        yield StopEvent(final_text)
-
-        yield from _pump_usage(usage)
-
-        for call in calls:
-            if call.name is None or call.args is None:
-                raise ValueError(call.id, call.name, call.args)
-            yield CallEvent(call.id or "", call.name, call.args, call.args)
+        yield from _pump_calls(final.calls)

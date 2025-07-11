@@ -5,6 +5,8 @@ from collections.abc import Iterator
 
 
 from anthropic.types.usage import Usage
+from anthropic.types.content_block import ContentBlock
+from anthropic.lib.streaming import MessageStreamEvent
 from anthropic.lib.streaming import MessageStreamManager
 
 
@@ -35,17 +37,29 @@ def _pump_usage(usage: Usage | None) -> Iterator[StatEvent]:
     yield StatEvent('output', usage.output_tokens)
 
 
+def _pump_chunk(chunk: MessageStreamEvent) -> Iterator[ChatEvent]:
+    log.info("%s", chunk.model_dump_json(indent=2))
+
+    if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
+        yield ModelTextChunk(chunk.delta.text)
+    if chunk.type == 'content_block_stop' and chunk.content_block.type == 'text' \
+            and chunk.content_block.citations is not None:
+        for citation in chunk.content_block.citations:
+            yield ModelTextChunk(citation.cited_text, label="claude.citation")
+
+
+def _pump_calls(content: list[ContentBlock]) -> Iterator[CallEvent]:
+    for message in content:
+        if message.type == 'tool_use':
+            if not isinstance(message.input, dict):
+                raise TypeError(message.input)
+            yield CallEvent(message.id, message.name, message.input, message.input)
+
+
 def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:
     with streamctx as stream:
         for chunk in stream:
-            log.info("%s", chunk.model_dump_json(indent=2))
-
-            if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
-                yield ModelTextChunk(chunk.delta.text)
-            if chunk.type == 'content_block_stop' and chunk.content_block.type == 'text' \
-                    and chunk.content_block.citations is not None:
-                for citation in chunk.content_block.citations:
-                    yield ModelTextChunk(citation.cited_text, label="claude.citation")
+            yield from _pump_chunk(chunk)
 
         final = stream.get_final_message()
 
@@ -54,8 +68,4 @@ def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:
 
         yield from _pump_usage(final.usage)
 
-        for message in final.content:
-            if message.type == 'tool_use':
-                if not isinstance(message.input, dict):
-                    raise TypeError(message.input)
-                yield CallEvent(message.id, message.name, message.input, message.input)
+        yield from _pump_calls(final.content)
