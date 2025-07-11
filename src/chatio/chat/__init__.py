@@ -85,9 +85,13 @@ class Chat:
         return self._iterate()
 
     def _iterate(self) -> Iterator[dict]:
-        calls = -1
-        while calls:
-            calls = 0
+        calls: list[CallEvent] = []
+        stats: list[StatEvent] = []
+
+        events = None
+        while not events or calls:
+            calls.clear()
+            stats.clear()
 
             events = self._client.iterate_model_events(self._model.model, self._state, self._tools)
 
@@ -102,17 +106,21 @@ class Chat:
                     case DoneEvent(text):
                         if text:
                             self._state.append_output_message(text)
-                    case CallEvent(call_id, name, args, args_raw):
-                        self._state.append_call_request(call_id, name, args_raw)
-                        yield {
-                            "type": "tools_usage",
-                            "tool_name": name,
-                            "tool_args": args,
-                        }
-                        yield from self._process_tool_call(call_id, name, args)
-                        calls += 1
+                    case CallEvent():
+                        calls.append(event)
                     case StatEvent():
-                        yield from self._usage(event)
+                        stats.append(event)
+
+            yield from self._usage(stats)
+
+            for call in calls:
+                self._state.append_call_request(call.call_id, call.name, call.args_raw)
+                yield {
+                    "type": "tools_usage",
+                    "tool_name": call.name,
+                    "tool_args": call.args,
+                }
+                yield from self._process_tool_call(call.call_id, call.name, call.args)
 
     # helpers
 

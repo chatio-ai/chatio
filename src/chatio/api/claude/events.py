@@ -26,9 +26,9 @@ def _pump_usage(usage: Usage | None) -> Iterator[StatEvent]:
     usage.input_tokens += usage.cache_creation_input_tokens
     usage.input_tokens += usage.cache_read_input_tokens
     yield StatEvent('input', usage.input_tokens)
-    yield StatEvent('output', usage.output_tokens)
     yield StatEvent('cache_written', usage.cache_creation_input_tokens)
     yield StatEvent('cache_read', usage.cache_read_input_tokens)
+    yield StatEvent('output', usage.output_tokens)
 
 
 def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:

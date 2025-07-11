@@ -19,13 +19,14 @@ def _pump_usage(usage: CompletionUsage | None) -> Iterator[StatEvent]:
         return
 
     yield StatEvent('input', usage.prompt_tokens)
-    yield StatEvent('output', usage.completion_tokens)
 
     input_details = usage.prompt_tokens_details
     if input_details is not None:
         if input_details.cached_tokens is None:
             input_details.cached_tokens = 0
         yield StatEvent('cache_read', input_details.cached_tokens)
+
+    yield StatEvent('output', usage.completion_tokens)
 
     output_details = usage.completion_tokens_details
     if output_details is not None:

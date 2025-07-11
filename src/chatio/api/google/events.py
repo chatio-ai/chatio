@@ -48,13 +48,13 @@ def _pump_usage(usage: GenerateContentResponseUsageMetadata | None) -> Iterator[
         usage.prompt_token_count = 0
     yield StatEvent('input', usage.prompt_token_count)
 
-    if usage.candidates_token_count is None:
-        usage.candidates_token_count = 0
-    yield StatEvent('output', usage.candidates_token_count)
-
     if usage.cached_content_token_count is None:
         usage.cached_content_token_count = 0
     yield StatEvent('cache_read', usage.cached_content_token_count)
+
+    if usage.candidates_token_count is None:
+        usage.candidates_token_count = 0
+    yield StatEvent('output', usage.candidates_token_count)
 
 
 def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterator[ChatEvent]:

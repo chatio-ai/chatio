@@ -8,22 +8,34 @@ class ChatUsage:
 
     def __init__(self):
         self._stats: dict[str, int] = {}
+        self._input = 0
 
     def __call__(self, usage) -> Iterator[dict]:
         return self.generate(usage)
 
-    def generate(self, event: StatEvent) -> Iterator[dict]:
-        total = self._stats.setdefault(event.label, 0) + event.delta
-        self._stats[event.label] = total
+    def _emit_event(self, label: str, delta: int) -> dict:
+        total = self._stats.setdefault(label, 0) + delta
+        self._stats[label] = total
 
-        yield {
+        return {
             'type': 'token_usage',
-            'label': event.label,
-            'delta': event.delta,
+            'label': label,
+            'delta': delta,
             'total': total,
         }
 
-        # self._delta.input.input_history_tokens = self._delta.input.input_tokens
-        # self._delta.input.input_current_tokens = usage.input_tokens - self._delta.input.input_history_tokens
+    def generate(self, events: list[StatEvent]) -> Iterator[dict]:
+        _values = {}
+        for event in events:
+            _values[event.label] = event.delta
+            yield self._emit_event(event.label, event.delta)
 
-        # self._delta.cache.cache_missed = usage.input_tokens - usage.cache_written - usage.cache_read
+        _input = _values.get('input', 0)
+        yield self._emit_event('input_real', _input - self._input)
+
+        self._input = _input
+
+        _cache_written = _values.get('cache_written', 0)
+        _cache_read = _values.get('cache_read', 0)
+
+        yield self._emit_event('cache_miss', _input - _cache_written - _cache_read)
