@@ -1,9 +1,9 @@
 
 from typing import override
 
-from httpx import Client as HttpxClient
+from httpx import AsyncClient as HttpxClient
 
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 
 from chatio.core.client import ApiClient
@@ -30,7 +30,7 @@ class OpenAIClient(ApiClient):
 
         self._format = OpenAIFormat(_config_format)
 
-        self._client = OpenAI(
+        self._client = AsyncOpenAI(
             api_key=_config_client.api_key,
             base_url=_config_client.base_url,
             http_client=HttpxClient(**httpx_args()))
@@ -63,9 +63,9 @@ class OpenAIClient(ApiClient):
     # helpers
 
     @override
-    def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
+    async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         raise NotImplementedError
 
     @override
-    def close(self) -> None:
-        self._client.close()
+    async def close(self) -> None:
+        await self._client.close()

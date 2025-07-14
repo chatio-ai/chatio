@@ -1,9 +1,9 @@
 
 from typing import override
 
-from httpx import Client as HttpxClient
+from httpx import AsyncClient as HttpxClient
 
-from anthropic import Anthropic
+from anthropic import AsyncAnthropic
 
 
 from chatio.core.client import ApiClient
@@ -30,7 +30,7 @@ class ClaudeClient(ApiClient):
 
         self._format = ClaudeFormat(_config_format)
 
-        self._client = Anthropic(
+        self._client = AsyncAnthropic(
             api_key=_config_client.api_key,
             base_url=_config_client.base_url,
             http_client=HttpxClient(**httpx_args()))
@@ -53,10 +53,10 @@ class ClaudeClient(ApiClient):
     # helpers
 
     @override
-    def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
+    async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         params = self._format.format(state, tools)
 
-        result = self._client.messages.count_tokens(
+        result = await self._client.messages.count_tokens(
             model=model,
             system=params.options.system,
             messages=params.messages,
@@ -67,5 +67,5 @@ class ClaudeClient(ApiClient):
         return result.input_tokens
 
     @override
-    def close(self) -> None:
-        self._client.close()
+    async def close(self) -> None:
+        await self._client.close()
