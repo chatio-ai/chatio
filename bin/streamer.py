@@ -4,7 +4,7 @@ import sys
 
 
 from chatio.cli.stdio import run_info, run_user_extra, run_chat
-from chatio.cli.style import Style
+from chatio.cli.style import Theme, Color
 
 from chatio.misc import setup_logging
 from chatio.misc import build_chat
@@ -16,14 +16,17 @@ setup_logging()
 def main():
     prompt = " ".join(sys.argv[1:])
 
+    input_theme = Theme(direction=Theme.INPUT, color=Color.BRIGHT_GREEN)
+    model_theme = Theme(direction=Theme.OUTPUT, color=Color.BRIGHT_CYAN)
+
     chat = build_chat(prompt)
 
-    run_info(chat, Style("::: ", color=Style.BRIGHT_GREEN))
+    run_info(chat, model_theme)
 
     results = None
     while True:
         print()
-        content, files = run_user_extra(Style(">>> ", color=Style.BRIGHT_GREEN))
+        content, files = run_user_extra(input_theme)
         if content is None:
             break
         if not files and not content:
@@ -38,10 +41,7 @@ def main():
         chat.state.update_prediction_message(results)
 
         print()
-        results = run_chat(chat.stream_content(),
-                           model_style=Style("<<< ", color=Style.BRIGHT_CYAN),
-                           event_style=Style("::: ", color=Style.RESET),
-                           tools_style=Style("<<< ", color=Style.BRIGHT_MAGENTA))
+        results = run_chat(chat.stream_content(), model_theme)
 
     print()
 

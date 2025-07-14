@@ -1,11 +1,15 @@
 
+import re
 import sys
 
 from collections.abc import Iterable
+from collections.abc import Iterator
 
 from contextlib import suppress
 
 from pathlib import Path
+
+from typing import TextIO
 
 
 from chatio.core.events import ChatEvent
@@ -15,56 +19,87 @@ from chatio.core.events import StatEvent
 from chatio.core.events import ModelTextChunk
 from chatio.core.events import ToolsTextChunk
 
+from chatio.chat import Chat
 
+
+from .style import Theme, Input, Model
 from .style import Style, Empty
 from .input import setup_readline
 
 
-def _mk_style(style=None) -> Style:
+class StyleWrap:
+
+    def __init__(
+        self, style: Style, end: str | None = None,
+        file: TextIO | None = None, *, prompt: bool = False,
+    ) -> None:
+        self.style = style
+        self.file = file
+        self.end = end
+        self.prompt = prompt
+
+    def __enter__(self) -> str:
+        if self.prompt:
+            return re.sub('\033\\[[0-9;]*m', '\001\\g<0>\002', self.style.prefix)
+
+        print(self.style.prefix, end="", flush=True, file=self.file)
+        return ""
+
+    def __exit__(self, *exc_info) -> None:
+        print(self.style.suffix, end=self.end, flush=True, file=self.file)
+
+
+def _wrap_print(style: Style, end: str | None = None, file: TextIO | None = None) -> StyleWrap:
+    return StyleWrap(style, end=end, file=file)
+
+
+def _wrap_input(style: Style, end: str | None = None, file: TextIO | None = None) -> StyleWrap:
+    return StyleWrap(style, end=end, file=file, prompt=True)
+
+
+def run_text(text: str, style: Style | None = None, *, file: TextIO | None = None) -> None:
     if style is None:
-        return Empty
-
-    if isinstance(style, str):
-        return Style(prefix=style)
-
-    return style
-
-
-def run_text(text, style=None, *, file=None):
-    with _mk_style(style).wrap_print(file=file):
+        style = Empty
+    with _wrap_print(style, file=file):
         print(text, end="", flush=True, file=file)
 
 
-def run_info(chat, style=None, *, file=None):
+def run_info(chat: Chat, theme: Theme | None = None, *, file: TextIO | None = None) -> None:
     info = chat.info()
+
+    if theme is None:
+        theme = Model
 
     run_text(
         f"chatio: model: {info.vendor}/{info.model} "
         f"tools: {info.tools} system: {info.system} messages: {info.messages}",
-        style=style, file=file)
+        style=theme.event_pri, file=file)
 
 
-def run_user(style=None, *, file=None) -> str | None:
+def run_user(theme: Theme | None = None, *, file: TextIO | None = None) -> str | None:
     setup_readline()
+
+    if theme is None:
+        theme = Input
 
     user_input = None
     if sys.stdin.isatty():
         with (
-            _mk_style(style).wrap_input(end="", file=file) as prompt,
+            _wrap_input(theme.chunk_pri, end="", file=file) as prompt,
             suppress(EOFError, KeyboardInterrupt),
         ):
             user_input = input(prompt)
     else:
         with suppress(EOFError, KeyboardInterrupt):
             user_input = input()
-            with _mk_style(style).wrap_print(end="", file=file):
+            with _wrap_print(theme.chunk_pri, end="", file=file):
                 print(user_input, flush=True, file=file)
 
     return user_input
 
 
-def run_user_extra(style=None, *, file=None) -> tuple[str | None, list[Path]]:
-    user_input = run_user(style, file=file)
+def run_user_extra(theme: Theme | None = None, *, file: TextIO | None = None) -> tuple[str | None, list[Path]]:
+    user_input = run_user(theme, file=file)
     if user_input is None:
         return None, []
 
@@ -91,7 +126,7 @@ def run_user_extra(style=None, *, file=None) -> tuple[str | None, list[Path]]:
     return user_input, paths
 
 
-def _run_chat_event(event: ChatEvent, style: Style, *, file=None):
+def _run_chat_event(event: ChatEvent, style: Style, *, file: TextIO | None = None) -> None:
 
     match event:
 
@@ -107,15 +142,15 @@ def _run_chat_event(event: ChatEvent, style: Style, *, file=None):
         case _:
             raise RuntimeError
 
-    with style.wrap_print(file=file):
+    with _wrap_print(style, file=file):
         print(text, end="", flush=True, file=file)
 
 
-def _run_text_chunk(chunk: str, style: Style, file=None, *, hascr: bool = False):
+def _run_text_chunk(chunk: str, style: Style, file: TextIO | None = None, *, hascr: bool = False) -> bool:
     for chunk_line in chunk.splitlines(keepends=True):
         result = ""
         if hascr:
-            result += style.color + style.prefix
+            result += style.prefix
 
         hascr = chunk_line.endswith("\n")
         if hascr:
@@ -130,23 +165,20 @@ def _run_text_chunk(chunk: str, style: Style, file=None, *, hascr: bool = False)
     return hascr
 
 
-def _run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, tools_style=None, *, file=None):
-    _model_style: Style = _mk_style(model_style)
-    _tools_style: Style = _mk_style(tools_style)
-    _event_style: Style = _mk_style(event_style)
+def _run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *, file: TextIO | None = None) -> Iterator[str]:
+    if theme is None:
+        theme = Model
 
     defer = None
     for event in events:
-        style = _event_style
+        style = theme.event_sec
         match event:
             case ModelTextChunk(_, label) if label is None:
-                style = _model_style
+                style = theme.chunk_pri
             case ModelTextChunk():
-                style = _tools_style
+                style = theme.chunk_sec
             case ToolsTextChunk():
-                style = _tools_style
-            # case _:
-            #     style = _event_style
+                style = theme.chunk_sec
 
         if defer != style and defer:
             _run_text_chunk('\n', style, file=file, hascr=not defer)
@@ -165,5 +197,5 @@ def _run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, t
                 defer = None
 
 
-def run_chat(events: Iterable[ChatEvent], model_style=None, event_style=None, tools_style=None, *, file=None):
-    return "".join(_run_chat(events, model_style, event_style, tools_style, file=file))
+def run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *, file: TextIO | None = None) -> str:
+    return "".join(_run_chat(events, theme, file=file))

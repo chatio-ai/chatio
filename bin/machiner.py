@@ -25,11 +25,11 @@ def main():
 
         content = content_raw.replace('\\n', '\n').replace('\\\\', '\\')
 
-        run_text(content, ">>> ", file=sys.stderr)
+        run_text(content, file=sys.stderr)
 
         chat.state.append_input_message(content)
 
-        content = run_chat(chat.stream_content(), "<<< ", file=sys.stderr)
+        content = run_chat(chat.stream_content(), file=sys.stderr)
 
         content_raw = content.replace('\\', '\\\\').replace('\n', '\\n')
 

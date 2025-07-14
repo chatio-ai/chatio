@@ -55,25 +55,25 @@ def makechat():
 def main():
     chat = makechat()
 
-    run_info(chat, "::: ")
+    run_info(chat)
 
     filenames = sys.argv[1:]
     for filename in filenames:
         chat.state.attach_document_auto(file=filename)
 
-    # chat.append_input_message("duplicate my message as is")
+    # chat.state.append_input_message("duplicate my message as is")
 
-    run_info(chat, "::: ")
+    run_info(chat)
 
     print()
 
     if filenames:
-        run_chat(chat.stream_content(), "<<< ", "::: ")
+        run_chat(chat.stream_content())
 
-    # chat.append_input_message("what is the exact text on first image? duplicate my message as is")
+    # chat.state.append_input_message("what is the exact text on first image? duplicate my message as is")
     chat.state.append_input_message("what is the exact text on first image?")
 
-    run_chat(chat.stream_content(), "<<< ", "::: ")
+    run_chat(chat.stream_content())
 
     print()
 
