@@ -37,6 +37,7 @@ FROM build AS final
 COPY --from=devel /app/src /app/src
 COPY --from=devel /app/bin /app/bin
 
+ENV PYTHONDEVMODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app/src/
 

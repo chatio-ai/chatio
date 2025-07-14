@@ -68,3 +68,6 @@ class ClaudeClient(ApiClient):
             tools=params.tools.tools,
             tool_choice=params.tools.tool_choice,
         ).input_tokens
+
+    def __del__(self) -> None:
+        self._client.close()
