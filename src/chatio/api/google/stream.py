@@ -1,7 +1,10 @@
 
 import logging
 
+from collections.abc import AsyncIterator
 from collections.abc import Iterator
+
+from collections.abc import Awaitable
 from collections.abc import Callable
 
 from dataclasses import dataclass, field
@@ -102,30 +105,38 @@ def _pump_calls(calls: list[FunctionCall]) -> Iterator[CallEvent]:
         yield CallEvent(call.id or "", call.name, call.args, call.args)
 
 
-def _pump(stream: Iterator[GenerateContentResponse]) -> Iterator[ChatEvent]:
+async def _pump(stream: AsyncIterator[GenerateContentResponse]) -> AsyncIterator[ChatEvent]:
     final = _PumpFinal()
 
-    for chunk in stream:
-        yield from _pump_chunk(chunk, final)
+    async for chunk in stream:
+        for event in _pump_chunk(chunk, final):
+            yield event
 
-    yield from _pump_grounding(final.search)
+    for event in _pump_grounding(final.search):
+        yield event
 
     yield StopEvent(final.text)
 
-    yield from _pump_usage(final.usage)
+    for event in _pump_usage(final.usage):
+        yield event
 
-    yield from _pump_calls(final.calls)
+    for event in _pump_calls(final.calls):
+        yield event
 
 
 class GoogleStream(ApiStream):
 
-    def __init__(self, streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> None:
+    def __init__(
+        self, streamfun: Callable[[], Awaitable[AsyncIterator[GenerateContentResponse]]],
+    ) -> None:
         self._streamfun = streamfun
 
     @override
-    def __iter__(self) -> Iterator[ChatEvent]:
-        return _pump(self._streamfun())
+    # pylint: disable=invalid-overridden-method
+    async def __aiter__(self) -> AsyncIterator[ChatEvent]:
+        async for event in _pump(await self._streamfun()):
+            yield event
 
     @override
-    def close(self) -> None:
+    async def close(self) -> None:
         pass

@@ -5,7 +5,7 @@ repos:
 
       - id: flake8
         name: flake8
-        entry: flake8 --count --color always
+        entry: flake8 --count --color always --asyncio
         language: system
         types: [python]
         require_serial: true

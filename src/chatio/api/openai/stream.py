@@ -1,6 +1,7 @@
 
 import logging
 
+from collections.abc import AsyncIterator
 from collections.abc import Iterator
 
 from typing import override
@@ -9,8 +10,8 @@ from typing import override
 from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.parsed_function_tool_call import ParsedFunctionToolCall
 from openai.lib.streaming.chat._events import ChatCompletionStreamEvent
-from openai.lib.streaming.chat._completions import ChatCompletionStreamManager
-from openai.lib.streaming.chat._completions import ChatCompletionStream
+from openai.lib.streaming.chat._completions import AsyncChatCompletionStreamManager
+from openai.lib.streaming.chat._completions import AsyncChatCompletionStream
 
 from openai import LengthFinishReasonError
 
@@ -67,32 +68,38 @@ def _pump_calls(calls: list[ParsedFunctionToolCall] | None) -> Iterator[CallEven
                         call.function.parsed_arguments, call.function.arguments)
 
 
-def _pump(stream: ChatCompletionStream) -> Iterator[ChatEvent]:
-    for chunk in stream:
-        yield from _pump_chunk(chunk)
+async def _pump(stream: AsyncChatCompletionStream) -> AsyncIterator[ChatEvent]:
+    async for chunk in stream:
+        for event in _pump_chunk(chunk):
+            yield event
 
     try:
-        final = stream.get_final_completion()
+        final = await stream.get_final_completion()
         final_message = final.choices[0].message
         yield StopEvent(final_message.content or "")
 
-        yield from _pump_usage(final.usage)
+        for event in _pump_usage(final.usage):
+            yield event
 
-        yield from _pump_calls(final_message.tool_calls)
+        for event in _pump_calls(final_message.tool_calls):
+            yield event
     except LengthFinishReasonError as e:
-        yield from _pump_usage(e.completion.usage)
+        for event in _pump_usage(e.completion.usage):
+            yield event
 
 
 class OpenAIStream(ApiStream):
 
-    def __init__(self, streamctx: ChatCompletionStreamManager) -> None:
+    def __init__(self, streamctx: AsyncChatCompletionStreamManager) -> None:
         self._streamctx = streamctx
 
     @override
-    def __iter__(self) -> Iterator[ChatEvent]:
-        stream = self._streamctx.__enter__()
-        return _pump(stream)
+    # pylint: disable=invalid-overridden-method
+    async def __aiter__(self) -> AsyncIterator[ChatEvent]:
+        stream = await self._streamctx.__aenter__()
+        async for event in _pump(stream):
+            yield event
 
     @override
-    def close(self) -> None:
-        return self._streamctx.__exit__(None, None, None)
+    async def close(self) -> None:
+        return await self._streamctx.__aexit__(None, None, None)

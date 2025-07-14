@@ -8,17 +8,17 @@ from typing import Self
 
 class Closeable(ABC):
 
-    def __enter__(self) -> Self:
+    async def __aenter__(self) -> Self:
         return self
 
-    def __exit__(
+    async def __aexit__(
         self,
         exc_type: type[BaseException] | None,
         exc: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        return self.close()
+        return await self.close()
 
     @abstractmethod
-    def close(self) -> None:
+    async def close(self) -> None:
         ...

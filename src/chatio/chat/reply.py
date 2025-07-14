@@ -1,6 +1,6 @@
 
+from collections.abc import AsyncIterator
 from collections.abc import Callable
-from collections.abc import Iterator
 
 from typing import override
 
@@ -32,20 +32,21 @@ class ChatReply(ApiStream):
         self._stream: ApiStream | None = None
 
     @override
-    def close(self) -> None:
+    async def close(self) -> None:
         if self._stream is not None:
-            self._stream.close()
+            await self._stream.close()
             self._stream = None
 
     @override
-    def __iter__(self) -> Iterator[ChatEvent]:
+    # pylint: disable=invalid-overridden-method
+    async def __aiter__(self) -> AsyncIterator[ChatEvent]:
         while not self._ready:
             calls: list[CallEvent] = []
             stats: list[StatEvent] = []
 
             self._stream = self._model(self._state, self._tools)
 
-            for event in self._stream:
+            async for event in self._stream:
                 match event:
                     case CallEvent():
                         calls.append(event)
@@ -57,10 +58,12 @@ class ChatReply(ApiStream):
                     case _:
                         yield event
 
-            self._stream.close()
+            await self._stream.close()
 
-            yield from self._usage(stats)
+            for event in self._usage(stats):
+                yield event
 
-            yield from self._tools(calls, self._state)
+            for event in self._tools(calls, self._state):
+                yield event
 
             self._ready = not calls

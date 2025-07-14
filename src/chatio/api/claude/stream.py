@@ -1,6 +1,7 @@
 
 import logging
 
+from collections.abc import AsyncIterator
 from collections.abc import Iterator
 
 from typing import override
@@ -9,8 +10,8 @@ from typing import override
 from anthropic.types.usage import Usage
 from anthropic.types.content_block import ContentBlock
 from anthropic.lib.streaming import MessageStreamEvent
-from anthropic.lib.streaming import MessageStreamManager
-from anthropic.lib.streaming import MessageStream
+from anthropic.lib.streaming import AsyncMessageStreamManager
+from anthropic.lib.streaming import AsyncMessageStream
 
 
 from chatio.core.events import ChatEvent
@@ -61,30 +62,35 @@ def _pump_calls(content: list[ContentBlock]) -> Iterator[CallEvent]:
             yield CallEvent(message.id, message.name, message.input, message.input)
 
 
-def _pump(stream: MessageStream) -> Iterator[ChatEvent]:
-    for chunk in stream:
-        yield from _pump_chunk(chunk)
+async def _pump(stream: AsyncMessageStream) -> AsyncIterator[ChatEvent]:
+    async for chunk in stream:
+        for event in _pump_chunk(chunk):
+            yield event
 
-    final = stream.get_final_message()
+    final = await stream.get_final_message()
 
     final_content = "".join(block.text for block in final.content if block.type == 'text')
     yield StopEvent(final_content)
 
-    yield from _pump_usage(final.usage)
+    for event in _pump_usage(final.usage):
+        yield event
 
-    yield from _pump_calls(final.content)
+    for event in _pump_calls(final.content):
+        yield event
 
 
 class ClaudeStream(ApiStream):
 
-    def __init__(self, streamctx: MessageStreamManager) -> None:
+    def __init__(self, streamctx: AsyncMessageStreamManager) -> None:
         self._streamctx = streamctx
 
     @override
-    def __iter__(self) -> Iterator[ChatEvent]:
-        stream = self._streamctx.__enter__()
-        return _pump(stream)
+    # pylint: disable=invalid-overridden-method
+    async def __aiter__(self) -> AsyncIterator[ChatEvent]:
+        stream = await self._streamctx.__aenter__()
+        async for event in _pump(stream):
+            yield event
 
     @override
-    def close(self) -> None:
-        return self._streamctx.__exit__(None, None, None)
+    async def close(self) -> None:
+        return await self._streamctx.__aexit__(None, None, None)

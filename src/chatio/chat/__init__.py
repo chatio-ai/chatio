@@ -53,8 +53,8 @@ class Chat(Closeable):
         return self._tools
 
     @override
-    def close(self) -> None:
-        self._client.close()
+    async def close(self) -> None:
+        await self._client.close()
 
     # streams
 
@@ -66,8 +66,8 @@ class Chat(Closeable):
 
     # helpers
 
-    def count_tokens(self) -> int:
-        return self._client.count_message_tokens(self._model.model, self._state, self._tools)
+    async def count_tokens(self) -> int:
+        return await self._client.count_message_tokens(self._model.model, self._state, self._tools)
 
     def info(self) -> ChatInfo:
         return ChatInfo(

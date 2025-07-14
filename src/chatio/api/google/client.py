@@ -33,7 +33,7 @@ class GoogleClient(ApiClient):
             http_options=HttpOptions(
                 base_url=_config_client.base_url,
                 client_args=httpx_args(),
-            ))
+            )).aio
 
     # streams
 
@@ -54,9 +54,9 @@ class GoogleClient(ApiClient):
     # helpers
 
     @override
-    def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
+    async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         raise NotImplementedError
 
     @override
-    def close(self) -> None:
+    async def close(self) -> None:
         pass
