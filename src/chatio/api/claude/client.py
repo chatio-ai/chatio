@@ -61,13 +61,15 @@ class ClaudeClient(ApiClient):
     def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         params = self._format.format(state, tools)
 
-        return self._client.messages.count_tokens(
+        result = self._client.messages.count_tokens(
             model=model,
             system=params.options.system,
             messages=params.messages,
             tools=params.tools.tools,
             tool_choice=params.tools.tool_choice,
-        ).input_tokens
+        )
+
+        return result.input_tokens
 
     def __del__(self) -> None:
         self._client.close()

@@ -5,5 +5,3 @@ ruff
 pylint
 pyright[nodejs]
 mypy
-
-pytest

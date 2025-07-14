@@ -1,6 +1,6 @@
 [tool.flake8]
 max-line-length = 120
-ignore = [
+extend-ignore = [
 	"F541",		# F541: f-string is missing placeholders
 ]
 
