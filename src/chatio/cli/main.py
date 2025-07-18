@@ -1,4 +1,6 @@
 
+import asyncio
+
 from contextlib import suppress
 
 from chatio.misc import build_chat
@@ -10,14 +12,14 @@ from ._cli import entry_point
 
 
 @entry_point
-def main(*args: str) -> None:
+async def main(*args: str) -> None:
 
     prompt = " ".join(args)
 
     input_theme = Theme(direction=Theme.INPUT, color=Color.BRIGHT_GREEN)
     model_theme = Theme(direction=Theme.OUTPUT, color=Color.BRIGHT_CYAN)
 
-    with build_chat(prompt) as chat:
+    async with build_chat(prompt) as chat:
 
         run_info(chat, model_theme)
 
@@ -39,7 +41,7 @@ def main(*args: str) -> None:
             chat.state.update_prediction_message(results)
 
             print()
-            with suppress(KeyboardInterrupt):
-                results = run_chat(chat.stream_content(), model_theme)
+            with suppress(asyncio.CancelledError):
+                results = await run_chat(chat.stream_content(), model_theme)
 
         print()
