@@ -63,7 +63,7 @@ class ChatReply(ApiStream):
             for event in self._usage(stats):
                 yield event
 
-            for event in self._tools(calls, self._state):
+            async for event in self._tools(calls, self._state):
                 yield event
 
             self._ready = not calls

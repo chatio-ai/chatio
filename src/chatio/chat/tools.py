@@ -1,7 +1,7 @@
 
 from dataclasses import dataclass, field
 
-from collections.abc import Iterator
+from collections.abc import AsyncIterator
 from collections.abc import Callable
 
 from chatio.core.models import ToolSchema
@@ -21,7 +21,7 @@ from .state import ChatState
 
 @dataclass
 class ChatTools(_ChatTools):
-    _funcs: dict[str, Callable[..., Iterator[str | dict]]] = field(default_factory=dict)
+    _funcs: dict[str, Callable[..., AsyncIterator[str | dict]]] = field(default_factory=dict)
 
     def __init__(self, tools: list[ToolBase] | None = None,
                  tool_choice_mode: str | None = None, tool_choice_name: str | None = None) -> None:
@@ -49,13 +49,13 @@ class ChatTools(_ChatTools):
         super().__init__(_tools, _tool_choice)
         self._funcs = _funcs
 
-    def _call(self, call: CallEvent, state: ChatState) -> Iterator[ChatEvent]:
+    async def _call(self, call: CallEvent, state: ChatState) -> AsyncIterator[ChatEvent]:
         tool_func = self._funcs.get(call.name)
         if not tool_func:
             return
 
         content = ""
-        for event in tool_func(**call.args):
+        async for event in tool_func(**call.args):
             if isinstance(event, str):
                 content += event
                 yield ToolsTextChunk(event)
@@ -65,7 +65,8 @@ class ChatTools(_ChatTools):
         state.append_call_request(call.call_id, call.name, call.args_raw)
         state.append_call_response(call.call_id, call.name, content)
 
-    def __call__(self, calls: list[CallEvent], state: ChatState) -> Iterator[ChatEvent]:
+    async def __call__(self, calls: list[CallEvent], state: ChatState) -> AsyncIterator[ChatEvent]:
         for call in calls:
             yield call
-            yield from self._call(call, state)
+            async for event in self._call(call, state):
+                yield event
