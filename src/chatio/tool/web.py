@@ -1,5 +1,5 @@
 
-from collections.abc import Iterator
+from collections.abc import AsyncIterator
 
 from typing import override
 
@@ -35,7 +35,8 @@ class WebSearchTool(ToolBase):
         return result if isinstance(result, str) else result.url
 
     @override
-    def __call__(self, text: str) -> Iterator[str]:
+    # pylint: disable=invalid-overridden-method
+    async def __call__(self, text: str) -> AsyncIterator[str]:
         yield "\n".join(self._result_to_str(result) for result in search(text))
 
 
@@ -59,5 +60,6 @@ class WebBrowseTool(ToolBase):
         }
 
     @override
-    def __call__(self, url: str) -> Iterator[str]:
+    # pylint: disable=invalid-overridden-method
+    async def __call__(self, url: str) -> AsyncIterator[str]:
         yield html2text(get(url, timeout=10).text)

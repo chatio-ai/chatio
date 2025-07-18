@@ -1,5 +1,5 @@
 
-from collections.abc import Iterator
+from collections.abc import AsyncIterator
 
 from typing import override
 
@@ -31,6 +31,7 @@ class DoNothingTool(ToolBase):
         }
 
     @override
-    def __call__(self, dummy: None = None) -> Iterator[str]:
+    # pylint: disable=invalid-overridden-method
+    async def __call__(self, dummy: None = None) -> AsyncIterator[str]:
         return
         yield dummy
