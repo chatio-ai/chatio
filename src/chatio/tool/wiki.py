@@ -1,5 +1,5 @@
 
-from collections.abc import Iterator
+from collections.abc import AsyncIterator
 from collections.abc import Callable
 
 from typing import override
@@ -34,8 +34,8 @@ class WikiPageToolBase(ToolBase):
 
         return self.page_cache[title], cached
 
-    def _page_do(self, title: str | None,
-                 func: Callable[[MediaWikiPage], str | None]) -> Iterator[str | dict]:
+    async def _page_do(self, title: str | None,
+                       func: Callable[[MediaWikiPage], str | None]) -> AsyncIterator[str | dict]:
 
         page_entry = self._get_page(title)
         if page_entry is None:
@@ -73,7 +73,8 @@ class WikiSearchTool(ToolBase):
         self.wiki = wiki
 
     @override
-    def __call__(self, text: str | None = None) -> Iterator[str | dict]:
+    # pylint: disable=invalid-overridden-method
+    async def __call__(self, text: str | None = None) -> AsyncIterator[str | dict]:
         yield "\n".join(self.wiki().search(text))
 
 
@@ -97,7 +98,7 @@ class WikiContentTool(WikiPageToolBase):
         }
 
     @override
-    def __call__(self, title: str | None = None) -> Iterator[str | dict]:
+    def __call__(self, title: str | None = None) -> AsyncIterator[str | dict]:
         return self._page_do(title, lambda page: "\n".join(page.sections))
 
 
@@ -121,7 +122,7 @@ class WikiSummaryTool(WikiPageToolBase):
         }
 
     @override
-    def __call__(self, title: str | None = None) -> Iterator[str | dict]:
+    def __call__(self, title: str | None = None) -> AsyncIterator[str | dict]:
         return self._page_do(title, lambda page: page.section(None))
 
 
@@ -150,7 +151,7 @@ class WikiSectionTool(WikiPageToolBase):
 
     @override
     def __call__(self, title: str | None = None,
-                 section: str | None = None) -> Iterator[str | dict]:
+                 section: str | None = None) -> AsyncIterator[str | dict]:
         return self._page_do(title, lambda page: page.section(section))
 
 

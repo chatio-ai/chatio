@@ -1,5 +1,5 @@
 
-from collections.abc import Iterator
+from collections.abc import AsyncIterator
 
 from typing import override
 
@@ -34,9 +34,10 @@ class LlmDialogTool(ToolBase):
         self._agent = agent
 
     @override
-    def __call__(self, message: str) -> Iterator[str]:
+    # pylint: disable=invalid-overridden-method
+    async def __call__(self, message: str) -> AsyncIterator[str]:
         self._agent.state.append_input_message(message)
-        for event in self._agent.stream_content():
+        async for event in self._agent.stream_content():
             match event:
                 case ModelTextChunk(text, _):
                     yield text

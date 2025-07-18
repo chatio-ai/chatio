@@ -1,7 +1,7 @@
 
 from abc import ABC, abstractmethod
 
-from collections.abc import Iterator
+from collections.abc import AsyncIterator
 
 from typing import Any
 
@@ -16,5 +16,5 @@ class ToolBase(ABC):
         ...
 
     @abstractmethod
-    def __call__(self, *_args: Any, **_kwargs: Any) -> Iterator[str | dict]:    # noqa: ANN401
+    def __call__(self, *_args: Any, **_kwargs: Any) -> AsyncIterator[str | dict]:    # noqa: ANN401
         ...
