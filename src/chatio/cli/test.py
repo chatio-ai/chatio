@@ -70,9 +70,9 @@ Do not remove anything and do not add anything!
 
 
 @entry_point
-def main(*filenames: str) -> None:
+async def main(*filenames: str) -> None:
 
-    with makechat() as chat:
+    async with makechat() as chat:
 
         run_info(chat)
 
@@ -86,11 +86,11 @@ def main(*filenames: str) -> None:
         print()
 
         if filenames:
-            run_chat(chat.stream_content())
+            await run_chat(chat.stream_content())
 
         chat.state.append_input_message("what is the exact text on first image?")
         # chat.state.append_input_message("duplicate my message as is")
 
-        run_chat(chat.stream_content())
+        await run_chat(chat.stream_content())
 
         print()
