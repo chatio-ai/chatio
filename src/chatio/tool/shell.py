@@ -1,11 +1,13 @@
 
-from collections.abc import Iterator
+import asyncio
+
+from asyncio.subprocess import PIPE
+from asyncio.subprocess import STDOUT
+
+from collections.abc import AsyncIterator
 
 from typing import override
 
-from subprocess import Popen
-from subprocess import PIPE
-from subprocess import STDOUT
 
 from chatio.core.schema import ToolSchemaDict
 from chatio.core.invoke import ToolBase
@@ -14,32 +16,33 @@ from chatio.core.invoke import ToolBase
 # pylint: disable=too-few-public-methods
 class ShellToolBase(ToolBase):
 
-    def _iterate(self, command: str, iterate: Iterator[str]) -> Iterator[str]:
+    async def _iterate(self, command: str, iterate: AsyncIterator[bytes]) -> AsyncIterator[str]:
         yield f"""\
 ```
 $ {command}
 """
-        yield from iterate
+        async for chunk in iterate:
+            yield chunk.decode('utf-8')
         yield """\
 ```
 """
 
-    def _command(self, command: str) -> Iterator[str | dict]:
+    async def _command(self, command: str) -> AsyncIterator[str | dict]:
 
-        with Popen(    # noqa: S602
-                command, shell=True, start_new_session=True,
-                stdout=PIPE, stderr=STDOUT, text=True) as process:
+        process = await asyncio.create_subprocess_shell(
+                command, start_new_session=True, stdout=PIPE, stderr=STDOUT)
 
-            try:
-                if process.stdout is None:
-                    raise RuntimeError
+        try:
+            if process.stdout is None:
+                raise RuntimeError
 
-                yield from self._iterate(command, process.stdout)
-            finally:
-                process.terminate()
-                exit_code = process.wait()
-                yield f"# exit code: {exit_code}"
-                yield {'command': command, 'exit_code': exit_code}
+            async for chunk in self._iterate(command, process.stdout):
+                yield chunk
+        finally:
+            process.terminate()
+            exit_code = await process.wait()
+            yield f"# exit code: {exit_code}"
+            yield {'command': command, 'exit_code': exit_code}
 
 
 class ShellCalcTool(ShellToolBase):
@@ -62,7 +65,7 @@ class ShellCalcTool(ShellToolBase):
         }
 
     @override
-    def __call__(self, expr: str) -> Iterator[str | dict]:
+    def __call__(self, expr: str) -> AsyncIterator[str | dict]:
         return self._command(f"echo '{expr}' | bc")
 
 
@@ -86,5 +89,5 @@ class ShellExecTool(ShellToolBase):
         }
 
     @override
-    def __call__(self, command: str) -> Iterator[str | dict]:
+    def __call__(self, command: str) -> AsyncIterator[str | dict]:
         return self._command(command)
