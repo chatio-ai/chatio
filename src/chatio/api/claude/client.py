@@ -71,5 +71,6 @@ class ClaudeClient(ApiClient):
 
         return result.input_tokens
 
-    def __del__(self) -> None:
+    @override
+    def close(self) -> None:
         self._client.close()

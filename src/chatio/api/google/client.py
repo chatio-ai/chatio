@@ -62,3 +62,7 @@ class GoogleClient(ApiClient):
     @override
     def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         raise NotImplementedError
+
+    @override
+    def close(self) -> None:
+        pass

@@ -17,11 +17,11 @@ def main():
     if not content.strip():
         raise SystemExit
 
-    chat = build_chat(prompt, [content])
+    with build_chat(prompt, [content]) as chat:
 
-    run_info(chat, file=sys.stderr)
+        run_info(chat, file=sys.stderr)
 
-    print(chat.count_tokens())
+        print(chat.count_tokens())
 
 
 if __name__ == '__main__':

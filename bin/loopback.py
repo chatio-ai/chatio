@@ -43,43 +43,44 @@ def main():
             run_text("### " + prompt_line, themes[True].chunk_pri)
         print()
 
-    chats = [
-        build_chat(request_prompt, ["."]),
-        build_chat(response_prompt),
-    ]
+    with (
+        build_chat(request_prompt, ["."]) as chat_request,
+        build_chat(response_prompt) as chat_response,
+    ):
+        chats = [chat_request, chat_response]
 
-    index = False
+        index = False
 
-    messages_list = text_from(script.joinpath('messages.list'))
-    if messages_list is not None:
-        for content_raw in messages_list.splitlines():
-            content = content_raw.strip()
-            if not content:
-                continue
+        messages_list = text_from(script.joinpath('messages.list'))
+        if messages_list is not None:
+            for content_raw in messages_list.splitlines():
+                content = content_raw.strip()
+                if not content:
+                    continue
 
-            chats[index].state.append_output_message(content)
-            chats[not index].state.append_input_message(content)
+                chats[index].state.append_output_message(content)
+                chats[not index].state.append_input_message(content)
 
-            run_text(content, themes[index].chunk_pri)
-            print()
+                run_text(content, themes[index].chunk_pri)
+                print()
 
-            index = not index
+                index = not index
 
-    run_info(chats[index], themes[index])
-    print()
-
-    run_info(chats[not index], themes[not index])
-    print()
-
-    try:
-        while True:
-            content = run_chat(chats[index].stream_content(), themes[index])
-            chats[not index].state.append_input_message(content)
-            print()
-
-            index = not index
-    except KeyboardInterrupt:
+        run_info(chats[index], themes[index])
         print()
+
+        run_info(chats[not index], themes[not index])
+        print()
+
+        try:
+            while True:
+                content = run_chat(chats[index].stream_content(), themes[index])
+                chats[not index].state.append_input_message(content)
+                print()
+
+                index = not index
+        except KeyboardInterrupt:
+            print()
 
 
 if __name__ == '__main__':

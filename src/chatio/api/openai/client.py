@@ -72,5 +72,6 @@ class OpenAIClient(ApiClient):
     def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         raise NotImplementedError
 
-    def __del__(self) -> None:
+    @override
+    def close(self) -> None:
         self._client.close()

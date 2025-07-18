@@ -17,3 +17,7 @@ class ApiClient(ABC):
     @abstractmethod
     def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         ...
+
+    @abstractmethod
+    def close(self):
+        ...

@@ -3,6 +3,8 @@ from collections.abc import Iterator
 
 from dataclasses import dataclass
 
+from typing import Self
+
 from chatio.core.config import ModelConfig
 
 from chatio.core.events import ChatEvent
@@ -59,6 +61,15 @@ class Chat:
     @property
     def tools(self) -> ChatTools:
         return self._tools
+
+    def close(self) -> None:
+        self._client.close()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()
 
     # streams
 
