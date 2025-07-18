@@ -9,11 +9,11 @@ from ._cli import entry_point
 
 
 @entry_point
-def main(*args: str) -> None:
+async def main(*args: str) -> None:
 
     prompt = " ".join(args)
 
-    with build_chat(prompt) as chat:
+    async with build_chat(prompt) as chat:
 
         while True:
             content_raw = run_user()
@@ -28,7 +28,7 @@ def main(*args: str) -> None:
 
             chat.state.append_input_message(content)
 
-            content = run_chat(chat.stream_content(), file=sys.stderr)
+            content = await run_chat(chat.stream_content(), file=sys.stderr)
 
             content_raw = content.replace('\\', '\\\\').replace('\n', '\\n')
 

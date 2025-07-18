@@ -1,6 +1,7 @@
 
 import sys
 import atexit
+import asyncio
 import pathlib
 import readline
 
@@ -89,11 +90,11 @@ def run_user(theme: Theme | None = None, *, file: TextIO | None = None) -> str |
     if sys.stdin.isatty():
         with (
             _wrap_input(theme.chunk_pri, end="", file=file) as prompt,
-            suppress(EOFError, KeyboardInterrupt),
+            suppress(EOFError, asyncio.CancelledError),
         ):
             user_input = input(prompt)
     else:
-        with suppress(EOFError, KeyboardInterrupt):
+        with suppress(EOFError, asyncio.CancelledError):
             user_input = input()
             with _wrap_print(theme.chunk_pri, end="", file=file):
                 print(user_input, flush=True, file=file)

@@ -1,6 +1,6 @@
 
-from collections.abc import Iterable
-from collections.abc import Iterator
+from collections.abc import AsyncIterable
+from collections.abc import AsyncIterator
 
 from typing import TextIO
 
@@ -82,14 +82,14 @@ def _run_text_chunk(chunk: str, style: Style, *,
     return hascr
 
 
-def _run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *,
-              file: TextIO | None = None) -> Iterator[str]:
+async def _run_chat(events: AsyncIterable[ChatEvent], theme: Theme | None = None, *,
+                    file: TextIO | None = None) -> AsyncIterator[str]:
 
     if theme is None:
         theme = Model
 
     defer = None
-    for event in events:
+    async for event in events:
         style = theme.event_sec
         match event:
             case ModelTextChunk(_, label) if label is None:
@@ -118,8 +118,8 @@ def _run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *,
                 defer = None
 
 
-def run_chat(reply: ChatReply, theme: Theme | None = None, *,
-             file: TextIO | None = None) -> str:
+async def run_chat(reply: ChatReply, theme: Theme | None = None, *,
+                   file: TextIO | None = None) -> str:
 
-    with reply as events:
-        return "".join(_run_chat(events, theme, file=file))
+    async with reply as events:
+        return "".join([_ async for _ in _run_chat(events, theme, file=file)])

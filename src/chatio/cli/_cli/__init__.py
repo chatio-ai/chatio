@@ -1,12 +1,14 @@
 
 import sys
 
+import asyncio
+
 from typing import Protocol
 
 
 # pylint: disable=too-few-public-methods
 class EntryPointFunc(Protocol):
-    def __call__(self, *args: str) -> int | None:
+    async def __call__(self, *args: str) -> int | None:
         ...
 
 
@@ -18,7 +20,7 @@ class EntryPoint(Protocol):
 
 def entry_point(func: EntryPointFunc) -> EntryPoint:
     def _func() -> int | None:
-        return func(*sys.argv[1:])
+        return asyncio.run(func(*sys.argv[1:]))
 
     if func.__module__ == '__main__':
         raise SystemExit(_func())
