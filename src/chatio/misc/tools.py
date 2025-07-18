@@ -5,17 +5,17 @@ import os
 from chatio.chat.tools import ChatTools
 from chatio.chat import Chat
 
-from toolbelt.shell import ShellCalcTool
-from toolbelt.shell import ShellExecTool
-from toolbelt.dummy import DoNothingTool
+from chatio.tool.shell import ShellCalcTool
+from chatio.tool.shell import ShellExecTool
+from chatio.tool.dummy import DoNothingTool
 
-from toolbelt.wiki import WikiToolFactory
-from toolbelt.web import WebSearchTool
-from toolbelt.web import WebBrowseTool
+from chatio.tool.wiki import WikiToolFactory
+from chatio.tool.web import WebSearchTool
+from chatio.tool.web import WebBrowseTool
 
-from toolbelt.image import ImageDumpTool
+from chatio.tool.image import ImageDumpTool
 
-from toolbelt.llm import LlmDialogTool
+from chatio.tool.llm import LlmDialogTool
 
 
 from .model import build_model

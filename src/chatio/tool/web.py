@@ -8,8 +8,8 @@ from googlesearch import SearchResult
 
 from html2text import html2text
 
-from . import ToolSchemaDict
-from . import ToolBase
+from chatio.core.schema import ToolSchemaDict
+from chatio.core.invoke import ToolBase
 
 
 class WebSearchTool(ToolBase):

@@ -1,6 +1,6 @@
 *
 !bin/*.py
-!src/toolbelt/*.py
+!src/chatio/tool/*.py
 !src/chatio/misc/*.py
 !src/chatio/chat/*.py
 !src/chatio/core/*.py

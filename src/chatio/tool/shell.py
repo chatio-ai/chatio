@@ -7,8 +7,8 @@ from contextlib import suppress
 
 from subprocess import Popen, PIPE, STDOUT
 
-from . import ToolSchemaDict
-from . import ToolBase
+from chatio.core.schema import ToolSchemaDict
+from chatio.core.invoke import ToolBase
 
 
 # pylint: disable=too-few-public-methods

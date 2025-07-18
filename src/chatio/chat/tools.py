@@ -9,7 +9,7 @@ from chatio.core.models import ToolChoice
 
 from chatio.core.models import ChatTools as _ChatTools
 
-from toolbelt import ToolBase
+from chatio.core.invoke import ToolBase
 
 
 @dataclass

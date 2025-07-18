@@ -7,8 +7,8 @@ from chatio.chat import Chat
 
 from chatio.core.events import ModelTextChunk
 
-from . import ToolSchemaDict
-from . import ToolBase
+from chatio.core.schema import ToolSchemaDict
+from chatio.core.invoke import ToolBase
 
 
 class LlmDialogTool(ToolBase):

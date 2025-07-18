@@ -3,8 +3,8 @@ from collections.abc import Iterator
 
 from typing import override
 
-from . import ToolSchemaDict
-from . import ToolBase
+from chatio.core.schema import ToolSchemaDict
+from chatio.core.invoke import ToolBase
 
 
 class DoNothingTool(ToolBase):
