@@ -33,6 +33,7 @@ disable = [
 	"unspecified-encoding",
 	"f-string-without-interpolation",
 	"missing-docstring",
+	"duplicate-code",
 ]
 
 [tool.pyright]

@@ -1,10 +1,13 @@
 
+from collections.abc import Iterator
+
 from typing import override
 
 from chatio.chat import Chat
 
 from chatio.core.events import ModelTextChunk
 
+from . import ToolSchemaDict
 from . import ToolBase
 
 
@@ -12,7 +15,7 @@ class LlmDialogTool(ToolBase):
 
     @staticmethod
     @override
-    def schema() -> dict[str, object]:
+    def schema() -> ToolSchemaDict:
         return {
             "name": "llm_dialog",
             "description": "Peform dialog to another LLM. Another LLM preserves history across session.",
@@ -26,10 +29,11 @@ class LlmDialogTool(ToolBase):
             "required": ["message"],
         }
 
-    def __init__(self, agent: Chat):
+    def __init__(self, agent: Chat) -> None:
         self._agent = agent
 
-    def __call__(self, message: str):
+    @override
+    def __call__(self, message: str) -> Iterator[str]:
         self._agent.state.append_input_message(message)
         for event in self._agent.stream_content():
             match event:

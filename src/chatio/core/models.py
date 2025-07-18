@@ -1,5 +1,9 @@
 
+from collections.abc import Mapping
+
 from dataclasses import dataclass, field
+
+from typing import Any
 
 
 @dataclass
@@ -62,7 +66,7 @@ class TextDocument(MessageContent):
 class ToolSchema:
     name: str
     desc: str
-    params: dict
+    params: Mapping[str, Any]
 
 
 @dataclass

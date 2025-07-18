@@ -1,6 +1,9 @@
 
+from collections.abc import Mapping
+
 from typing import override
 from typing import TypeGuard
+from typing import Any
 
 from google.genai.types import SchemaDict
 from google.genai.types import ToolConfigDict
@@ -23,7 +26,7 @@ class GoogleToolsFormatter(ApiToolsFormatterBase[
     GoogleConfigFormat,
 ]):
 
-    def _is_tool_params_schema(self, _params: dict) -> TypeGuard[SchemaDict]:
+    def _is_tool_params_schema(self, _params: Mapping[str, Any]) -> TypeGuard[SchemaDict]:
         return True
 
     @override

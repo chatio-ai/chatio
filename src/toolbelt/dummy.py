@@ -1,6 +1,9 @@
 
+from collections.abc import Iterator
+
 from typing import override
 
+from . import ToolSchemaDict
 from . import ToolBase
 
 
@@ -8,7 +11,7 @@ class DoNothingTool(ToolBase):
 
     @staticmethod
     @override
-    def schema() -> dict[str, object]:
+    def schema() -> ToolSchemaDict:
         return {
             "name": "do_nothing",
             "description": (
@@ -27,6 +30,7 @@ class DoNothingTool(ToolBase):
             },
         }
 
-    def __call__(self, dummy=None):
+    @override
+    def __call__(self, dummy=None) -> Iterator[str]:
         return
         yield dummy

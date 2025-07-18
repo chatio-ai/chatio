@@ -1,6 +1,7 @@
 
 from dataclasses import dataclass, field
 
+from collections.abc import Iterator
 from collections.abc import Callable
 
 from chatio.core.models import ToolSchema
@@ -8,12 +9,14 @@ from chatio.core.models import ToolChoice
 
 from chatio.core.models import ChatTools as _ChatTools
 
+from toolbelt import ToolBase
+
 
 @dataclass
 class ChatTools(_ChatTools):
-    funcs: dict[str, Callable] = field(default_factory=dict)
+    funcs: dict[str, Callable[..., Iterator[str | dict]]] = field(default_factory=dict)
 
-    def __init__(self, tools: list | None = None,
+    def __init__(self, tools: list[ToolBase] | None = None,
                  tool_choice_mode: str | None = None, tool_choice_name: str | None = None) -> None:
 
         if tools is None:
@@ -29,7 +32,7 @@ class ChatTools(_ChatTools):
             if not name or not desc or not schema:
                 raise RuntimeError
 
-            _funcs[name] = tool
+            _funcs[name] = tool.__call__
             _tools.append(ToolSchema(name, desc, schema))
 
         if tool_choice_name and tool_choice_name not in tools:

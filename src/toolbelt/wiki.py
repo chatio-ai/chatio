@@ -1,34 +1,18 @@
 
+from collections.abc import Iterator
 from collections.abc import Callable
 
 from typing import override
 
 from mediawiki import MediaWiki, MediaWikiPage
 
+from . import ToolSchemaDict
 from . import ToolBase
-
-
-class WikiToolFactory:
-    def __init__(self):
-        self.wiki = MediaWiki()
-        self.page_cache = {}
-
-    def wiki_search(self):
-        return WikiSearchTool(self.wiki)
-
-    def wiki_content(self):
-        return WikiContentTool(self.wiki, self.page_cache)
-
-    def wiki_summary(self):
-        return WikiSummaryTool(self.wiki, self.page_cache)
-
-    def wiki_section(self):
-        return WikiSectionTool(self.wiki, self.page_cache)
 
 
 # pylint: disable=too-few-public-methods
 class WikiPageToolBase(ToolBase):
-    def __init__(self, wiki, page_cache):
+    def __init__(self, wiki: MediaWiki, page_cache: dict[str, MediaWikiPage]) -> None:
         self.wiki = wiki
         self.page_cache = page_cache
 
@@ -46,7 +30,7 @@ class WikiPageToolBase(ToolBase):
 
         return self.page_cache[title], cached
 
-    def _page_do(self, title: str | None, func: Callable[[MediaWikiPage], object]):
+    def _page_do(self, title: str | None, func: Callable[[MediaWikiPage], str | None]) -> Iterator[str | dict]:
         page_entry = self._get_page(title)
         if page_entry is None:
             yield {"title": title, "cache": None}
@@ -55,14 +39,16 @@ class WikiPageToolBase(ToolBase):
         page, cached = page_entry
         yield {"title": title, "cache": cached}
 
-        yield func(page)
+        data = func(page)
+        if data is not None:
+            yield data
 
 
 class WikiSearchTool(ToolBase):
 
     @staticmethod
     @override
-    def schema() -> dict[str, object]:
+    def schema() -> ToolSchemaDict:
         return {
             "name": "wiki_search",
             "description": "Search wiki pages for given text. Returns up to 10 titles each on separate line.",
@@ -76,10 +62,11 @@ class WikiSearchTool(ToolBase):
             "required": ["text"],
         }
 
-    def __init__(self, wiki):
+    def __init__(self, wiki) -> None:
         self.wiki = wiki
 
-    def __call__(self, text=None):
+    @override
+    def __call__(self, text=None) -> Iterator[str | dict]:
         yield "\n".join(self.wiki.search(text))
 
 
@@ -87,7 +74,7 @@ class WikiContentTool(WikiPageToolBase):
 
     @staticmethod
     @override
-    def schema() -> dict[str, object]:
+    def schema() -> ToolSchemaDict:
         return {
             "name": "wiki_content",
             "description": "Get list of wiki page sections. Returns list of sections each on separate line.",
@@ -101,7 +88,8 @@ class WikiContentTool(WikiPageToolBase):
             "required": ["title"],
         }
 
-    def __call__(self, title: str | None = None):
+    @override
+    def __call__(self, title: str | None = None) -> Iterator[str | dict]:
         return self._page_do(title, lambda page: "\n".join(page.sections))
 
 
@@ -109,7 +97,7 @@ class WikiSummaryTool(WikiPageToolBase):
 
     @staticmethod
     @override
-    def schema() -> dict[str, object]:
+    def schema() -> ToolSchemaDict:
         return {
             "name": "wiki_summary",
             "description": "Get content of wiki page summary. Returns text of summary (header) section.",
@@ -123,7 +111,8 @@ class WikiSummaryTool(WikiPageToolBase):
             "required": ["title"],
         }
 
-    def __call__(self, title: str | None = None):
+    @override
+    def __call__(self, title: str | None = None) -> Iterator[str | dict]:
         return self._page_do(title, lambda page: page.section(None))
 
 
@@ -131,7 +120,7 @@ class WikiSectionTool(WikiPageToolBase):
 
     @staticmethod
     @override
-    def schema() -> dict[str, object]:
+    def schema() -> ToolSchemaDict:
         return {
             "name": "wiki_section",
             "description": "Get content of wiki page section. Returns text of the given section.",
@@ -149,5 +138,24 @@ class WikiSectionTool(WikiPageToolBase):
             "required": ["title", "section"],
         }
 
-    def __call__(self, title: str | None = None, section: str | None = None):
+    @override
+    def __call__(self, title: str | None = None, section: str | None = None) -> Iterator[str | dict]:
         return self._page_do(title, lambda page: page.section(section))
+
+
+class WikiToolFactory:
+    def __init__(self) -> None:
+        self.wiki = MediaWiki()
+        self.page_cache: dict[str, MediaWikiPage] = {}
+
+    def wiki_search(self) -> WikiSearchTool:
+        return WikiSearchTool(self.wiki)
+
+    def wiki_content(self) -> WikiContentTool:
+        return WikiContentTool(self.wiki, self.page_cache)
+
+    def wiki_summary(self) -> WikiSummaryTool:
+        return WikiSummaryTool(self.wiki, self.page_cache)
+
+    def wiki_section(self) -> WikiSectionTool:
+        return WikiSectionTool(self.wiki, self.page_cache)

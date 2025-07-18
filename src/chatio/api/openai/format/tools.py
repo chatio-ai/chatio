@@ -1,8 +1,13 @@
 
+from collections.abc import Mapping
+
+from typing import Any
 from typing import override
 
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
+
+from openai.types import FunctionParameters
 
 from openai import NotGiven, NOT_GIVEN
 
@@ -21,8 +26,8 @@ class OpenAIToolsFormatter(ApiToolsFormatterBase[
     OpenAIConfigFormat,
 ]):
 
-    def _tool_params_schema(self, params: dict) -> dict:
-        _params = params.copy()
+    def _tool_params_schema(self, params: Mapping[str, Any]) -> FunctionParameters:
+        _params = {**params}
 
         props = None
         if _params.get("type") == "object":

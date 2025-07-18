@@ -1,8 +1,14 @@
 
+from collections.abc import Mapping
+
 from typing import override
+from typing import TypeGuard
+from typing import Any
 
 from anthropic.types import ToolParam
 from anthropic.types import ToolChoiceParam
+
+from anthropic.types.tool_param import InputSchemaTyped
 
 from anthropic import NotGiven, NOT_GIVEN
 
@@ -33,8 +39,14 @@ class ClaudeToolsFormatter(ApiToolsFormatterBase[
 
         return entries
 
+    def _is_tool_params_schema(self, _params: Mapping[str, Any]) -> TypeGuard[InputSchemaTyped]:
+        return True
+
     @override
     def _tool_schema(self, tool: ToolSchema) -> ToolParam:
+        if not self._is_tool_params_schema(tool.params):
+            raise TypeError
+
         return {
             "name": tool.name,
             "description": tool.desc,

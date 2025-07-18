@@ -1,6 +1,9 @@
 
+from collections.abc import Iterator
+
 from typing import override
 
+from . import ToolSchemaDict
 from . import ToolBase
 
 
@@ -8,7 +11,7 @@ class ImageDumpTool(ToolBase):
 
     @staticmethod
     @override
-    def schema() -> dict[str, object]:
+    def schema() -> ToolSchemaDict:
         return {
             "name": "image_dump",
             "description": "Dump image analysis result. Summary includes key colors (r,g,b) and description.",
@@ -41,6 +44,7 @@ class ImageDumpTool(ToolBase):
             "required": ["info"],
         }
 
-    def __call__(self, info=None):
+    @override
+    def __call__(self, info=None) -> Iterator[str]:
         return
         yield info

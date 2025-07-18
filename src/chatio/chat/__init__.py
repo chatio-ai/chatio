@@ -62,20 +62,20 @@ class Chat:
 
     # streams
 
-    def _process_tool_call(self, tool_call_id: str, tool_name: str, tool_args: dict) -> Iterator[ChatEvent]:
-        tool_func = self._tools.funcs.get(tool_name)
+    def _process_tool_call(self, call: CallEvent) -> Iterator[ChatEvent]:
+        tool_func = self._tools.funcs.get(call.name)
         if not tool_func:
             return
 
         content = ""
-        for event in tool_func(**tool_args):
+        for event in tool_func(**call.args):
             if isinstance(event, str):
                 content += event
                 yield ToolsTextChunk(event)
             elif event is not None:
-                yield ToolEvent(tool_call_id, tool_name, event)
+                yield ToolEvent(call.call_id, call.name, event)
 
-        self._state.append_call_response(tool_call_id, tool_name, content)
+        self._state.append_call_response(call.call_id, call.name, content)
 
     def stream_content(self) -> Iterator[ChatEvent]:
         calls: list[CallEvent] = []
@@ -105,7 +105,7 @@ class Chat:
             for call in calls:
                 self._state.append_call_request(call.call_id, call.name, call.args_raw)
                 yield call
-                yield from self._process_tool_call(call.call_id, call.name, call.args)
+                yield from self._process_tool_call(call)
 
     # helpers
 
