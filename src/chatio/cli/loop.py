@@ -19,7 +19,7 @@ def text_from(filepath: pathlib.Path) -> str | None:
 
 
 @entry_point
-def main(*args: str) -> None:
+async def main(*args: str) -> None:
 
     themes = [
         Theme(direction=Theme.INPUT, color=Color.BRIGHT_GREEN),
@@ -40,7 +40,7 @@ def main(*args: str) -> None:
             run_text("### " + prompt_line, themes[True].chunk_pri)
         print()
 
-    with (
+    async with (
         build_chat(request_prompt, ["."]) as chat_request,
         build_chat(response_prompt) as chat_response,
     ):
@@ -71,7 +71,7 @@ def main(*args: str) -> None:
 
         try:
             while True:
-                content = run_chat(chats[index].stream_content(), themes[index])
+                content = await run_chat(chats[index].stream_content(), themes[index])
                 chats[not index].state.append_input_message(content)
                 print()
 
