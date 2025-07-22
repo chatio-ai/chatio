@@ -32,7 +32,7 @@ class GoogleClient(ApiClient):
             api_key=_config_client.api_key,
             http_options=HttpOptions(
                 base_url=_config_client.base_url,
-                client_args=httpx_args(),
+                async_client_args=httpx_args(),
             )).aio
 
     # streams
