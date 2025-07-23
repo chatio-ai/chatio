@@ -88,6 +88,12 @@ class Chat:
 
         self._state.append_call_response(call.call_id, call.name, content)
 
+    def _calls(self, calls: list[CallEvent]) -> Iterator[ChatEvent]:
+        for call in calls:
+            self._state.append_call_request(call.call_id, call.name, call.args_raw)
+            yield call
+            yield from self._process_tool_call(call)
+
     def stream_content(self) -> Iterator[ChatEvent]:
         calls: list[CallEvent] = []
         stats: list[StatEvent] = []
@@ -113,10 +119,7 @@ class Chat:
 
             yield from self._usage(stats)
 
-            for call in calls:
-                self._state.append_call_request(call.call_id, call.name, call.args_raw)
-                yield call
-                yield from self._process_tool_call(call)
+            yield from self._calls(calls)
 
     # helpers
 
