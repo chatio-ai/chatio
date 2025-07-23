@@ -25,12 +25,18 @@ class ChatUsage:
             _values[event.label] = event.delta
             yield self._emit_event(event.label, event.delta)
 
-        _input = _values.get('input', 0)
+        _input = _values.get('input')
+        if _input is None:
+            return
+
         yield self._emit_event('input_real', _input - self._input)
 
         self._input = _input
 
+        _cache_read = _values.get('cache_read')
+        if _cache_read is None:
+            return
+
         _cache_written = _values.get('cache_written', 0)
-        _cache_read = _values.get('cache_read', 0)
 
         yield self._emit_event('cache_miss', _input - _cache_written - _cache_read)
