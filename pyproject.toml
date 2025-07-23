@@ -14,7 +14,6 @@ ignore = [
 	"F541",		# f-string is missing placeholders
 	"Q000",		# using single quotes
 	"D",		# missing docstrings
-	"ANN",		# missing type annotations
 
 	"ERA001",	# commented code
 

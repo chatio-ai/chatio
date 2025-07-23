@@ -6,11 +6,11 @@ from chatio.core.events import StatEvent
 
 class ChatUsage:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._stats: dict[str, int] = {}
         self._input = 0
 
-    def __call__(self, usage) -> Iterator[StatEvent]:
+    def __call__(self, usage: list[StatEvent]) -> Iterator[StatEvent]:
         return self.generate(usage)
 
     def _emit_event(self, label: str, delta: int) -> StatEvent:

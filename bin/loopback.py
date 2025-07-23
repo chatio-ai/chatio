@@ -13,7 +13,7 @@ from chatio.misc import build_chat
 setup_logging()
 
 
-def text_from(filepath):
+def text_from(filepath: pathlib.Path) -> str | None:
     try:
         with filepath.open() as f:
             return f.read()
@@ -22,7 +22,7 @@ def text_from(filepath):
         return None
 
 
-def main():
+def main() -> None:
 
     themes = [
         Theme(direction=Theme.INPUT, color=Color.BRIGHT_GREEN),

@@ -45,6 +45,6 @@ class ImageDumpTool(ToolBase):
         }
 
     @override
-    def __call__(self, info=None) -> Iterator[str]:
+    def __call__(self, info: dict | None = None) -> Iterator[str]:
         return
         yield info

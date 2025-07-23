@@ -11,7 +11,8 @@ from chatio.misc import build_chat
 setup_logging()
 
 
-def main():
+def main() -> None:
+
     prompt = " ".join(sys.argv[1:])
 
     with build_chat(prompt) as chat:

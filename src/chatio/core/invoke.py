@@ -17,5 +17,5 @@ class ToolBase(ABC):
         ...
 
     @abstractmethod
-    def __call__(self, *_args: Any, **_kwargs: Any) -> Iterator[str | dict]:
+    def __call__(self, *_args: Any, **_kwargs: Any) -> Iterator[str | dict]:    # noqa: ANN401
         ...

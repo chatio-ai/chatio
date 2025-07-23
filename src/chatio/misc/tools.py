@@ -64,7 +64,7 @@ def build_tools(tools_name: str | None = None, env_ns: str | None = None) -> Cha
     return ChatTools(tools, tool_choice_mode, tool_choice_name)
 
 
-def build_llm_tool():
+def build_llm_tool() -> Chat:
     _env_ns = "NESTED"
 
     _model = build_model(env_ns=_env_ns)

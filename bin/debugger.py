@@ -7,11 +7,14 @@ from chatio.cli.stdio import run_info, run_chat
 from chatio.misc import setup_logging
 from chatio.misc import build_chat
 
+from chatio.chat import Chat
+
 
 setup_logging()
 
 
-def makechat():
+def makechat() -> Chat:
+
     prompt = "Отвечай на русском"
     # prompt = "duplicate user message as is"
     # prompt = """
@@ -52,7 +55,7 @@ def makechat():
     return build_chat(prompt, messages)
 
 
-def main():
+def main() -> None:
 
     with makechat() as chat:
 

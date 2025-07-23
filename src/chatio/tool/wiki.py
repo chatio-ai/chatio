@@ -62,11 +62,11 @@ class WikiSearchTool(ToolBase):
             "required": ["text"],
         }
 
-    def __init__(self, wiki) -> None:
+    def __init__(self, wiki: MediaWiki) -> None:
         self.wiki = wiki
 
     @override
-    def __call__(self, text=None) -> Iterator[str | dict]:
+    def __call__(self, text: str | None = None) -> Iterator[str | dict]:
         yield "\n".join(self.wiki.search(text))
 
 

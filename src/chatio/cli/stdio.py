@@ -45,7 +45,7 @@ class StyleWrap:
         print(self.style.prefix, end="", flush=True, file=self.file)
         return ""
 
-    def __exit__(self, *exc_info) -> None:
+    def __exit__(self, *exc: object) -> None:
         print(self.style.suffix, end=self.end, flush=True, file=self.file)
 
 

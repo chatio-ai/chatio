@@ -31,6 +31,6 @@ class DoNothingTool(ToolBase):
         }
 
     @override
-    def __call__(self, dummy=None) -> Iterator[str]:
+    def __call__(self, dummy: None = None) -> Iterator[str]:
         return
         yield dummy

@@ -13,7 +13,8 @@ from chatio.misc import build_chat
 setup_logging()
 
 
-def main():
+def main() -> None:
+
     prompt = " ".join(sys.argv[1:])
 
     input_theme = Theme(direction=Theme.INPUT, color=Color.BRIGHT_GREEN)
