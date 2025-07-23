@@ -29,6 +29,9 @@ class ClaudeOptionsFormatter(ApiOptionsFormatterBase[
 
         content = message_text(msg)
 
+        if not content['text']:
+            return NOT_GIVEN
+
         if self._config.use_cache:
             content.update({
                 "cache_control": {
