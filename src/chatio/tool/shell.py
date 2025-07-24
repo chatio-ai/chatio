@@ -15,14 +15,16 @@ from chatio.core.invoke import ToolBase
 class ShellToolBase(ToolBase):
 
     def _iterate(self, command: str, iterate: Iterator[str]) -> Iterator[str]:
-        yield f"""```
+        yield f"""\
+```
 $ {command}
 """
 
         with suppress(KeyboardInterrupt):
             yield from iterate
 
-        yield f"""```
+        yield """\
+```
 """
 
     def _command(self, command: str) -> Iterator[str | dict]:

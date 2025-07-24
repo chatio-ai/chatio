@@ -11,7 +11,7 @@ from chatio.misc import build_chat
 
 def text_from(filepath: pathlib.Path) -> str | None:
     try:
-        with filepath.open() as f:
+        with filepath.open('r') as f:
             return f.read()
     except OSError as e:
         print(e, file=sys.stderr)

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# ruff: noqa: ERA001
+
 import sys
 
 from chatio.cli.stdio import run_info, run_chat

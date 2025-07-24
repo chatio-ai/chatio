@@ -20,5 +20,5 @@ def init_client(config: dict) -> ApiClient:
             err_msg = f"api is not supported: {api}"
             raise RuntimeError(err_msg)
         case _:
-            err_msg = f"api is not specified"
+            err_msg = "api is not specified"
             raise RuntimeError(err_msg)

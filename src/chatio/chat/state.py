@@ -40,8 +40,8 @@ class ChatState(_ChatState):
 
         self.messages.append(InputMessage(str(file)))
 
-        with Path(file).open("rb") as filep:
-            self.messages.append(ImageDocument(filep.read(), mimetype))
+        blob = Path(file).read_bytes()
+        self.messages.append(ImageDocument(blob, mimetype))
 
     def attach_text_document(self, *, file: str | PathLike, mimetype: str | None = None) -> None:
         if mimetype is None:
@@ -51,8 +51,8 @@ class ChatState(_ChatState):
 
         self.messages.append(InputMessage(str(file)))
 
-        with Path(file).open("r") as filep:
-            self.messages.append(TextDocument(filep.read(), mimetype))
+        text = Path(file).read_text(encoding="utf-8")
+        self.messages.append(TextDocument(text, mimetype))
 
     def attach_document_auto(self, *, file: str | PathLike) -> None:
         mimetype, _ = mimetypes.guess_type(file)

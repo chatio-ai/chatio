@@ -31,9 +31,6 @@ class ChatCompleter:
         if state < len(matches):
             return matches[state]
 
-        # print()
-        # print(f"<{state}:{_text}:{part}:{path}:{matches}>")
-
         return None
 
     def __call__(self, text: str, state: int) -> str | None:
