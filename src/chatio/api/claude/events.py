@@ -38,7 +38,7 @@ def _pump_usage(usage: Usage | None) -> Iterator[StatEvent]:
 
 
 def _pump_chunk(chunk: MessageStreamEvent) -> Iterator[ChatEvent]:
-    log.info("%s", chunk.model_dump_json(indent=2))
+    log.debug("%s", chunk.model_dump_json(indent=2))
 
     if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
         yield ModelTextChunk(chunk.delta.text)

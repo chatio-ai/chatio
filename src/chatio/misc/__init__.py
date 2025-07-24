@@ -1,6 +1,4 @@
 
-import logging
-
 from chatio.chat import Chat
 
 from chatio.chat.state import ChatState
@@ -8,12 +6,6 @@ from chatio.chat.state import ChatState
 
 from .model import build_model
 from .tools import build_tools
-
-
-def setup_logging() -> None:
-    logging.basicConfig(filename='chunkapi.log', filemode='a', level=100,
-                        format='%(asctime)s %(name)s %(levelname)s %(message)s')
-    logging.getLogger('chatio.api').setLevel(logging.INFO)
 
 
 def build_chat(

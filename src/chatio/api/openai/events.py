@@ -43,7 +43,7 @@ def _pump_usage(usage: CompletionUsage | None) -> Iterator[StatEvent]:
 
 
 def _pump_chunk(chunk: ChatCompletionStreamEvent) -> Iterator[ChatEvent]:
-    log.info("%s", chunk.model_dump_json(indent=2))
+    log.debug("%s", chunk.model_dump_json(indent=2))
 
     if chunk.type == 'content.delta':
         yield ModelTextChunk(chunk.delta)

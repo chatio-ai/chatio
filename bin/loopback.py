@@ -6,11 +6,7 @@ import pathlib
 from chatio.cli.stdio import run_info, run_chat, run_text
 from chatio.cli.style import Theme, Color
 
-from chatio.misc import setup_logging
 from chatio.misc import build_chat
-
-
-setup_logging()
 
 
 def text_from(filepath: pathlib.Path) -> str | None:

@@ -4,13 +4,9 @@ import sys
 
 from chatio.cli.stdio import run_info, run_chat
 
-from chatio.misc import setup_logging
 from chatio.misc import build_chat
 
 from chatio.chat import Chat
-
-
-setup_logging()
 
 
 def makechat() -> Chat:

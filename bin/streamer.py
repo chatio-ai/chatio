@@ -6,11 +6,7 @@ import sys
 from chatio.cli.stdio import run_info, run_user_extra, run_chat
 from chatio.cli.style import Theme, Color
 
-from chatio.misc import setup_logging
 from chatio.misc import build_chat
-
-
-setup_logging()
 
 
 def main() -> None:

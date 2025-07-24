@@ -73,7 +73,7 @@ class _PumpFinal:
 
 
 def _pump_chunk(chunk: GenerateContentResponse, final: _PumpFinal) -> Iterator[ChatEvent]:
-    log.info("%s", chunk.model_dump_json(indent=2))
+    log.debug("%s", chunk.model_dump_json(indent=2))
 
     if chunk.candidates \
             and chunk.candidates[0].content \
