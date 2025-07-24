@@ -25,9 +25,12 @@ class HttpxHooks:
         _iter_bytes = response.iter_bytes
 
         def iter_bytes(chunk_size: int | None = None) -> Iterator[bytes]:
+            buffer = bytearray()
             for chunk in _iter_bytes(chunk_size):
                 print(chunk.decode())
-                yield chunk
+                buffer.extend(chunk)
+                yield b""
+            yield bytes(buffer)
 
         response.iter_bytes = iter_bytes  # type: ignore[method-assign]
 
