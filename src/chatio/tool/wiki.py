@@ -12,21 +12,21 @@ from chatio.core.invoke import ToolBase
 
 # pylint: disable=too-few-public-methods
 class WikiPageToolBase(ToolBase):
-    def __init__(self, wiki: MediaWiki, page_cache: dict[str, MediaWikiPage]) -> None:
+    def __init__(self, wiki: Callable[[], MediaWiki], page_cache: dict[str, MediaWikiPage]) -> None:
         self.wiki = wiki
         self.page_cache = page_cache
 
     def _get_page(self, title: str | None) -> tuple[MediaWikiPage, bool] | None:
         cached = title in self.page_cache
         if not cached:
-            title = self.wiki.suggest(title)
+            title = self.wiki().suggest(title)
 
         if title is None:
             return None
 
         cached = cached or title in self.page_cache
         if not cached:
-            self.page_cache[title] = self.wiki.page(title, auto_suggest=False)
+            self.page_cache[title] = self.wiki().page(title, auto_suggest=False)
 
         return self.page_cache[title], cached
 
@@ -62,12 +62,12 @@ class WikiSearchTool(ToolBase):
             "required": ["text"],
         }
 
-    def __init__(self, wiki: MediaWiki) -> None:
+    def __init__(self, wiki: Callable[[], MediaWiki]) -> None:
         self.wiki = wiki
 
     @override
     def __call__(self, text: str | None = None) -> Iterator[str | dict]:
-        yield "\n".join(self.wiki.search(text))
+        yield "\n".join(self.wiki().search(text))
 
 
 class WikiContentTool(WikiPageToolBase):
@@ -145,17 +145,22 @@ class WikiSectionTool(WikiPageToolBase):
 
 class WikiToolFactory:
     def __init__(self) -> None:
-        self.wiki = MediaWiki()
-        self.page_cache: dict[str, MediaWikiPage] = {}
+        self._wiki: MediaWiki | None = None
+        self._page_cache: dict[str, MediaWikiPage] = {}
+
+    def wiki(self) -> MediaWiki:
+        if self._wiki is None:
+            self._wiki = MediaWiki()
+        return self._wiki
 
     def wiki_search(self) -> WikiSearchTool:
         return WikiSearchTool(self.wiki)
 
     def wiki_content(self) -> WikiContentTool:
-        return WikiContentTool(self.wiki, self.page_cache)
+        return WikiContentTool(self.wiki, self._page_cache)
 
     def wiki_summary(self) -> WikiSummaryTool:
-        return WikiSummaryTool(self.wiki, self.page_cache)
+        return WikiSummaryTool(self.wiki, self._page_cache)
 
     def wiki_section(self) -> WikiSectionTool:
-        return WikiSectionTool(self.wiki, self.page_cache)
+        return WikiSectionTool(self.wiki, self._page_cache)
