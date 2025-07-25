@@ -1,6 +1,9 @@
 
+import asyncio
+
 from collections.abc import AsyncIterator
 from collections.abc import Callable
+from collections.abc import Awaitable
 
 from typing import override
 
@@ -12,32 +15,33 @@ from chatio.core.invoke import ToolBase
 
 # pylint: disable=too-few-public-methods
 class WikiPageToolBase(ToolBase):
-
-    def __init__(self, wiki: Callable[[], MediaWiki],
+    def __init__(self, wiki: Callable[[], Awaitable[MediaWiki]],
                  page_cache: dict[str, MediaWikiPage]) -> None:
 
         self.wiki = wiki
         self.page_cache = page_cache
 
-    def _get_page(self, title: str | None) -> tuple[MediaWikiPage, bool] | None:
+    async def _get_page(self, title: str | None) -> tuple[MediaWikiPage, bool] | None:
+        wiki = await self.wiki()
 
         cached = title in self.page_cache
         if not cached:
-            title = self.wiki().suggest(title)
+            title = await asyncio.to_thread(lambda: wiki.suggest(title))
 
         if title is None:
             return None
 
         cached = cached or title in self.page_cache
         if not cached:
-            self.page_cache[title] = self.wiki().page(title, auto_suggest=False)
+            self.page_cache[title] = \
+                    await asyncio.to_thread(lambda: wiki.page(title, auto_suggest=False))
 
         return self.page_cache[title], cached
 
     async def _page_do(self, title: str | None,
                        func: Callable[[MediaWikiPage], str | None]) -> AsyncIterator[str | dict]:
 
-        page_entry = self._get_page(title)
+        page_entry = await self._get_page(title)
         if page_entry is None:
             yield {"title": title, "cache": None}
             return
@@ -45,7 +49,7 @@ class WikiPageToolBase(ToolBase):
         page, cached = page_entry
         yield {"title": title, "cache": cached}
 
-        data = func(page)
+        data = await asyncio.to_thread(lambda: func(page))
         if data is not None:
             yield data
 
@@ -69,13 +73,14 @@ class WikiSearchTool(ToolBase):
             "required": ["text"],
         }
 
-    def __init__(self, wiki: Callable[[], MediaWiki]) -> None:
+    def __init__(self, wiki: Callable[[], Awaitable[MediaWiki]]) -> None:
         self.wiki = wiki
 
     @override
     # pylint: disable=invalid-overridden-method
     async def __call__(self, text: str | None = None) -> AsyncIterator[str | dict]:
-        yield "\n".join(self.wiki().search(text))
+        wiki = await self.wiki()
+        yield "\n".join(await asyncio.to_thread(lambda: wiki.search(text)))
 
 
 class WikiContentTool(WikiPageToolBase):
@@ -160,9 +165,9 @@ class WikiToolFactory:
         self._wiki: MediaWiki | None = None
         self._page_cache: dict[str, MediaWikiPage] = {}
 
-    def wiki(self) -> MediaWiki:
+    async def wiki(self) -> MediaWiki:
         if self._wiki is None:
-            self._wiki = MediaWiki()
+            self._wiki = await asyncio.to_thread(lambda: MediaWiki(verify_ssl=True))
         return self._wiki
 
     def wiki_search(self) -> WikiSearchTool:
