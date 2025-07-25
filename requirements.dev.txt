@@ -1,3 +1,4 @@
+pre-commit
 flake8
 flake8-async
 flake8-bugbear
@@ -6,3 +7,4 @@ ruff
 pylint
 pyright[nodejs]
 mypy
+types-setuptools

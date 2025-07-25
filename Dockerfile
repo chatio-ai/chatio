@@ -25,12 +25,14 @@ COPY ./bin ./bin
 
 COPY ./pyproject.toml ./
 
-COPY ./lints ./lints
+COPY ./.pre-commit-config.yaml ./
 
 ARG LINTS=1
 
+RUN git init --quiet . && git add --all
+
 RUN --mount=type=cache,target=.mypy_cache \
-	if test $LINTS -ne 0; then ./lints/run.sh; fi;
+	if test $LINTS -ne 0; then pre-commit run --all-files --color=always; fi
 
 FROM build AS final
 

@@ -15,7 +15,7 @@
 !src/chatio/api/*.py
 !src/chatio/cli/*.py
 !src/chatio/*.py
-!lints/run.sh
+!.pre-commit-config.yaml
 !requirements.dev.txt
 !requirements.txt
 !pyproject.toml
