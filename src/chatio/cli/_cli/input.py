@@ -80,7 +80,7 @@ class SetupReadLine:
 setup_readline = SetupReadLine()
 
 
-def run_user(theme: Theme | None = None, *, file: TextIO | None = None) -> str | None:
+async def run_user(theme: Theme | None = None, *, file: TextIO | None = None) -> str | None:
     setup_readline()
 
     if theme is None:
@@ -92,20 +92,20 @@ def run_user(theme: Theme | None = None, *, file: TextIO | None = None) -> str |
             _wrap_input(theme.chunk_pri, end="", file=file) as prompt,
             suppress(EOFError, asyncio.CancelledError),
         ):
-            user_input = input(prompt)
+            user_input = await asyncio.to_thread(lambda: input(prompt))
     else:
         with suppress(EOFError, asyncio.CancelledError):
-            user_input = input()
+            user_input = await asyncio.to_thread(lambda: input(""))
             with _wrap_print(theme.chunk_pri, end="", file=file):
                 print(user_input, flush=True, file=file)
 
     return user_input
 
 
-def run_user_extra(theme: Theme | None = None, *,
-                   file: TextIO | None = None) -> tuple[str | None, list[Path]]:
+async def run_user_extra(theme: Theme | None = None, *,
+                         file: TextIO | None = None) -> tuple[str | None, list[Path]]:
 
-    user_input = run_user(theme, file=file)
+    user_input = await run_user(theme, file=file)
     if user_input is None:
         return None, []
 

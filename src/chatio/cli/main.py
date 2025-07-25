@@ -26,7 +26,7 @@ async def main(*args: str) -> None:
         results = None
         while True:
             print()
-            content, files = run_user_extra(input_theme)
+            content, files = await run_user_extra(input_theme)
             if content is None:
                 break
             if not files and not content:

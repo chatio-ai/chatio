@@ -16,7 +16,7 @@ async def main(*args: str) -> None:
     async with build_chat(prompt) as chat:
 
         while True:
-            content_raw = run_user()
+            content_raw = await run_user()
             if content_raw is None:
                 break
             if not content_raw:
