@@ -1,4 +1,6 @@
 
+import asyncio
+
 from collections.abc import AsyncIterator
 
 from typing import override
@@ -37,7 +39,8 @@ class WebSearchTool(ToolBase):
     @override
     # pylint: disable=invalid-overridden-method
     async def __call__(self, text: str) -> AsyncIterator[str]:
-        yield "\n".join(self._result_to_str(result) for result in search(text))
+        results = await asyncio.to_thread(lambda: list(search(text)))
+        yield "\n".join(self._result_to_str(result) for result in results)
 
 
 class WebBrowseTool(ToolBase):
@@ -62,4 +65,5 @@ class WebBrowseTool(ToolBase):
     @override
     # pylint: disable=invalid-overridden-method
     async def __call__(self, url: str) -> AsyncIterator[str]:
-        yield html2text(get(url, timeout=10).text)
+        text = await asyncio.to_thread(lambda: get(url, timeout=10).text)
+        yield html2text(text)
