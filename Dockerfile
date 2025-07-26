@@ -22,11 +22,11 @@ RUN pip install --break-system-packages --root-user-action ignore --upgrade -r r
 
 COPY ./src ./src
 
-COPY ./setup.py ./
+COPY ./setup.py .
 
-COPY ./pyproject.toml ./
+COPY ./pyproject.toml .
 
-COPY ./.pre-commit-config.yaml ./
+COPY ./.pre-commit-config.yaml .
 
 ARG LINTS=1
 
@@ -42,6 +42,8 @@ COPY --from=devel /app/setup.py ./build/
 
 RUN pip install --break-system-packages --root-user-action ignore --upgrade ./build && rm -rf ./build
 
+COPY ./entrypoint.sh ./entrypoint.sh
+
 ENV PYTHONDEVMODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app/src/
@@ -52,4 +54,4 @@ WORKDIR /app/var
 
 USER chatio
 
-ENTRYPOINT ["chatio"]
+ENTRYPOINT ["/app/entrypoint.sh"]
