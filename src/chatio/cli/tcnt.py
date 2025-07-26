@@ -4,11 +4,13 @@ import sys
 from chatio.misc import build_chat
 
 from ._cli.stdio import run_info
+from ._cli import entry_point
 
 
-def main() -> None:
+@entry_point
+def main(*args: str) -> None:
 
-    prompt = " ".join(sys.argv[1:])
+    prompt = " ".join(args)
     content = sys.stdin.read()
     if not content.strip():
         raise SystemExit

@@ -6,6 +6,7 @@ from chatio.misc import build_chat
 
 from ._cli.stdio import run_info, run_chat, run_text
 from ._cli.style import Theme, Color
+from ._cli import entry_point
 
 
 def text_from(filepath: pathlib.Path) -> str | None:
@@ -17,14 +18,15 @@ def text_from(filepath: pathlib.Path) -> str | None:
         return None
 
 
-def main() -> None:
+@entry_point
+def main(*args: str) -> None:
 
     themes = [
         Theme(direction=Theme.INPUT, color=Color.BRIGHT_GREEN),
         Theme(direction=Theme.OUTPUT, color=Color.BRIGHT_CYAN),
     ]
 
-    script = pathlib.Path(sys.argv[1]) if sys.argv[1:] else pathlib.Path()
+    script = pathlib.Path(args[0]) if args else pathlib.Path()
 
     request_prompt = text_from(script.joinpath('request.prompt'))
     if request_prompt:

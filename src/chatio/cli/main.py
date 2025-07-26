@@ -1,15 +1,15 @@
 
-import sys
-
 from chatio.misc import build_chat
 
 from ._cli.stdio import run_info, run_user_extra, run_chat
 from ._cli.style import Theme, Color
+from ._cli import entry_point
 
 
-def main() -> None:
+@entry_point
+def main(*args: str) -> None:
 
-    prompt = " ".join(sys.argv[1:])
+    prompt = " ".join(args)
 
     input_theme = Theme(direction=Theme.INPUT, color=Color.BRIGHT_GREEN)
     model_theme = Theme(direction=Theme.OUTPUT, color=Color.BRIGHT_CYAN)

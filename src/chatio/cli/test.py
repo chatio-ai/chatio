@@ -1,13 +1,11 @@
 
 # ruff: noqa: ERA001
 
-import sys
-
 from chatio.chat import Chat
-
 from chatio.misc import build_chat
 
 from ._cli.stdio import run_info, run_chat
+from ._cli import entry_point
 
 
 def makechat() -> Chat:
@@ -52,13 +50,13 @@ def makechat() -> Chat:
     return build_chat(prompt, messages)
 
 
-def main() -> None:
+@entry_point
+def main(*filenames: str) -> None:
 
     with makechat() as chat:
 
         run_info(chat)
 
-        filenames = sys.argv[1:]
         for filename in filenames:
             chat.state.attach_document_auto(file=filename)
 
