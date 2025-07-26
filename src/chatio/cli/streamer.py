@@ -1,12 +1,10 @@
-#!/usr/bin/env python
 
 import sys
 
-
-from chatio.cli.stdio import run_info, run_user_extra, run_chat
-from chatio.cli.style import Theme, Color
-
 from chatio.misc import build_chat
+
+from ._cli.stdio import run_info, run_user_extra, run_chat
+from ._cli.style import Theme, Color
 
 
 def main() -> None:
@@ -41,7 +39,3 @@ def main() -> None:
             results = run_chat(chat.stream_content(), model_theme)
 
         print()
-
-
-if __name__ == '__main__':
-    main()

@@ -1,14 +1,13 @@
-#!/usr/bin/env python
 
 # ruff: noqa: ERA001
 
 import sys
 
-from chatio.cli.stdio import run_info, run_chat
+from chatio.chat import Chat
 
 from chatio.misc import build_chat
 
-from chatio.chat import Chat
+from ._cli.stdio import run_info, run_chat
 
 
 def makechat() -> Chat:
@@ -78,7 +77,3 @@ def main() -> None:
         run_chat(chat.stream_content())
 
         print()
-
-
-if __name__ == '__main__':
-    main()

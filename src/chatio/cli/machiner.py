@@ -1,10 +1,9 @@
-#!/usr/bin/env python
 
 import sys
 
-from chatio.cli.stdio import run_text, run_user, run_chat
-
 from chatio.misc import build_chat
+
+from ._cli.stdio import run_text, run_user, run_chat
 
 
 def main() -> None:
@@ -35,7 +34,3 @@ def main() -> None:
             print(file=sys.stderr)
 
         print()
-
-
-if __name__ == '__main__':
-    main()

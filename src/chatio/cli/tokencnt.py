@@ -1,10 +1,9 @@
-#!/usr/bin/env python
 
 import sys
 
-from chatio.cli.stdio import run_info
-
 from chatio.misc import build_chat
+
+from ._cli.stdio import run_info
 
 
 def main() -> None:
@@ -19,7 +18,3 @@ def main() -> None:
         run_info(chat, file=sys.stderr)
 
         print(chat.count_tokens())
-
-
-if __name__ == '__main__':
-    main()

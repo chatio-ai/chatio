@@ -1,5 +1,4 @@
 *
-!bin/*.py
 !src/chatio/util/*.py
 !src/chatio/tool/*.py
 !src/chatio/misc/*.py
@@ -14,9 +13,11 @@
 !src/chatio/api/claude/format/*.py
 !src/chatio/api/helper/*.py
 !src/chatio/api/*.py
+!src/chatio/cli/_cli/*.py
 !src/chatio/cli/*.py
 !src/chatio/*.py
 !.pre-commit-config.yaml
 !requirements.dev.txt
 !requirements.txt
 !pyproject.toml
+!setup.py

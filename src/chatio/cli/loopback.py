@@ -1,12 +1,11 @@
-#!/usr/bin/env python
 
 import sys
 import pathlib
 
-from chatio.cli.stdio import run_info, run_chat, run_text
-from chatio.cli.style import Theme, Color
-
 from chatio.misc import build_chat
+
+from ._cli.stdio import run_info, run_chat, run_text
+from ._cli.style import Theme, Color
 
 
 def text_from(filepath: pathlib.Path) -> str | None:
@@ -77,7 +76,3 @@ def main() -> None:
                 index = not index
         except KeyboardInterrupt:
             print()
-
-
-if __name__ == '__main__':
-    main()
