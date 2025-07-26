@@ -49,14 +49,14 @@ class OpenAIClient(ApiClient):
         _messages = [*params.options.system, *params.messages]
 
         if params.options.prediction:
-            return _pump(self._client.beta.chat.completions.stream(
+            return _pump(self._client.chat.completions.stream(
                 stream_options={'include_usage': True},
                 model=model,
                 messages=_messages,
                 prediction=params.options.prediction,
             ))
 
-        return _pump(self._client.beta.chat.completions.stream(
+        return _pump(self._client.chat.completions.stream(
             max_completion_tokens=4096,
             stream_options={'include_usage': True},
             model=model,
