@@ -45,7 +45,8 @@ class ShellCalcTool(ShellToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "shell_calc",
-            "description": "Run bc command via shell to evaluate expression. Returns output of the command.",
+            "description":
+                "Run bc command via shell to evaluate expression. Returns output of the command.",
             "type": "object",
             "properties": {
                 "expr": {
@@ -68,7 +69,8 @@ class ShellExecTool(ShellToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "shell_exec",
-            "description": "Run custom user command via shell. Returns merged output from stdout and stderr.",
+            "description":
+                "Run custom user command via shell. Returns merged output from stdout and stderr.",
             "type": "object",
             "properties": {
                 "command": {

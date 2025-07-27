@@ -19,7 +19,8 @@ class WebSearchTool(ToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "web_search",
-            "description": "Peform web search for given text. Returns up to 10 urls each on separate line.",
+            "description":
+                "Peform web search for given text. Returns up to 10 urls each on separate line.",
             "type": "object",
             "properties": {
                 "text": {
@@ -45,7 +46,8 @@ class WebBrowseTool(ToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "web_browse",
-            "description": "Perform web browse for given url. Returns content of the given url in md format.",
+            "description":
+                "Perform web browse for given url. Returns content of the given url in md format.",
             "type": "object",
             "properties": {
                 "url": {

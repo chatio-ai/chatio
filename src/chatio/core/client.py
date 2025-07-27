@@ -11,7 +11,8 @@ from .events import ChatEvent
 class ApiClient(ABC):
 
     @abstractmethod
-    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
+    def iterate_model_events(
+            self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
         ...
 
     @abstractmethod

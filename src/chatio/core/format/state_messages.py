@@ -40,14 +40,16 @@ class ApiMessagesFormatterBase[
         ...
 
     @abstractmethod
-    def _input_content(self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
+    def _input_content(
+            self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
         ...
 
     def _input_message(self, msg: InputMessage) -> MessageContentT:
         return self._input_content(self._message_text(msg))
 
     @abstractmethod
-    def _output_content(self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
+    def _output_content(
+            self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
         ...
 
     def _output_message(self, msg: OutputMessage) -> MessageContentT:

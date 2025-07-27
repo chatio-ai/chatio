@@ -12,11 +12,15 @@ from chatio.core.invoke import ToolBase
 
 # pylint: disable=too-few-public-methods
 class WikiPageToolBase(ToolBase):
-    def __init__(self, wiki: Callable[[], MediaWiki], page_cache: dict[str, MediaWikiPage]) -> None:
+
+    def __init__(self, wiki: Callable[[], MediaWiki],
+                 page_cache: dict[str, MediaWikiPage]) -> None:
+
         self.wiki = wiki
         self.page_cache = page_cache
 
     def _get_page(self, title: str | None) -> tuple[MediaWikiPage, bool] | None:
+
         cached = title in self.page_cache
         if not cached:
             title = self.wiki().suggest(title)
@@ -30,7 +34,9 @@ class WikiPageToolBase(ToolBase):
 
         return self.page_cache[title], cached
 
-    def _page_do(self, title: str | None, func: Callable[[MediaWikiPage], str | None]) -> Iterator[str | dict]:
+    def _page_do(self, title: str | None,
+                 func: Callable[[MediaWikiPage], str | None]) -> Iterator[str | dict]:
+
         page_entry = self._get_page(title)
         if page_entry is None:
             yield {"title": title, "cache": None}
@@ -51,7 +57,8 @@ class WikiSearchTool(ToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "wiki_search",
-            "description": "Search wiki pages for given text. Returns up to 10 titles each on separate line.",
+            "description":
+                "Search wiki pages for given text. Returns up to 10 titles each on separate line.",
             "type": "object",
             "properties": {
                 "text": {
@@ -77,7 +84,8 @@ class WikiContentTool(WikiPageToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "wiki_content",
-            "description": "Get list of wiki page sections. Returns list of sections each on separate line.",
+            "description":
+                "Get list of wiki page sections. Returns list of sections each on separate line.",
             "type": "object",
             "properties": {
                 "title": {
@@ -100,7 +108,8 @@ class WikiSummaryTool(WikiPageToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "wiki_summary",
-            "description": "Get content of wiki page summary. Returns text of summary (header) section.",
+            "description":
+                "Get content of wiki page summary. Returns text of summary (header) section.",
             "type": "object",
             "properties": {
                 "title": {
@@ -123,7 +132,8 @@ class WikiSectionTool(WikiPageToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "wiki_section",
-            "description": "Get content of wiki page section. Returns text of the given section.",
+            "description":
+                "Get content of wiki page section. Returns text of the given section.",
             "type": "object",
             "properties": {
                 "title": {
@@ -139,7 +149,8 @@ class WikiSectionTool(WikiPageToolBase):
         }
 
     @override
-    def __call__(self, title: str | None = None, section: str | None = None) -> Iterator[str | dict]:
+    def __call__(self, title: str | None = None,
+                 section: str | None = None) -> Iterator[str | dict]:
         return self._page_do(title, lambda page: page.section(section))
 
 

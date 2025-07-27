@@ -98,7 +98,9 @@ def run_user(theme: Theme | None = None, *, file: TextIO | None = None) -> str |
     return user_input
 
 
-def run_user_extra(theme: Theme | None = None, *, file: TextIO | None = None) -> tuple[str | None, list[Path]]:
+def run_user_extra(theme: Theme | None = None, *,
+                   file: TextIO | None = None) -> tuple[str | None, list[Path]]:
+
     user_input = run_user(theme, file=file)
     if user_input is None:
         return None, []
@@ -146,7 +148,9 @@ def _run_chat_event(event: ChatEvent, style: Style, *, file: TextIO | None = Non
         print(text, end="", flush=True, file=file)
 
 
-def _run_text_chunk(chunk: str, style: Style, file: TextIO | None = None, *, hascr: bool = False) -> bool:
+def _run_text_chunk(chunk: str, style: Style, *,
+                    hascr: bool = False, file: TextIO | None = None) -> bool:
+
     for chunk_line in chunk.splitlines(keepends=True):
         result = ""
         if hascr:
@@ -165,7 +169,9 @@ def _run_text_chunk(chunk: str, style: Style, file: TextIO | None = None, *, has
     return hascr
 
 
-def _run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *, file: TextIO | None = None) -> Iterator[str]:
+def _run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *,
+              file: TextIO | None = None) -> Iterator[str]:
+
     if theme is None:
         theme = Model
 
@@ -197,5 +203,7 @@ def _run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *, file: 
                 defer = None
 
 
-def run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *, file: TextIO | None = None) -> str:
+def run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *,
+             file: TextIO | None = None) -> str:
+
     return "".join(_run_chat(events, theme, file=file))

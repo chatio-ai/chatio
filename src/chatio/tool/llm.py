@@ -18,7 +18,8 @@ class LlmDialogTool(ToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "llm_dialog",
-            "description": "Peform dialog to another LLM. Another LLM preserves history across session.",
+            "description":
+                "Peform dialog to another LLM. Another LLM preserves history across session.",
             "type": "object",
             "properties": {
                 "message": {

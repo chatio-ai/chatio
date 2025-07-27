@@ -43,7 +43,9 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
 ]):
 
     @override
-    def _chat_messages(self, messages: list[ChatCompletionMessageParam]) -> list[ChatCompletionMessageParam]:
+    def _chat_messages(
+            self, messages: list[ChatCompletionMessageParam]) -> list[ChatCompletionMessageParam]:
+
         return messages
 
     @override
@@ -51,7 +53,9 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
         return message_text(msg)
 
     @override
-    def _input_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
+    def _input_content(
+            self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
+
         if content['type'] != 'text':
             return {
                 "role": "user",
@@ -64,7 +68,9 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
         }
 
     @override
-    def _output_content(self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
+    def _output_content(
+            self, content: _ChatCompletionContentPartParam) -> ChatCompletionMessageParam:
+
         if content['type'] != 'text':
             raise TypeError
 
@@ -112,7 +118,8 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
 
     @override
     def _text_document_text(self, doc: TextDocument) -> File:
-        blob = weasyprint.HTML(string=f"<html><body><pre>{doc.text}</pre></body></html>").write_pdf()
+        content = f"<html><body><pre>{doc.text}</pre></body></html>"
+        blob = weasyprint.HTML(string=content).write_pdf()
         if blob is None:
             raise RuntimeError
         data = base64.b64encode(blob).decode('ascii')

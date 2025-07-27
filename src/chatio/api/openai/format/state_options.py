@@ -25,7 +25,8 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
     OpenAIConfigFormat,
 ]):
 
-    def _prediction_message(self, msg: PredictionMessage | None) -> ChatCompletionPredictionContentParam | NotGiven:
+    def _prediction_message(self, msg: PredictionMessage | None,
+                            ) -> ChatCompletionPredictionContentParam | NotGiven:
 
         if not self._config.prediction:
             return NOT_GIVEN

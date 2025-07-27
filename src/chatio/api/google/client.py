@@ -43,7 +43,9 @@ class GoogleClient(ApiClient):
     # streams
 
     @override
-    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
+    def iterate_model_events(
+            self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
+
         params = self._format.format(state, tools)
 
         return _pump(lambda: self._client.models.generate_content_stream(

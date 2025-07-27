@@ -14,7 +14,8 @@ class ImageDumpTool(ToolBase):
     def schema() -> ToolSchemaDict:
         return {
             "name": "image_dump",
-            "description": "Dump image analysis result. Summary includes key colors (r,g,b) and description.",
+            "description":
+                "Dump image analysis result. Summary includes key colors (r,g,b) and description.",
             "type": "object",
             "properties": {
                 "info": {
