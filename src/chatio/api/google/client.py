@@ -1,8 +1,5 @@
 
-from collections.abc import Iterator
-
 from typing import override
-
 
 from google.genai import Client
 from google.genai.types import HttpOptions
@@ -13,15 +10,13 @@ from chatio.core.client import ApiClient
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.core.events import ChatEvent
-
 from chatio.api.helper.httpx import httpx_args
 
 
 from .config import GoogleConfigFormat
 from .config import GoogleConfigClient
 from .format import GoogleFormat
-from .events import _pump
+from .stream import GoogleStream
 
 
 class GoogleClient(ApiClient):
@@ -43,12 +38,10 @@ class GoogleClient(ApiClient):
     # streams
 
     @override
-    def iterate_model_events(
-            self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-
+    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> GoogleStream:
         params = self._format.format(state, tools)
 
-        return _pump(lambda: self._client.models.generate_content_stream(
+        return GoogleStream(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
                 'max_output_tokens': 4096,

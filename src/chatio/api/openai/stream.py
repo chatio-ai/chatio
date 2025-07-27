@@ -3,11 +3,16 @@ import logging
 
 from collections.abc import Iterator
 
+from types import TracebackType
+
+from typing import override
+
 
 from openai.types.completion_usage import CompletionUsage
 from openai.types.chat.parsed_function_tool_call import ParsedFunctionToolCall
 from openai.lib.streaming.chat._events import ChatCompletionStreamEvent
 from openai.lib.streaming.chat._completions import ChatCompletionStreamManager
+from openai.lib.streaming.chat._completions import ChatCompletionStream
 
 
 from chatio.core.events import ChatEvent
@@ -15,6 +20,8 @@ from chatio.core.events import CallEvent
 from chatio.core.events import StopEvent
 from chatio.core.events import StatEvent
 from chatio.core.events import ModelTextChunk
+
+from chatio.core.stream import ApiStream
 
 
 log = logging.getLogger(__name__)
@@ -60,15 +67,34 @@ def _pump_calls(calls: list[ParsedFunctionToolCall] | None) -> Iterator[CallEven
                         call.function.parsed_arguments, call.function.arguments)
 
 
-def _pump(streamctx: ChatCompletionStreamManager) -> Iterator[ChatEvent]:
-    with streamctx as stream:
-        for chunk in stream:
-            yield from _pump_chunk(chunk)
+def _pump(stream: ChatCompletionStream) -> Iterator[ChatEvent]:
+    for chunk in stream:
+        yield from _pump_chunk(chunk)
 
-        final = stream.get_final_completion()
-        final_message = final.choices[0].message
-        yield StopEvent(final_message.content or "")
+    final = stream.get_final_completion()
+    final_message = final.choices[0].message
+    yield StopEvent(final_message.content or "")
 
-        yield from _pump_usage(final.usage)
+    yield from _pump_usage(final.usage)
 
-        yield from _pump_calls(final_message.tool_calls)
+    yield from _pump_calls(final_message.tool_calls)
+
+
+class OpenAIStream(ApiStream):
+
+    def __init__(self, streamctx: ChatCompletionStreamManager) -> None:
+        self._streamctx = streamctx
+
+    @override
+    def __enter__(self) -> Iterator[ChatEvent]:
+        stream = self._streamctx.__enter__()
+        return _pump(stream)
+
+    @override
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        return self._streamctx.__exit__(exc_type, exc, exc_tb)

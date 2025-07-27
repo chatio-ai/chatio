@@ -3,11 +3,16 @@ import logging
 
 from collections.abc import Iterator
 
+from types import TracebackType
+
+from typing import override
+
 
 from anthropic.types.usage import Usage
 from anthropic.types.content_block import ContentBlock
 from anthropic.lib.streaming import MessageStreamEvent
 from anthropic.lib.streaming import MessageStreamManager
+from anthropic.lib.streaming import MessageStream
 
 
 from chatio.core.events import ChatEvent
@@ -15,6 +20,8 @@ from chatio.core.events import CallEvent
 from chatio.core.events import StopEvent
 from chatio.core.events import StatEvent
 from chatio.core.events import ModelTextChunk
+
+from chatio.core.stream import ApiStream
 
 
 log = logging.getLogger(__name__)
@@ -56,16 +63,35 @@ def _pump_calls(content: list[ContentBlock]) -> Iterator[CallEvent]:
             yield CallEvent(message.id, message.name, message.input, message.input)
 
 
-def _pump(streamctx: MessageStreamManager) -> Iterator[ChatEvent]:
-    with streamctx as stream:
-        for chunk in stream:
-            yield from _pump_chunk(chunk)
+def _pump(stream: MessageStream) -> Iterator[ChatEvent]:
+    for chunk in stream:
+        yield from _pump_chunk(chunk)
 
-        final = stream.get_final_message()
+    final = stream.get_final_message()
 
-        final_content = "".join(block.text for block in final.content if block.type == 'text')
-        yield StopEvent(final_content)
+    final_content = "".join(block.text for block in final.content if block.type == 'text')
+    yield StopEvent(final_content)
 
-        yield from _pump_usage(final.usage)
+    yield from _pump_usage(final.usage)
 
-        yield from _pump_calls(final.content)
+    yield from _pump_calls(final.content)
+
+
+class ClaudeStream(ApiStream):
+
+    def __init__(self, streamctx: MessageStreamManager) -> None:
+        self._streamctx = streamctx
+
+    @override
+    def __enter__(self) -> Iterator[ChatEvent]:
+        stream = self._streamctx.__enter__()
+        return _pump(stream)
+
+    @override
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        return self._streamctx.__exit__(exc_type, exc, exc_tb)

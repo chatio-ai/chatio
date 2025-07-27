@@ -1,8 +1,5 @@
 
-from collections.abc import Iterator
-
 from typing import override
-
 
 from httpx import Client as HttpxClient
 
@@ -14,8 +11,6 @@ from chatio.core.client import ApiClient
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.core.events import ChatEvent
-
 
 from chatio.api.helper.httpx import httpx_args
 
@@ -23,7 +18,7 @@ from chatio.api.helper.httpx import httpx_args
 from .config import OpenAIConfigFormat
 from .config import OpenAIConfigClient
 from .format import OpenAIFormat
-from .events import _pump
+from .stream import OpenAIStream
 
 
 class OpenAIClient(ApiClient):
@@ -43,22 +38,20 @@ class OpenAIClient(ApiClient):
     # streams
 
     @override
-    def iterate_model_events(
-            self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-
+    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> OpenAIStream:
         params = self._format.format(state, tools)
 
         _messages = [*params.options.system, *params.messages]
 
         if params.options.prediction:
-            return _pump(self._client.chat.completions.stream(
+            return OpenAIStream(self._client.chat.completions.stream(
                 stream_options={'include_usage': True},
                 model=model,
                 messages=_messages,
                 prediction=params.options.prediction,
             ))
 
-        return _pump(self._client.chat.completions.stream(
+        return OpenAIStream(self._client.chat.completions.stream(
             max_completion_tokens=4096,
             stream_options={'include_usage': True},
             model=model,

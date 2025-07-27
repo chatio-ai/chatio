@@ -8,6 +8,8 @@ from chatio.core.events import StopEvent
 from chatio.core.events import StatEvent
 from chatio.core.events import ModelTextChunk
 
+from chatio.core.stream import ApiStream
+
 from .state import ChatState
 from .usage import ChatUsage
 
@@ -15,7 +17,7 @@ from .usage import ChatUsage
 # pylint: disable=too-few-public-methods
 class ChatReply:
 
-    def __init__(self, model: Callable[[], Iterator[ChatEvent]], state: ChatState,
+    def __init__(self, model: Callable[[], ApiStream], state: ChatState,
                  calls: Callable[[list[CallEvent]], Iterator[ChatEvent]]) -> None:
 
         self._model = model
@@ -33,19 +35,20 @@ class ChatReply:
             calls.clear()
             stats.clear()
 
-            events = self._model()
+            stream = self._model()
 
-            for event in events:
-                match event:
-                    case ModelTextChunk():
-                        yield event
-                    case StopEvent(text):
-                        if text:
-                            self._state.append_output_message(text)
-                    case CallEvent():
-                        calls.append(event)
-                    case StatEvent():
-                        stats.append(event)
+            with stream as events:
+                for event in events:
+                    match event:
+                        case ModelTextChunk():
+                            yield event
+                        case StopEvent(text):
+                            if text:
+                                self._state.append_output_message(text)
+                        case CallEvent():
+                            calls.append(event)
+                        case StatEvent():
+                            stats.append(event)
 
             yield from self._usage(stats)
 

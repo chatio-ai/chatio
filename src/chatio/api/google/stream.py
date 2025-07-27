@@ -6,6 +6,10 @@ from collections.abc import Callable
 
 from dataclasses import dataclass, field
 
+from types import TracebackType
+
+from typing import override
+
 
 from google.genai.types import FunctionCall
 from google.genai.types import GroundingMetadata
@@ -20,6 +24,8 @@ from chatio.core.events import CallEvent
 from chatio.core.events import StopEvent
 from chatio.core.events import StatEvent
 from chatio.core.events import ModelTextChunk
+
+from chatio.core.stream import ApiStream
 
 
 log = logging.getLogger(__name__)
@@ -98,20 +104,35 @@ def _pump_calls(calls: list[FunctionCall]) -> Iterator[CallEvent]:
         yield CallEvent(call.id or "", call.name, call.args, call.args)
 
 
-def _pump(streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> Iterator[ChatEvent]:
-    stream = streamfun()
+def _pump(stream: Iterator[GenerateContentResponse]) -> Iterator[ChatEvent]:
+    final = _PumpFinal()
 
-    if stream is not None:
+    for chunk in stream:
+        yield from _pump_chunk(chunk, final)
 
-        final = _PumpFinal()
+    yield from _pump_grounding(final.search)
 
-        for chunk in stream:
-            yield from _pump_chunk(chunk, final)
+    yield StopEvent(final.text)
 
-        yield from _pump_grounding(final.search)
+    yield from _pump_usage(final.usage)
 
-        yield StopEvent(final.text)
+    yield from _pump_calls(final.calls)
 
-        yield from _pump_usage(final.usage)
 
-        yield from _pump_calls(final.calls)
+class GoogleStream(ApiStream):
+
+    def __init__(self, streamfun: Callable[[], Iterator[GenerateContentResponse]]) -> None:
+        self._streamfun = streamfun
+
+    @override
+    def __enter__(self) -> Iterator[ChatEvent]:
+        return _pump(self._streamfun())
+
+    @override
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        pass

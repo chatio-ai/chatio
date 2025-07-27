@@ -1,8 +1,5 @@
 
-from collections.abc import Iterator
-
 from typing import override
-
 
 from httpx import Client as HttpxClient
 
@@ -14,15 +11,13 @@ from chatio.core.client import ApiClient
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.core.events import ChatEvent
-
 
 from chatio.api.helper.httpx import httpx_args
 
 from .config import ClaudeConfigFormat
 from .config import ClaudeConfigClient
 from .format import ClaudeFormat
-from .events import _pump
+from .stream import ClaudeStream
 
 
 class ClaudeClient(ApiClient):
@@ -43,12 +38,10 @@ class ClaudeClient(ApiClient):
     # streams
 
     @override
-    def iterate_model_events(
-            self, model: str, state: ChatState, tools: ChatTools) -> Iterator[ChatEvent]:
-
+    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> ClaudeStream:
         params = self._format.format(state, tools)
 
-        return _pump(self._client.messages.stream(
+        return ClaudeStream(self._client.messages.stream(
             max_tokens=4096,
             model=model,
             system=params.options.system,
