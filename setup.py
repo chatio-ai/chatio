@@ -14,11 +14,11 @@ setup(
     classifiers=[],
     entry_points={
         'console_scripts': [
-            'streamer = chatio.cli.streamer:main',
-            'tokencnt = chatio.cli.tokencnt:main',
-            'loopback = chatio.cli.loopback:main',
-            'machiner = chatio.cli.machiner:main',
-            'debugger = chatio.cli.debugger:main',
+            'chatio = chatio.cli.main:main',
+            'chatio-tcnt = chatio.cli.tcnt:main',
+            'chatio-loop = chatio.cli.loop:main',
+            'chatio-pipe = chatio.cli.pipe:main',
+            'chatio-test = chatio.cli.test:main',
         ],
     },
 )

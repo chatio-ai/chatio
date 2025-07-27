@@ -52,4 +52,4 @@ WORKDIR /app/var
 
 USER chatio
 
-ENTRYPOINT ["streamer"]
+ENTRYPOINT ["chatio"]
