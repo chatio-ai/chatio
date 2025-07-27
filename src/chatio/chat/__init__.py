@@ -3,6 +3,8 @@ from collections.abc import Iterator
 
 from dataclasses import dataclass
 
+from types import TracebackType
+
 from typing import Self
 
 from chatio.core.config import ModelConfig
@@ -68,7 +70,12 @@ class Chat:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *exc: object) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         self.close()
 
     # streams

@@ -9,6 +9,8 @@ from contextlib import suppress
 
 from pathlib import Path
 
+from types import TracebackType
+
 from typing import TextIO
 
 
@@ -45,7 +47,12 @@ class StyleWrap:
         print(self.style.prefix, end="", flush=True, file=self.file)
         return ""
 
-    def __exit__(self, *exc: object) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         print(self.style.suffix, end=self.end, flush=True, file=self.file)
 
 
