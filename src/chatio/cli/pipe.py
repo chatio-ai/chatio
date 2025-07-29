@@ -1,7 +1,7 @@
 
 import sys
 
-from chatio.misc import build_chat
+from ._cli.build import build_chat
 
 from ._cli.input import run_user
 from ._cli.print import run_text, run_chat
@@ -13,7 +13,7 @@ async def main(*args: str) -> None:
 
     prompt = " ".join(args)
 
-    async with build_chat(prompt) as chat:
+    async with await build_chat(prompt) as chat:
 
         while True:
             content_raw = await run_user()

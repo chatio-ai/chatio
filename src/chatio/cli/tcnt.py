@@ -1,7 +1,7 @@
 
 import sys
 
-from chatio.misc import build_chat
+from ._cli.build import build_chat
 
 from ._cli.print import run_info
 from ._cli import entry_point
@@ -15,7 +15,7 @@ async def main(*args: str) -> None:
     if not content.strip():
         raise SystemExit
 
-    async with build_chat(prompt, [content]) as chat:
+    async with await build_chat(prompt, [content]) as chat:
 
         run_info(chat, file=sys.stderr)
 

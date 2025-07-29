@@ -3,7 +3,7 @@ import asyncio
 
 from contextlib import suppress
 
-from chatio.misc import build_chat
+from ._cli.build import build_chat
 
 from ._cli.input import run_user_extra
 from ._cli.print import run_info, run_chat
@@ -19,7 +19,7 @@ async def main(*args: str) -> None:
     input_theme = Theme(direction=Theme.INPUT, color=Color.BRIGHT_GREEN)
     model_theme = Theme(direction=Theme.OUTPUT, color=Color.BRIGHT_CYAN)
 
-    async with build_chat(prompt) as chat:
+    async with await build_chat(prompt) as chat:
 
         run_info(chat, model_theme)
 

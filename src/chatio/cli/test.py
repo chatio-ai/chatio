@@ -2,13 +2,13 @@
 # ruff: noqa: ERA001
 
 from chatio.chat import Chat
-from chatio.misc import build_chat
+from ._cli.build import build_chat
 
 from ._cli.print import run_info, run_chat
 from ._cli import entry_point
 
 
-def makechat() -> Chat:
+async def makechat() -> Chat:
 
     prompt = "Отвечай на русском"
     prompt = "duplicate user message as is"
@@ -66,13 +66,13 @@ Do not remove anything and do not add anything!
             "content.jpeg [Image depicting holy grail of Roman Empire]",
         ]
 
-    return build_chat(prompt, messages)
+    return await build_chat(prompt, messages)
 
 
 @entry_point
 async def main(*filenames: str) -> None:
 
-    async with makechat() as chat:
+    async with await makechat() as chat:
 
         run_info(chat)
 
