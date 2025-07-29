@@ -3,55 +3,67 @@ import os
 
 from collections.abc import Iterator
 
+from typing import override
+
 import httpx
 
 
-class HttpxHooks:
+class LoggingResponse(httpx.Response):
 
-    def log_request(self, request: httpx.Request) -> None:
+    @override
+    def iter_bytes(self, chunk_size: int | None = None) -> Iterator[bytes]:
+        buffer = bytearray()
+        for chunk in super().iter_bytes(chunk_size):
+            print(chunk.decode())
+            buffer.extend(chunk)
+            yield b""
+        yield bytes(buffer)
+
+
+class LoggingTransport(httpx.HTTPTransport):
+
+    def __init__(self, *, verbose: bool = False) -> None:
+        super().__init__()
+        self.verbose = verbose
+
+    def _log_request(self, request: httpx.Request) -> None:
         content = request.content.decode()
         headers = "\n".join(f"{k}: {v}" for k, v in request.headers.items())
         print(f"{request.method} {request.url}\n{headers}\n\n{content}\n\n")
 
-    def log_response(self, response: httpx.Response) -> None:
+    def _log_response(self, response: httpx.Response) -> None:
         headers = "\n".join(f"{k}: {v}" for k, v in response.headers.items())
         print(f"{response.http_version} {response.status_code}\n{headers}\n\n")
 
-    def log_response_trace(self, response: httpx.Response) -> None:
-        self.log_response(response)
-        if not isinstance(response.stream, httpx.SyncByteStream):
-            raise TypeError
+    @override
+    def handle_request(self,
+                       request: httpx.Request, **kwargs: object) -> httpx.Response:
 
-        _iter_bytes = response.iter_bytes
+        self._log_request(request)
+        response = super().handle_request(request, **kwargs)
+        self._log_response(response)
 
-        def iter_bytes(chunk_size: int | None = None) -> Iterator[bytes]:
-            buffer = bytearray()
-            for chunk in _iter_bytes(chunk_size):
-                print(chunk.decode())
-                buffer.extend(chunk)
-                yield b""
-            yield bytes(buffer)
+        if self.verbose:
+            return LoggingResponse(
+                status_code=response.status_code,
+                headers=response.headers,
+                stream=response.stream,
+                extensions=response.extensions,
+            )
 
-        response.iter_bytes = iter_bytes  # type: ignore[method-assign]
+        return response
 
 
 def httpx_args() -> dict:
     args: dict[str, object] = {}
-    hooks = HttpxHooks()
 
     if os.getenv("CHATIO_HTTPX_TRACE"):
         args.update({
-            "event_hooks": {
-                "request": [hooks.log_request],
-                "response": [hooks.log_response_trace],
-            },
+            'transport': LoggingTransport(verbose=True),
         })
     if os.getenv("CHATIO_HTTPX_DEBUG"):
         args.update({
-            "event_hooks": {
-                "request": [hooks.log_request],
-                "response": [hooks.log_response],
-            },
+            'transport': LoggingTransport(verbose=False),
         })
 
     if os.getenv("CHATIO_HTTPX_INSECURE"):
