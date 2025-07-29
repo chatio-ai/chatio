@@ -5,6 +5,8 @@ from httpx import AsyncClient as HttpxClient
 
 from openai import AsyncOpenAI
 
+from openai.resources.chat import AsyncChat    # noqa: F401    # pylint: disable=unused-import
+
 
 from chatio.core.client import ApiClient
 
