@@ -2,7 +2,7 @@
 import sys
 import pathlib
 
-from chatio.misc import build_chat
+from ._cli.build import build_chat
 
 from ._cli.print import run_info, run_chat, run_text
 from ._cli.style import Theme, Color
@@ -41,8 +41,8 @@ async def main(*args: str) -> None:
         print()
 
     async with (
-        build_chat(request_prompt, ["."]) as chat_request,
-        build_chat(response_prompt) as chat_response,
+        await build_chat(request_prompt, ["."]) as chat_request,
+        await build_chat(response_prompt) as chat_response,
     ):
         chats = [chat_request, chat_response]
 

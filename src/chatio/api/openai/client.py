@@ -5,6 +5,8 @@ from httpx import AsyncClient as HttpxClient
 
 from openai import AsyncOpenAI
 
+from openai.resources import chat
+
 
 from chatio.api.helper.httpx import httpx_args
 
@@ -14,6 +16,9 @@ from chatio.core.client import ApiClient
 from .config import OpenAIConfigClient
 from .params import OpenAIParams
 from .stream import OpenAIStream
+
+
+_chat = chat
 
 
 class OpenAIClient(ApiClient[
