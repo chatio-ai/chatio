@@ -6,8 +6,6 @@ from collections.abc import Callable
 
 from dataclasses import dataclass, field
 
-from types import TracebackType
-
 from typing import override
 
 
@@ -125,14 +123,9 @@ class GoogleStream(ApiStream):
         self._streamfun = streamfun
 
     @override
-    def __enter__(self) -> Iterator[ChatEvent]:
+    def __iter__(self) -> Iterator[ChatEvent]:
         return _pump(self._streamfun())
 
     @override
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
+    def close(self) -> None:
         pass

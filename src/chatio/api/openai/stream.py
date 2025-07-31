@@ -3,8 +3,6 @@ import logging
 
 from collections.abc import Iterator
 
-from types import TracebackType
-
 from typing import override
 
 
@@ -86,15 +84,10 @@ class OpenAIStream(ApiStream):
         self._streamctx = streamctx
 
     @override
-    def __enter__(self) -> Iterator[ChatEvent]:
+    def __iter__(self) -> Iterator[ChatEvent]:
         stream = self._streamctx.__enter__()
         return _pump(stream)
 
     @override
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        return self._streamctx.__exit__(exc_type, exc, exc_tb)
+    def close(self) -> None:
+        return self._streamctx.__exit__(None, None, None)

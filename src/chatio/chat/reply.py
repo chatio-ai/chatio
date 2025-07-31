@@ -42,8 +42,11 @@ class ChatReply:
         exc_value: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
+        self.close()
+
+    def close(self) -> None:
         if self._stream is not None:
-            self._stream.__exit__(exc_type, exc_value, traceback)
+            self._stream.close()
             self._stream = None
 
     def __iter__(self) -> Iterator[ChatEvent]:
@@ -55,9 +58,8 @@ class ChatReply:
             stats.clear()
 
             self._stream = self._model()
-            events = self._stream.__enter__()
 
-            for event in events:
+            for event in self._stream:
                 match event:
                     case ModelTextChunk():
                         yield event
@@ -69,8 +71,7 @@ class ChatReply:
                     case StatEvent():
                         stats.append(event)
 
-            self._stream.__exit__(None, None, None)
-            self._stream = None
+            self._stream.close()
 
             yield from self._usage(stats)
 
