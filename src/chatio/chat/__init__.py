@@ -1,6 +1,4 @@
 
-from collections.abc import Iterator
-
 from dataclasses import dataclass
 
 from types import TracebackType
@@ -8,11 +6,6 @@ from types import TracebackType
 from typing import Self
 
 from chatio.core.config import ModelConfig
-
-from chatio.core.events import ChatEvent
-from chatio.core.events import CallEvent
-from chatio.core.events import ToolEvent
-from chatio.core.events import ToolsTextChunk
 
 
 from .model import init_client
@@ -75,31 +68,10 @@ class Chat:
 
     # streams
 
-    def _call(self, call: CallEvent, state: ChatState) -> Iterator[ChatEvent]:
-        tool_func = self._tools.funcs.get(call.name)
-        if not tool_func:
-            return
-
-        content = ""
-        for event in tool_func(**call.args):
-            if isinstance(event, str):
-                content += event
-                yield ToolsTextChunk(event)
-            elif event is not None:
-                yield ToolEvent(call.call_id, call.name, event)
-
-        state.append_call_request(call.call_id, call.name, call.args_raw)
-        state.append_call_response(call.call_id, call.name, content)
-
-    def _calls(self, calls: list[CallEvent], state: ChatState) -> Iterator[ChatEvent]:
-        for call in calls:
-            yield call
-            yield from self._call(call, state)
-
     def stream_content(self) -> ChatReply:
         return ChatReply(
             lambda: self._client.iterate_model_events(self._model.model, self._state, self._tools),
-            self._state, self._calls)
+            self._state, self._tools)
 
     # helpers
 
@@ -110,7 +82,7 @@ class Chat:
         return ChatInfo(
             self._model.vendor,
             self._model.model,
-            len(self._tools.funcs),
+            len(self._tools.tools) if self._tools.tools is not None else 0,
             bool(self._state.options.system),
             len(self._state.messages),
         )
