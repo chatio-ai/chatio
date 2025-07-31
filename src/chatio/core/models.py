@@ -7,26 +7,26 @@ from typing import Any
 
 
 @dataclass
-class MessageContent:
+class ChatMessage:
     pass
 
 
 @dataclass
-class CallRequest(MessageContent):
+class CallRequest(ChatMessage):
     tool_call_id: str
     tool_name: str
     tool_input: object
 
 
 @dataclass
-class CallResponse(MessageContent):
+class CallResponse(ChatMessage):
     tool_call_id: str
     tool_name: str
     tool_output: str
 
 
 @dataclass
-class TextMessage(MessageContent):
+class TextMessage(ChatMessage):
     text: str
 
 
@@ -51,13 +51,13 @@ class PredictionMessage(TextMessage):
 
 
 @dataclass
-class ImageDocument(MessageContent):
+class ImageDocument(ChatMessage):
     blob: bytes
     mimetype: str
 
 
 @dataclass
-class TextDocument(MessageContent):
+class TextDocument(ChatMessage):
     text: str
     mimetype: str
 
@@ -83,7 +83,7 @@ class ChatStateOptions:
 
 @dataclass
 class ChatState:
-    messages: list[MessageContent] = field(default_factory=list)
+    messages: list[ChatMessage] = field(default_factory=list)
     options: ChatStateOptions = field(default_factory=ChatStateOptions)
 
 

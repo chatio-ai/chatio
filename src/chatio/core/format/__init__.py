@@ -17,7 +17,7 @@ from .tools import ApiToolsFormatter
 
 # pylint: disable=too-few-public-methods
 class ApiFormat[
-    MessageContentT,
+    ChatMessageT,
     ApiStateOptionsT: ApiStateOptions,
     ToolDefinitionsT,
     ToolChoiceT,
@@ -28,7 +28,7 @@ class ApiFormat[
 
     @property
     @abstractmethod
-    def _messages_formatter(self) -> ApiMessagesFormatter[MessageContentT]:
+    def _messages_formatter(self) -> ApiMessagesFormatter[ChatMessageT]:
         ...
 
     @property
@@ -42,7 +42,7 @@ class ApiFormat[
         ...
 
     def format(self, state: ChatState, tools: ChatTools) -> ApiParams[
-        MessageContentT,
+        ChatMessageT,
         ApiStateOptionsT,
         ToolDefinitionsT,
         ToolChoiceT,

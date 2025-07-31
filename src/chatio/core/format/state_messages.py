@@ -12,7 +12,7 @@ from chatio.core.models import TextDocument
 from chatio.core.models import CallResponse
 from chatio.core.models import CallRequest
 
-from chatio.core.models import MessageContent
+from chatio.core.models import ChatMessage
 
 from chatio.core.config import ApiConfigFormat
 
@@ -21,7 +21,7 @@ from ._base import ApiFormatBase
 
 # pylint: disable=too-few-public-methods
 class ApiMessagesFormatterBase[
-    MessageContentT,
+    ChatMessageT,
     MessageTextT,
     ImageDocumentT,
     TextDocumentT,
@@ -32,7 +32,7 @@ class ApiMessagesFormatterBase[
 ):
 
     @abstractmethod
-    def _chat_messages(self, messages: list[MessageContentT]) -> list[MessageContentT]:
+    def _chat_messages(self, messages: list[ChatMessageT]) -> list[ChatMessageT]:
         ...
 
     @abstractmethod
@@ -41,43 +41,43 @@ class ApiMessagesFormatterBase[
 
     @abstractmethod
     def _input_content(
-            self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
+            self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> ChatMessageT:
         ...
 
-    def _input_message(self, msg: InputMessage) -> MessageContentT:
+    def _input_message(self, msg: InputMessage) -> ChatMessageT:
         return self._input_content(self._message_text(msg))
 
     @abstractmethod
     def _output_content(
-            self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> MessageContentT:
+            self, content: MessageTextT | ImageDocumentT | TextDocumentT) -> ChatMessageT:
         ...
 
-    def _output_message(self, msg: OutputMessage) -> MessageContentT:
+    def _output_message(self, msg: OutputMessage) -> ChatMessageT:
         return self._output_content(self._message_text(msg))
 
     @abstractmethod
-    def _call_request(self, req: CallRequest) -> MessageContentT:
+    def _call_request(self, req: CallRequest) -> ChatMessageT:
         ...
 
     @abstractmethod
-    def _call_response(self, resp: CallResponse) -> MessageContentT:
+    def _call_response(self, resp: CallResponse) -> ChatMessageT:
         ...
 
     @abstractmethod
     def _image_document_blob(self, doc: ImageDocument) -> ImageDocumentT:
         ...
 
-    def _image_document(self, doc: ImageDocument) -> MessageContentT:
+    def _image_document(self, doc: ImageDocument) -> ChatMessageT:
         return self._input_content(self._image_document_blob(doc))
 
     @abstractmethod
     def _text_document_text(self, doc: TextDocument) -> TextDocumentT:
         ...
 
-    def _text_document(self, doc: TextDocument) -> MessageContentT:
+    def _text_document(self, doc: TextDocument) -> ChatMessageT:
         return self._input_content(self._text_document_text(doc))
 
-    def format(self, messages: list[MessageContent]) -> list[MessageContentT]:
+    def format(self, messages: list[ChatMessage]) -> list[ChatMessageT]:
         _messages = []
 
         for message in messages:
@@ -101,8 +101,8 @@ class ApiMessagesFormatterBase[
 
 
 # pylint: disable=too-few-public-methods
-class ApiMessagesFormatter[MessageContentT](Protocol):
+class ApiMessagesFormatter[ChatMessageT](Protocol):
 
     @abstractmethod
-    def format(self, messages: list[MessageContent]) -> list[MessageContentT]:
+    def format(self, messages: list[ChatMessage]) -> list[ChatMessageT]:
         ...

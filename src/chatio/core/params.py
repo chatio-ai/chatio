@@ -18,13 +18,13 @@ class ApiToolsOptions[
 
 @dataclass
 class ApiParams[
-    MessageContentT,
+    ChatMessageT,
     ApiStateOptionsT: ApiStateOptions,
     ToolDefinitionsT,
     ToolChoiceT,
 ]:
     options: ApiStateOptionsT
-    messages: list[MessageContentT]
+    messages: list[ChatMessageT]
     tools: ApiToolsOptions[
         ToolDefinitionsT,
         ToolChoiceT,
