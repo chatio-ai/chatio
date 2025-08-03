@@ -12,16 +12,13 @@ from chatio.core.config import ModelConfig
 from chatio.core.events import ChatEvent
 from chatio.core.events import CallEvent
 from chatio.core.events import ToolEvent
-from chatio.core.events import StopEvent
-from chatio.core.events import StatEvent
-from chatio.core.events import ModelTextChunk
 from chatio.core.events import ToolsTextChunk
 
 
 from .model import init_client
 from .state import ChatState
 from .tools import ChatTools
-from .usage import ChatUsage
+from .reply import ChatReply
 
 
 @dataclass
@@ -53,8 +50,6 @@ class Chat:
         if tools is None:
             tools = ChatTools()
         self._tools = tools
-
-        self._usage = ChatUsage()
 
     @property
     def state(self) -> ChatState:
@@ -101,32 +96,10 @@ class Chat:
             yield call
             yield from self._process_tool_call(call)
 
-    def stream_content(self) -> Iterator[ChatEvent]:
-        calls: list[CallEvent] = []
-        stats: list[StatEvent] = []
-
-        events = None
-        while not events or calls:
-            calls.clear()
-            stats.clear()
-
-            events = self._client.iterate_model_events(self._model.model, self._state, self._tools)
-
-            for event in events:
-                match event:
-                    case ModelTextChunk():
-                        yield event
-                    case StopEvent(text):
-                        if text:
-                            self._state.append_output_message(text)
-                    case CallEvent():
-                        calls.append(event)
-                    case StatEvent():
-                        stats.append(event)
-
-            yield from self._usage(stats)
-
-            yield from self._calls(calls)
+    def stream_content(self) -> ChatReply:
+        return ChatReply(
+            lambda: self._client.iterate_model_events(self._model.model, self._state, self._tools),
+            self._state, self._calls)
 
     # helpers
 
