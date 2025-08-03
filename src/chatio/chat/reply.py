@@ -14,17 +14,18 @@ from chatio.core.events import StatEvent
 from chatio.core.stream import ApiStream
 
 from .state import ChatState
+from .tools import ChatTools
 from .usage import ChatUsage
 
 
 class ChatReply:
 
-    def __init__(self, model: Callable[[], ApiStream], state: ChatState,
-                 calls: Callable[[list[CallEvent], ChatState], Iterator[ChatEvent]]) -> None:
+    def __init__(self, model: Callable[[ChatState, ChatTools], ApiStream],
+                 state: ChatState, tools: ChatTools) -> None:
 
         self._model = model
         self._state = state
-        self._calls = calls
+        self._tools = tools
 
         self._ready = False
 
@@ -55,7 +56,7 @@ class ChatReply:
             calls: list[CallEvent] = []
             stats: list[StatEvent] = []
 
-            self._stream = self._model()
+            self._stream = self._model(self._state, self._tools)
 
             for event in self._stream:
                 match event:
@@ -74,6 +75,6 @@ class ChatReply:
 
             yield from self._usage(stats)
 
-            yield from self._calls(calls, self._state)
+            yield from self._tools(calls, self._state)
 
             self._ready = not calls

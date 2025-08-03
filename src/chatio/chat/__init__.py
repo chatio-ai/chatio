@@ -69,8 +69,9 @@ class Chat:
     # streams
 
     def stream_content(self) -> ChatReply:
+        model = self._model.model
         return ChatReply(
-            lambda: self._client.iterate_model_events(self._model.model, self._state, self._tools),
+            lambda state, tools: self._client.iterate_model_events(model, state, tools),
             self._state, self._tools)
 
     # helpers
