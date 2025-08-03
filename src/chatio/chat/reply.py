@@ -2,6 +2,10 @@
 from collections.abc import Callable
 from collections.abc import Iterator
 
+from types import TracebackType
+
+from typing import Self
+
 from chatio.core.events import ChatEvent
 from chatio.core.events import CallEvent
 from chatio.core.events import StopEvent
@@ -14,7 +18,6 @@ from .state import ChatState
 from .usage import ChatUsage
 
 
-# pylint: disable=too-few-public-methods
 class ChatReply:
 
     def __init__(self, model: Callable[[], ApiStream], state: ChatState,
@@ -26,30 +29,52 @@ class ChatReply:
 
         self._usage = ChatUsage()
 
+        self._stream: ApiStream | None = None
+
+    def __enter__(self) -> Self:
+        if self._stream is not None:
+            raise RuntimeError
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        if self._stream is not None:
+            self._stream.__exit__(exc_type, exc_value, traceback)
+            self._stream = None
+
     def __iter__(self) -> Iterator[ChatEvent]:
         calls: list[CallEvent] = []
         stats: list[StatEvent] = []
 
-        events = None
-        while not events or calls:
+        while True:
             calls.clear()
             stats.clear()
 
-            stream = self._model()
+            self._stream = self._model()
+            events = self._stream.__enter__()
 
-            with stream as events:
-                for event in events:
-                    match event:
-                        case ModelTextChunk():
-                            yield event
-                        case StopEvent(text):
-                            if text:
-                                self._state.append_output_message(text)
-                        case CallEvent():
-                            calls.append(event)
-                        case StatEvent():
-                            stats.append(event)
+            for event in events:
+                match event:
+                    case ModelTextChunk():
+                        yield event
+                    case StopEvent(text):
+                        if text:
+                            self._state.append_output_message(text)
+                    case CallEvent():
+                        calls.append(event)
+                    case StatEvent():
+                        stats.append(event)
+
+            self._stream.__exit__(None, None, None)
+            self._stream = None
 
             yield from self._usage(stats)
 
             yield from self._calls(calls)
+
+            if not calls:
+                break

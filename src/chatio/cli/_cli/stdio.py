@@ -21,6 +21,7 @@ from chatio.core.events import StatEvent
 from chatio.core.events import ModelTextChunk
 from chatio.core.events import ToolsTextChunk
 
+from chatio.chat import ChatReply
 from chatio.chat import Chat
 
 
@@ -210,7 +211,8 @@ def _run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *,
                 defer = None
 
 
-def run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *,
+def run_chat(reply: ChatReply, theme: Theme | None = None, *,
              file: TextIO | None = None) -> str:
 
-    return "".join(_run_chat(events, theme, file=file))
+    with reply as events:
+        return "".join(_run_chat(events, theme, file=file))
