@@ -17,6 +17,9 @@ ignore = [
 	"S602",		# shell equals true
 ]
 
+[tool.pylint.main]
+jobs = 0
+
 [tool.pylint.format]
 max-line-length = 99
 
