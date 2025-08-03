@@ -75,7 +75,7 @@ class Chat:
 
     # streams
 
-    def _process_tool_call(self, call: CallEvent) -> Iterator[ChatEvent]:
+    def _call(self, call: CallEvent, state: ChatState) -> Iterator[ChatEvent]:
         tool_func = self._tools.funcs.get(call.name)
         if not tool_func:
             return
@@ -88,13 +88,13 @@ class Chat:
             elif event is not None:
                 yield ToolEvent(call.call_id, call.name, event)
 
-        self._state.append_call_response(call.call_id, call.name, content)
+        state.append_call_request(call.call_id, call.name, call.args_raw)
+        state.append_call_response(call.call_id, call.name, content)
 
-    def _calls(self, calls: list[CallEvent]) -> Iterator[ChatEvent]:
+    def _calls(self, calls: list[CallEvent], state: ChatState) -> Iterator[ChatEvent]:
         for call in calls:
-            self._state.append_call_request(call.call_id, call.name, call.args_raw)
             yield call
-            yield from self._process_tool_call(call)
+            yield from self._call(call, state)
 
     def stream_content(self) -> ChatReply:
         return ChatReply(

@@ -21,11 +21,13 @@ from .usage import ChatUsage
 class ChatReply:
 
     def __init__(self, model: Callable[[], ApiStream], state: ChatState,
-                 calls: Callable[[list[CallEvent]], Iterator[ChatEvent]]) -> None:
+                 calls: Callable[[list[CallEvent], ChatState], Iterator[ChatEvent]]) -> None:
 
         self._model = model
         self._state = state
         self._calls = calls
+
+        self._ready = False
 
         self._usage = ChatUsage()
 
@@ -50,12 +52,9 @@ class ChatReply:
             self._stream = None
 
     def __iter__(self) -> Iterator[ChatEvent]:
-        calls: list[CallEvent] = []
-        stats: list[StatEvent] = []
-
-        while True:
-            calls.clear()
-            stats.clear()
+        while not self._ready:
+            calls: list[CallEvent] = []
+            stats: list[StatEvent] = []
 
             self._stream = self._model()
 
@@ -75,7 +74,6 @@ class ChatReply:
 
             yield from self._usage(stats)
 
-            yield from self._calls(calls)
+            yield from self._calls(calls, self._state)
 
-            if not calls:
-                break
+            self._ready = not calls
