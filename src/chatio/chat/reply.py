@@ -10,7 +10,6 @@ from chatio.core.events import ChatEvent
 from chatio.core.events import CallEvent
 from chatio.core.events import StopEvent
 from chatio.core.events import StatEvent
-from chatio.core.events import ModelTextChunk
 
 from chatio.core.stream import ApiStream
 
@@ -60,15 +59,16 @@ class ChatReply:
 
             for event in self._stream:
                 match event:
-                    case ModelTextChunk():
-                        yield event
                     case StopEvent(text):
                         if text:
                             self._state.append_output_message(text)
+                        yield event
                     case CallEvent():
                         calls.append(event)
                     case StatEvent():
                         stats.append(event)
+                    case _:
+                        yield event
 
             self._stream.close()
 

@@ -18,6 +18,7 @@ from chatio.core.events import ChatEvent
 from chatio.core.events import CallEvent
 from chatio.core.events import ToolEvent
 from chatio.core.events import StatEvent
+from chatio.core.events import StopEvent
 from chatio.core.events import ModelTextChunk
 from chatio.core.events import ToolsTextChunk
 
@@ -206,6 +207,8 @@ def _run_chat(events: Iterable[ChatEvent], theme: Theme | None = None, *,
             case ToolsTextChunk(chunk, _):
                 hascr = _run_text_chunk(chunk, style, hascr=not defer, file=file)
                 defer = None if hascr else style
+            case StopEvent(_):
+                pass
             case _:
                 _run_chat_event(event, style, file=file)
                 defer = None
