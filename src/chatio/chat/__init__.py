@@ -1,9 +1,9 @@
 
 from dataclasses import dataclass
 
-from types import TracebackType
+from typing import override
 
-from typing import Self
+from chatio.core.object import Closeable
 
 from chatio.core.config import ModelConfig
 
@@ -23,7 +23,7 @@ class ChatInfo:
     messages: int
 
 
-class Chat:
+class Chat(Closeable):
 
     def __init__(
         self,
@@ -52,19 +52,9 @@ class Chat:
     def tools(self) -> ChatTools:
         return self._tools
 
+    @override
     def close(self) -> None:
         self._client.close()
-
-    def __enter__(self) -> Self:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ) -> None:
-        self.close()
 
     # streams
 

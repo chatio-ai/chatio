@@ -8,7 +8,6 @@ from typing import Any
 from chatio.core.schema import ToolSchemaDict
 
 
-# pylint: disable=too-few-public-methods
 class ToolBase(ABC):
 
     @staticmethod

@@ -2,9 +2,7 @@
 from collections.abc import Callable
 from collections.abc import Iterator
 
-from types import TracebackType
-
-from typing import Self
+from typing import override
 
 from chatio.core.events import ChatEvent
 from chatio.core.events import CallEvent
@@ -18,7 +16,7 @@ from .tools import ChatTools
 from .usage import ChatUsage
 
 
-class ChatReply:
+class ChatReply(ApiStream):
 
     def __init__(self, model: Callable[[ChatState, ChatTools], ApiStream],
                  state: ChatState, tools: ChatTools) -> None:
@@ -33,24 +31,13 @@ class ChatReply:
 
         self._stream: ApiStream | None = None
 
-    def __enter__(self) -> Self:
-        if self._stream is not None:
-            raise RuntimeError
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: TracebackType | None,
-    ) -> None:
-        self.close()
-
+    @override
     def close(self) -> None:
         if self._stream is not None:
             self._stream.close()
             self._stream = None
 
+    @override
     def __iter__(self) -> Iterator[ChatEvent]:
         while not self._ready:
             calls: list[CallEvent] = []
