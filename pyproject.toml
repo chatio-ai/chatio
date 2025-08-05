@@ -13,8 +13,6 @@ ignore = [
 	"D",		# missing docstrings
 
 	"T",		# print pprint usage
-
-	"S602",		# shell equals true
 ]
 
 [tool.pylint.main]

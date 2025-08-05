@@ -1,4 +1,6 @@
 
+from contextlib import suppress
+
 from chatio.misc import build_chat
 
 from ._cli.input import run_user_extra
@@ -37,6 +39,7 @@ def main(*args: str) -> None:
             chat.state.update_prediction_message(results)
 
             print()
-            results = run_chat(chat.stream_content(), model_theme)
+            with suppress(KeyboardInterrupt):
+                results = run_chat(chat.stream_content(), model_theme)
 
         print()

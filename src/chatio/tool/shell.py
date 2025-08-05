@@ -3,9 +3,9 @@ from collections.abc import Iterator
 
 from typing import override
 
-from contextlib import suppress
-
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen
+from subprocess import PIPE
+from subprocess import STDOUT
 
 from chatio.core.schema import ToolSchemaDict
 from chatio.core.invoke import ToolBase
@@ -19,23 +19,27 @@ class ShellToolBase(ToolBase):
 ```
 $ {command}
 """
-
-        with suppress(KeyboardInterrupt):
-            yield from iterate
-
+        yield from iterate
         yield """\
 ```
 """
 
     def _command(self, command: str) -> Iterator[str | dict]:
 
-        with Popen(command, shell=True, stdout=PIPE, stderr=STDOUT, text=True) as process:
-            if process.stdout is not None:
-                yield from self._iterate(command, process.stdout)
-                process.stdout.close()
+        with Popen(    # noqa: S602
+                command, shell=True, start_new_session=True,
+                stdout=PIPE, stderr=STDOUT, text=True) as process:
 
-            exit_code = process.wait()
-            yield {'command': command, 'exit_code': exit_code}
+            try:
+                if process.stdout is None:
+                    raise RuntimeError
+
+                yield from self._iterate(command, process.stdout)
+            finally:
+                process.terminate()
+                exit_code = process.wait()
+                yield f"# exit code: {exit_code}"
+                yield {'command': command, 'exit_code': exit_code}
 
 
 class ShellCalcTool(ShellToolBase):
