@@ -21,7 +21,7 @@ class GoogleOptionsFormatter(ApiOptionsFormatterBase[
 ]):
 
     def _system_message(self, msg: SystemMessage | None) -> ContentDict | None:
-        if msg is None:
+        if not msg:
             return None
 
         content = message_text(msg)

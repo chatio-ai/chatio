@@ -77,10 +77,15 @@ class ApiMessagesFormatterBase[
     def _text_document(self, doc: TextDocument) -> ChatMessageT:
         return self._input_content(self._text_document_text(doc))
 
+    @abstractmethod
+    def _should_format(self, message: ChatMessage) -> bool:
+        ...
+
     def format(self, messages: list[ChatMessage]) -> list[ChatMessageT]:
         _messages = []
-
         for message in messages:
+            if not self._should_format(message):
+                continue
             match message:
                 case InputMessage():
                     _messages.append(self._input_message(message))

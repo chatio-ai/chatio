@@ -31,7 +31,7 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
         if not self._config.prediction:
             return NOT_GIVEN
 
-        if msg is None:
+        if not msg:
             return NOT_GIVEN
 
         content = message_text(msg)
@@ -43,7 +43,7 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
 
     def _system_message(self, msg: SystemMessage | None) -> list[ChatCompletionMessageParam]:
 
-        if msg is None:
+        if not msg:
             return []
 
         content = message_text(msg)

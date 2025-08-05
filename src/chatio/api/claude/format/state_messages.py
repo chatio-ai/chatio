@@ -13,6 +13,7 @@ from anthropic.types import ToolUseBlockParam
 from anthropic.types import ToolResultBlockParam
 
 
+from chatio.core.models import ChatMessage
 from chatio.core.models import TextMessage
 from chatio.core.models import CallRequest
 from chatio.core.models import CallResponse
@@ -151,3 +152,7 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
                 "enabled": True,
             },
         }
+
+    @override
+    def _should_format(self, message: ChatMessage) -> bool:
+        return bool(message)

@@ -29,6 +29,9 @@ class CallResponse(ChatMessage):
 class TextMessage(ChatMessage):
     text: str
 
+    def __bool__(self) -> bool:
+        return bool(self.text)
+
 
 @dataclass
 class SystemMessage(TextMessage):

@@ -11,6 +11,7 @@ from openai.types.chat import ChatCompletionContentPartImageParam
 from openai.types.chat.chat_completion_content_part_param import File
 
 
+from chatio.core.models import ChatMessage
 from chatio.core.models import TextMessage
 from chatio.core.models import CallRequest
 from chatio.core.models import CallResponse
@@ -133,3 +134,7 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
                 "file_data": f"data:{mimetype};base64,{data}",
             },
         }
+
+    @override
+    def _should_format(self, message: ChatMessage) -> bool:
+        return bool(message)

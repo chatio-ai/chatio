@@ -24,13 +24,10 @@ class ClaudeOptionsFormatter(ApiOptionsFormatterBase[
 ]):
 
     def _system_message(self, msg: SystemMessage | None) -> list[TextBlockParam] | NotGiven:
-        if msg is None:
+        if not msg:
             return NOT_GIVEN
 
         content = message_text(msg)
-
-        if not content['text']:
-            return NOT_GIVEN
 
         if self._config.use_cache:
             content.update({

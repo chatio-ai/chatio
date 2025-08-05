@@ -47,14 +47,13 @@ class ChatReply(ApiStream):
 
             for event in self._stream:
                 match event:
-                    case StopEvent(text):
-                        if text:
-                            self._state.append_output_message(text)
-                        yield event
                     case CallEvent():
                         calls.append(event)
                     case StatEvent():
                         stats.append(event)
+                    case StopEvent(text):
+                        self._state.append_output_message(text)
+                        yield event
                     case _:
                         yield event
 
