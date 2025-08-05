@@ -73,7 +73,7 @@ class Chat(Closeable):
         return ChatInfo(
             self._model.vendor,
             self._model.model,
-            len(self._tools.tools) if self._tools.tools is not None else 0,
+            len(self._tools.tools),
             bool(self._state.options.system),
             len(self._state.messages),
         )

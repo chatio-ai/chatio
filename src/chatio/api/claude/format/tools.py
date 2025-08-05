@@ -54,8 +54,8 @@ class ClaudeToolsFormatter(ApiToolsFormatterBase[
         }
 
     @override
-    def _tool_definitions(self, tools: list[ToolParam] | None) -> list[ToolParam] | NotGiven:
-        if tools is None:
+    def _tool_definitions(self, tools: list[ToolParam]) -> list[ToolParam] | NotGiven:
+        if not tools:
             return NOT_GIVEN
         return self._setup_tools_cache(tools)
 

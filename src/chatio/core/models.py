@@ -89,5 +89,5 @@ class ChatState:
 
 @dataclass
 class ChatTools:
-    tools: list[ToolSchema] | None = None
+    tools: list[ToolSchema] = field(default_factory=list)
     tool_choice: ToolChoice | None = None

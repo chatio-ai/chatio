@@ -30,7 +30,7 @@ class ApiToolsFormatterBase[
         ...
 
     @abstractmethod
-    def _tool_definitions(self, tools: list[ToolSchemaT] | None) -> ToolDefinitionsT:
+    def _tool_definitions(self, tools: list[ToolSchemaT]) -> ToolDefinitionsT:
         ...
 
     @abstractmethod
@@ -82,9 +82,7 @@ class ApiToolsFormatterBase[
         ToolDefinitionsT,
         ToolChoiceT,
     ]:
-        _tool_defs = None
-        if tools.tools is not None:
-            _tool_defs = [self._tool_schema(tool) for tool in tools.tools]
+        _tool_defs = [self._tool_schema(tool) for tool in tools.tools]
 
         _tools = self._tool_definitions(_tool_defs)
 

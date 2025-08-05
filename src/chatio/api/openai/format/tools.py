@@ -60,11 +60,10 @@ class OpenAIToolsFormatter(ApiToolsFormatterBase[
         }
 
     @override
-    def _tool_definitions(
-        self, tools: list[ChatCompletionToolParam] | None,
-    ) -> list[ChatCompletionToolParam] | NotGiven:
+    def _tool_definitions(self, tools: list[ChatCompletionToolParam],
+                          ) -> list[ChatCompletionToolParam] | NotGiven:
 
-        if tools is None:
+        if not tools:
             return NOT_GIVEN
         return tools
 

@@ -41,10 +41,7 @@ class GoogleToolsFormatter(ApiToolsFormatterBase[
         }
 
     @override
-    def _tool_definitions(
-        self, tools: list[FunctionDeclarationDict] | None,
-    ) -> ToolListUnionDict | None:
-
+    def _tool_definitions(self, tools: list[FunctionDeclarationDict]) -> ToolListUnionDict | None:
         tools_config: ToolListUnionDict = []
 
         if tools:
