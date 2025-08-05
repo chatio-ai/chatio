@@ -3,7 +3,7 @@ import sys
 
 from chatio.misc import build_chat
 
-from ._cli.stdio import run_info
+from ._cli.print import run_info
 from ._cli import entry_point
 
 

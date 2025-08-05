@@ -4,7 +4,7 @@
 from chatio.chat import Chat
 from chatio.misc import build_chat
 
-from ._cli.stdio import run_info, run_chat
+from ._cli.print import run_info, run_chat
 from ._cli import entry_point
 
 

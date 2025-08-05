@@ -1,10 +1,19 @@
 
+import sys
 import atexit
 import pathlib
 import readline
 
-
 from contextlib import suppress
+
+from pathlib import Path
+
+from typing import TextIO
+
+
+from .style import Theme, Input
+from .stdio import _wrap_input
+from .stdio import _wrap_print
 
 
 class ChatCompleter:
@@ -68,3 +77,55 @@ class SetupReadLine:
 
 
 setup_readline = SetupReadLine()
+
+
+def run_user(theme: Theme | None = None, *, file: TextIO | None = None) -> str | None:
+    setup_readline()
+
+    if theme is None:
+        theme = Input
+
+    user_input = None
+    if sys.stdin.isatty():
+        with (
+            _wrap_input(theme.chunk_pri, end="", file=file) as prompt,
+            suppress(EOFError, KeyboardInterrupt),
+        ):
+            user_input = input(prompt)
+    else:
+        with suppress(EOFError, KeyboardInterrupt):
+            user_input = input()
+            with _wrap_print(theme.chunk_pri, end="", file=file):
+                print(user_input, flush=True, file=file)
+
+    return user_input
+
+
+def run_user_extra(theme: Theme | None = None, *,
+                   file: TextIO | None = None) -> tuple[str | None, list[Path]]:
+
+    user_input = run_user(theme, file=file)
+    if user_input is None:
+        return None, []
+
+    paths = []
+    ready = True
+    while ready:
+        ready = False
+        splits = user_input.split(maxsplit=1)
+
+        part, rest = "", ""
+        match len(splits):
+            case 2:
+                part, rest = splits
+            case 1:
+                part = splits.pop()
+            case _:
+                pass
+
+        if part.startswith("@"):
+            paths.append(Path(part.removeprefix("@")))
+            user_input = rest
+            ready = True
+
+    return user_input, paths
