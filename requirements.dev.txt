@@ -7,4 +7,3 @@ ruff
 pylint
 pyright[nodejs]
 mypy
-types-setuptools

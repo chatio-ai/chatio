@@ -4,5 +4,5 @@
 !requirements.dev.txt
 !requirements.txt
 !pyproject.toml
-!setup.py
+!setup.cfg
 !entrypoint.sh

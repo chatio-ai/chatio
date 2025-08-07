@@ -6,26 +6,22 @@ ENV LANG=C.UTF-8
 ENV TERM=xterm-256color
 ENV FORCE_COLOR=1
 
-RUN pip install --break-system-packages --root-user-action ignore --upgrade pip
+RUN pip install --break-system-packages --root-user-action ignore -U pip
 
-WORKDIR /app/
+WORKDIR /app/build
 
 COPY ./requirements.txt .
 
-RUN pip install --break-system-packages --root-user-action ignore --upgrade -r requirements.txt
+RUN pip install --break-system-packages --root-user-action ignore -Ur ./requirements.txt
 
 FROM build AS devel
 
 COPY ./requirements.dev.txt .
 
-RUN pip install --break-system-packages --root-user-action ignore --upgrade -r requirements.dev.txt
+RUN pip install --break-system-packages --root-user-action ignore -Ur ./requirements.dev.txt
 
 COPY ./src ./src
-
-COPY ./setup.py .
-
 COPY ./pyproject.toml .
-
 COPY ./.pre-commit-config.yaml .
 
 ARG LINTS=1
@@ -37,10 +33,11 @@ RUN --mount=type=cache,target=.mypy_cache \
 
 FROM build AS final
 
-COPY --from=devel /app/src ./build/src
-COPY --from=devel /app/setup.py ./build/
+WORKDIR /app
 
-RUN pip install --break-system-packages --root-user-action ignore --upgrade ./build && rm -rf ./build
+COPY ./ ./build
+
+RUN pip install --break-system-packages --root-user-action ignore -U ./build && rm -rf ./build
 
 COPY ./entrypoint.sh ./entrypoint.sh
 

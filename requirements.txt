@@ -5,4 +5,3 @@ pymediawiki
 googlesearch-python
 html2text
 weasyprint
-setuptools
