@@ -12,8 +12,8 @@ from typing import TextIO
 
 
 from .style import Theme, Input
-from .stdio import _wrap_input
-from .stdio import _wrap_print
+from .style import _wrap_input
+from .style import _wrap_print
 
 
 class ChatCompleter:

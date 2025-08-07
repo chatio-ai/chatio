@@ -19,7 +19,7 @@ from chatio.chat import Chat
 
 from .style import Theme, Model
 from .style import Style, Empty
-from .stdio import _wrap_print
+from .style import _wrap_print
 
 
 def run_text(text: str, style: Style | None = None, *, file: TextIO | None = None) -> None:
