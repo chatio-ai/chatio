@@ -5,29 +5,33 @@ import json
 import pathlib
 import tomllib
 
+from importlib import resources
+
 from chatio.core.config import ModelConfig
 
 
 def _vendor_config_parse(model_name: str) -> tuple[str, str, dict]:
     config = None
 
-    vendors_dir = pathlib.Path('./vendors').resolve()
-    vendor_path = pathlib.Path()
-    while model_name:
-        vendor_path_part, _, model_name = model_name.partition('/')
-        vendor_path = vendor_path.joinpath(vendor_path_part)
+    vendors_res = resources.files('chatio').joinpath('share/vendors')
+    with resources.as_file(vendors_res) as vendors_root:
+        vendors_dir = vendors_root.resolve()
+        vendor_path = pathlib.Path()
+        while model_name:
+            vendor_path_part, _, model_name = model_name.partition('/')
+            vendor_path = vendor_path.joinpath(vendor_path_part)
 
-        config_file = vendors_dir.joinpath(vendor_path).with_suffix('.toml').resolve()
+            config_file = vendors_dir.joinpath(vendor_path).with_suffix('.toml').resolve()
 
-        try:
-            with config_file.open('rb') as vendorfp:
-                config_data = tomllib.load(vendorfp)
+            try:
+                with config_file.open('rb') as vendorfp:
+                    config_data = tomllib.load(vendorfp)
 
-            _vendor_path = config_file.relative_to(vendors_dir).with_suffix("")
-            config = str(_vendor_path), model_name, config_data
-        except FileNotFoundError:
-            if config:
-                break
+                _vendor_path = config_file.relative_to(vendors_dir).with_suffix("")
+                config = str(_vendor_path), model_name, config_data
+            except FileNotFoundError:
+                if config:
+                    break
 
     if config is None:
         raise FileNotFoundError

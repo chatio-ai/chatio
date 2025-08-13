@@ -1,0 +1,7 @@
+api = 'openai'
+
+[client]
+base_url = 'https://api.together.xyz/v1'
+
+[format]
+compat = true

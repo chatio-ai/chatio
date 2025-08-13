@@ -1,0 +1,4 @@
+api = 'openai'
+
+[client]
+base_url = 'https://openrouter.ai/api/v1'

@@ -35,9 +35,15 @@ FROM build AS final
 
 WORKDIR /app
 
-COPY ./ ./build
+COPY --from=devel /app/build/src ./build/src
 
-RUN pip install --break-system-packages --root-user-action ignore -U ./build && rm -rf ./build
+COPY ./share ./build/share
+COPY ./requirements.txt ./build
+COPY ./pyproject.toml ./build
+COPY ./setup.cfg ./build
+
+RUN pip install --break-system-packages --root-user-action ignore --no-deps -U ./build \
+	&& rm -rf ./build
 
 COPY ./entrypoint.sh ./entrypoint.sh
 

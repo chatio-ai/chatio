@@ -1,0 +1,7 @@
+api = 'openai'
+
+[client]
+base_url = 'https://api.z.ai/api/paas/v4/'
+
+[format]
+compat = true

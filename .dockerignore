@@ -1,5 +1,7 @@
 *
 !src/**/*.py
+!src/chatio/share
+!share/vendors/**/*.toml
 !.pre-commit-config.yaml
 !requirements.dev.txt
 !requirements.txt

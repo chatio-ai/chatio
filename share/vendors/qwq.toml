@@ -1,0 +1,8 @@
+api = 'openai'
+env_ns = 'dashscope'
+
+[client]
+base_url = 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1'
+
+[format]
+compat = true

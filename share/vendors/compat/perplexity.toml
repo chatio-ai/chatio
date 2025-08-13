@@ -1,0 +1,7 @@
+api = 'openai'
+
+[client]
+base_url = 'https://api.perplexity.ai/'
+
+[format]
+compat = true

@@ -1,0 +1,7 @@
+api = 'openai'
+
+[client]
+base_url = 'https://api.minimax.io/v1'
+
+[format]
+compat = true
