@@ -44,7 +44,6 @@ class GoogleClient(ApiClient):
         return GoogleStream(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
-                'max_output_tokens': 4096,
                 'tools': params.tools.tools,
                 'tool_config': params.tools.tool_choice,
                 'system_instruction': params.options.system,

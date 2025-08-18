@@ -52,7 +52,6 @@ class OpenAIClient(ApiClient):
             ))
 
         return OpenAIStream(self._client.chat.completions.stream(
-            max_completion_tokens=4096,
             stream_options={'include_usage': True},
             model=model,
             messages=_messages,
