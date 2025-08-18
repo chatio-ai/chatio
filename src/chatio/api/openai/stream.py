@@ -12,6 +12,8 @@ from openai.lib.streaming.chat._events import ChatCompletionStreamEvent
 from openai.lib.streaming.chat._completions import ChatCompletionStreamManager
 from openai.lib.streaming.chat._completions import ChatCompletionStream
 
+from openai import LengthFinishReasonError
+
 
 from chatio.core.events import ChatEvent
 from chatio.core.events import CallEvent
@@ -69,13 +71,16 @@ def _pump(stream: ChatCompletionStream) -> Iterator[ChatEvent]:
     for chunk in stream:
         yield from _pump_chunk(chunk)
 
-    final = stream.get_final_completion()
-    final_message = final.choices[0].message
-    yield StopEvent(final_message.content or "")
+    try:
+        final = stream.get_final_completion()
+        final_message = final.choices[0].message
+        yield StopEvent(final_message.content or "")
 
-    yield from _pump_usage(final.usage)
+        yield from _pump_usage(final.usage)
 
-    yield from _pump_calls(final_message.tool_calls)
+        yield from _pump_calls(final_message.tool_calls)
+    except LengthFinishReasonError as e:
+        yield from _pump_usage(e.completion.usage)
 
 
 class OpenAIStream(ApiStream):
