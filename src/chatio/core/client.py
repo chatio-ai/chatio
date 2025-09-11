@@ -1,6 +1,8 @@
 
 from abc import ABC, abstractmethod
 
+from typing import override
+
 from .object import Closeable
 
 from .config import ApiConfigFormat
@@ -23,6 +25,19 @@ class ApiClient(Closeable, ABC):
 
 
 class ApiClientImpl[
+    ApiParamsT: ApiParams,
+](Closeable, ABC):
+
+    @abstractmethod
+    def iterate_model_events(self, model: str, params: ApiParamsT) -> ApiStream:
+        ...
+
+    @abstractmethod
+    async def count_message_tokens(self, model: str, params: ApiParamsT) -> int:
+        ...
+
+
+class ApiClientBase[
     ApiConfigT: ApiConfigFormat,
     ApiParamsT: ApiParams,
 ](ApiClient, ABC):
@@ -35,18 +50,19 @@ class ApiClientImpl[
     ]:
         ...
 
+    @property
     @abstractmethod
-    def _iterate_model_events(self, model: str, params: ApiParamsT) -> ApiStream:
+    def _client(self) -> ApiClientImpl[ApiParamsT]:
         ...
 
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> ApiStream:
         params = self._format.format(state, tools)
-        return self._iterate_model_events(model, params)
-
-    @abstractmethod
-    async def _count_message_tokens(self, model: str, params: ApiParamsT) -> int:
-        ...
+        return self._client.iterate_model_events(model, params)
 
     async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         params = self._format.format(state, tools)
-        return await self._count_message_tokens(model, params)
+        return await self._client.count_message_tokens(model, params)
+
+    @override
+    async def close(self) -> None:
+        await self._client.close()

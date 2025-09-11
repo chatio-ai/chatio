@@ -7,6 +7,7 @@ from anthropic import AsyncAnthropic
 
 
 from chatio.core.client import ApiClientImpl
+from chatio.core.client import ApiClientBase
 
 from chatio.api.helper.httpx import httpx_args
 
@@ -18,35 +19,20 @@ from .format import ClaudeFormat
 from .stream import ClaudeStream
 
 
-class ClaudeClient(ApiClientImpl[
-    ClaudeConfigFormat,
+class ClaudeClientImpl(ApiClientImpl[
     ClaudeParams,
 ]):
 
-    @override
-    def __init__(self, config: dict[str, dict]) -> None:
-
-        _config_format = ClaudeConfigFormat(**config.get('format', {}))
-        _config_client = ClaudeConfigClient(**config.get('client', {}))
-
-        self._formatter = ClaudeFormat(_config_format)
-
+    def __init__(self, config: ClaudeConfigClient) -> None:
         self._client = AsyncAnthropic(
-            api_key=_config_client.api_key,
-            base_url=_config_client.base_url,
+            api_key=config.api_key,
+            base_url=config.base_url,
             http_client=HttpxClient(**httpx_args()))
-
-    # formats
-
-    @property
-    @override
-    def _format(self) -> ClaudeFormat:
-        return self._formatter
 
     # streams
 
     @override
-    def _iterate_model_events(self, model: str, params: ClaudeParams) -> ClaudeStream:
+    def iterate_model_events(self, model: str, params: ClaudeParams) -> ClaudeStream:
         return ClaudeStream(self._client.messages.stream(
             max_tokens=4096,
             model=model,
@@ -59,7 +45,7 @@ class ClaudeClient(ApiClientImpl[
     # helpers
 
     @override
-    async def _count_message_tokens(self, model: str, params: ClaudeParams) -> int:
+    async def count_message_tokens(self, model: str, params: ClaudeParams) -> int:
         result = await self._client.messages.count_tokens(
             model=model,
             system=params.options.system,
@@ -73,3 +59,27 @@ class ClaudeClient(ApiClientImpl[
     @override
     async def close(self) -> None:
         await self._client.close()
+
+
+class ClaudeClient(ApiClientBase[
+    ClaudeConfigFormat,
+    ClaudeParams,
+]):
+
+    def __init__(self, config: dict[str, dict]) -> None:
+
+        _config_format = ClaudeConfigFormat(**config.get('format', {}))
+        _config_client = ClaudeConfigClient(**config.get('client', {}))
+
+        self._formatter = ClaudeFormat(_config_format)
+        self._client_do = ClaudeClientImpl(_config_client)
+
+    @property
+    @override
+    def _format(self) -> ClaudeFormat:
+        return self._formatter
+
+    @property
+    @override
+    def _client(self) -> ClaudeClientImpl:
+        return self._client_do

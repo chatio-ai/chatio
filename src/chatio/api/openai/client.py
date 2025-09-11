@@ -7,6 +7,7 @@ from openai import AsyncOpenAI
 
 
 from chatio.core.client import ApiClientImpl
+from chatio.core.client import ApiClientBase
 
 from chatio.api.helper.httpx import httpx_args
 
@@ -18,34 +19,20 @@ from .format import OpenAIFormat
 from .stream import OpenAIStream
 
 
-class OpenAIClient(ApiClientImpl[
-    OpenAIConfigFormat,
+class OpenAIClientImpl(ApiClientImpl[
     OpenAIParams,
 ]):
 
-    def __init__(self, config: dict[str, dict]) -> None:
-
-        _config_format = OpenAIConfigFormat(**config.get('format', {}))
-        _config_client = OpenAIConfigClient(**config.get('client', {}))
-
-        self._formatter = OpenAIFormat(_config_format)
-
+    def __init__(self, config: OpenAIConfigClient) -> None:
         self._client = AsyncOpenAI(
-            api_key=_config_client.api_key,
-            base_url=_config_client.base_url,
+            api_key=config.api_key,
+            base_url=config.base_url,
             http_client=HttpxClient(**httpx_args()))
-
-    # formats
-
-    @property
-    @override
-    def _format(self) -> OpenAIFormat:
-        return self._formatter
 
     # streams
 
     @override
-    def _iterate_model_events(self, model: str, params: OpenAIParams) -> OpenAIStream:
+    def iterate_model_events(self, model: str, params: OpenAIParams) -> OpenAIStream:
         _messages = [*params.options.system, *params.messages]
 
         if params.options.prediction:
@@ -68,9 +55,33 @@ class OpenAIClient(ApiClientImpl[
     # helpers
 
     @override
-    async def _count_message_tokens(self, model: str, params: OpenAIParams) -> int:
+    async def count_message_tokens(self, model: str, params: OpenAIParams) -> int:
         raise NotImplementedError
 
     @override
     async def close(self) -> None:
         await self._client.close()
+
+
+class OpenAIClient(ApiClientBase[
+    OpenAIConfigFormat,
+    OpenAIParams,
+]):
+
+    def __init__(self, config: dict[str, dict]) -> None:
+
+        _config_format = OpenAIConfigFormat(**config.get('format', {}))
+        _config_client = OpenAIConfigClient(**config.get('client', {}))
+
+        self._formatter = OpenAIFormat(_config_format)
+        self._client_do = OpenAIClientImpl(_config_client)
+
+    @property
+    @override
+    def _format(self) -> OpenAIFormat:
+        return self._formatter
+
+    @property
+    @override
+    def _client(self) -> OpenAIClientImpl:
+        return self._client_do
