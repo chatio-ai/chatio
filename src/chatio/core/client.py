@@ -1,9 +1,6 @@
 
 from abc import ABC, abstractmethod
 
-from typing import Protocol
-
-from .object import SupportsCloseable
 from .object import Closeable
 
 from .config import ApiConfigFormat
@@ -14,10 +11,21 @@ from .format import ApiFormat
 from .stream import ApiStream
 
 
+class ApiClient(Closeable, ABC):
+
+    @abstractmethod
+    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> ApiStream:
+        ...
+
+    @abstractmethod
+    async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
+        ...
+
+
 class ApiClientImpl[
     ApiConfigT: ApiConfigFormat,
     ApiParamsT: ApiParams,
-](Closeable, ABC):
+](ApiClient, ABC):
 
     @property
     @abstractmethod
@@ -42,12 +50,3 @@ class ApiClientImpl[
     async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
         params = self._format.format(state, tools)
         return await self._count_message_tokens(model, params)
-
-
-class ApiClient(SupportsCloseable, Protocol):
-
-    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> ApiStream:
-        ...
-
-    async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
-        ...
