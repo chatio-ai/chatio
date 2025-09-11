@@ -5,20 +5,17 @@ from google.genai import Client
 from google.genai.types import HttpOptions
 
 
-from chatio.core.client import ApiClientImpl
-from chatio.core.client import ApiClientBase
-
 from chatio.api.helper.httpx import httpx_args
 
+from chatio.core.client import ApiClient
 
-from .config import GoogleConfigFormat
+
 from .config import GoogleConfigClient
 from .params import GoogleParams
-from .format import GoogleFormat
 from .stream import GoogleStream
 
 
-class GoogleClientImpl(ApiClientImpl[
+class GoogleClient(ApiClient[
     GoogleParams,
 ]):
 
@@ -53,27 +50,3 @@ class GoogleClientImpl(ApiClientImpl[
     @override
     async def close(self) -> None:
         pass
-
-
-class GoogleClient(ApiClientBase[
-    GoogleConfigFormat,
-    GoogleParams,
-]):
-
-    def __init__(self, config: dict[str, dict]) -> None:
-
-        _config_client = GoogleConfigClient(**config.get('client', {}))
-        _config_format = GoogleConfigFormat(**config.get('format', {}))
-
-        self._formatter = GoogleFormat(_config_format)
-        self._client_do = GoogleClientImpl(_config_client)
-
-    @property
-    @override
-    def _format(self) -> GoogleFormat:
-        return self._formatter
-
-    @property
-    @override
-    def _client(self) -> GoogleClientImpl:
-        return self._client_do

@@ -6,20 +6,17 @@ from httpx import AsyncClient as HttpxClient
 from openai import AsyncOpenAI
 
 
-from chatio.core.client import ApiClientImpl
-from chatio.core.client import ApiClientBase
-
 from chatio.api.helper.httpx import httpx_args
 
+from chatio.core.client import ApiClient
 
-from .config import OpenAIConfigFormat
+
 from .config import OpenAIConfigClient
 from .params import OpenAIParams
-from .format import OpenAIFormat
 from .stream import OpenAIStream
 
 
-class OpenAIClientImpl(ApiClientImpl[
+class OpenAIClient(ApiClient[
     OpenAIParams,
 ]):
 
@@ -61,27 +58,3 @@ class OpenAIClientImpl(ApiClientImpl[
     @override
     async def close(self) -> None:
         await self._client.close()
-
-
-class OpenAIClient(ApiClientBase[
-    OpenAIConfigFormat,
-    OpenAIParams,
-]):
-
-    def __init__(self, config: dict[str, dict]) -> None:
-
-        _config_format = OpenAIConfigFormat(**config.get('format', {}))
-        _config_client = OpenAIConfigClient(**config.get('client', {}))
-
-        self._formatter = OpenAIFormat(_config_format)
-        self._client_do = OpenAIClientImpl(_config_client)
-
-    @property
-    @override
-    def _format(self) -> OpenAIFormat:
-        return self._formatter
-
-    @property
-    @override
-    def _client(self) -> OpenAIClientImpl:
-        return self._client_do

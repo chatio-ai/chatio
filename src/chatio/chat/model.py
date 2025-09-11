@@ -1,21 +1,21 @@
 
-from chatio.core.client import ApiClient
+from chatio.core.facade import ApiFacade
 
-from chatio.api.claude.client import ClaudeClient
-from chatio.api.google.client import GoogleClient
-from chatio.api.openai.client import OpenAIClient
+from chatio.api.claude.facade import ClaudeFacade
+from chatio.api.google.facade import GoogleFacade
+from chatio.api.openai.facade import OpenAIFacade
 
 
-def init_client(config: dict) -> ApiClient:
+def init_facade(config: dict) -> ApiFacade:
 
     api = config.get('api')
     match api:
         case 'claude':
-            return ClaudeClient(config)
+            return ClaudeFacade(config)
         case 'google':
-            return GoogleClient(config)
+            return GoogleFacade(config)
         case 'openai':
-            return OpenAIClient(config)
+            return OpenAIFacade(config)
         case str():
             err_msg = f"api is not supported: {api}"
             raise RuntimeError(err_msg)

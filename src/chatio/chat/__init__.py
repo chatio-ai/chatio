@@ -8,7 +8,7 @@ from chatio.core.object import Closeable
 from chatio.core.config import ModelConfig
 
 
-from .model import init_client
+from .model import init_facade
 from .state import ChatState
 from .tools import ChatTools
 from .reply import ChatReply
@@ -34,7 +34,7 @@ class Chat(Closeable):
 
         self._model = model
 
-        self._client = init_client(model.config)
+        self._facade = init_facade(model.config)
 
         if state is None:
             state = ChatState()
@@ -54,20 +54,20 @@ class Chat(Closeable):
 
     @override
     async def close(self) -> None:
-        await self._client.close()
+        await self._facade.close()
 
     # streams
 
     def stream_content(self) -> ChatReply:
         model = self._model.model
         return ChatReply(
-            lambda state, tools: self._client.iterate_model_events(model, state, tools),
+            lambda state, tools: self._facade.iterate_model_events(model, state, tools),
             self._state, self._tools)
 
     # helpers
 
     async def count_tokens(self) -> int:
-        return await self._client.count_message_tokens(self._model.model, self._state, self._tools)
+        return await self._facade.count_message_tokens(self._model.model, self._state, self._tools)
 
     def info(self) -> ChatInfo:
         return ChatInfo(
