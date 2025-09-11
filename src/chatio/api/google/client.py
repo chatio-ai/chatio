@@ -4,29 +4,42 @@ from typing import override
 from google.genai import Client
 from google.genai.types import HttpOptions
 
+from google.genai.types import ContentUnionDict
 
-from chatio.core.client import ApiClient
+from google.genai.types import ToolListUnionDict
+from google.genai.types import ToolConfigDict
+
 
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
+
+from chatio.core.params import ApiParams
+
+from chatio.core.client import ApiClientImpl
 
 from chatio.api.helper.httpx import httpx_args
 
 
 from .config import GoogleConfigFormat
 from .config import GoogleConfigClient
+from .params import GoogleStateOptions
 from .format import GoogleFormat
 from .stream import GoogleStream
 
 
-class GoogleClient(ApiClient):
+class GoogleClient(ApiClientImpl[
+    ContentUnionDict,
+    GoogleStateOptions,
+    ToolListUnionDict | None,
+    ToolConfigDict | None,
+]):
 
     def __init__(self, config: dict[str, dict]) -> None:
 
         _config_client = GoogleConfigClient(**config.get('client', {}))
         _config_format = GoogleConfigFormat(**config.get('format', {}))
 
-        self._format = GoogleFormat(_config_format)
+        self._formatter = GoogleFormat(_config_format)
 
         self._client = Client(
             api_key=_config_client.api_key,
@@ -35,12 +48,26 @@ class GoogleClient(ApiClient):
                 async_client_args=httpx_args(),
             )).aio
 
+    # formats
+
+    @override
+    def _format(self, state: ChatState, tools: ChatTools) -> ApiParams[
+        ContentUnionDict,
+        GoogleStateOptions,
+        ToolListUnionDict | None,
+        ToolConfigDict | None,
+    ]:
+        return self._formatter.format(state, tools)
+
     # streams
 
     @override
-    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> GoogleStream:
-        params = self._format.format(state, tools)
-
+    def _iterate_model_events(self, model: str, params: ApiParams[
+        ContentUnionDict,
+        GoogleStateOptions,
+        ToolListUnionDict | None,
+        ToolConfigDict | None,
+    ]) -> GoogleStream:
         return GoogleStream(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
@@ -54,7 +81,12 @@ class GoogleClient(ApiClient):
     # helpers
 
     @override
-    async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
+    async def _count_message_tokens(self, model: str, params: ApiParams[
+        ContentUnionDict,
+        GoogleStateOptions,
+        ToolListUnionDict | None,
+        ToolConfigDict | None,
+    ]) -> int:
         raise NotImplementedError
 
     @override

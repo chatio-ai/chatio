@@ -5,42 +5,69 @@ from httpx import AsyncClient as HttpxClient
 
 from openai import AsyncOpenAI
 
+from openai.types.chat import ChatCompletionMessageParam
 
-from chatio.core.client import ApiClient
+from openai.types.chat import ChatCompletionToolParam
+from openai.types.chat import ChatCompletionToolChoiceOptionParam
+
+from openai import NotGiven
+
 
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
+from chatio.core.params import ApiParams
+
+from chatio.core.client import ApiClientImpl
 
 from chatio.api.helper.httpx import httpx_args
 
 
 from .config import OpenAIConfigFormat
 from .config import OpenAIConfigClient
+from .params import OpenAIStateOptions
 from .format import OpenAIFormat
 from .stream import OpenAIStream
 
 
-class OpenAIClient(ApiClient):
+class OpenAIClient(ApiClientImpl[
+    ChatCompletionMessageParam,
+    OpenAIStateOptions,
+    list[ChatCompletionToolParam] | NotGiven,
+    ChatCompletionToolChoiceOptionParam | NotGiven,
+]):
 
     def __init__(self, config: dict[str, dict]) -> None:
 
         _config_format = OpenAIConfigFormat(**config.get('format', {}))
         _config_client = OpenAIConfigClient(**config.get('client', {}))
 
-        self._format = OpenAIFormat(_config_format)
+        self._formatter = OpenAIFormat(_config_format)
 
         self._client = AsyncOpenAI(
             api_key=_config_client.api_key,
             base_url=_config_client.base_url,
             http_client=HttpxClient(**httpx_args()))
 
+    # formats
+
+    def _format(self, state: ChatState, tools: ChatTools) -> ApiParams[
+        ChatCompletionMessageParam,
+        OpenAIStateOptions,
+        list[ChatCompletionToolParam] | NotGiven,
+        ChatCompletionToolChoiceOptionParam | NotGiven,
+    ]:
+        return self._formatter.format(state, tools)
+
     # streams
 
     @override
-    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> OpenAIStream:
-        params = self._format.format(state, tools)
-
+    def _iterate_model_events(self, model: str, params: ApiParams[
+        ChatCompletionMessageParam,
+        OpenAIStateOptions,
+        list[ChatCompletionToolParam] | NotGiven,
+        ChatCompletionToolChoiceOptionParam | NotGiven,
+    ]) -> OpenAIStream:
         _messages = [*params.options.system, *params.messages]
 
         if params.options.prediction:
@@ -63,7 +90,12 @@ class OpenAIClient(ApiClient):
     # helpers
 
     @override
-    async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
+    async def _count_message_tokens(self, model: str, params: ApiParams[
+        ChatCompletionMessageParam,
+        OpenAIStateOptions,
+        list[ChatCompletionToolParam] | NotGiven,
+        ChatCompletionToolChoiceOptionParam | NotGiven,
+    ]) -> int:
         raise NotImplementedError
 
     @override
