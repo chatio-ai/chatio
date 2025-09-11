@@ -6,9 +6,6 @@ from httpx import AsyncClient as HttpxClient
 from anthropic import AsyncAnthropic
 
 
-from chatio.core.models import ChatState
-from chatio.core.models import ChatTools
-
 from chatio.core.client import ApiClientImpl
 
 from chatio.api.helper.httpx import httpx_args
@@ -21,7 +18,10 @@ from .format import ClaudeFormat
 from .stream import ClaudeStream
 
 
-class ClaudeClient(ApiClientImpl[ClaudeParams]):
+class ClaudeClient(ApiClientImpl[
+    ClaudeConfigFormat,
+    ClaudeParams,
+]):
 
     @override
     def __init__(self, config: dict[str, dict]) -> None:
@@ -38,9 +38,10 @@ class ClaudeClient(ApiClientImpl[ClaudeParams]):
 
     # formats
 
+    @property
     @override
-    def _format(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
-        return self._formatter.format(state, tools)
+    def _format(self) -> ClaudeFormat:
+        return self._formatter
 
     # streams
 

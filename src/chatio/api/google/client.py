@@ -5,9 +5,6 @@ from google.genai import Client
 from google.genai.types import HttpOptions
 
 
-from chatio.core.models import ChatState
-from chatio.core.models import ChatTools
-
 from chatio.core.client import ApiClientImpl
 
 from chatio.api.helper.httpx import httpx_args
@@ -20,7 +17,10 @@ from .format import GoogleFormat
 from .stream import GoogleStream
 
 
-class GoogleClient(ApiClientImpl[GoogleParams]):
+class GoogleClient(ApiClientImpl[
+    GoogleConfigFormat,
+    GoogleParams,
+]):
 
     def __init__(self, config: dict[str, dict]) -> None:
 
@@ -38,9 +38,10 @@ class GoogleClient(ApiClientImpl[GoogleParams]):
 
     # formats
 
+    @property
     @override
-    def _format(self, state: ChatState, tools: ChatTools) -> GoogleParams:
-        return self._formatter.format(state, tools)
+    def _format(self) -> GoogleFormat:
+        return self._formatter
 
     # streams
 

@@ -6,9 +6,6 @@ from httpx import AsyncClient as HttpxClient
 from openai import AsyncOpenAI
 
 
-from chatio.core.models import ChatState
-from chatio.core.models import ChatTools
-
 from chatio.core.client import ApiClientImpl
 
 from chatio.api.helper.httpx import httpx_args
@@ -21,7 +18,10 @@ from .format import OpenAIFormat
 from .stream import OpenAIStream
 
 
-class OpenAIClient(ApiClientImpl[OpenAIParams]):
+class OpenAIClient(ApiClientImpl[
+    OpenAIConfigFormat,
+    OpenAIParams,
+]):
 
     def __init__(self, config: dict[str, dict]) -> None:
 
@@ -37,8 +37,10 @@ class OpenAIClient(ApiClientImpl[OpenAIParams]):
 
     # formats
 
-    def _format(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
-        return self._formatter.format(state, tools)
+    @property
+    @override
+    def _format(self) -> OpenAIFormat:
+        return self._formatter
 
     # streams
 
