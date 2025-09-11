@@ -17,12 +17,17 @@ class ApiToolsOptions[
 
 
 @dataclass
-class ApiParams[
+class ApiParams:
+    pass
+
+
+@dataclass
+class ApiParamsImpl[
     ChatMessageT,
     ApiStateOptionsT: ApiStateOptions,
     ToolDefinitionsT,
     ToolChoiceT,
-]:
+](ApiParams):
     options: ApiStateOptionsT
     messages: list[ChatMessageT]
     tools: ApiToolsOptions[

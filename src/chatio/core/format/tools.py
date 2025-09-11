@@ -20,10 +20,7 @@ class ApiToolsFormatterBase[
     ToolSchemaT,
     ToolChoiceT,
     ApiConfigFormatT: ApiConfigFormat,
-](
-    ApiFormatBase[ApiConfigFormatT],
-    ABC,
-):
+](ApiFormatBase[ApiConfigFormatT], ABC):
 
     @abstractmethod
     def _tool_schema(self, tool: ToolSchema) -> ToolSchemaT:

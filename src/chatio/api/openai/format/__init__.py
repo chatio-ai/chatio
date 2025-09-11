@@ -1,18 +1,12 @@
 
 from typing import override
 
-from openai.types.chat import ChatCompletionMessageParam
-
-from openai.types.chat import ChatCompletionToolParam
-from openai.types.chat import ChatCompletionToolChoiceOptionParam
-
-from openai import NotGiven
-
-
+from chatio.core.models import ChatState
+from chatio.core.models import ChatTools
 from chatio.core.format import ApiFormat
 
-from chatio.api.openai.params import OpenAIStateOptions
 from chatio.api.openai.config import OpenAIConfigFormat
+from chatio.api.openai.params import OpenAIParams
 
 from .state_messages import OpenAIMessagesFormatter
 from .state_options import OpenAIOptionsFormatter
@@ -21,24 +15,21 @@ from .tools import OpenAIToolsFormatter
 
 # pylint: disable=too-few-public-methods
 class OpenAIFormat(ApiFormat[
-    ChatCompletionMessageParam,
-    OpenAIStateOptions,
-    list[ChatCompletionToolParam] | NotGiven,
-    ChatCompletionToolChoiceOptionParam | NotGiven,
     OpenAIConfigFormat,
+    OpenAIParams,
 ]):
 
-    @property
-    @override
-    def _messages_formatter(self) -> OpenAIMessagesFormatter:
-        return OpenAIMessagesFormatter(self._config)
+    def __init__(self, config: OpenAIConfigFormat) -> None:
+        super().__init__(config)
+        self._messages_formatter = OpenAIMessagesFormatter(self._config)
+        self._options_formatter = OpenAIOptionsFormatter(self._config)
+        self._tools_formatter = OpenAIToolsFormatter(self._config)
 
-    @property
     @override
-    def _options_formatter(self) -> OpenAIOptionsFormatter:
-        return OpenAIOptionsFormatter(self._config)
-
-    @property
-    @override
-    def _tools_formatter(self) -> OpenAIToolsFormatter:
-        return OpenAIToolsFormatter(self._config)
+    def format(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
+        # pylint: disable=unexpected-keyword-arg
+        return OpenAIParams(
+            messages=self._messages_formatter.format(state.messages),
+            options=self._options_formatter.format(state.options),
+            tools=self._tools_formatter.format(tools),
+        )

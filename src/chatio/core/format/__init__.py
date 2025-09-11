@@ -1,54 +1,21 @@
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 
-from chatio.core.params import ApiStateOptions
-from chatio.core.params import ApiParams
 from chatio.core.config import ApiConfigFormat
+from chatio.core.params import ApiParams
 
 from ._base import ApiFormatBase
-
-from .state_messages import ApiMessagesFormatter
-from .state_options import ApiOptionsFormatter
-from .tools import ApiToolsFormatter
 
 
 # pylint: disable=too-few-public-methods
 class ApiFormat[
-    ChatMessageT,
-    ApiStateOptionsT: ApiStateOptions,
-    ToolDefinitionsT,
-    ToolChoiceT,
     ApiConfigFormatT: ApiConfigFormat,
-](
-    ApiFormatBase[ApiConfigFormatT],
-):
+    ApiParamsT: ApiParams,
+](ApiFormatBase[ApiConfigFormatT], ABC):
 
-    @property
     @abstractmethod
-    def _messages_formatter(self) -> ApiMessagesFormatter[ChatMessageT]:
+    def format(self, state: ChatState, tools: ChatTools) -> ApiParamsT:
         ...
-
-    @property
-    @abstractmethod
-    def _options_formatter(self) -> ApiOptionsFormatter[ApiStateOptionsT]:
-        ...
-
-    @property
-    @abstractmethod
-    def _tools_formatter(self) -> ApiToolsFormatter[ToolDefinitionsT, ToolChoiceT]:
-        ...
-
-    def format(self, state: ChatState, tools: ChatTools) -> ApiParams[
-        ChatMessageT,
-        ApiStateOptionsT,
-        ToolDefinitionsT,
-        ToolChoiceT,
-    ]:
-        return ApiParams(
-            messages=self._messages_formatter.format(state.messages),
-            options=self._options_formatter.format(state.options),
-            tools=self._tools_formatter.format(tools),
-        )

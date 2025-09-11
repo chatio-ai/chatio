@@ -15,10 +15,7 @@ from ._base import ApiFormatBase
 class ApiOptionsFormatterBase[
     ApiStateOptionsT: ApiStateOptions,
     ApiConfigFormatT: ApiConfigFormat,
-](
-    ApiFormatBase[ApiConfigFormatT],
-    ABC,
-):
+](ApiFormatBase[ApiConfigFormatT], ABC):
 
     @abstractmethod
     def format(self, options: ChatStateOptions) -> ApiStateOptionsT:

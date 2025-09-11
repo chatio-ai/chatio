@@ -4,16 +4,9 @@ from typing import override
 from google.genai import Client
 from google.genai.types import HttpOptions
 
-from google.genai.types import ContentUnionDict
-
-from google.genai.types import ToolListUnionDict
-from google.genai.types import ToolConfigDict
-
 
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
-
-from chatio.core.params import ApiParams
 
 from chatio.core.client import ApiClientImpl
 
@@ -22,17 +15,12 @@ from chatio.api.helper.httpx import httpx_args
 
 from .config import GoogleConfigFormat
 from .config import GoogleConfigClient
-from .params import GoogleStateOptions
+from .params import GoogleParams
 from .format import GoogleFormat
 from .stream import GoogleStream
 
 
-class GoogleClient(ApiClientImpl[
-    ContentUnionDict,
-    GoogleStateOptions,
-    ToolListUnionDict | None,
-    ToolConfigDict | None,
-]):
+class GoogleClient(ApiClientImpl[GoogleParams]):
 
     def __init__(self, config: dict[str, dict]) -> None:
 
@@ -51,23 +39,13 @@ class GoogleClient(ApiClientImpl[
     # formats
 
     @override
-    def _format(self, state: ChatState, tools: ChatTools) -> ApiParams[
-        ContentUnionDict,
-        GoogleStateOptions,
-        ToolListUnionDict | None,
-        ToolConfigDict | None,
-    ]:
+    def _format(self, state: ChatState, tools: ChatTools) -> GoogleParams:
         return self._formatter.format(state, tools)
 
     # streams
 
     @override
-    def _iterate_model_events(self, model: str, params: ApiParams[
-        ContentUnionDict,
-        GoogleStateOptions,
-        ToolListUnionDict | None,
-        ToolConfigDict | None,
-    ]) -> GoogleStream:
+    def _iterate_model_events(self, model: str, params: GoogleParams) -> GoogleStream:
         return GoogleStream(lambda: self._client.models.generate_content_stream(
             model=model,
             config={
@@ -81,12 +59,7 @@ class GoogleClient(ApiClientImpl[
     # helpers
 
     @override
-    async def _count_message_tokens(self, model: str, params: ApiParams[
-        ContentUnionDict,
-        GoogleStateOptions,
-        ToolListUnionDict | None,
-        ToolConfigDict | None,
-    ]) -> int:
+    async def _count_message_tokens(self, model: str, params: GoogleParams) -> int:
         raise NotImplementedError
 
     @override

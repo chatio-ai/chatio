@@ -26,10 +26,7 @@ class ApiMessagesFormatterBase[
     ImageDocumentT,
     TextDocumentT,
     ApiConfigFormatT: ApiConfigFormat,
-](
-    ApiFormatBase[ApiConfigFormatT],
-    ABC,
-):
+](ApiFormatBase[ApiConfigFormatT], ABC):
 
     @abstractmethod
     def _chat_messages(self, messages: list[ChatMessageT]) -> list[ChatMessageT]:

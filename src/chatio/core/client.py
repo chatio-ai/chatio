@@ -9,33 +9,17 @@ from .object import Closeable
 from .models import ChatState
 from .models import ChatTools
 from .params import ApiParams
-from .params import ApiStateOptions
 from .stream import ApiStream
 
 
-class ApiClientImpl[
-    ChatMessageT,
-    ApiStateOptionsT: ApiStateOptions,
-    ToolDefinitionsT,
-    ToolChoiceT,
-](Closeable, ABC):
+class ApiClientImpl[ApiParamsT: ApiParams](Closeable, ABC):
 
     @abstractmethod
-    def _format(self, state: ChatState, tools: ChatTools) -> ApiParams[
-        ChatMessageT,
-        ApiStateOptionsT,
-        ToolDefinitionsT,
-        ToolChoiceT,
-    ]:
+    def _format(self, state: ChatState, tools: ChatTools) -> ApiParamsT:
         ...
 
     @abstractmethod
-    def _iterate_model_events(self, model: str, params: ApiParams[
-        ChatMessageT,
-        ApiStateOptionsT,
-        ToolDefinitionsT,
-        ToolChoiceT,
-    ]) -> ApiStream:
+    def _iterate_model_events(self, model: str, params: ApiParamsT) -> ApiStream:
         ...
 
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> ApiStream:
@@ -43,12 +27,7 @@ class ApiClientImpl[
         return self._iterate_model_events(model, params)
 
     @abstractmethod
-    async def _count_message_tokens(self, model: str, params: ApiParams[
-        ChatMessageT,
-        ApiStateOptionsT,
-        ToolDefinitionsT,
-        ToolChoiceT,
-    ]) -> int:
+    async def _count_message_tokens(self, model: str, params: ApiParamsT) -> int:
         ...
 
     async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:

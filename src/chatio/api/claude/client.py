@@ -5,18 +5,9 @@ from httpx import AsyncClient as HttpxClient
 
 from anthropic import AsyncAnthropic
 
-from anthropic.types import MessageParam
-
-from anthropic.types import ToolParam
-from anthropic.types import ToolChoiceParam
-
-from anthropic import NotGiven
-
 
 from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
-
-from chatio.core.params import ApiParams
 
 from chatio.core.client import ApiClientImpl
 
@@ -25,17 +16,12 @@ from chatio.api.helper.httpx import httpx_args
 
 from .config import ClaudeConfigFormat
 from .config import ClaudeConfigClient
-from .params import ClaudeStateOptions
+from .params import ClaudeParams
 from .format import ClaudeFormat
 from .stream import ClaudeStream
 
 
-class ClaudeClient(ApiClientImpl[
-    MessageParam,
-    ClaudeStateOptions,
-    list[ToolParam] | NotGiven,
-    ToolChoiceParam | NotGiven,
-]):
+class ClaudeClient(ApiClientImpl[ClaudeParams]):
 
     @override
     def __init__(self, config: dict[str, dict]) -> None:
@@ -53,23 +39,13 @@ class ClaudeClient(ApiClientImpl[
     # formats
 
     @override
-    def _format(self, state: ChatState, tools: ChatTools) -> ApiParams[
-        MessageParam,
-        ClaudeStateOptions,
-        list[ToolParam] | NotGiven,
-        ToolChoiceParam | NotGiven,
-    ]:
+    def _format(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
         return self._formatter.format(state, tools)
 
     # streams
 
     @override
-    def _iterate_model_events(self, model: str, params: ApiParams[
-        MessageParam,
-        ClaudeStateOptions,
-        list[ToolParam] | NotGiven,
-        ToolChoiceParam | NotGiven,
-    ]) -> ClaudeStream:
+    def _iterate_model_events(self, model: str, params: ClaudeParams) -> ClaudeStream:
         return ClaudeStream(self._client.messages.stream(
             max_tokens=4096,
             model=model,
@@ -82,13 +58,7 @@ class ClaudeClient(ApiClientImpl[
     # helpers
 
     @override
-    async def _count_message_tokens(self, model: str, params: ApiParams[
-        MessageParam,
-        ClaudeStateOptions,
-        list[ToolParam] | NotGiven,
-        ToolChoiceParam | NotGiven,
-    ]) -> int:
-
+    async def _count_message_tokens(self, model: str, params: ClaudeParams) -> int:
         result = await self._client.messages.count_tokens(
             model=model,
             system=params.options.system,
