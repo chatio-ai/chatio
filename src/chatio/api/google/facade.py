@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.core.facade import ApiFacadeBase
+from chatio.core.facade import ApiFacadeDeps
 
 
 from .config import GoogleConfigFormat
@@ -11,25 +11,22 @@ from .format import GoogleFormat
 from .client import GoogleClient
 
 
-class GoogleFacade(ApiFacadeBase[
+class GoogleFacadeDeps(ApiFacadeDeps[
     GoogleConfigFormat,
     GoogleParams,
 ]):
 
     def __init__(self, config: dict[str, dict]) -> None:
-
-        _config_client = GoogleConfigClient(**config.get('client', {}))
-        _config_format = GoogleConfigFormat(**config.get('format', {}))
-
-        self._formatter = GoogleFormat(_config_format)
-        self._client_do = GoogleClient(_config_client)
+        self._config = config
 
     @property
     @override
-    def _format(self) -> GoogleFormat:
-        return self._formatter
+    def format(self) -> GoogleFormat:
+        _config_format = GoogleConfigFormat(**self._config.get('format', {}))
+        return GoogleFormat(_config_format)
 
     @property
     @override
-    def _client(self) -> GoogleClient:
-        return self._client_do
+    def client(self) -> GoogleClient:
+        _config_client = GoogleConfigClient(**self._config.get('client', {}))
+        return GoogleClient(_config_client)

@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.core.facade import ApiFacadeBase
+from chatio.core.facade import ApiFacadeDeps
 
 
 from .config import ClaudeConfigFormat
@@ -11,25 +11,22 @@ from .format import ClaudeFormat
 from .client import ClaudeClient
 
 
-class ClaudeFacade(ApiFacadeBase[
+class ClaudeFacadeDeps(ApiFacadeDeps[
     ClaudeConfigFormat,
     ClaudeParams,
 ]):
 
     def __init__(self, config: dict[str, dict]) -> None:
-
-        _config_format = ClaudeConfigFormat(**config.get('format', {}))
-        _config_client = ClaudeConfigClient(**config.get('client', {}))
-
-        self._formatter = ClaudeFormat(_config_format)
-        self._client_do = ClaudeClient(_config_client)
+        self._config = config
 
     @property
     @override
-    def _format(self) -> ClaudeFormat:
-        return self._formatter
+    def format(self) -> ClaudeFormat:
+        _config_format = ClaudeConfigFormat(**self._config.get('format', {}))
+        return ClaudeFormat(_config_format)
 
     @property
     @override
-    def _client(self) -> ClaudeClient:
-        return self._client_do
+    def client(self) -> ClaudeClient:
+        _config_client = ClaudeConfigClient(**self._config.get('client', {}))
+        return ClaudeClient(_config_client)

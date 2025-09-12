@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.core.facade import ApiFacadeBase
+from chatio.core.facade import ApiFacadeDeps
 
 
 from .config import OpenAIConfigFormat
@@ -11,25 +11,22 @@ from .format import OpenAIFormat
 from .client import OpenAIClient
 
 
-class OpenAIFacade(ApiFacadeBase[
+class OpenAIFacadeDeps(ApiFacadeDeps[
     OpenAIConfigFormat,
     OpenAIParams,
 ]):
 
     def __init__(self, config: dict[str, dict]) -> None:
-
-        _config_format = OpenAIConfigFormat(**config.get('format', {}))
-        _config_client = OpenAIConfigClient(**config.get('client', {}))
-
-        self._formatter = OpenAIFormat(_config_format)
-        self._client_do = OpenAIClient(_config_client)
+        self._config = config
 
     @property
     @override
-    def _format(self) -> OpenAIFormat:
-        return self._formatter
+    def format(self) -> OpenAIFormat:
+        _config_format = OpenAIConfigFormat(**self._config.get('format', {}))
+        return OpenAIFormat(_config_format)
 
     @property
     @override
-    def _client(self) -> OpenAIClient:
-        return self._client_do
+    def client(self) -> OpenAIClient:
+        _config_client = OpenAIConfigClient(**self._config.get('client', {}))
+        return OpenAIClient(_config_client)

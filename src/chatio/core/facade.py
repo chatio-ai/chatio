@@ -25,14 +25,14 @@ class ApiFacade(Closeable, ABC):
         ...
 
 
-class ApiFacadeBase[
+class ApiFacadeDeps[
     ApiConfigT: ApiConfigFormat,
     ApiParamsT: ApiParams,
-](ApiFacade, ABC):
+](ABC):
 
     @property
     @abstractmethod
-    def _format(self) -> ApiFormat[
+    def format(self) -> ApiFormat[
         ApiConfigT,
         ApiParamsT,
     ]:
@@ -40,8 +40,19 @@ class ApiFacadeBase[
 
     @property
     @abstractmethod
-    def _client(self) -> ApiClient[ApiParamsT]:
+    def client(self) -> ApiClient[
+        ApiParamsT,
+    ]:
         ...
+
+
+class ApiFacadeImpl[
+    ApiFacadeDepsT: ApiFacadeDeps,
+](ApiFacade, ABC):
+
+    def __init__(self, deps: ApiFacadeDepsT) -> None:
+        self._format = deps.format
+        self._client = deps.client
 
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> ApiStream:
         params = self._format.format(state, tools)
