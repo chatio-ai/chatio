@@ -6,6 +6,8 @@ from asyncio.subprocess import STDOUT
 
 from collections.abc import AsyncIterator
 
+from contextlib import suppress
+
 from typing import override
 
 
@@ -39,7 +41,8 @@ $ {command}
             async for chunk in self._iterate(command, process.stdout):
                 yield chunk
         finally:
-            process.terminate()
+            with suppress(ProcessLookupError):
+                process.terminate()
             exit_code = await process.wait()
             yield f"# exit code: {exit_code}"
             yield {'command': command, 'exit_code': exit_code}
