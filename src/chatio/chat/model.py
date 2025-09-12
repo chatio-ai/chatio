@@ -1,7 +1,6 @@
 
-from chatio.core.facade import ApiFacade
 from chatio.core.facade import ApiFacadeDeps
-from chatio.core.facade import ApiFacadeImpl
+from chatio.core.facade import ApiFacade
 
 from chatio.api.claude.facade import ClaudeFacadeDeps
 from chatio.api.google.facade import GoogleFacadeDeps
@@ -27,4 +26,4 @@ def _init_facade_deps(config: dict) -> ApiFacadeDeps:
 
 
 def init_facade(config: dict) -> ApiFacade:
-    return ApiFacadeImpl(_init_facade_deps(config))
+    return ApiFacade(_init_facade_deps(config))

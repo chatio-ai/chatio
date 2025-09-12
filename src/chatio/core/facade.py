@@ -14,17 +14,6 @@ from .stream import ApiStream
 from .client import ApiClient
 
 
-class ApiFacade(Closeable, ABC):
-
-    @abstractmethod
-    def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> ApiStream:
-        ...
-
-    @abstractmethod
-    async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
-        ...
-
-
 class ApiFacadeDeps[
     ApiConfigT: ApiConfigFormat,
     ApiParamsT: ApiParams,
@@ -50,9 +39,9 @@ class ApiFacadeDeps[
         ...
 
 
-class ApiFacadeImpl[
+class ApiFacade[
     ApiFacadeDepsT: ApiFacadeDeps,
-](ApiFacade, ABC):
+](Closeable):
 
     def __init__(self, deps: ApiFacadeDepsT) -> None:
         self._format = deps.format
