@@ -10,7 +10,7 @@ from chatio.tool.shell import ShellExecTool
 from chatio.tool.dummy import DoNothingTool
 
 from chatio.tool.wiki import WikiToolFactory
-from chatio.tool.web import WebSearchTool
+from chatio.tool.web import GoogleSearchTool as WebSearchTool
 from chatio.tool.web import WebBrowseTool
 
 from chatio.tool.image import ImageDumpTool

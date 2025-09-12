@@ -1,11 +1,13 @@
 
 import asyncio
 
+from abc import ABC, abstractmethod
+
 from collections.abc import AsyncIterator
 
 from typing import override
 
-from googlesearch import search, get
+from googlesearch import search as googlesearch, get
 from googlesearch import SearchResult
 
 from html2text import html2text
@@ -14,7 +16,7 @@ from chatio.core.schema import ToolSchemaDict
 from chatio.core.invoke import ToolBase
 
 
-class WebSearchTool(ToolBase):
+class WebSearchToolBase(ToolBase, ABC):
 
     @staticmethod
     @override
@@ -33,13 +35,20 @@ class WebSearchTool(ToolBase):
             "required": ["text"],
         }
 
+    @abstractmethod
+    def __call__(self, text: str) -> AsyncIterator[str]:
+        ...
+
+
+class GoogleSearchTool(WebSearchToolBase):
+
     def _result_to_str(self, result: str | SearchResult) -> str:
         return result if isinstance(result, str) else result.url
 
     @override
     # pylint: disable=invalid-overridden-method
     async def __call__(self, text: str) -> AsyncIterator[str]:
-        results = await asyncio.to_thread(lambda: list(search(text)))
+        results = await asyncio.to_thread(lambda: list(googlesearch(text)))
         yield "\n".join(self._result_to_str(result) for result in results)
 
 
