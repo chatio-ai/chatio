@@ -10,6 +10,8 @@ from typing import override
 from googlesearch import search as googlesearch, get
 from googlesearch import SearchResult
 
+from ddgs import DDGS
+
 from html2text import html2text
 
 from chatio.core.schema import ToolSchemaDict
@@ -49,7 +51,18 @@ class GoogleSearchTool(WebSearchToolBase):
     # pylint: disable=invalid-overridden-method
     async def __call__(self, text: str) -> AsyncIterator[str]:
         results = await asyncio.to_thread(lambda: list(googlesearch(text)))
-        yield "\n".join(self._result_to_str(result) for result in results)
+        for result in results:
+            yield f"{self._result_to_str(result)}\n"
+
+
+class DuckDuckGoTool(WebSearchToolBase):
+
+    @override
+    # pylint: disable=invalid-overridden-method
+    async def __call__(self, text: str) -> AsyncIterator[str]:
+        results = await asyncio.to_thread(lambda: DDGS().text(text))
+        for result in results:
+            yield f"{result['href']}\n"
 
 
 class WebBrowseTool(ToolBase):
