@@ -16,17 +16,12 @@ class OpenAIFacadeDeps(ApiFacadeDeps[
     OpenAIParams,
 ]):
 
-    def __init__(self, config: dict[str, dict]) -> None:
-        self._config = config
-
     @property
     @override
     def format(self) -> OpenAIFormat:
-        _config_format = OpenAIConfigFormat(**self._config.get('format', {}))
-        return OpenAIFormat(_config_format)
+        return OpenAIFormat(OpenAIConfigFormat(**self._config_format))
 
     @property
     @override
     def client(self) -> OpenAIClient:
-        _config_client = OpenAIConfigClient(**self._config.get('client', {}))
-        return OpenAIClient(_config_client)
+        return OpenAIClient(OpenAIConfigClient(**self._config_client))

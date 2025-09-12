@@ -30,6 +30,10 @@ class ApiFacadeDeps[
     ApiParamsT: ApiParams,
 ](ABC):
 
+    def __init__(self, config: dict[str, dict]) -> None:
+        self._config_format = config.get('format', {})
+        self._config_client = config.get('client', {})
+
     @property
     @abstractmethod
     def format(self) -> ApiFormat[

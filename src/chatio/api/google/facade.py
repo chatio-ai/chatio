@@ -16,17 +16,12 @@ class GoogleFacadeDeps(ApiFacadeDeps[
     GoogleParams,
 ]):
 
-    def __init__(self, config: dict[str, dict]) -> None:
-        self._config = config
-
     @property
     @override
     def format(self) -> GoogleFormat:
-        _config_format = GoogleConfigFormat(**self._config.get('format', {}))
-        return GoogleFormat(_config_format)
+        return GoogleFormat(GoogleConfigFormat(**self._config_format))
 
     @property
     @override
     def client(self) -> GoogleClient:
-        _config_client = GoogleConfigClient(**self._config.get('client', {}))
-        return GoogleClient(_config_client)
+        return GoogleClient(GoogleConfigClient(**self._config_client))
