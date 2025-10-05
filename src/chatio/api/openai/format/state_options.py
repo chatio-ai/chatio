@@ -4,7 +4,7 @@ from typing import override
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionPredictionContentParam
 
-from openai import NotGiven, NOT_GIVEN
+from openai import Omit, omit
 
 
 from chatio.core.models import SystemMessage
@@ -26,13 +26,13 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
 ]):
 
     def _prediction_message(self, msg: PredictionMessage | None,
-                            ) -> ChatCompletionPredictionContentParam | NotGiven:
+                            ) -> ChatCompletionPredictionContentParam | Omit:
 
         if not self._config.prediction:
-            return NOT_GIVEN
+            return omit
 
         if not msg:
-            return NOT_GIVEN
+            return omit
 
         content = message_text(msg)
 

@@ -10,7 +10,7 @@ from anthropic.types import ToolChoiceParam
 
 from anthropic.types.tool_param import InputSchemaTyped
 
-from anthropic import NotGiven, NOT_GIVEN
+from anthropic import Omit, omit
 
 from chatio.core.models import ToolSchema
 
@@ -21,9 +21,9 @@ from chatio.api.claude.config import ClaudeConfigFormat
 
 # pylint: disable=too-few-public-methods
 class ClaudeToolsFormatter(ApiToolsFormatterBase[
-    list[ToolParam] | NotGiven,
+    list[ToolParam] | Omit,
     ToolParam,
-    ToolChoiceParam | NotGiven,
+    ToolChoiceParam | Omit,
     ClaudeConfigFormat,
 ]):
 
@@ -54,13 +54,13 @@ class ClaudeToolsFormatter(ApiToolsFormatterBase[
         }
 
     @override
-    def _tool_definitions(self, tools: list[ToolParam]) -> list[ToolParam] | NotGiven:
+    def _tool_definitions(self, tools: list[ToolParam]) -> list[ToolParam] | Omit:
         if not tools:
-            return NOT_GIVEN
+            return omit
         return self._setup_tools_cache(tools)
 
-    def _tool_choice_null(self) -> NotGiven:
-        return NOT_GIVEN
+    def _tool_choice_null(self) -> Omit:
+        return omit
 
     @override
     def _tool_choice_none(self) -> ToolChoiceParam:

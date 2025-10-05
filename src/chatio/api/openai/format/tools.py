@@ -9,7 +9,7 @@ from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
 from openai.types import FunctionParameters
 
-from openai import NotGiven, NOT_GIVEN
+from openai import Omit, omit
 
 from chatio.core.models import ToolSchema
 
@@ -20,9 +20,9 @@ from chatio.api.openai.config import OpenAIConfigFormat
 
 # pylint: disable=too-few-public-methods
 class OpenAIToolsFormatter(ApiToolsFormatterBase[
-    list[ChatCompletionToolParam] | NotGiven,
+    list[ChatCompletionToolParam] | Omit,
     ChatCompletionToolParam,
-    ChatCompletionToolChoiceOptionParam | NotGiven,
+    ChatCompletionToolChoiceOptionParam | Omit,
     OpenAIConfigFormat,
 ]):
 
@@ -61,15 +61,15 @@ class OpenAIToolsFormatter(ApiToolsFormatterBase[
 
     @override
     def _tool_definitions(self, tools: list[ChatCompletionToolParam],
-                          ) -> list[ChatCompletionToolParam] | NotGiven:
+                          ) -> list[ChatCompletionToolParam] | Omit:
 
         if not tools:
-            return NOT_GIVEN
+            return omit
         return tools
 
     @override
-    def _tool_choice_null(self) -> NotGiven:
-        return NOT_GIVEN
+    def _tool_choice_null(self) -> Omit:
+        return omit
 
     @override
     def _tool_choice_none(self) -> ChatCompletionToolChoiceOptionParam:

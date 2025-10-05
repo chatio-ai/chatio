@@ -3,7 +3,7 @@ from typing import override
 
 from anthropic.types import TextBlockParam
 
-from anthropic import NotGiven, NOT_GIVEN
+from anthropic import Omit, omit
 
 
 from chatio.core.models import SystemMessage
@@ -23,9 +23,9 @@ class ClaudeOptionsFormatter(ApiOptionsFormatterBase[
     ClaudeConfigFormat,
 ]):
 
-    def _system_message(self, msg: SystemMessage | None) -> list[TextBlockParam] | NotGiven:
+    def _system_message(self, msg: SystemMessage | None) -> list[TextBlockParam] | Omit:
         if not msg:
-            return NOT_GIVEN
+            return omit
 
         content = message_text(msg)
 

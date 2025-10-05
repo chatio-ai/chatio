@@ -7,7 +7,7 @@ from openai.types.chat import ChatCompletionPredictionContentParam
 from openai.types.chat import ChatCompletionToolParam
 from openai.types.chat import ChatCompletionToolChoiceOptionParam
 
-from openai import NotGiven, NOT_GIVEN
+from openai import Omit, omit
 
 
 from chatio.core.params import ApiStateOptions
@@ -18,14 +18,14 @@ from chatio.core.params import ApiParamsImpl
 class OpenAIStateOptions(ApiStateOptions):
     system: list[ChatCompletionMessageParam] = field(default_factory=list)
 
-    prediction: ChatCompletionPredictionContentParam | NotGiven = NOT_GIVEN
+    prediction: ChatCompletionPredictionContentParam | Omit = omit
 
 
 @dataclass
 class OpenAIParams(ApiParamsImpl[
     ChatCompletionMessageParam,
     OpenAIStateOptions,
-    list[ChatCompletionToolParam] | NotGiven,
-    ChatCompletionToolChoiceOptionParam | NotGiven,
+    list[ChatCompletionToolParam] | Omit,
+    ChatCompletionToolChoiceOptionParam | Omit,
 ]):
     pass
