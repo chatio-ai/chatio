@@ -19,13 +19,16 @@ class GoogleClient(ApiClient[
     GoogleParams,
 ]):
 
-    def __init__(self, config: GoogleConfigClient) -> None:
-        self._client = Client(
-            api_key=config.api_key,
-            http_options=HttpOptions(
-                base_url=config.base_url,
-                async_client_args=httpx_args(),
-            )).aio
+    def __init__(self, config: GoogleConfigClient, client: Client | None = None) -> None:
+        if client is None:
+            client = Client(
+                api_key=config.api_key,
+                http_options=HttpOptions(
+                    base_url=config.base_url,
+                    async_client_args=httpx_args(),
+                ))
+
+        self._client = client.aio
 
     # streams
 
