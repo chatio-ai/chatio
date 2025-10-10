@@ -5,6 +5,7 @@ from chatio.core.facade import ApiFacade
 from chatio.api.claude.facade import ClaudeFacadeDeps
 from chatio.api.google.facade import GoogleFacadeDeps
 from chatio.api.openai.facade import OpenAIFacadeDeps
+from chatio.api.compat.facade import CompatFacadeDeps
 
 
 def _init_facade_deps(config: dict) -> ApiFacadeDeps:
@@ -17,6 +18,8 @@ def _init_facade_deps(config: dict) -> ApiFacadeDeps:
             return GoogleFacadeDeps(config)
         case 'openai':
             return OpenAIFacadeDeps(config)
+        case 'compat':
+            return CompatFacadeDeps(config)
         case str():
             err_msg = f"api is not supported: {api}"
             raise RuntimeError(err_msg)

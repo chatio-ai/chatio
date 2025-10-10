@@ -4,6 +4,8 @@ from collections.abc import Callable
 
 from typing import override
 
+from httpx import AsyncClient as HttpxClient
+
 from openai.types.chat.chat_completion_chunk import ChoiceDelta
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
@@ -11,6 +13,12 @@ from openai._models import FinalRequestOptions
 from openai import AsyncOpenAI
 from openai import AsyncStream
 from openai import NotGiven
+
+
+from chatio.api.helper.httpx import httpx_args
+
+from chatio.api.openai.config import OpenAIConfigClient
+from chatio.api.openai.client import OpenAIClient
 
 
 # pylint: disable=too-few-public-methods
@@ -69,3 +77,12 @@ class AsyncCompat(AsyncOpenAI):
         options = await super()._prepare_options(options)
         options.post_parser = _ChunkParser(self, options.post_parser)
         return options
+
+
+class CompatClient(OpenAIClient):
+    def __init__(self, config: OpenAIConfigClient) -> None:
+        client = AsyncCompat(
+            api_key=config.api_key,
+            base_url=config.base_url,
+            http_client=HttpxClient(**httpx_args()))
+        super().__init__(config, client)

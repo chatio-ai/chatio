@@ -20,11 +20,14 @@ class ClaudeClient(ApiClient[
     ClaudeParams,
 ]):
 
-    def __init__(self, config: ClaudeConfigClient) -> None:
-        self._client = AsyncAnthropic(
-            api_key=config.api_key,
-            base_url=config.base_url,
-            http_client=HttpxClient(**httpx_args()))
+    def __init__(self, config: ClaudeConfigClient, client: AsyncAnthropic | None = None) -> None:
+        if client is None:
+            client = AsyncAnthropic(
+                api_key=config.api_key,
+                base_url=config.base_url,
+                http_client=HttpxClient(**httpx_args()))
+
+        self._client = client
 
     # streams
 
