@@ -82,7 +82,7 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
 
     @override
     def _call_request(self, req: CallRequest) -> ChatCompletionMessageParam:
-        if not isinstance(req.tool_input, str):
+        if isinstance(req.tool_input, dict):
             raise TypeError
 
         return {

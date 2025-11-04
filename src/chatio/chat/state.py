@@ -81,7 +81,7 @@ class ChatState(_ChatState):
     def append_call_response(self, call_id: str, name: str, args: str) -> None:
         self.messages.append(CallResponse(call_id, name, args))
 
-    def append_call_request(self, call_id: str, name: str, args: object) -> None:
+    def append_call_request(self, call_id: str, name: str, args: str | dict[str, object]) -> None:
         self.messages.append(CallRequest(call_id, name, args))
 
     def update_system_message(self, message: str | None) -> None:

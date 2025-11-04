@@ -99,6 +99,9 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
 
     @override
     def _call_request(self, req: CallRequest) -> MessageParam:
+        if isinstance(req.tool_input, str):
+            raise TypeError
+
         return self._output_content({
             "type": "tool_use",
             "id": req.tool_call_id,

@@ -18,8 +18,8 @@ class StatEvent(ChatEvent):
 class CallEvent(ChatEvent):
     call_id: str
     name: str
-    args: dict
-    args_raw: object
+    args: dict[str, object]
+    args_raw: str | dict[str, object]
 
 
 @dataclass
