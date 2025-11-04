@@ -46,7 +46,7 @@ class Style:
     suffix: str = f"{RESET}"
 
 
-Empty = Style("")
+EMPTY = Style("")
 
 
 @dataclass
@@ -73,9 +73,9 @@ class Theme:
         self.event_sec = Style(f"{Style.DIM}{color}{direction}{Style.RESET}::: ")
 
 
-Input = Theme(direction=Theme.INPUT)
+INPUT = Theme(direction=Theme.INPUT)
 
-Model = Theme(direction=Theme.OUTPUT)
+MODEL = Theme(direction=Theme.OUTPUT)
 
 
 class StyleWrap:

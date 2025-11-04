@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import TextIO
 
 
-from .style import Theme, Input
+from .style import Theme, INPUT
 from .style import _wrap_input
 from .style import _wrap_print
 
@@ -84,7 +84,7 @@ async def run_user(theme: Theme | None = None, *, file: TextIO | None = None) ->
     setup_readline()
 
     if theme is None:
-        theme = Input
+        theme = INPUT
 
     user_input = None
     if sys.stdin.isatty():

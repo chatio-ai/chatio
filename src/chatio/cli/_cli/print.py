@@ -17,14 +17,14 @@ from chatio.chat import ChatReply
 from chatio.chat import Chat
 
 
-from .style import Theme, Model
-from .style import Style, Empty
+from .style import Theme, MODEL
+from .style import Style, EMPTY
 from .style import _wrap_print
 
 
 def run_text(text: str, style: Style | None = None, *, file: TextIO | None = None) -> None:
     if style is None:
-        style = Empty
+        style = EMPTY
     with _wrap_print(style, file=file):
         print(text, end="", flush=True, file=file)
 
@@ -33,7 +33,7 @@ def run_info(chat: Chat, theme: Theme | None = None, *, file: TextIO | None = No
     info = chat.info()
 
     if theme is None:
-        theme = Model
+        theme = MODEL
 
     run_text(
         f"chatio: model: {info.vendor}/{info.model} "
@@ -86,7 +86,7 @@ async def _run_chat(events: AsyncIterable[ChatEvent], theme: Theme | None = None
                     file: TextIO | None = None) -> AsyncIterator[str]:
 
     if theme is None:
-        theme = Model
+        theme = MODEL
 
     defer = None
     async for event in events:
