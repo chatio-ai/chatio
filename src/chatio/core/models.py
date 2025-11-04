@@ -15,7 +15,7 @@ class ChatMessage:
 class CallRequest(ChatMessage):
     tool_call_id: str
     tool_name: str
-    tool_input: object
+    tool_input: str | dict[str, object]
 
 
 @dataclass

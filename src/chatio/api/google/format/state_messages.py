@@ -57,7 +57,7 @@ class GoogleMessagesFormatter(ApiMessagesFormatterBase[
 
     @override
     def _call_request(self, req: CallRequest) -> ContentDict:
-        if not isinstance(req.tool_input, dict):
+        if isinstance(req.tool_input, str):
             raise TypeError
 
         return {
