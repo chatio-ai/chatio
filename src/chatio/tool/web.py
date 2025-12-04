@@ -10,7 +10,7 @@ from typing import override
 from googlesearch import search as googlesearch, get
 from googlesearch import SearchResult
 
-from ddgs import DDGS
+from ddgs.ddgs import DDGS
 
 from html2text import html2text
 
