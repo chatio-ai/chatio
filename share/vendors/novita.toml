@@ -1,0 +1,7 @@
+api = 'compat'
+
+[client]
+base_url = 'https://api.novita.ai/openai'
+
+[format]
+compat = true
