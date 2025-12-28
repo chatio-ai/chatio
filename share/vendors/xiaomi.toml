@@ -1,0 +1,8 @@
+api = 'compat'
+env_ns = 'mimo'
+
+[client]
+base_url = 'https://api.xiaomimimo.com/v1'
+
+[format]
+compat = true
