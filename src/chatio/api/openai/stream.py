@@ -8,6 +8,7 @@ from typing import override
 
 
 from openai.types.completion_usage import CompletionUsage
+from openai.types.chat import ChatCompletion
 from openai.types.chat.parsed_function_tool_call import ParsedFunctionToolCall
 from openai.lib.streaming.chat._events import ChatCompletionStreamEvent
 from openai.lib.streaming.chat._completions import AsyncChatCompletionStreamManager
@@ -68,6 +69,15 @@ def _pump_calls(calls: list[ParsedFunctionToolCall] | None) -> Iterator[CallEven
                         call.function.parsed_arguments, call.function.arguments)
 
 
+def _pump_compl(completion: ChatCompletion) -> Iterator[ChatEvent]:
+    message = completion.choices[0].message
+    if message.content is None:
+        message.content = ""
+    yield StopEvent(message.content)
+
+    yield from _pump_usage(completion.usage)
+
+
 async def _pump(stream: AsyncChatCompletionStream) -> AsyncIterator[ChatEvent]:
     async for chunk in stream:
         for event in _pump_chunk(chunk):
@@ -75,16 +85,13 @@ async def _pump(stream: AsyncChatCompletionStream) -> AsyncIterator[ChatEvent]:
 
     try:
         final = await stream.get_final_completion()
-        final_message = final.choices[0].message
-        yield StopEvent(final_message.content or "")
-
-        for event in _pump_usage(final.usage):
+        for event in _pump_compl(final):
             yield event
 
-        for event in _pump_calls(final_message.tool_calls):
+        for event in _pump_calls(final.choices[0].message.tool_calls):
             yield event
     except LengthFinishReasonError as e:
-        for event in _pump_usage(e.completion.usage):
+        for event in _pump_compl(e.completion):
             yield event
 
 
