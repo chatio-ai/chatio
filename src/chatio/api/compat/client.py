@@ -51,13 +51,16 @@ class _AsyncStream(AsyncStream[ChatCompletionChunk]):
             yield chunk
 
 
+type Parser = Callable[[FinalRequestOptions], FinalRequestOptions]
+
+
 # pylint: disable=too-few-public-methods
 class _ChunkParser:
-    def __init__(self, client: AsyncOpenAI, parser: Callable | NotGiven) -> None:
+    def __init__(self, client: AsyncOpenAI, parser: Parser | NotGiven) -> None:
         self._client = client
         self._parser = parser
 
-    def __call__(self, result: object) -> object:
+    def __call__(self, result: FinalRequestOptions) -> FinalRequestOptions:
         if isinstance(result, AsyncStream):
             method = result.response.request.headers.get('x-stainless-helper-method')
             if method == 'chat.completions.stream':

@@ -21,6 +21,9 @@ from chatio.core.models import CallRequest
 from chatio.core.models import ChatState as _ChatState
 
 
+type StrPath = str | PathLike[str]
+
+
 @dataclass
 class ChatState(_ChatState):
 
@@ -32,7 +35,7 @@ class ChatState(_ChatState):
 
         self.update_system_message(prompt)
 
-    def attach_image_document(self, *, file: str | PathLike, mimetype: str | None = None) -> None:
+    def attach_image_document(self, *, file: StrPath, mimetype: str | None = None) -> None:
         if mimetype is None:
             mimetype, _ = mimetypes.guess_type(file)
             if mimetype is None:
@@ -43,7 +46,7 @@ class ChatState(_ChatState):
         blob = Path(file).read_bytes()
         self.messages.append(ImageDocument(blob, mimetype))
 
-    def attach_text_document(self, *, file: str | PathLike, mimetype: str | None = None) -> None:
+    def attach_text_document(self, *, file: StrPath, mimetype: str | None = None) -> None:
         if mimetype is None:
             mimetype, _ = mimetypes.guess_type(file)
             if mimetype is None:
@@ -54,7 +57,7 @@ class ChatState(_ChatState):
         text = Path(file).read_text(encoding="utf-8")
         self.messages.append(TextDocument(text, mimetype))
 
-    def attach_document_auto(self, *, file: str | PathLike) -> None:
+    def attach_document_auto(self, *, file: StrPath) -> None:
         mimetype, _ = mimetypes.guess_type(file)
         if mimetype is None:
             raise RuntimeError

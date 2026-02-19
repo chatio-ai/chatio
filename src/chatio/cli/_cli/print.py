@@ -13,7 +13,7 @@ from chatio.core.events import StopEvent
 from chatio.core.events import ModelTextChunk
 from chatio.core.events import ToolsTextChunk
 
-from chatio.chat import ChatReply
+from chatio.chat.reply import ChatReply
 from chatio.chat import Chat
 
 
