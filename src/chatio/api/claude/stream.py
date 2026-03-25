@@ -8,8 +8,8 @@ from typing import override
 
 
 from anthropic.types.usage import Usage
-from anthropic.types.content_block import ContentBlock
-from anthropic.lib.streaming import MessageStreamEvent
+from anthropic.types.parsed_message import ParsedContentBlock
+from anthropic.lib.streaming import ParsedMessageStreamEvent
 from anthropic.lib.streaming import AsyncMessageStreamManager
 from anthropic.lib.streaming import AsyncMessageStream
 
@@ -43,7 +43,7 @@ def _pump_usage(usage: Usage | None) -> Iterator[StatEvent]:
     yield StatEvent('output', usage.output_tokens)
 
 
-def _pump_chunk(chunk: MessageStreamEvent) -> Iterator[ChatEvent]:
+def _pump_chunk(chunk: ParsedMessageStreamEvent) -> Iterator[ChatEvent]:
     log.debug("%s", chunk.model_dump_json(indent=2))
 
     if chunk.type == 'content_block_delta' and chunk.delta.type == 'text_delta':
@@ -54,7 +54,7 @@ def _pump_chunk(chunk: MessageStreamEvent) -> Iterator[ChatEvent]:
             yield ModelTextChunk(citation.cited_text, label="claude.citation")
 
 
-def _pump_calls(content: list[ContentBlock]) -> Iterator[CallEvent]:
+def _pump_calls(content: list[ParsedContentBlock]) -> Iterator[CallEvent]:
     for message in content:
         if message.type == 'tool_use':
             if not isinstance(message.input, dict):
