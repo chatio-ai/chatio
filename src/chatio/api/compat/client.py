@@ -4,8 +4,6 @@ from collections.abc import Callable
 
 from typing import override
 
-from httpx import AsyncClient as HttpxClient
-
 from openai.types.chat.chat_completion_chunk import ChoiceDelta
 from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 
@@ -15,7 +13,7 @@ from openai import AsyncStream
 from openai import NotGiven
 
 
-from chatio.api.helper.httpx import httpx_args
+from chatio.api.helper.httpx import httpx_client
 
 from chatio.api.openai.config import OpenAIConfigClient
 from chatio.api.openai.client import OpenAIClient
@@ -84,5 +82,5 @@ class CompatClient(OpenAIClient):
         client = AsyncCompat(
             api_key=config.api_key,
             base_url=config.base_url,
-            http_client=HttpxClient(**httpx_args()))
+            http_client=httpx_client())
         super().__init__(config, client)

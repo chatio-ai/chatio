@@ -54,21 +54,24 @@ class LoggingTransport(httpx.AsyncHTTPTransport):
         return response
 
 
-def httpx_args() -> dict:
-    args: dict[str, object] = {}
-
+def _httpx_transport() -> httpx.AsyncHTTPTransport | None:
     if os.getenv("CHATIO_HTTPX_TRACE"):
-        args.update({
-            'transport': LoggingTransport(verbose=True),
-        })
+        return LoggingTransport(verbose=True)
     if os.getenv("CHATIO_HTTPX_DEBUG"):
-        args.update({
-            'transport': LoggingTransport(verbose=False),
-        })
+        return LoggingTransport(verbose=False)
+    return None
 
-    if os.getenv("CHATIO_HTTPX_INSECURE"):
-        args.update({
-            "verify": False,
-        })
 
-    return args
+def _httpx_verify() -> bool:
+    return not os.getenv("CHATIO_HTTPX_INSECURE")
+
+
+def httpx_args() -> dict[str, object]:
+    return {
+        'transport': _httpx_transport(),
+        'verify': _httpx_verify(),
+    }
+
+
+def httpx_client() -> httpx.AsyncClient:
+    return httpx.AsyncClient(transport=_httpx_transport(), verify=_httpx_verify())

@@ -1,12 +1,10 @@
 
 from typing import override
 
-from httpx import AsyncClient as HttpxClient
-
 from anthropic import AsyncAnthropic
 
 
-from chatio.api.helper.httpx import httpx_args
+from chatio.api.helper.httpx import httpx_client
 
 from chatio.core.client import ApiClient
 
@@ -25,7 +23,7 @@ class ClaudeClient(ApiClient[
             client = AsyncAnthropic(
                 api_key=config.api_key,
                 base_url=config.base_url,
-                http_client=HttpxClient(**httpx_args()))
+                http_client=httpx_client())
 
         self._client = client
 
