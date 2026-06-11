@@ -3,12 +3,9 @@ import base64
 
 from typing import override
 
-import weasyprint
-
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
-from openai.types.chat.chat_completion_content_part_param import File
 
 
 from chatio.core.models import ChatMessage
@@ -24,7 +21,7 @@ from chatio.api.openai.config import OpenAIConfigFormat
 
 
 type _ChatCompletionContentPartParam = \
-    ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam | File
+    ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam
 
 
 def message_text(msg: TextMessage) -> ChatCompletionContentPartTextParam:
@@ -39,7 +36,7 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
     ChatCompletionMessageParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
-    File,
+    ChatCompletionContentPartTextParam,
     OpenAIConfigFormat,
 ]):
 
@@ -118,21 +115,10 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
         }
 
     @override
-    def _text_document_text(self, doc: TextDocument) -> File:
-        content = f"<html><body><pre>{doc.text}</pre></body></html>"
-        blob = weasyprint.HTML(string=content).write_pdf()
-        if blob is None:
-            raise RuntimeError
-        data = base64.b64encode(blob).decode('ascii')
-
-        mimetype = 'application/pdf'
-
+    def _text_document_text(self, doc: TextDocument) -> ChatCompletionContentPartTextParam:
         return {
-            "type": "file",
-            "file": {
-                "filename": "",
-                "file_data": f"data:{mimetype};base64,{data}",
-            },
+            "type": "text",
+            "text": f"data:{doc.mimetype};\n{doc.text}",
         }
 
     @override

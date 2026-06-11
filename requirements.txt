@@ -5,4 +5,3 @@ pymediawiki
 googlesearch-python
 ddgs
 html2text
-weasyprint
