@@ -40,10 +40,11 @@ class ApiFacadeDeps[
 
 
 class ApiFacade[
-    ApiFacadeDepsT: ApiFacadeDeps,
+    ApiConfigT: ApiConfigFormat,
+    ApiParamsT: ApiParams,
 ](Closeable):
 
-    def __init__(self, deps: ApiFacadeDepsT) -> None:
+    def __init__(self, deps: ApiFacadeDeps[ApiConfigT, ApiParamsT]) -> None:
         self._format = deps.format
         self._client = deps.client
 

@@ -3,15 +3,18 @@ from importlib import import_module
 
 import chatio.api
 
+from chatio.core.config import ApiConfigFormat
+from chatio.core.params import ApiParams
+
 from chatio.core.facade import ApiFacadeDeps
 from chatio.core.facade import ApiFacade
 
 
-def init_facade(config: dict) -> ApiFacade:
+def init_facade(config: dict) -> ApiFacade[ApiConfigFormat, ApiParams]:
     return ApiFacade(_init_facade_deps(config))
 
 
-def _init_facade_deps(config: dict) -> ApiFacadeDeps:
+def _init_facade_deps(config: dict) -> ApiFacadeDeps[ApiConfigFormat, ApiParams]:
 
     api = config.get('api')
     if not api:
