@@ -2,6 +2,5 @@ anthropic
 google-genai
 openai
 pymediawiki
-googlesearch-python
 ddgs
 html2text

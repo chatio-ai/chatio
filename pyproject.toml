@@ -35,7 +35,3 @@ analyzeUnannotatedFunctions = true
 
 [tool.mypy]
 check_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = "googlesearch"
-follow_untyped_imports = true

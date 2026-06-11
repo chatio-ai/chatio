@@ -7,10 +7,9 @@ from collections.abc import AsyncIterator
 
 from typing import override
 
-from googlesearch import search as googlesearch, get
-from googlesearch import SearchResult
-
 from ddgs import DDGS
+
+from httpx import get
 
 from html2text import html2text
 
@@ -40,19 +39,6 @@ class WebSearchToolBase(ToolBase, ABC):
     @abstractmethod
     def __call__(self, text: str) -> AsyncIterator[str]:
         ...
-
-
-class GoogleSearchTool(WebSearchToolBase):
-
-    def _result_to_str(self, result: str | SearchResult) -> str:
-        return result if isinstance(result, str) else result.url
-
-    @override
-    # pylint: disable=invalid-overridden-method
-    async def __call__(self, text: str) -> AsyncIterator[str]:
-        results = await asyncio.to_thread(lambda: list(googlesearch(text)))
-        for result in results:
-            yield f"{self._result_to_str(result)}\n"
 
 
 class DuckDuckGoTool(WebSearchToolBase):
