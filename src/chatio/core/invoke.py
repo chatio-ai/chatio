@@ -16,5 +16,5 @@ class ToolBase(ABC):
         ...
 
     @abstractmethod
-    def __call__(self, *_args: Any, **_kwargs: Any) -> AsyncIterator[str | dict]:    # noqa: ANN401
+    def __call__(self, *_args: Any, **_kwargs: Any) -> AsyncIterator[str | dict[str, object]]:
         ...

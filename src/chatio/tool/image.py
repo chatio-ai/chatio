@@ -47,6 +47,6 @@ class ImageDumpTool(ToolBase):
 
     @override
     # pylint: disable=invalid-overridden-method
-    async def __call__(self, info: dict | None = None) -> AsyncIterator[str]:
+    async def __call__(self, info: dict[str, object] | None = None) -> AsyncIterator[str]:
         return
         yield info

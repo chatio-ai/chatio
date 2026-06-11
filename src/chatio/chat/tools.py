@@ -19,9 +19,12 @@ from chatio.core.invoke import ToolBase
 from .state import ChatState
 
 
+type Func = Callable[..., AsyncIterator[str | dict[str, object]]]
+
+
 @dataclass
 class ChatTools(_ChatTools):
-    _funcs: dict[str, Callable[..., AsyncIterator[str | dict]]] = field(default_factory=dict)
+    _funcs: dict[str, Func] = field(default_factory=dict)
 
     def __init__(self, tools: list[ToolBase] | None = None,
                  tool_choice_mode: str | None = None, tool_choice_name: str | None = None) -> None:
@@ -42,7 +45,7 @@ class ChatTools(_ChatTools):
             _funcs[name] = tool.__call__
             _tools.append(ToolSchema(name, desc, schema))
 
-        if tool_choice_name and tool_choice_name not in tools:
+        if tool_choice_name and tool_choice_name not in _funcs:
             raise ValueError
         _tool_choice = ToolChoice(tool_choice_mode, tool_choice_name)
 

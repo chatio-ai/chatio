@@ -51,8 +51,8 @@ def _run_chat_event(event: ChatEvent, style: Style, *, file: TextIO | None = Non
         case CallEvent(_, name, args, _):
             text = f"call: {name}: {args}"
 
-        case ToolEvent(_, name, data):
-            text = f"tool: {name}: {data}"
+        case ToolEvent(_, name, args):
+            text = f"tool: {name}: {args}"
 
         case _:
             raise RuntimeError

@@ -29,7 +29,7 @@ $ {command}
 ```
 """
 
-    async def _command(self, command: str) -> AsyncIterator[str | dict]:
+    async def _command(self, command: str) -> AsyncIterator[str | dict[str, object]]:
 
         process = await asyncio.create_subprocess_shell(
                 command, start_new_session=True, stdout=PIPE, stderr=STDOUT)
@@ -68,7 +68,7 @@ class ShellCalcTool(ShellToolBase):
         }
 
     @override
-    def __call__(self, expr: str) -> AsyncIterator[str | dict]:
+    def __call__(self, expr: str) -> AsyncIterator[str | dict[str, object]]:
         return self._command(f"echo '{expr}' | bc")
 
 
@@ -92,5 +92,5 @@ class ShellExecTool(ShellToolBase):
         }
 
     @override
-    def __call__(self, command: str) -> AsyncIterator[str | dict]:
+    def __call__(self, command: str) -> AsyncIterator[str | dict[str, object]]:
         return self._command(command)

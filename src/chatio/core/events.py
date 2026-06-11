@@ -26,7 +26,7 @@ class CallEvent(ChatEvent):
 class ToolEvent(ChatEvent):
     call_id: str
     name: str
-    data: dict
+    args: dict[str, object]
 
 
 @dataclass
