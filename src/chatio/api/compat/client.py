@@ -15,7 +15,7 @@ from openai import NotGiven
 
 from chatio.api.helper.httpx import httpx_client
 
-from chatio.api.openai.config import OpenAIConfigClient
+from chatio.api.openai.config import OpenAIClientConfig
 from chatio.api.openai.client import OpenAIClient
 
 
@@ -81,7 +81,7 @@ class AsyncCompat(AsyncOpenAI):
 
 
 class CompatClient(OpenAIClient):
-    def __init__(self, config: OpenAIConfigClient) -> None:
+    def __init__(self, config: OpenAIClientConfig) -> None:
         client = AsyncCompat(
             api_key=config.api_key,
             base_url=config.base_url,

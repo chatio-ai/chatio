@@ -1,16 +1,16 @@
 
 from dataclasses import dataclass
 
-from chatio.core.config import ApiConfigFormat
-from chatio.core.config import ApiConfigClient
+from chatio.core.config import ApiFormatConfig
+from chatio.core.config import ApiClientConfig
 
 
 @dataclass
-class OpenAIConfigFormat(ApiConfigFormat):
+class OpenAIFormatConfig(ApiFormatConfig):
     prediction: bool = False
     compat: bool = False
 
 
 @dataclass
-class OpenAIConfigClient(ApiConfigClient):
+class OpenAIClientConfig(ApiClientConfig):
     pass

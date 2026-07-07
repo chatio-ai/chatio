@@ -10,7 +10,7 @@ from chatio.api.helper.httpx import httpx_args
 from chatio.core.client import ApiClient
 
 
-from .config import GoogleConfigClient
+from .config import GoogleClientConfig
 from .params import GoogleParams
 from .stream import GoogleStream
 
@@ -19,7 +19,7 @@ class GoogleClient(ApiClient[
     GoogleParams,
 ]):
 
-    def __init__(self, config: GoogleConfigClient, client: Client | None = None) -> None:
+    def __init__(self, config: GoogleClientConfig, client: Client | None = None) -> None:
         if client is None:
             client = Client(
                 api_key=config.api_key,

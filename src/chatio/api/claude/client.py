@@ -9,7 +9,7 @@ from chatio.api.helper.httpx import httpx_client
 from chatio.core.client import ApiClient
 
 
-from .config import ClaudeConfigClient
+from .config import ClaudeClientConfig
 from .params import ClaudeParams
 from .stream import ClaudeStream
 
@@ -18,7 +18,7 @@ class ClaudeClient(ApiClient[
     ClaudeParams,
 ]):
 
-    def __init__(self, config: ClaudeConfigClient, client: AsyncAnthropic | None = None) -> None:
+    def __init__(self, config: ClaudeClientConfig, client: AsyncAnthropic | None = None) -> None:
         if client is None:
             client = AsyncAnthropic(
                 api_key=config.api_key,

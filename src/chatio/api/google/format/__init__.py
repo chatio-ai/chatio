@@ -5,7 +5,7 @@ from chatio.core.models import ChatState
 from chatio.core.models import ChatTools
 from chatio.core.format import ApiFormat
 
-from chatio.api.google.config import GoogleConfigFormat
+from chatio.api.google.config import GoogleFormatConfig
 from chatio.api.google.params import GoogleParams
 
 from .state_messages import GoogleMessagesFormatter
@@ -18,7 +18,7 @@ class GoogleFormat(ApiFormat[
     GoogleParams,
 ]):
 
-    def __init__(self, config: GoogleConfigFormat) -> None:
+    def __init__(self, config: GoogleFormatConfig) -> None:
         self._messages_formatter = GoogleMessagesFormatter(config)
         self._options_formatter = GoogleOptionsFormatter(config)
         self._tools_formatter = GoogleToolsFormatter(config)

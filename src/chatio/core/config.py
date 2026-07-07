@@ -3,12 +3,12 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ApiConfigFormat:
+class ApiFormatConfig:
     pass
 
 
 @dataclass
-class ApiConfigClient:
+class ApiClientConfig:
     api_key: str | None = None
     base_url: str | None = None
 
@@ -18,8 +18,8 @@ class ApiConfig:
     api: str | None = None
     env_ns: str | None = None
 
-    client: ApiConfigClient | None = None
-    format: ApiConfigFormat | None = None
+    client: ApiClientConfig | None = None
+    format: ApiFormatConfig | None = None
 
 
 @dataclass

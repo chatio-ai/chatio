@@ -17,7 +17,7 @@ from chatio.core.models import TextDocument
 
 from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
-from chatio.api.openai.config import OpenAIConfigFormat
+from chatio.api.openai.config import OpenAIFormatConfig
 
 
 type _ChatCompletionContentPartParam = \
@@ -37,7 +37,7 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     ChatCompletionContentPartTextParam,
-    OpenAIConfigFormat,
+    OpenAIFormatConfig,
 ]):
 
     @override

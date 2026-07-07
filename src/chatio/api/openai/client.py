@@ -11,7 +11,7 @@ from chatio.api.helper.httpx import httpx_client
 from chatio.core.client import ApiClient
 
 
-from .config import OpenAIConfigClient
+from .config import OpenAIClientConfig
 from .params import OpenAIParams
 from .stream import OpenAIStream
 
@@ -23,7 +23,7 @@ class OpenAIClient(ApiClient[
     OpenAIParams,
 ]):
 
-    def __init__(self, config: OpenAIConfigClient, client: AsyncOpenAI | None = None) -> None:
+    def __init__(self, config: OpenAIClientConfig, client: AsyncOpenAI | None = None) -> None:
         if client is None:
             client = AsyncOpenAI(
                 api_key=config.api_key,

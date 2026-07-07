@@ -12,7 +12,7 @@ from chatio.core.models import ChatStateOptions
 from chatio.core.format.state_options import ApiOptionsFormatterBase
 
 from chatio.api.claude.params import ClaudeStateOptions
-from chatio.api.claude.config import ClaudeConfigFormat
+from chatio.api.claude.config import ClaudeFormatConfig
 
 from .state_messages import message_text
 
@@ -20,7 +20,7 @@ from .state_messages import message_text
 # pylint: disable=too-few-public-methods
 class ClaudeOptionsFormatter(ApiOptionsFormatterBase[
     ClaudeStateOptions,
-    ClaudeConfigFormat,
+    ClaudeFormatConfig,
 ]):
 
     def _system_message(self, msg: SystemMessage | None) -> list[TextBlockParam] | Omit:

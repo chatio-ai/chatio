@@ -4,8 +4,8 @@ from typing import override
 from chatio.core.facade import ApiFacadeDeps
 
 
-from .config import OpenAIConfigFormat
-from .config import OpenAIConfigClient
+from .config import OpenAIFormatConfig
+from .config import OpenAIClientConfig
 from .params import OpenAIParams
 from .format import OpenAIFormat
 from .client import OpenAIClient
@@ -18,12 +18,12 @@ class OpenAIFacadeDeps(ApiFacadeDeps[
     @property
     @override
     def format(self) -> OpenAIFormat:
-        return OpenAIFormat(OpenAIConfigFormat(**self._config_format))
+        return OpenAIFormat(OpenAIFormatConfig(**self._config_format))
 
     @property
     @override
     def client(self) -> OpenAIClient:
-        return OpenAIClient(OpenAIConfigClient(**self._config_client))
+        return OpenAIClient(OpenAIClientConfig(**self._config_client))
 
 
 API = OpenAIFacadeDeps

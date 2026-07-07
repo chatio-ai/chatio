@@ -9,7 +9,7 @@ from chatio.core.models import ToolChoice
 from chatio.core.models import ChatTools
 
 from chatio.core.params import ApiToolsOptions
-from chatio.core.config import ApiConfigFormat
+from chatio.core.config import ApiFormatConfig
 
 from ._base import ApiFormatBase
 
@@ -19,8 +19,8 @@ class ApiToolsFormatterBase[
     ToolDefinitionsT,
     ToolSchemaT,
     ToolChoiceT,
-    ApiConfigFormatT: ApiConfigFormat,
-](ApiFormatBase[ApiConfigFormatT], ABC):
+    ApiFormatConfigT: ApiFormatConfig,
+](ApiFormatBase[ApiFormatConfigT], ABC):
 
     @abstractmethod
     def _tool_schema(self, tool: ToolSchema) -> ToolSchemaT:

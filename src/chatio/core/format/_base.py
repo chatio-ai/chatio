@@ -1,11 +1,11 @@
 
-from chatio.core.config import ApiConfigFormat
+from chatio.core.config import ApiFormatConfig
 
 
 # pylint: disable=too-few-public-methods
 class ApiFormatBase[
-    ApiConfigFormatT: ApiConfigFormat,
+    ApiFormatConfigT: ApiFormatConfig,
 ]:
 
-    def __init__(self, config: ApiConfigFormatT) -> None:
+    def __init__(self, config: ApiFormatConfigT) -> None:
         self._config = config

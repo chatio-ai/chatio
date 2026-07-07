@@ -14,7 +14,7 @@ from chatio.core.models import ChatStateOptions
 from chatio.core.format.state_options import ApiOptionsFormatterBase
 
 from chatio.api.openai.params import OpenAIStateOptions
-from chatio.api.openai.config import OpenAIConfigFormat
+from chatio.api.openai.config import OpenAIFormatConfig
 
 from .state_messages import message_text
 
@@ -22,7 +22,7 @@ from .state_messages import message_text
 # pylint: disable=too-few-public-methods
 class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
     OpenAIStateOptions,
-    OpenAIConfigFormat,
+    OpenAIFormatConfig,
 ]):
 
     def _prediction_message(self, msg: PredictionMessage | None,

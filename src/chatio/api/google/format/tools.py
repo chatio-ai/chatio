@@ -15,7 +15,7 @@ from chatio.core.models import ToolSchema
 
 from chatio.core.format.tools import ApiToolsFormatterBase
 
-from chatio.api.google.config import GoogleConfigFormat
+from chatio.api.google.config import GoogleFormatConfig
 
 
 # pylint: disable=too-few-public-methods
@@ -23,7 +23,7 @@ class GoogleToolsFormatter(ApiToolsFormatterBase[
     ToolListUnionDict | None,
     FunctionDeclarationDict,
     ToolConfigDict | None,
-    GoogleConfigFormat,
+    GoogleFormatConfig,
 ]):
 
     def _is_tool_params_schema(self, _params: Mapping[str, Any]) -> TypeGuard[SchemaDict]:

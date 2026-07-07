@@ -22,7 +22,7 @@ from chatio.core.models import TextDocument
 
 from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
-from chatio.api.claude.config import ClaudeConfigFormat
+from chatio.api.claude.config import ClaudeFormatConfig
 
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
@@ -43,7 +43,7 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
     TextBlockParam,
     ImageBlockParam,
     DocumentBlockParam,
-    ClaudeConfigFormat,
+    ClaudeFormatConfig,
 ]):
 
     def _setup_messages_cache(self, messages: list[MessageParam]) -> list[MessageParam]:

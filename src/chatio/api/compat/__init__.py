@@ -1,7 +1,7 @@
 
 from typing import override
 
-from chatio.api.openai.config import OpenAIConfigClient
+from chatio.api.openai.config import OpenAIClientConfig
 from chatio.api.openai import OpenAIFacadeDeps
 
 
@@ -13,7 +13,7 @@ class CompatFacadeDeps(OpenAIFacadeDeps):
     @property
     @override
     def client(self) -> CompatClient:
-        return CompatClient(OpenAIConfigClient(**self._config_client))
+        return CompatClient(OpenAIClientConfig(**self._config_client))
 
 
 API = CompatFacadeDeps

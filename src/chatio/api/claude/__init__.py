@@ -4,8 +4,8 @@ from typing import override
 from chatio.core.facade import ApiFacadeDeps
 
 
-from .config import ClaudeConfigFormat
-from .config import ClaudeConfigClient
+from .config import ClaudeFormatConfig
+from .config import ClaudeClientConfig
 from .params import ClaudeParams
 from .format import ClaudeFormat
 from .client import ClaudeClient
@@ -18,12 +18,12 @@ class ClaudeFacadeDeps(ApiFacadeDeps[
     @property
     @override
     def format(self) -> ClaudeFormat:
-        return ClaudeFormat(ClaudeConfigFormat(**self._config_format))
+        return ClaudeFormat(ClaudeFormatConfig(**self._config_format))
 
     @property
     @override
     def client(self) -> ClaudeClient:
-        return ClaudeClient(ClaudeConfigClient(**self._config_client))
+        return ClaudeClient(ClaudeClientConfig(**self._config_client))
 
 
 API = ClaudeFacadeDeps

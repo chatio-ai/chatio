@@ -14,7 +14,7 @@ from chatio.core.models import CallRequest
 
 from chatio.core.models import ChatMessage
 
-from chatio.core.config import ApiConfigFormat
+from chatio.core.config import ApiFormatConfig
 
 from ._base import ApiFormatBase
 
@@ -25,8 +25,8 @@ class ApiMessagesFormatterBase[
     MessageTextT,
     ImageDocumentT,
     TextDocumentT,
-    ApiConfigFormatT: ApiConfigFormat,
-](ApiFormatBase[ApiConfigFormatT], ABC):
+    ApiFormatConfigT: ApiFormatConfig,
+](ApiFormatBase[ApiFormatConfigT], ABC):
 
     @abstractmethod
     def _chat_messages(self, messages: list[ChatMessageT]) -> list[ChatMessageT]:

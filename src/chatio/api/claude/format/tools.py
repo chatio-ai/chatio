@@ -16,7 +16,7 @@ from chatio.core.models import ToolSchema
 
 from chatio.core.format.tools import ApiToolsFormatterBase
 
-from chatio.api.claude.config import ClaudeConfigFormat
+from chatio.api.claude.config import ClaudeFormatConfig
 
 
 # pylint: disable=too-few-public-methods
@@ -24,7 +24,7 @@ class ClaudeToolsFormatter(ApiToolsFormatterBase[
     list[ToolParam] | Omit,
     ToolParam,
     ToolChoiceParam | Omit,
-    ClaudeConfigFormat,
+    ClaudeFormatConfig,
 ]):
 
     def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
