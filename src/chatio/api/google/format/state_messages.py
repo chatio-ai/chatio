@@ -15,8 +15,6 @@ from chatio.core.models import TextDocument
 
 from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
-from chatio.api.google.config import GoogleFormatConfig
-
 
 def message_text(msg: TextMessage) -> PartDict:
     return {
@@ -30,7 +28,6 @@ class GoogleMessagesFormatter(ApiMessagesFormatterBase[
     PartDict,
     PartDict,
     PartDict,
-    GoogleFormatConfig,
 ]):
 
     @override

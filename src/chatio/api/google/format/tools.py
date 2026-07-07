@@ -15,16 +15,16 @@ from chatio.core.models import ToolSchema
 
 from chatio.core.format.tools import ApiToolsFormatterBase
 
-from chatio.api.google.config import GoogleFormatConfig
-
 
 # pylint: disable=too-few-public-methods
 class GoogleToolsFormatter(ApiToolsFormatterBase[
     ToolListUnionDict | None,
     FunctionDeclarationDict,
     ToolConfigDict | None,
-    GoogleFormatConfig,
 ]):
+
+    def __init__(self, *, grounding: bool) -> None:
+        self._grounding = grounding
 
     def _is_tool_params_schema(self, _params: Mapping[str, Any]) -> TypeGuard[SchemaDict]:
         return True
@@ -49,7 +49,7 @@ class GoogleToolsFormatter(ApiToolsFormatterBase[
                 "function_declarations": tools,
             })
 
-        if self._config.grounding:
+        if self._grounding:
             tools_config.append({
                 "google_search": {},
             })

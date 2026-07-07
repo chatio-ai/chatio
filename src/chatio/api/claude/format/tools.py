@@ -16,19 +16,19 @@ from chatio.core.models import ToolSchema
 
 from chatio.core.format.tools import ApiToolsFormatterBase
 
-from chatio.api.claude.config import ClaudeFormatConfig
-
 
 # pylint: disable=too-few-public-methods
 class ClaudeToolsFormatter(ApiToolsFormatterBase[
     list[ToolParam] | Omit,
     ToolParam,
     ToolChoiceParam | Omit,
-    ClaudeFormatConfig,
 ]):
 
+    def __init__(self, *, use_cache: bool) -> None:
+        self._use_cache = use_cache
+
     def _setup_tools_cache(self, entries: list[ToolParam]) -> list[ToolParam]:
-        if self._config.use_cache and entries:
+        if self._use_cache and entries:
             entry = entries[-1]
 
             entry.update({

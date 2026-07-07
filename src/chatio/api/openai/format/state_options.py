@@ -14,7 +14,6 @@ from chatio.core.models import ChatStateOptions
 from chatio.core.format.state_options import ApiOptionsFormatterBase
 
 from chatio.api.openai.params import OpenAIStateOptions
-from chatio.api.openai.config import OpenAIFormatConfig
 
 from .state_messages import message_text
 
@@ -22,13 +21,16 @@ from .state_messages import message_text
 # pylint: disable=too-few-public-methods
 class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
     OpenAIStateOptions,
-    OpenAIFormatConfig,
 ]):
+
+    def __init__(self, *, prediction: bool, compat: bool) -> None:
+        self._prediction = prediction
+        self._compat = compat
 
     def _prediction_message(self, msg: PredictionMessage | None,
                             ) -> ChatCompletionPredictionContentParam | Omit:
 
-        if not self._config.prediction:
+        if not self._prediction:
             return omit
 
         if not msg:
@@ -48,7 +50,7 @@ class OpenAIOptionsFormatter(ApiOptionsFormatterBase[
 
         content = message_text(msg)
 
-        if self._config.compat:
+        if self._compat:
             return [{
                 "role": "system",
                 "content": content['text'],

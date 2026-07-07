@@ -19,9 +19,10 @@ class OpenAIFormat(ApiFormat[
 ]):
 
     def __init__(self, config: OpenAIFormatConfig) -> None:
-        self._messages_formatter = OpenAIMessagesFormatter(config)
-        self._options_formatter = OpenAIOptionsFormatter(config)
-        self._tools_formatter = OpenAIToolsFormatter(config)
+        self._messages_formatter = OpenAIMessagesFormatter(compat=config.compat)
+        self._options_formatter = OpenAIOptionsFormatter(
+            prediction=config.prediction, compat=config.compat)
+        self._tools_formatter = OpenAIToolsFormatter()
 
     @override
     def format(self, state: ChatState, tools: ChatTools) -> OpenAIParams:

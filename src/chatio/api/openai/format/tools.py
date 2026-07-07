@@ -15,15 +15,12 @@ from chatio.core.models import ToolSchema
 
 from chatio.core.format.tools import ApiToolsFormatterBase
 
-from chatio.api.openai.config import OpenAIFormatConfig
-
 
 # pylint: disable=too-few-public-methods
 class OpenAIToolsFormatter(ApiToolsFormatterBase[
     list[ChatCompletionToolParam] | Omit,
     ChatCompletionToolParam,
     ChatCompletionToolChoiceOptionParam | Omit,
-    OpenAIFormatConfig,
 ]):
 
     def _tool_params_schema(self, params: Mapping[str, Any]) -> FunctionParameters:

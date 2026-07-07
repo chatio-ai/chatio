@@ -22,8 +22,6 @@ from chatio.core.models import TextDocument
 
 from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
-from chatio.api.claude.config import ClaudeFormatConfig
-
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
 type _InputContentBlockParam = _ContentBlockParamBase | ToolResultBlockParam
@@ -43,8 +41,10 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
     TextBlockParam,
     ImageBlockParam,
     DocumentBlockParam,
-    ClaudeFormatConfig,
 ]):
+
+    def __init__(self, *, use_cache: bool) -> None:
+        self._use_cache = use_cache
 
     def _setup_messages_cache(self, messages: list[MessageParam]) -> list[MessageParam]:
         last_entry = None
@@ -66,7 +66,7 @@ class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
                     case _:
                         raise TypeError
 
-        if self._config.use_cache and last_entry is not None:
+        if self._use_cache and last_entry is not None:
             last_entry.update({
                 'cache_control': {
                     "type": "ephemeral",

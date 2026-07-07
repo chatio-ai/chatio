@@ -19,9 +19,9 @@ class ClaudeFormat(ApiFormat[
 ]):
 
     def __init__(self, config: ClaudeFormatConfig) -> None:
-        self._messages_formatter = ClaudeMessagesFormatter(config)
-        self._options_formatter = ClaudeOptionsFormatter(config)
-        self._tools_formatter = ClaudeToolsFormatter(config)
+        self._messages_formatter = ClaudeMessagesFormatter(use_cache=config.use_cache)
+        self._options_formatter = ClaudeOptionsFormatter(use_cache=config.use_cache)
+        self._tools_formatter = ClaudeToolsFormatter(use_cache=config.use_cache)
 
     @override
     def format(self, state: ChatState, tools: ChatTools) -> ClaudeParams:

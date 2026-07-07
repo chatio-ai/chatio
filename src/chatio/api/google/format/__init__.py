@@ -19,9 +19,9 @@ class GoogleFormat(ApiFormat[
 ]):
 
     def __init__(self, config: GoogleFormatConfig) -> None:
-        self._messages_formatter = GoogleMessagesFormatter(config)
-        self._options_formatter = GoogleOptionsFormatter(config)
-        self._tools_formatter = GoogleToolsFormatter(config)
+        self._messages_formatter = GoogleMessagesFormatter()
+        self._options_formatter = GoogleOptionsFormatter()
+        self._tools_formatter = GoogleToolsFormatter(grounding=config.grounding)
 
     @override
     def format(self, state: ChatState, tools: ChatTools) -> GoogleParams:

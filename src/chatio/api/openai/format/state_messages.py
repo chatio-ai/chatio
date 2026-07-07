@@ -17,8 +17,6 @@ from chatio.core.models import TextDocument
 
 from chatio.core.format.state_messages import ApiMessagesFormatterBase
 
-from chatio.api.openai.config import OpenAIFormatConfig
-
 
 type _ChatCompletionContentPartParam = \
     ChatCompletionContentPartTextParam | ChatCompletionContentPartImageParam
@@ -37,8 +35,10 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
     ChatCompletionContentPartTextParam,
-    OpenAIFormatConfig,
 ]):
+
+    def __init__(self, *, compat: bool) -> None:
+        self._compat = compat
 
     @override
     def _chat_messages(
@@ -62,7 +62,7 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
 
         return {
             "role": "user",
-            "content": content['text'] if self._config.compat else [content],
+            "content": content['text'] if self._compat else [content],
         }
 
     @override
@@ -74,7 +74,7 @@ class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
 
         return {
             "role": "assistant",
-            "content": content['text'] if self._config.compat else [content],
+            "content": content['text'] if self._compat else [content],
         }
 
     @override

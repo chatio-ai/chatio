@@ -14,10 +14,6 @@ from chatio.core.models import CallRequest
 
 from chatio.core.models import ChatMessage
 
-from chatio.core.config import ApiFormatConfig
-
-from ._base import ApiFormatBase
-
 
 # pylint: disable=too-few-public-methods
 class ApiMessagesFormatterBase[
@@ -25,8 +21,7 @@ class ApiMessagesFormatterBase[
     MessageTextT,
     ImageDocumentT,
     TextDocumentT,
-    ApiFormatConfigT: ApiFormatConfig,
-](ApiFormatBase[ApiFormatConfigT], ABC):
+](ABC):
 
     @abstractmethod
     def _chat_messages(self, messages: list[ChatMessageT]) -> list[ChatMessageT]:
