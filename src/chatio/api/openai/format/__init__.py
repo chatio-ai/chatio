@@ -15,15 +15,13 @@ from .tools import OpenAIToolsFormatter
 
 # pylint: disable=too-few-public-methods
 class OpenAIFormat(ApiFormat[
-    OpenAIConfigFormat,
     OpenAIParams,
 ]):
 
     def __init__(self, config: OpenAIConfigFormat) -> None:
-        super().__init__(config)
-        self._messages_formatter = OpenAIMessagesFormatter(self._config)
-        self._options_formatter = OpenAIOptionsFormatter(self._config)
-        self._tools_formatter = OpenAIToolsFormatter(self._config)
+        self._messages_formatter = OpenAIMessagesFormatter(config)
+        self._options_formatter = OpenAIOptionsFormatter(config)
+        self._tools_formatter = OpenAIToolsFormatter(config)
 
     @override
     def format(self, state: ChatState, tools: ChatTools) -> OpenAIParams:

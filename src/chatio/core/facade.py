@@ -5,7 +5,6 @@ from typing import override
 
 from .object import Closeable
 
-from .config import ApiConfigFormat
 from .models import ChatState
 from .models import ChatTools
 from .params import ApiParams
@@ -15,7 +14,6 @@ from .client import ApiClient
 
 
 class ApiFacadeDeps[
-    ApiConfigT: ApiConfigFormat,
     ApiParamsT: ApiParams,
 ](ABC):
 
@@ -26,7 +24,6 @@ class ApiFacadeDeps[
     @property
     @abstractmethod
     def format(self) -> ApiFormat[
-        ApiConfigT,
         ApiParamsT,
     ]:
         ...
@@ -40,11 +37,10 @@ class ApiFacadeDeps[
 
 
 class ApiFacade[
-    ApiConfigT: ApiConfigFormat,
     ApiParamsT: ApiParams,
 ](Closeable):
 
-    def __init__(self, deps: ApiFacadeDeps[ApiConfigT, ApiParamsT]) -> None:
+    def __init__(self, deps: ApiFacadeDeps[ApiParamsT]) -> None:
         self._format = deps.format
         self._client = deps.client
 

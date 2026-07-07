@@ -12,7 +12,6 @@ from .client import ClaudeClient
 
 
 class ClaudeFacadeDeps(ApiFacadeDeps[
-    ClaudeConfigFormat,
     ClaudeParams,
 ]):
 

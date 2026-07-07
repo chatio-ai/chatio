@@ -12,7 +12,6 @@ from .client import GoogleClient
 
 
 class GoogleFacadeDeps(ApiFacadeDeps[
-    GoogleConfigFormat,
     GoogleParams,
 ]):
 

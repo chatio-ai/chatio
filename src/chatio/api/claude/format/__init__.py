@@ -15,15 +15,13 @@ from .tools import ClaudeToolsFormatter
 
 # pylint: disable=too-few-public-methods
 class ClaudeFormat(ApiFormat[
-    ClaudeConfigFormat,
     ClaudeParams,
 ]):
 
     def __init__(self, config: ClaudeConfigFormat) -> None:
-        super().__init__(config)
-        self._messages_formatter = ClaudeMessagesFormatter(self._config)
-        self._options_formatter = ClaudeOptionsFormatter(self._config)
-        self._tools_formatter = ClaudeToolsFormatter(self._config)
+        self._messages_formatter = ClaudeMessagesFormatter(config)
+        self._options_formatter = ClaudeOptionsFormatter(config)
+        self._tools_formatter = ClaudeToolsFormatter(config)
 
     @override
     def format(self, state: ChatState, tools: ChatTools) -> ClaudeParams:

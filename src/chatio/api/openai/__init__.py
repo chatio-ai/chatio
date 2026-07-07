@@ -12,7 +12,6 @@ from .client import OpenAIClient
 
 
 class OpenAIFacadeDeps(ApiFacadeDeps[
-    OpenAIConfigFormat,
     OpenAIParams,
 ]):
 

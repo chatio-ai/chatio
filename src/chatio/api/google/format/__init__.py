@@ -15,15 +15,13 @@ from .tools import GoogleToolsFormatter
 
 # pylint: disable=too-few-public-methods
 class GoogleFormat(ApiFormat[
-    GoogleConfigFormat,
     GoogleParams,
 ]):
 
     def __init__(self, config: GoogleConfigFormat) -> None:
-        super().__init__(config)
-        self._messages_formatter = GoogleMessagesFormatter(self._config)
-        self._options_formatter = GoogleOptionsFormatter(self._config)
-        self._tools_formatter = GoogleToolsFormatter(self._config)
+        self._messages_formatter = GoogleMessagesFormatter(config)
+        self._options_formatter = GoogleOptionsFormatter(config)
+        self._tools_formatter = GoogleToolsFormatter(config)
 
     @override
     def format(self, state: ChatState, tools: ChatTools) -> GoogleParams:
