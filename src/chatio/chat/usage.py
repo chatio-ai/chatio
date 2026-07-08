@@ -20,23 +20,23 @@ class ChatUsage:
         return StatEvent(label, delta, total)
 
     def generate(self, events: list[StatEvent]) -> Iterator[StatEvent]:
-        _values = {}
+        values = {}
         for event in events:
-            _values[event.label] = event.delta
+            values[event.label] = event.delta
             yield self._emit_event(event.label, event.delta)
 
-        _input = _values.get('input')
-        if _input is None:
+        input_ = values.get('input')
+        if input_ is None:
             return
 
-        yield self._emit_event('input_real', _input - self._input)
+        yield self._emit_event('input_real', input_ - self._input)
 
-        self._input = _input
+        self._input = input_
 
-        _cache_read = _values.get('cache_read')
-        if _cache_read is None:
+        cache_read = values.get('cache_read')
+        if cache_read is None:
             return
 
-        _cache_written = _values.get('cache_written', 0)
+        cache_written = values.get('cache_written', 0)
 
-        yield self._emit_event('cache_miss', _input - _cache_written - _cache_read)
+        yield self._emit_event('cache_miss', input_ - cache_written - cache_read)
