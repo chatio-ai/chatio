@@ -3,6 +3,8 @@ from collections.abc import Mapping
 
 from dataclasses import dataclass, field
 
+from enum import StrEnum
+
 from typing import Any
 
 
@@ -79,9 +81,16 @@ class ToolSchema:
     params: Mapping[str, Any]
 
 
+class ToolChoiceMode(StrEnum):
+    NONE = 'none'
+    AUTO = 'auto'
+    ANY = 'any'
+    NAME = 'name'
+
+
 @dataclass
 class ToolChoice:
-    mode: str | None = None
+    mode: ToolChoiceMode | None = None
     name: str | None = None
 
 

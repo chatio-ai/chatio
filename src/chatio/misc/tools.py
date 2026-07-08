@@ -2,6 +2,7 @@
 import os
 
 
+from chatio.core.models import ToolChoiceMode
 from chatio.core.invoke import ToolBase
 from chatio.chat.tools import ChatTools
 from chatio.chat import Chat
@@ -114,7 +115,8 @@ def _build_tools_list(tools_list: list[str] | None = None, env_ns: str = "") -> 
     return tools
 
 
-def _build_tools_mode(tools_name: str | None = None, env_ns: str = "") -> tuple[str, str]:
+def _build_tools_mode(
+        tools_name: str | None = None, env_ns: str = "") -> tuple[ToolChoiceMode | None, str]:
     env_ns = f"CHATIO_{env_ns}" if env_ns else "CHATIO"
     if tools_name is None:
         env_name = f"{env_ns}_TOOLS_NAME"
@@ -125,7 +127,7 @@ def _build_tools_mode(tools_name: str | None = None, env_ns: str = "") -> tuple[
     _, _, tool_choice = tools_name.partition(':')
     tool_choice_mode, _, tool_choice_name = tool_choice.partition(':')
 
-    return tool_choice_mode, tool_choice_name
+    return (ToolChoiceMode(tool_choice_mode) if tool_choice_mode else None, tool_choice_name)
 
 
 def build_tools(

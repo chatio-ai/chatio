@@ -5,6 +5,7 @@ from collections.abc import AsyncIterator
 from collections.abc import Callable
 
 from chatio.core.models import ToolSchema
+from chatio.core.models import ToolChoiceMode
 from chatio.core.models import ToolChoice
 
 from chatio.core.models import ChatTools as _ChatTools
@@ -27,7 +28,7 @@ class ChatTools(_ChatTools):
     def __init__(
         self,
         tools: list[ToolBase] | None = None,
-        tool_choice_mode: str | None = None,
+        tool_choice_mode: ToolChoiceMode | None = None,
         tool_choice_name: str | None = None,
     ) -> None:
         self._functions: dict[str, Func] = {}
@@ -49,9 +50,8 @@ class ChatTools(_ChatTools):
 
         if tool_choice_name and tool_choice_name not in self._functions:
             raise ValueError
-        choice = ToolChoice(tool_choice_mode, tool_choice_name)
 
-        super().__init__(schemas, choice)
+        super().__init__(schemas, ToolChoice(tool_choice_mode, tool_choice_name))
 
     async def _do_call(self, call: CallEvent, state: ChatState) -> AsyncIterator[ChatEvent]:
         function = self._functions.get(call.name)

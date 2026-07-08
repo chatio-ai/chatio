@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 
 from chatio.core.models import ToolSchema
+from chatio.core.models import ToolChoiceMode
 from chatio.core.models import ToolChoice
 
 
@@ -48,23 +49,23 @@ class ApiToolChoiceFormat[
     def _tool_choice_name(self, name: str) -> ToolChoiceT:
         ...
 
-    def _tool_choice(self, mode: str | None, name: str | None) -> ToolChoiceT:
+    def _tool_choice(self, mode: ToolChoiceMode | None, name: str | None) -> ToolChoiceT:
         if not mode and not name:
             return self._tool_choice_null()
 
         if not name:
             match mode:
-                case 'none':
+                case ToolChoiceMode.NONE:
                     return self._tool_choice_none()
-                case 'auto':
+                case ToolChoiceMode.AUTO:
                     return self._tool_choice_auto()
-                case 'any':
+                case ToolChoiceMode.ANY:
                     return self._tool_choice_any()
                 case _:
                     raise ValueError
         else:
             match mode:
-                case 'name' | None:
+                case ToolChoiceMode.NAME | None:
                     return self._tool_choice_name(name)
                 case _:
                     raise ValueError
