@@ -67,7 +67,7 @@ class ClaudeMessagesFormat(ApiMessagesFormat[
 
         if self._use_cache and last_entry is not None:
             last_entry.update({
-                'cache_control': {
+                "cache_control": {
                     "type": "ephemeral",
                 },
             })

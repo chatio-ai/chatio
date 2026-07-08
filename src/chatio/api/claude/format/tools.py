@@ -65,24 +65,24 @@ class ClaudeToolsFormat(ApiToolsFormat[
     @override
     def _tool_choice_none(self) -> ToolChoiceParam:
         return {
-            "type": 'none',
+            "type": "none",
         }
 
     @override
     def _tool_choice_auto(self) -> ToolChoiceParam:
         return {
-            "type": 'auto',
+            "type": "auto",
         }
 
     @override
     def _tool_choice_any(self) -> ToolChoiceParam:
         return {
-            "type": 'any',
+            "type": "any",
         }
 
     @override
     def _tool_choice_name(self, tool_name: str) -> ToolChoiceParam:
         return {
-            "type": 'tool',
+            "type": "tool",
             "name": tool_name,
         }

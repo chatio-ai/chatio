@@ -70,20 +70,20 @@ class OpenAIToolsFormat(ApiToolsFormat[
 
     @override
     def _tool_choice_none(self) -> ChatCompletionToolChoiceOptionParam:
-        return 'none'
+        return "none"
 
     @override
     def _tool_choice_auto(self) -> ChatCompletionToolChoiceOptionParam:
-        return 'auto'
+        return "auto"
 
     @override
     def _tool_choice_any(self) -> ChatCompletionToolChoiceOptionParam:
-        return 'required'
+        return "required"
 
     @override
     def _tool_choice_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam:
         return {
-            "type": 'function',
+            "type": "function",
             "function": {
                 "name": tool_name,
             },
