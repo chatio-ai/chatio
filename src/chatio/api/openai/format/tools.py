@@ -13,14 +13,14 @@ from openai import Omit, omit
 
 from chatio.core.models import ToolSchema
 
-from chatio.core.format.tools import ApiToolsFormat
+from chatio.core.format.tools import ApiToolSchemasFormat
+from chatio.core.format.tools import ApiToolChoiceFormat
 
 
 # pylint: disable=too-few-public-methods
-class OpenAIToolsFormat(ApiToolsFormat[
+class OpenAIToolSchemasFormat(ApiToolSchemasFormat[
     list[ChatCompletionToolParam] | Omit,
     ChatCompletionToolParam,
-    ChatCompletionToolChoiceOptionParam | Omit,
 ]):
 
     def _tool_params_schema(self, params: Mapping[str, Any]) -> FunctionParameters:
@@ -61,6 +61,11 @@ class OpenAIToolsFormat(ApiToolsFormat[
         if not schemas:
             return omit
         return list(schemas)
+
+
+class OpenAIToolChoiceFormat(ApiToolChoiceFormat[
+    ChatCompletionToolChoiceOptionParam | Omit,
+]):
 
     @override
     def _tool_choice_null(self) -> Omit:

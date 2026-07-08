@@ -14,14 +14,14 @@ from anthropic import Omit, omit
 
 from chatio.core.models import ToolSchema
 
-from chatio.core.format.tools import ApiToolsFormat
+from chatio.core.format.tools import ApiToolSchemasFormat
+from chatio.core.format.tools import ApiToolChoiceFormat
 
 
 # pylint: disable=too-few-public-methods
-class ClaudeToolsFormat(ApiToolsFormat[
+class ClaudeToolSchemasFormat(ApiToolSchemasFormat[
     list[ToolParam] | Omit,
     ToolParam,
-    ToolChoiceParam | Omit,
 ]):
 
     def __init__(self, *, use_cache: bool) -> None:
@@ -59,6 +59,12 @@ class ClaudeToolsFormat(ApiToolsFormat[
             return omit
         return self._setup_tools_cache(list(schemas))
 
+
+class ClaudeToolChoiceFormat(ApiToolChoiceFormat[
+    ToolChoiceParam | Omit,
+]):
+
+    @override
     def _tool_choice_null(self) -> Omit:
         return omit
 

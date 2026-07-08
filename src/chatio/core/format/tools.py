@@ -2,16 +2,13 @@
 from abc import ABC, abstractmethod
 
 from chatio.core.models import ToolSchema
-from chatio.core.models import ChatTools
-
-from chatio.core.params import ApiToolsOptions
+from chatio.core.models import ToolChoice
 
 
 # pylint: disable=too-few-public-methods
-class ApiToolsFormat[
+class ApiToolSchemasFormat[
     ToolsT,
     ToolSchemaT,
-    ToolChoiceT,
 ](ABC):
 
     @abstractmethod
@@ -21,6 +18,15 @@ class ApiToolsFormat[
     @abstractmethod
     def _tools(self, *schemas: ToolSchemaT) -> ToolsT:
         ...
+
+    def __call__(self, schemas: list[ToolSchema]) -> ToolsT:
+        return self._tools(*(self._tool_schema(tool) for tool in schemas))
+
+
+# pylint: disable=too-few-public-methods
+class ApiToolChoiceFormat[
+    ToolChoiceT,
+](ABC):
 
     @abstractmethod
     def _tool_choice_null(self) -> ToolChoiceT:
@@ -63,8 +69,5 @@ class ApiToolsFormat[
                 case _:
                     raise ValueError
 
-    def __call__(self, tools: ChatTools) -> ApiToolsOptions[ToolsT, ToolChoiceT]:
-        return ApiToolsOptions(
-            tools=self._tools(*(self._tool_schema(tool) for tool in tools.schemas)),
-            tool_choice=self._tool_choice(tools.choice.mode, tools.choice.name),
-        )
+    def __call__(self, choice: ToolChoice) -> ToolChoiceT:
+        return self._tool_choice(choice.mode, choice.name)

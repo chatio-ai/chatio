@@ -10,7 +10,8 @@ from chatio.api.google.params import GoogleParams
 
 from .state_messages import GoogleMessagesFormat
 from .state_options import GoogleOptionsFormat
-from .tools import GoogleToolsFormat
+from .tools import GoogleToolSchemasFormat
+from .tools import GoogleToolChoiceFormat
 
 
 # pylint: disable=too-few-public-methods
@@ -21,15 +22,14 @@ class GoogleFormat(ApiFormat[
     def __init__(self, config: GoogleFormatConfig) -> None:
         self._messages_format = GoogleMessagesFormat()
         self._options_format = GoogleOptionsFormat()
-        self._tools_format = GoogleToolsFormat(grounding=config.grounding)
+        self._tool_schemas_format = GoogleToolSchemasFormat(grounding=config.grounding)
+        self._tool_choice_format = GoogleToolChoiceFormat()
 
     @override
     def __call__(self, state: ChatState, tools: ChatTools) -> GoogleParams:
-        tools_ = self._tools_format(tools)
-
         return GoogleParams(
             messages=self._messages_format(state.messages),
             system=self._options_format.system_message(state.options.system),
-            tools=tools_.tools,
-            tool_config=tools_.tool_choice,
+            tools=self._tool_schemas_format(tools.schemas),
+            tool_config=self._tool_choice_format(tools.choice),
         )

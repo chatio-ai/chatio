@@ -13,14 +13,14 @@ from google.genai.types import FunctionDeclarationDict
 
 from chatio.core.models import ToolSchema
 
-from chatio.core.format.tools import ApiToolsFormat
+from chatio.core.format.tools import ApiToolSchemasFormat
+from chatio.core.format.tools import ApiToolChoiceFormat
 
 
 # pylint: disable=too-few-public-methods
-class GoogleToolsFormat(ApiToolsFormat[
+class GoogleToolSchemasFormat(ApiToolSchemasFormat[
     ToolListUnionDict | None,
     FunctionDeclarationDict,
-    ToolConfigDict | None,
 ]):
 
     def __init__(self, *, grounding: bool) -> None:
@@ -58,6 +58,12 @@ class GoogleToolsFormat(ApiToolsFormat[
             return None
 
         return result
+
+
+# pylint: disable=too-few-public-methods
+class GoogleToolChoiceFormat(ApiToolChoiceFormat[
+    ToolConfigDict | None,
+]):
 
     @override
     def _tool_choice_null(self) -> None:

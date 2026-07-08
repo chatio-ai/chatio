@@ -10,7 +10,8 @@ from chatio.api.openai.params import OpenAIParams
 
 from .state_messages import OpenAIMessagesFormat
 from .state_options import OpenAIOptionsFormat
-from .tools import OpenAIToolsFormat
+from .tools import OpenAIToolSchemasFormat
+from .tools import OpenAIToolChoiceFormat
 
 
 # pylint: disable=too-few-public-methods
@@ -22,16 +23,15 @@ class OpenAIFormat(ApiFormat[
         self._messages_format = OpenAIMessagesFormat(compat=config.compat)
         self._options_format = OpenAIOptionsFormat(
             prediction=config.prediction, compat=config.compat)
-        self._tools_format = OpenAIToolsFormat()
+        self._tool_schemas_format = OpenAIToolSchemasFormat()
+        self._tool_choice_format = OpenAIToolChoiceFormat()
 
     @override
     def __call__(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
-        tools_ = self._tools_format(tools)
-
         return OpenAIParams(
             messages=self._messages_format(state.messages),
             system=self._options_format.system_message(state.options.system),
-            tools=tools_.tools,
-            tool_choice=tools_.tool_choice,
+            tools=self._tool_schemas_format(tools.schemas),
+            tool_choice=self._tool_choice_format(tools.choice),
             prediction=self._options_format.prediction_message(state.options.prediction),
         )
