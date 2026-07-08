@@ -22,7 +22,7 @@ class ApiMessagesFormat[
 ](ABC):
 
     @abstractmethod
-    def _chat_messages(self, messages: list[ChatMessageT]) -> list[ChatMessageT]:
+    def _chat_messages(self, *messages: ChatMessageT) -> list[ChatMessageT]:
         ...
 
     @abstractmethod
@@ -67,25 +67,22 @@ class ApiMessagesFormat[
     def _text_document(self, doc: TextDocument) -> ChatMessageT:
         return self._input_content(self._text_document_text(doc))
 
-    def __call__(self, messages: list[ChatMessage]) -> list[ChatMessageT]:
-        _messages = []
-        for message in messages:
-            if not message:
-                continue
-            match message:
-                case InputMessage():
-                    _messages.append(self._input_message(message))
-                case OutputMessage():
-                    _messages.append(self._output_message(message))
-                case CallRequest():
-                    _messages.append(self._call_request(message))
-                case CallResponse():
-                    _messages.append(self._call_response(message))
-                case ImageDocument():
-                    _messages.append(self._image_document(message))
-                case TextDocument():
-                    _messages.append(self._text_document(message))
-                case _:
-                    raise RuntimeError(message)
+    def _message(self, message: ChatMessage) -> ChatMessageT:
+        match message:
+            case InputMessage():
+                return self._input_message(message)
+            case OutputMessage():
+                return self._output_message(message)
+            case CallRequest():
+                return self._call_request(message)
+            case CallResponse():
+                return self._call_response(message)
+            case ImageDocument():
+                return self._image_document(message)
+            case TextDocument():
+                return self._text_document(message)
+            case _:
+                raise RuntimeError(message)
 
-        return self._chat_messages(_messages)
+    def __call__(self, messages: list[ChatMessage]) -> list[ChatMessageT]:
+        return self._chat_messages(*(self._message(message) for message in messages if message))

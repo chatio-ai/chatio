@@ -30,8 +30,8 @@ class GoogleMessagesFormat(ApiMessagesFormat[
 ]):
 
     @override
-    def _chat_messages(self, messages: list[ContentUnionDict]) -> list[ContentUnionDict]:
-        return messages
+    def _chat_messages(self, *messages: ContentUnionDict) -> list[ContentUnionDict]:
+        return list(messages)
 
     @override
     def _message_text(self, msg: TextMessage) -> PartDict:

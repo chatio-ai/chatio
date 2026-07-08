@@ -36,20 +36,20 @@ class OpenAIClient(ApiClient[
 
     @override
     def iterate_model_events(self, model: str, params: OpenAIParams) -> OpenAIStream:
-        _messages = [*params.options.system, *params.messages]
+        messages = [*params.options.system, *params.messages]
 
         if params.options.prediction:
             return OpenAIStream(self._client.chat.completions.stream(
                 stream_options={'include_usage': True},
                 model=model,
-                messages=_messages,
+                messages=messages,
                 prediction=params.options.prediction,
             ))
 
         return OpenAIStream(self._client.chat.completions.stream(
             stream_options={'include_usage': True},
             model=model,
-            messages=_messages,
+            messages=messages,
             prediction=params.options.prediction,
             tools=params.tools.tools,
             tool_choice=params.tools.tool_choice,

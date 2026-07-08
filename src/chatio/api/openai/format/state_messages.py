@@ -41,9 +41,9 @@ class OpenAIMessagesFormat(ApiMessagesFormat[
 
     @override
     def _chat_messages(
-            self, messages: list[ChatCompletionMessageParam]) -> list[ChatCompletionMessageParam]:
+            self, *messages: ChatCompletionMessageParam) -> list[ChatCompletionMessageParam]:
 
-        return messages
+        return list(messages)
 
     @override
     def _message_text(self, msg: TextMessage) -> ChatCompletionContentPartTextParam:

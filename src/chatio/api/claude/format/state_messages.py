@@ -75,8 +75,8 @@ class ClaudeMessagesFormat(ApiMessagesFormat[
         return messages
 
     @override
-    def _chat_messages(self, messages: list[MessageParam]) -> list[MessageParam]:
-        return self._setup_messages_cache(messages)
+    def _chat_messages(self, *messages: MessageParam) -> list[MessageParam]:
+        return self._setup_messages_cache(list(messages))
 
     @override
     def _message_text(self, msg: TextMessage) -> TextBlockParam:
