@@ -41,23 +41,23 @@ class GoogleToolsFormat(ApiToolsFormat[
         }
 
     @override
-    def _tool_definitions(self, tools: list[FunctionDeclarationDict]) -> ToolListUnionDict | None:
-        tools_config: ToolListUnionDict = []
+    def _tools(self, *tools: FunctionDeclarationDict) -> ToolListUnionDict | None:
+        result: ToolListUnionDict = []
 
         if tools:
-            tools_config.append({
-                "function_declarations": tools,
+            result.append({
+                "function_declarations": list(tools),
             })
 
         if self._grounding:
-            tools_config.append({
+            result.append({
                 "google_search": {},
             })
 
-        if not tools_config:
+        if not result:
             return None
 
-        return tools_config
+        return result
 
     @override
     def _tool_choice_null(self) -> None:

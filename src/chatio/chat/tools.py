@@ -26,8 +26,12 @@ type Func = Callable[..., AsyncIterator[str | dict[str, object]]]
 class ChatTools(_ChatTools):
     _funcs: dict[str, Func] = field(default_factory=dict)
 
-    def __init__(self, tools: list[ToolBase] | None = None,
-                 tool_choice_mode: str | None = None, tool_choice_name: str | None = None) -> None:
+    def __init__(
+        self,
+        tools: list[ToolBase] | None = None,
+        tool_choice_mode: str | None = None,
+        tool_choice_name: str | None = None,
+    ) -> None:
 
         if tools is None:
             tools = []
@@ -52,7 +56,7 @@ class ChatTools(_ChatTools):
         super().__init__(_tools, _tool_choice)
         self._funcs = _funcs
 
-    async def _call(self, call: CallEvent, state: ChatState) -> AsyncIterator[ChatEvent]:
+    async def _do_call(self, call: CallEvent, state: ChatState) -> AsyncIterator[ChatEvent]:
         tool_func = self._funcs.get(call.name)
         if not tool_func:
             return
@@ -71,5 +75,5 @@ class ChatTools(_ChatTools):
     async def __call__(self, calls: list[CallEvent], state: ChatState) -> AsyncIterator[ChatEvent]:
         for call in calls:
             yield call
-            async for event in self._call(call, state):
+            async for event in self._do_call(call, state):
                 yield event

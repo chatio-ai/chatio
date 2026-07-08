@@ -54,10 +54,10 @@ class ClaudeToolsFormat(ApiToolsFormat[
         }
 
     @override
-    def _tool_definitions(self, tools: list[ToolParam]) -> list[ToolParam] | Omit:
+    def _tools(self, *tools: ToolParam) -> list[ToolParam] | Omit:
         if not tools:
             return omit
-        return self._setup_tools_cache(tools)
+        return self._setup_tools_cache(list(tools))
 
     def _tool_choice_null(self) -> Omit:
         return omit

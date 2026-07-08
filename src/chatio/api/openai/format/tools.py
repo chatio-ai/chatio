@@ -24,14 +24,14 @@ class OpenAIToolsFormat(ApiToolsFormat[
 ]):
 
     def _tool_params_schema(self, params: Mapping[str, Any]) -> FunctionParameters:
-        _params = {**params}
+        params_ = {**params}
 
         props = None
-        if _params.get("type") == "object":
-            props = _params.setdefault("properties", {})
+        if params_.get("type") == "object":
+            props = params_.setdefault("properties", {})
 
         if props is not None:
-            _params.update({
+            params_.update({
                 "additionalProperties": False,
                 "required": list(props),
             })
@@ -41,28 +41,26 @@ class OpenAIToolsFormat(ApiToolsFormat[
                 value = self._tool_params_schema(value)
                 props[key] = value
 
-        return _params
+        return params_
 
     @override
     def _tool_schema(self, tool: ToolSchema) -> ChatCompletionToolParam:
-        _params = self._tool_params_schema(tool.params)
+        params_ = self._tool_params_schema(tool.params)
         return {
             "type": "function",
             "function": {
                 "name": tool.name,
                 "description": tool.desc,
-                "parameters": _params,
+                "parameters": params_,
                 "strict": True,
             },
         }
 
     @override
-    def _tool_definitions(self, tools: list[ChatCompletionToolParam],
-                          ) -> list[ChatCompletionToolParam] | Omit:
-
+    def _tools(self, *tools: ChatCompletionToolParam) -> list[ChatCompletionToolParam] | Omit:
         if not tools:
             return omit
-        return tools
+        return list(tools)
 
     @override
     def _tool_choice_null(self) -> Omit:

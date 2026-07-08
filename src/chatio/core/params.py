@@ -9,10 +9,10 @@ class ApiStateOptions:
 
 @dataclass
 class ApiToolsOptions[
-    ToolDefinitionsT,
+    ToolsT,
     ToolChoiceT,
 ]:
-    tools: ToolDefinitionsT
+    tools: ToolsT
     tool_choice: ToolChoiceT
 
 
@@ -25,12 +25,12 @@ class ApiParams:
 class ApiParamsImpl[
     ChatMessageT,
     ApiStateOptionsT: ApiStateOptions,
-    ToolDefinitionsT,
+    ToolsT,
     ToolChoiceT,
 ](ApiParams):
     options: ApiStateOptionsT
     messages: list[ChatMessageT]
     tools: ApiToolsOptions[
-        ToolDefinitionsT,
+        ToolsT,
         ToolChoiceT,
     ]

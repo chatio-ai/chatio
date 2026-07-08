@@ -11,7 +11,7 @@ from chatio.core.params import ApiToolsOptions
 
 # pylint: disable=too-few-public-methods
 class ApiToolsFormat[
-    ToolDefinitionsT,
+    ToolsT,
     ToolSchemaT,
     ToolChoiceT,
 ](ABC):
@@ -21,7 +21,7 @@ class ApiToolsFormat[
         ...
 
     @abstractmethod
-    def _tool_definitions(self, tools: list[ToolSchemaT]) -> ToolDefinitionsT:
+    def _tools(self, *tools: ToolSchemaT) -> ToolsT:
         ...
 
     @abstractmethod
@@ -44,11 +44,7 @@ class ApiToolsFormat[
     def _tool_choice_name(self, tool_name: str) -> ToolChoiceT:
         ...
 
-    def _tool_choice(self, tool_choice: ToolChoice | None) -> ToolChoiceT:
-
-        if tool_choice is None:
-            return self._tool_choice_null()
-
+    def _tool_choice(self, tool_choice: ToolChoice) -> ToolChoiceT:
         if not tool_choice.mode and not tool_choice.name:
             return self._tool_choice_null()
 
@@ -64,19 +60,13 @@ class ApiToolsFormat[
                     raise ValueError
         else:
             match tool_choice.mode:
-                case 'name':
+                case 'name' | None:
                     return self._tool_choice_name(tool_choice.name)
                 case _:
                     raise ValueError
 
-    def __call__(self, tools: ChatTools) -> ApiToolsOptions[
-        ToolDefinitionsT,
-        ToolChoiceT,
-    ]:
-        _tool_defs = [self._tool_schema(tool) for tool in tools.tools]
-
-        _tools = self._tool_definitions(_tool_defs)
-
-        _tool_choice = self._tool_choice(tools.tool_choice)
-
-        return ApiToolsOptions(_tools, _tool_choice)
+    def __call__(self, tools: ChatTools) -> ApiToolsOptions[ToolsT, ToolChoiceT]:
+        return ApiToolsOptions(
+            tools=self._tools(*(self._tool_schema(tool) for tool in tools.tools)),
+            tool_choice=self._tool_choice(tools.tool_choice),
+        )

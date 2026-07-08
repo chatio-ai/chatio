@@ -86,11 +86,11 @@ class ToolSchema:
 
 @dataclass
 class ToolChoice:
-    mode: str | None
-    name: str | None
+    mode: str | None = None
+    name: str | None = None
 
 
 @dataclass
 class ChatTools:
     tools: list[ToolSchema] = field(default_factory=list)
-    tool_choice: ToolChoice | None = None
+    tool_choice: ToolChoice = field(default_factory=ToolChoice)
