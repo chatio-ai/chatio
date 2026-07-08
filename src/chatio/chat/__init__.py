@@ -74,6 +74,6 @@ class Chat(Closeable):
             self._model.vendor,
             self._model.model,
             len(self._tools.schemas),
-            bool(self._state.options.system),
+            bool(self._state.system),
             len(self._state.messages),
         )

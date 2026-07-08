@@ -12,12 +12,15 @@ from anthropic.types import DocumentBlockParam
 from anthropic.types import ToolUseBlockParam
 from anthropic.types import ToolResultBlockParam
 
+from anthropic import Omit, omit
+
 
 from chatio.core.models import TextMessage
 from chatio.core.models import CallRequest
 from chatio.core.models import CallResponse
 from chatio.core.models import ImageDocument
 from chatio.core.models import TextDocument
+from chatio.core.models import SystemMessage
 
 from chatio.core.format.state_messages import ApiMessagesFormat
 
@@ -35,7 +38,7 @@ def message_text(msg: TextMessage) -> TextBlockParam:
 
 
 # pylint: disable=too-few-public-methods
-class ClaudeMessagesFormat(ApiMessagesFormat[
+class ClaudeChatMessagesFormat(ApiMessagesFormat[
     MessageParam,
     TextBlockParam,
     ImageBlockParam,
@@ -154,3 +157,25 @@ class ClaudeMessagesFormat(ApiMessagesFormat[
                 "enabled": True,
             },
         }
+
+
+# pylint: disable=too-few-public-methods
+class ClaudeSystemMessageFormat:
+
+    def __init__(self, *, use_cache: bool) -> None:
+        self._use_cache = use_cache
+
+    def __call__(self, msg: SystemMessage | None) -> list[TextBlockParam] | Omit:
+        if not msg:
+            return omit
+
+        content = message_text(msg)
+
+        if self._use_cache:
+            content.update({
+                "cache_control": {
+                    "type": "ephemeral",
+                },
+            })
+
+        return [content]

@@ -66,15 +66,10 @@ class TextDocument(ChatMessage):
 
 
 @dataclass
-class ChatStateOptions:
-    system: SystemMessage | None = None
-    prediction: PredictionMessage | None = None
-
-
-@dataclass
 class ChatState:
     messages: list[ChatMessage] = field(default_factory=list)
-    options: ChatStateOptions = field(default_factory=ChatStateOptions)
+    system: SystemMessage | None = None
+    prediction: PredictionMessage | None = None
 
 
 @dataclass

@@ -6,6 +6,9 @@ from typing import override
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
+from openai.types.chat import ChatCompletionPredictionContentParam
+
+from openai import Omit, omit
 
 
 from chatio.core.models import TextMessage
@@ -13,6 +16,8 @@ from chatio.core.models import CallRequest
 from chatio.core.models import CallResponse
 from chatio.core.models import ImageDocument
 from chatio.core.models import TextDocument
+from chatio.core.models import SystemMessage
+from chatio.core.models import PredictionMessage
 
 from chatio.core.format.state_messages import ApiMessagesFormat
 
@@ -29,7 +34,7 @@ def message_text(msg: TextMessage) -> ChatCompletionContentPartTextParam:
 
 
 # pylint: disable=too-few-public-methods
-class OpenAIMessagesFormat(ApiMessagesFormat[
+class OpenAIChatMessagesFormat(ApiMessagesFormat[
     ChatCompletionMessageParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,
@@ -118,4 +123,52 @@ class OpenAIMessagesFormat(ApiMessagesFormat[
         return {
             "type": "text",
             "text": f"data:{doc.mimetype};\n{doc.text}",
+        }
+
+
+# pylint: disable=too-few-public-methods
+class OpenAISystemMessageFormat:
+
+    def __init__(self, *, compat: bool) -> None:
+        self._compat = compat
+
+    def __call__(self, msg: SystemMessage | None) -> list[ChatCompletionMessageParam]:
+
+        if not msg:
+            return []
+
+        content = message_text(msg)
+
+        if self._compat:
+            return [{
+                "role": "system",
+                "content": content['text'],
+            }]
+
+        return [{
+            "role": "developer",
+            "content": [content],
+        }]
+
+
+# pylint: disable=too-few-public-methods
+class OpenAIPredictionMessageFormat:
+
+    def __init__(self, *, prediction: bool) -> None:
+        self._prediction = prediction
+
+    def __call__(
+            self, msg: PredictionMessage | None) -> ChatCompletionPredictionContentParam | Omit:
+
+        if not self._prediction:
+            return omit
+
+        if not msg:
+            return omit
+
+        content = message_text(msg)
+
+        return {
+            "type": "content",
+            "content": [content],
         }

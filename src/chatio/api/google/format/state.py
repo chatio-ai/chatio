@@ -11,6 +11,7 @@ from chatio.core.models import CallRequest
 from chatio.core.models import CallResponse
 from chatio.core.models import ImageDocument
 from chatio.core.models import TextDocument
+from chatio.core.models import SystemMessage
 
 from chatio.core.format.state_messages import ApiMessagesFormat
 
@@ -22,7 +23,7 @@ def message_text(msg: TextMessage) -> PartDict:
 
 
 # pylint: disable=too-few-public-methods
-class GoogleMessagesFormat(ApiMessagesFormat[
+class GoogleChatMessagesFormat(ApiMessagesFormat[
     ContentUnionDict,
     PartDict,
     PartDict,
@@ -98,4 +99,17 @@ class GoogleMessagesFormat(ApiMessagesFormat[
                 "mime_type": doc.mimetype,
                 "data": doc.text.encode(),
             },
+        }
+
+
+# pylint: disable=too-few-public-methods
+class GoogleSystemMessageFormat:
+
+    def __call__(self, msg: SystemMessage | None) -> ContentDict | None:
+        if not msg:
+            return None
+
+        content = message_text(msg)
+        return {
+            "parts": [content],
         }

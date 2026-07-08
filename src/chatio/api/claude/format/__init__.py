@@ -8,8 +8,8 @@ from chatio.core.format import ApiFormat
 from chatio.api.claude.config import ClaudeFormatConfig
 from chatio.api.claude.params import ClaudeParams
 
-from .state_messages import ClaudeMessagesFormat
-from .state_options import ClaudeOptionsFormat
+from .state import ClaudeChatMessagesFormat
+from .state import ClaudeSystemMessageFormat
 from .tools import ClaudeToolSchemasFormat
 from .tools import ClaudeToolChoiceFormat
 
@@ -20,16 +20,16 @@ class ClaudeFormat(ApiFormat[
 ]):
 
     def __init__(self, config: ClaudeFormatConfig) -> None:
-        self._messages_format = ClaudeMessagesFormat(use_cache=config.use_cache)
-        self._options_format = ClaudeOptionsFormat(use_cache=config.use_cache)
+        self._chat_messages_format = ClaudeChatMessagesFormat(use_cache=config.use_cache)
+        self._system_message_format = ClaudeSystemMessageFormat(use_cache=config.use_cache)
         self._tool_schemas_format = ClaudeToolSchemasFormat(use_cache=config.use_cache)
         self._tool_choice_format = ClaudeToolChoiceFormat()
 
     @override
     def __call__(self, state: ChatState, tools: ChatTools) -> ClaudeParams:
         return ClaudeParams(
-            messages=self._messages_format(state.messages),
-            system=self._options_format.system_message(state.options.system),
+            messages=self._chat_messages_format(state.messages),
+            system=self._system_message_format(state.system),
             tools=self._tool_schemas_format(tools.schemas),
             tool_choice=self._tool_choice_format(tools.choice),
         )

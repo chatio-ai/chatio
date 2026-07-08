@@ -88,7 +88,7 @@ class ChatState(_ChatState):
         self.messages.append(CallRequest(call_id, name, args))
 
     def update_system_message(self, message: str | None) -> None:
-        self.options.system = None if message is None else SystemMessage(message)
+        self.system = None if message is None else SystemMessage(message)
 
     def update_prediction_message(self, message: str | None) -> None:
-        self.options.prediction = None if message is None else PredictionMessage(message)
+        self.prediction = None if message is None else PredictionMessage(message)
