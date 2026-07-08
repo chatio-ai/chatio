@@ -1,8 +1,6 @@
 
 from abc import ABC, abstractmethod
 
-from typing import Protocol
-
 from chatio.core.models import ToolSchema
 from chatio.core.models import ToolChoice
 
@@ -12,7 +10,7 @@ from chatio.core.params import ApiToolsOptions
 
 
 # pylint: disable=too-few-public-methods
-class ApiToolsFormatterBase[
+class ApiToolsFormat[
     ToolDefinitionsT,
     ToolSchemaT,
     ToolChoiceT,
@@ -82,17 +80,3 @@ class ApiToolsFormatterBase[
         _tool_choice = self._tool_choice(tools.tool_choice)
 
         return ApiToolsOptions(_tools, _tool_choice)
-
-
-# pylint: disable=too-few-public-methods
-class ApiToolsFormatter[
-    ToolDefinitionsT,
-    ToolChoiceT,
-](Protocol):
-
-    @abstractmethod
-    def format(self, tools: ChatTools) -> ApiToolsOptions[
-        ToolDefinitionsT,
-        ToolChoiceT,
-    ]:
-        ...

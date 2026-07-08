@@ -13,11 +13,11 @@ from google.genai.types import FunctionDeclarationDict
 
 from chatio.core.models import ToolSchema
 
-from chatio.core.format.tools import ApiToolsFormatterBase
+from chatio.core.format.tools import ApiToolsFormat
 
 
 # pylint: disable=too-few-public-methods
-class GoogleToolsFormatter(ApiToolsFormatterBase[
+class GoogleToolsFormat(ApiToolsFormat[
     ToolListUnionDict | None,
     FunctionDeclarationDict,
     ToolConfigDict | None,

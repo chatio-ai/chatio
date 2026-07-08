@@ -14,11 +14,11 @@ from anthropic import Omit, omit
 
 from chatio.core.models import ToolSchema
 
-from chatio.core.format.tools import ApiToolsFormatterBase
+from chatio.core.format.tools import ApiToolsFormat
 
 
 # pylint: disable=too-few-public-methods
-class ClaudeToolsFormatter(ApiToolsFormatterBase[
+class ClaudeToolsFormat(ApiToolsFormat[
     list[ToolParam] | Omit,
     ToolParam,
     ToolChoiceParam | Omit,

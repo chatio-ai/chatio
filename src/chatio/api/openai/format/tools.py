@@ -13,11 +13,11 @@ from openai import Omit, omit
 
 from chatio.core.models import ToolSchema
 
-from chatio.core.format.tools import ApiToolsFormatterBase
+from chatio.core.format.tools import ApiToolsFormat
 
 
 # pylint: disable=too-few-public-methods
-class OpenAIToolsFormatter(ApiToolsFormatterBase[
+class OpenAIToolsFormat(ApiToolsFormat[
     list[ChatCompletionToolParam] | Omit,
     ChatCompletionToolParam,
     ChatCompletionToolChoiceOptionParam | Omit,

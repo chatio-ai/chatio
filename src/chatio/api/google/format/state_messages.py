@@ -13,7 +13,7 @@ from chatio.core.models import CallResponse
 from chatio.core.models import ImageDocument
 from chatio.core.models import TextDocument
 
-from chatio.core.format.state_messages import ApiMessagesFormatterBase
+from chatio.core.format.state_messages import ApiMessagesFormat
 
 
 def message_text(msg: TextMessage) -> PartDict:
@@ -23,7 +23,7 @@ def message_text(msg: TextMessage) -> PartDict:
 
 
 # pylint: disable=too-few-public-methods
-class GoogleMessagesFormatter(ApiMessagesFormatterBase[
+class GoogleMessagesFormat(ApiMessagesFormat[
     ContentUnionDict,
     PartDict,
     PartDict,

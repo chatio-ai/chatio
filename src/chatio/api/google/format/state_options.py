@@ -6,7 +6,7 @@ from google.genai.types import ContentDict
 from chatio.core.models import SystemMessage
 from chatio.core.models import ChatStateOptions
 
-from chatio.core.format.state_options import ApiOptionsFormatterBase
+from chatio.core.format.state_options import ApiOptionsFormat
 
 from chatio.api.google.params import GoogleStateOptions
 
@@ -14,7 +14,7 @@ from .state_messages import message_text
 
 
 # pylint: disable=too-few-public-methods
-class GoogleOptionsFormatter(ApiOptionsFormatterBase[
+class GoogleOptionsFormat(ApiOptionsFormat[
     GoogleStateOptions,
 ]):
 

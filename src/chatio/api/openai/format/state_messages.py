@@ -15,7 +15,7 @@ from chatio.core.models import CallResponse
 from chatio.core.models import ImageDocument
 from chatio.core.models import TextDocument
 
-from chatio.core.format.state_messages import ApiMessagesFormatterBase
+from chatio.core.format.state_messages import ApiMessagesFormat
 
 
 type _ChatCompletionContentPartParam = \
@@ -30,7 +30,7 @@ def message_text(msg: TextMessage) -> ChatCompletionContentPartTextParam:
 
 
 # pylint: disable=too-few-public-methods
-class OpenAIMessagesFormatter(ApiMessagesFormatterBase[
+class OpenAIMessagesFormat(ApiMessagesFormat[
     ChatCompletionMessageParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionContentPartImageParam,

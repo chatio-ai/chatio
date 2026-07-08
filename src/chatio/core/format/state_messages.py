@@ -1,8 +1,6 @@
 
 from abc import ABC, abstractmethod
 
-from typing import Protocol
-
 from chatio.core.models import OutputMessage
 from chatio.core.models import InputMessage
 from chatio.core.models import TextMessage
@@ -16,7 +14,7 @@ from chatio.core.models import ChatMessage
 
 
 # pylint: disable=too-few-public-methods
-class ApiMessagesFormatterBase[
+class ApiMessagesFormat[
     ChatMessageT,
     MessageTextT,
     ImageDocumentT,
@@ -95,11 +93,3 @@ class ApiMessagesFormatterBase[
                     raise RuntimeError(message)
 
         return self._chat_messages(_messages)
-
-
-# pylint: disable=too-few-public-methods
-class ApiMessagesFormatter[ChatMessageT](Protocol):
-
-    @abstractmethod
-    def format(self, messages: list[ChatMessage]) -> list[ChatMessageT]:
-        ...

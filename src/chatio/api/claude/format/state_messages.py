@@ -20,7 +20,7 @@ from chatio.core.models import CallResponse
 from chatio.core.models import ImageDocument
 from chatio.core.models import TextDocument
 
-from chatio.core.format.state_messages import ApiMessagesFormatterBase
+from chatio.core.format.state_messages import ApiMessagesFormat
 
 
 type _ContentBlockParamBase = TextBlockParam | ImageBlockParam | DocumentBlockParam
@@ -36,7 +36,7 @@ def message_text(msg: TextMessage) -> TextBlockParam:
 
 
 # pylint: disable=too-few-public-methods
-class ClaudeMessagesFormatter(ApiMessagesFormatterBase[
+class ClaudeMessagesFormat(ApiMessagesFormat[
     MessageParam,
     TextBlockParam,
     ImageBlockParam,

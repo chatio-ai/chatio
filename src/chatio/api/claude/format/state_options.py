@@ -9,7 +9,7 @@ from anthropic import Omit, omit
 from chatio.core.models import SystemMessage
 from chatio.core.models import ChatStateOptions
 
-from chatio.core.format.state_options import ApiOptionsFormatterBase
+from chatio.core.format.state_options import ApiOptionsFormat
 
 from chatio.api.claude.params import ClaudeStateOptions
 
@@ -17,7 +17,7 @@ from .state_messages import message_text
 
 
 # pylint: disable=too-few-public-methods
-class ClaudeOptionsFormatter(ApiOptionsFormatterBase[
+class ClaudeOptionsFormat(ApiOptionsFormat[
     ClaudeStateOptions,
 ]):
 
