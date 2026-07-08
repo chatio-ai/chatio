@@ -95,23 +95,21 @@ def _vendor_config_setup(config: ModelConfig, overrides: dict) -> ModelConfig:
     return config
 
 
-def build_model(model_name: str | None = None, env_ns: str | None = None) -> ModelConfig:
-    _env_ns = "CHATIO"
-    if env_ns is not None:
-        _env_ns = _env_ns + "_" + env_ns
+def build_model(model_name: str | None = None, env_ns: str = "") -> ModelConfig:
+    env_ns = f"CHATIO_{env_ns}" if env_ns else "CHATIO"
 
     if model_name is None:
-        env_name = f"{_env_ns}_MODEL_NAME"
+        env_name = f"{env_ns}_MODEL_NAME"
         model_name = os.environ.get(env_name)
         if model_name is None:
             err_msg = f"Configure {env_name}!"
             raise RuntimeError(err_msg)
 
-    env_name = f"{_env_ns}_VENDOR_CONFIG"
-    _overrides = os.environ.get(env_name)
+    env_name = f"{env_ns}_VENDOR_CONFIG"
+    overrides_str = os.environ.get(env_name)
     overrides = {}
-    if _overrides is not None:
-        overrides = json.loads(_overrides)
+    if overrides_str is not None:
+        overrides = json.loads(overrides_str)
 
     config = _vendor_config_fetch(model_name)
     return _vendor_config_setup(config, overrides)

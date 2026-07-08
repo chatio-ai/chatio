@@ -16,7 +16,7 @@ class ApiClientConfig:
 @dataclass
 class ApiConfig:
     api: str | None = None
-    env_ns: str | None = None
+    env_ns: str = ""
 
     client: ApiClientConfig | None = None
     format: ApiFormatConfig | None = None

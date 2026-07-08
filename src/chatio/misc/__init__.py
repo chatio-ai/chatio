@@ -14,12 +14,11 @@ def build_chat(
     tools: str | None = None,
     model: str | None = None,
 ) -> Chat:
-
-    _model = build_model(model)
-    _state = build_state(prompt, messages)
-    _tools = build_tools(tools)
-
-    return Chat(_model, _state, _tools)
+    return Chat(
+        model=build_model(model),
+        state=build_state(prompt, messages),
+        tools=build_tools(tools),
+    )
 
 
 def build_state(prompt: str | None = None, messages: list[str] | None = None) -> ChatState:
