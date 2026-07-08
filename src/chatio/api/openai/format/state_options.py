@@ -1,6 +1,4 @@
 
-from typing import override
-
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat import ChatCompletionPredictionContentParam
 
@@ -9,26 +7,19 @@ from openai import Omit, omit
 
 from chatio.core.models import SystemMessage
 from chatio.core.models import PredictionMessage
-from chatio.core.models import ChatStateOptions
-
-from chatio.core.format.state_options import ApiOptionsFormat
-
-from chatio.api.openai.params import OpenAIStateOptions
 
 from .state_messages import message_text
 
 
 # pylint: disable=too-few-public-methods
-class OpenAIOptionsFormat(ApiOptionsFormat[
-    OpenAIStateOptions,
-]):
+class OpenAIOptionsFormat:
 
     def __init__(self, *, prediction: bool, compat: bool) -> None:
         self._prediction = prediction
         self._compat = compat
 
-    def _prediction_message(self, msg: PredictionMessage | None,
-                            ) -> ChatCompletionPredictionContentParam | Omit:
+    def prediction_message(
+            self, msg: PredictionMessage | None) -> ChatCompletionPredictionContentParam | Omit:
 
         if not self._prediction:
             return omit
@@ -43,7 +34,7 @@ class OpenAIOptionsFormat(ApiOptionsFormat[
             "content": [content],
         }
 
-    def _system_message(self, msg: SystemMessage | None) -> list[ChatCompletionMessageParam]:
+    def system_message(self, msg: SystemMessage | None) -> list[ChatCompletionMessageParam]:
 
         if not msg:
             return []
@@ -60,10 +51,3 @@ class OpenAIOptionsFormat(ApiOptionsFormat[
             "role": "developer",
             "content": [content],
         }]
-
-    @override
-    def __call__(self, options: ChatStateOptions) -> OpenAIStateOptions:
-        return OpenAIStateOptions(
-            system=self._system_message(options.system),
-            prediction=self._prediction_message(options.prediction),
-        )

@@ -11,20 +11,9 @@ from anthropic.types import ToolChoiceParam
 from anthropic import Omit, omit
 
 
-from chatio.core.params import ApiStateOptions
-from chatio.core.params import ApiParamsImpl
-
-
 @dataclass
-class ClaudeStateOptions(ApiStateOptions):
+class ClaudeParams:
+    messages: list[MessageParam]
     system: list[TextBlockParam] | Omit = omit
-
-
-@dataclass
-class ClaudeParams(ApiParamsImpl[
-    MessageParam,
-    ClaudeStateOptions,
-    list[ToolParam] | Omit,
-    ToolChoiceParam | Omit,
-]):
-    pass
+    tools: list[ToolParam] | Omit = omit
+    tool_choice: ToolChoiceParam | Omit = omit

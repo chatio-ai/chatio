@@ -7,15 +7,12 @@ from .object import Closeable
 
 from .models import ChatState
 from .models import ChatTools
-from .params import ApiParams
 from .format import ApiFormat
 from .stream import ApiStream
 from .client import ApiClient
 
 
-class ApiFacadeDeps[
-    ApiParamsT: ApiParams,
-](ABC):
+class ApiFacadeDeps[ApiParamsT](ABC):
 
     def __init__(self, config: dict[str, dict]) -> None:
         self._config_format = config.get('format', {})
@@ -36,9 +33,7 @@ class ApiFacadeDeps[
         ...
 
 
-class ApiFacade[
-    ApiParamsT: ApiParams,
-](Closeable):
+class ApiFacade[ApiParamsT](Closeable):
 
     def __init__(self, deps: ApiFacadeDeps[ApiParamsT]) -> None:
         self._format = deps.format

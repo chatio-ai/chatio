@@ -3,12 +3,11 @@ from abc import ABC, abstractmethod
 
 from .object import Closeable
 
-from .params import ApiParams
 from .stream import ApiStream
 
 
 class ApiClient[
-    ApiParamsT: ApiParams,
+    ApiParamsT,
 ](Closeable, ABC):
 
     @abstractmethod

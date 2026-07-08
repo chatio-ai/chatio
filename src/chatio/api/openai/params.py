@@ -10,22 +10,10 @@ from openai.types.chat import ChatCompletionToolChoiceOptionParam
 from openai import Omit, omit
 
 
-from chatio.core.params import ApiStateOptions
-from chatio.core.params import ApiParamsImpl
-
-
 @dataclass
-class OpenAIStateOptions(ApiStateOptions):
+class OpenAIParams:
+    messages: list[ChatCompletionMessageParam]
     system: list[ChatCompletionMessageParam] = field(default_factory=list)
-
+    tools: list[ChatCompletionToolParam] | Omit = omit
+    tool_choice: ChatCompletionToolChoiceOptionParam | Omit = omit
     prediction: ChatCompletionPredictionContentParam | Omit = omit
-
-
-@dataclass
-class OpenAIParams(ApiParamsImpl[
-    ChatCompletionMessageParam,
-    OpenAIStateOptions,
-    list[ChatCompletionToolParam] | Omit,
-    ChatCompletionToolChoiceOptionParam | Omit,
-]):
-    pass

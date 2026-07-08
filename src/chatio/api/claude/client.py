@@ -34,10 +34,10 @@ class ClaudeClient(ApiClient[
         return ClaudeStream(self._client.messages.stream(
             max_tokens=4096,
             model=model,
-            system=params.options.system,
+            system=params.system,
             messages=params.messages,
-            tools=params.tools.tools,
-            tool_choice=params.tools.tool_choice,
+            tools=params.tools,
+            tool_choice=params.tool_choice,
         ))
 
     # helpers
@@ -46,10 +46,10 @@ class ClaudeClient(ApiClient[
     async def count_message_tokens(self, model: str, params: ClaudeParams) -> int:
         result = await self._client.messages.count_tokens(
             model=model,
-            system=params.options.system,
+            system=params.system,
             messages=params.messages,
-            tools=params.tools.tools,
-            tool_choice=params.tools.tool_choice,
+            tools=params.tools,
+            tool_choice=params.tool_choice,
         )
 
         return result.input_tokens

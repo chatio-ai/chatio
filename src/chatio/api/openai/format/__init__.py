@@ -26,8 +26,12 @@ class OpenAIFormat(ApiFormat[
 
     @override
     def __call__(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
+        tools_ = self._tools_format(tools)
+
         return OpenAIParams(
             messages=self._messages_format(state.messages),
-            options=self._options_format(state.options),
-            tools=self._tools_format(tools),
+            system=self._options_format.system_message(state.options.system),
+            tools=tools_.tools,
+            tool_choice=tools_.tool_choice,
+            prediction=self._options_format.prediction_message(state.options.prediction),
         )
