@@ -28,7 +28,7 @@ class GoogleOptionsFormat(ApiOptionsFormat[
         }
 
     @override
-    def format(self, options: ChatStateOptions) -> GoogleStateOptions:
+    def __call__(self, options: ChatStateOptions) -> GoogleStateOptions:
         return GoogleStateOptions(
             system=self._system_message(options.system),
         )

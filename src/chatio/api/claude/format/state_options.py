@@ -40,7 +40,7 @@ class ClaudeOptionsFormat(ApiOptionsFormat[
         return [content]
 
     @override
-    def format(self, options: ChatStateOptions) -> ClaudeStateOptions:
+    def __call__(self, options: ChatStateOptions) -> ClaudeStateOptions:
         return ClaudeStateOptions(
             system=self._system_message(options.system),
         )

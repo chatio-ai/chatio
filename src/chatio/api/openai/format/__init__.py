@@ -25,10 +25,9 @@ class OpenAIFormat(ApiFormat[
         self._tools_format = OpenAIToolsFormat()
 
     @override
-    def format(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
-        # pylint: disable=unexpected-keyword-arg
+    def __call__(self, state: ChatState, tools: ChatTools) -> OpenAIParams:
         return OpenAIParams(
-            messages=self._messages_format.format(state.messages),
-            options=self._options_format.format(state.options),
-            tools=self._tools_format.format(tools),
+            messages=self._messages_format(state.messages),
+            options=self._options_format(state.options),
+            tools=self._tools_format(tools),
         )

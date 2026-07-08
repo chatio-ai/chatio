@@ -69,7 +69,7 @@ class ApiToolsFormat[
                 case _:
                     raise ValueError
 
-    def format(self, tools: ChatTools) -> ApiToolsOptions[
+    def __call__(self, tools: ChatTools) -> ApiToolsOptions[
         ToolDefinitionsT,
         ToolChoiceT,
     ]:

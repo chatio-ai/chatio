@@ -12,5 +12,5 @@ class ApiOptionsFormat[
 ](ABC):
 
     @abstractmethod
-    def format(self, options: ChatStateOptions) -> ApiStateOptionsT:
+    def __call__(self, options: ChatStateOptions) -> ApiStateOptionsT:
         ...

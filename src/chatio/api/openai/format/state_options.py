@@ -62,7 +62,7 @@ class OpenAIOptionsFormat(ApiOptionsFormat[
         }]
 
     @override
-    def format(self, options: ChatStateOptions) -> OpenAIStateOptions:
+    def __call__(self, options: ChatStateOptions) -> OpenAIStateOptions:
         return OpenAIStateOptions(
             system=self._system_message(options.system),
             prediction=self._prediction_message(options.prediction),

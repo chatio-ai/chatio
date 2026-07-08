@@ -11,5 +11,5 @@ from chatio.core.params import ApiParams
 class ApiFormat[ApiParamsT: ApiParams](ABC):
 
     @abstractmethod
-    def format(self, state: ChatState, tools: ChatTools) -> ApiParamsT:
+    def __call__(self, state: ChatState, tools: ChatTools) -> ApiParamsT:
         ...

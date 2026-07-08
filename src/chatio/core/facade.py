@@ -45,11 +45,11 @@ class ApiFacade[
         self._client = deps.client
 
     def iterate_model_events(self, model: str, state: ChatState, tools: ChatTools) -> ApiStream:
-        params = self._format.format(state, tools)
+        params = self._format(state, tools)
         return self._client.iterate_model_events(model, params)
 
     async def count_message_tokens(self, model: str, state: ChatState, tools: ChatTools) -> int:
-        params = self._format.format(state, tools)
+        params = self._format(state, tools)
         return await self._client.count_message_tokens(model, params)
 
     @override
