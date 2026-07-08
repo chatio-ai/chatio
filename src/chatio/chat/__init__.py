@@ -73,7 +73,7 @@ class Chat(Closeable):
         return ChatInfo(
             self._model.vendor,
             self._model.model,
-            len(self._tools.tools),
+            len(self._tools.schemas),
             bool(self._state.options.system),
             len(self._state.messages),
         )

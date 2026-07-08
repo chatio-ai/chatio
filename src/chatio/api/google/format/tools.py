@@ -30,23 +30,23 @@ class GoogleToolsFormat(ApiToolsFormat[
         return True
 
     @override
-    def _tool_schema(self, tool: ToolSchema) -> FunctionDeclarationDict:
-        if not self._is_tool_params_schema(tool.params):
+    def _tool_schema(self, schema: ToolSchema) -> FunctionDeclarationDict:
+        if not self._is_tool_params_schema(schema.params):
             raise TypeError
 
         return {
-            "name": tool.name,
-            "description": tool.desc,
-            "parameters": tool.params,
+            "name": schema.name,
+            "description": schema.desc,
+            "parameters": schema.params,
         }
 
     @override
-    def _tools(self, *tools: FunctionDeclarationDict) -> ToolListUnionDict | None:
+    def _tools(self, *schemas: FunctionDeclarationDict) -> ToolListUnionDict | None:
         result: ToolListUnionDict = []
 
-        if tools:
+        if schemas:
             result.append({
-                "function_declarations": list(tools),
+                "function_declarations": list(schemas),
             })
 
         if self._grounding:
@@ -88,10 +88,10 @@ class GoogleToolsFormat(ApiToolsFormat[
         }
 
     @override
-    def _tool_choice_name(self, tool_name: str) -> ToolConfigDict:
+    def _tool_choice_name(self, name: str) -> ToolConfigDict:
         return {
             "function_calling_config": {
                 "mode": FunctionCallingConfigMode.ANY,
-                "allowed_function_names": [tool_name],
+                "allowed_function_names": [name],
             },
         }

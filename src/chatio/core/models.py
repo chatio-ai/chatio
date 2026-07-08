@@ -92,5 +92,5 @@ class ToolChoice:
 
 @dataclass
 class ChatTools:
-    tools: list[ToolSchema] = field(default_factory=list)
-    tool_choice: ToolChoice = field(default_factory=ToolChoice)
+    schemas: list[ToolSchema] = field(default_factory=list)
+    choice: ToolChoice = field(default_factory=ToolChoice)

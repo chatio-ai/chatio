@@ -1,5 +1,5 @@
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from collections.abc import AsyncIterator
 from collections.abc import Callable
@@ -24,20 +24,18 @@ type Func = Callable[..., AsyncIterator[str | dict[str, object]]]
 
 @dataclass
 class ChatTools(_ChatTools):
-    _funcs: dict[str, Func] = field(default_factory=dict)
-
     def __init__(
         self,
         tools: list[ToolBase] | None = None,
         tool_choice_mode: str | None = None,
         tool_choice_name: str | None = None,
     ) -> None:
+        self._functions: dict[str, Func] = {}
 
         if tools is None:
             tools = []
 
-        _tools = []
-        _funcs = {}
+        schemas = []
         for tool in tools:
             schema = tool.schema()
             name = schema.pop("name")
@@ -46,23 +44,22 @@ class ChatTools(_ChatTools):
             if not name or not desc or not schema:
                 raise RuntimeError
 
-            _funcs[name] = tool.__call__
-            _tools.append(ToolSchema(name, desc, schema))
+            self._functions[name] = tool.__call__
+            schemas.append(ToolSchema(name, desc, schema))
 
-        if tool_choice_name and tool_choice_name not in _funcs:
+        if tool_choice_name and tool_choice_name not in self._functions:
             raise ValueError
-        _tool_choice = ToolChoice(tool_choice_mode, tool_choice_name)
+        choice = ToolChoice(tool_choice_mode, tool_choice_name)
 
-        super().__init__(_tools, _tool_choice)
-        self._funcs = _funcs
+        super().__init__(schemas, choice)
 
     async def _do_call(self, call: CallEvent, state: ChatState) -> AsyncIterator[ChatEvent]:
-        tool_func = self._funcs.get(call.name)
-        if not tool_func:
+        function = self._functions.get(call.name)
+        if not function:
             return
 
         content = ""
-        async for event in tool_func(**call.args):
+        async for event in function(**call.args):
             if isinstance(event, str):
                 content += event
                 yield ToolsTextChunk(event)

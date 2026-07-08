@@ -43,21 +43,21 @@ class ClaudeToolsFormat(ApiToolsFormat[
         return True
 
     @override
-    def _tool_schema(self, tool: ToolSchema) -> ToolParam:
-        if not self._is_tool_params_schema(tool.params):
+    def _tool_schema(self, schema: ToolSchema) -> ToolParam:
+        if not self._is_tool_params_schema(schema.params):
             raise TypeError
 
         return {
-            "name": tool.name,
-            "description": tool.desc,
-            "input_schema": tool.params,
+            "name": schema.name,
+            "description": schema.desc,
+            "input_schema": schema.params,
         }
 
     @override
-    def _tools(self, *tools: ToolParam) -> list[ToolParam] | Omit:
-        if not tools:
+    def _tools(self, *schemas: ToolParam) -> list[ToolParam] | Omit:
+        if not schemas:
             return omit
-        return self._setup_tools_cache(list(tools))
+        return self._setup_tools_cache(list(schemas))
 
     def _tool_choice_null(self) -> Omit:
         return omit
@@ -81,8 +81,8 @@ class ClaudeToolsFormat(ApiToolsFormat[
         }
 
     @override
-    def _tool_choice_name(self, tool_name: str) -> ToolChoiceParam:
+    def _tool_choice_name(self, name: str) -> ToolChoiceParam:
         return {
             "type": "tool",
-            "name": tool_name,
+            "name": name,
         }

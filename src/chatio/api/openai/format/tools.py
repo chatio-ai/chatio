@@ -44,23 +44,23 @@ class OpenAIToolsFormat(ApiToolsFormat[
         return params_
 
     @override
-    def _tool_schema(self, tool: ToolSchema) -> ChatCompletionToolParam:
-        params_ = self._tool_params_schema(tool.params)
+    def _tool_schema(self, schema: ToolSchema) -> ChatCompletionToolParam:
+        params_ = self._tool_params_schema(schema.params)
         return {
             "type": "function",
             "function": {
-                "name": tool.name,
-                "description": tool.desc,
+                "name": schema.name,
+                "description": schema.desc,
                 "parameters": params_,
                 "strict": True,
             },
         }
 
     @override
-    def _tools(self, *tools: ChatCompletionToolParam) -> list[ChatCompletionToolParam] | Omit:
-        if not tools:
+    def _tools(self, *schemas: ChatCompletionToolParam) -> list[ChatCompletionToolParam] | Omit:
+        if not schemas:
             return omit
-        return list(tools)
+        return list(schemas)
 
     @override
     def _tool_choice_null(self) -> Omit:
@@ -79,10 +79,10 @@ class OpenAIToolsFormat(ApiToolsFormat[
         return "required"
 
     @override
-    def _tool_choice_name(self, tool_name: str) -> ChatCompletionToolChoiceOptionParam:
+    def _tool_choice_name(self, name: str) -> ChatCompletionToolChoiceOptionParam:
         return {
             "type": "function",
             "function": {
-                "name": tool_name,
+                "name": name,
             },
         }
