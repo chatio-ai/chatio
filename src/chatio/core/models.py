@@ -66,6 +66,18 @@ class TextDocument(ChatMessage):
 
 
 @dataclass
+class ChatStateOptions:
+    system: SystemMessage | None = None
+    prediction: PredictionMessage | None = None
+
+
+@dataclass
+class ChatState:
+    messages: list[ChatMessage] = field(default_factory=list)
+    options: ChatStateOptions = field(default_factory=ChatStateOptions)
+
+
+@dataclass
 class ToolSchema:
     name: str
     desc: str
@@ -76,18 +88,6 @@ class ToolSchema:
 class ToolChoice:
     mode: str | None
     name: str | None
-
-
-@dataclass
-class ChatStateOptions:
-    system: SystemMessage | None = None
-    prediction: PredictionMessage | None = None
-
-
-@dataclass
-class ChatState:
-    messages: list[ChatMessage] = field(default_factory=list)
-    options: ChatStateOptions = field(default_factory=ChatStateOptions)
 
 
 @dataclass
