@@ -6,7 +6,6 @@ from google.genai.types import ContentUnionDict
 from google.genai.types import PartDict
 
 
-from chatio.core.models import ChatMessage
 from chatio.core.models import TextMessage
 from chatio.core.models import CallRequest
 from chatio.core.models import CallResponse
@@ -100,7 +99,3 @@ class GoogleMessagesFormat(ApiMessagesFormat[
                 "data": doc.text.encode(),
             },
         }
-
-    @override
-    def _should_format(self, message: ChatMessage) -> bool:
-        return bool(message)

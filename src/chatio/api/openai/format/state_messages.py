@@ -8,7 +8,6 @@ from openai.types.chat import ChatCompletionContentPartTextParam
 from openai.types.chat import ChatCompletionContentPartImageParam
 
 
-from chatio.core.models import ChatMessage
 from chatio.core.models import TextMessage
 from chatio.core.models import CallRequest
 from chatio.core.models import CallResponse
@@ -120,7 +119,3 @@ class OpenAIMessagesFormat(ApiMessagesFormat[
             "type": "text",
             "text": f"data:{doc.mimetype};\n{doc.text}",
         }
-
-    @override
-    def _should_format(self, message: ChatMessage) -> bool:
-        return bool(message)
