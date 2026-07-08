@@ -19,7 +19,6 @@ from chatio.api.openai.config import OpenAIClientConfig
 from chatio.api.openai.client import OpenAIClient
 
 
-# pylint: disable=too-few-public-methods
 class _AsyncStream(AsyncStream[ChatCompletionChunk]):
     def __init__(self, client: AsyncOpenAI, stream: AsyncStream[ChatCompletionChunk]) -> None:
         super().__init__(cast_to=ChatCompletionChunk, response=stream.response, client=client)

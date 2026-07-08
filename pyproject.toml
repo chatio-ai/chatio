@@ -28,6 +28,10 @@ jobs = 0
 max-line-length = 99
 
 [tool.pylint."message control"]
+enable = [
+	"useless-suppression",
+	"use-symbolic-message-instead",
+]
 disable = [
 	"missing-docstring",
 	"duplicate-code",
