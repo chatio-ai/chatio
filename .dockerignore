@@ -3,6 +3,7 @@
 !src/chatio/share
 !share/vendors/**/*.toml
 !.pre-commit-config.yaml
+!requirements.tools.txt
 !requirements.dev.txt
 !requirements.txt
 !pyproject.toml

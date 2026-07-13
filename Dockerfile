@@ -11,8 +11,11 @@ RUN pip install --break-system-packages --root-user-action ignore -U pip
 WORKDIR /app/build
 
 COPY ./requirements.txt .
+COPY ./requirements.tools.txt .
 
-RUN pip install --break-system-packages --root-user-action ignore -Ur ./requirements.txt
+RUN pip install --break-system-packages --root-user-action ignore -U \
+	-r ./requirements.tools.txt \
+	-r ./requirements.txt
 
 FROM build AS devel
 
