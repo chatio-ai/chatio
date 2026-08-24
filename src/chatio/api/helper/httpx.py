@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 
 from typing import override
 
-import httpx
+import httpx2 as httpx
 
 
 class LoggingResponse(httpx.Response):

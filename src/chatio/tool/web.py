@@ -9,7 +9,7 @@ from typing import override
 
 from ddgs import DDGS
 
-from httpx import get
+from httpx2 import get
 
 from html2text import html2text
 

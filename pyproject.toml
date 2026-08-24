@@ -1,8 +1,5 @@
 [tool.flake8]
 max-line-length = 99
-disable = [
-	"ASYNC127",
-]
 
 [tool.ruff]
 target-version = "py312"
